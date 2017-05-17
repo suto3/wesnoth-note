@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/gui/core/widget_definition.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5837.html'>gui</a>/<a href='../files/5840.html'>core</a>/widget_definition.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L107'>[^]</a><a href='#L139'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L107' title='Defined at 107.'>state</a></li>
+<li><a href='#L139' title='Defined at 139.'>resolutions</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2007 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#define</em> <a href='../R/577.html' title='Multiple referred from 20 places.'>GETTEXT_DOMAIN</a> "wesnoth-lib"
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='../I/1551.html'>gui/core/widget_definition.hpp</a>"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='93.html'>gettext.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='../I/2015.html'>gui/core/log.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/2034.html'>gui/widgets/helper.hpp</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='1103.html'>wml_exception.hpp</a>"
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>namespace</strong> <a href='../R/7397.html' title='Multiple referred from 720 places.'>gui2</a>
+<a id='L25' name='L25'></a>  25 <em class='brace'>{</em>
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='comment'>/*WIKI</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * @page = GUIToolkitWML</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * @order = 1_widget</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * @begin{parent}{name=generic/widget_definition/}</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * == Resolution ==</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * @begin{tag}{name="resolution"}{min="0"}{max="-1"}</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> *</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * Depending on the resolution a widget can look different. Resolutions are</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * evaluated in order of appearance. The ''window_width'' and ''window_height''</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * are the upper limit this resolution is valid for. When one of the sizes</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * gets above the limit, the next resolution is selected. There's one special</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * case where both values are ''0''. This resolution always matches. (Resolution</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> * definitions behind that one will never be picked.) This resolution can be</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * used as upper limit or if there's only one resolution.</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> *</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> * The default (and also minimum) size of a button is determined by two items,</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * the wanted default size and the size needed for the text. The size of the</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> * text differs per used widget so needs to be determined per button.</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> *</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> * Container widgets like panels and windows have other rules for their sizes.</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> * Their sizes are based on the size of their children (and the border they need</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> * themselves). It's wise to set all sizes to 0 for these kind of widgets.</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> *</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * @begin{table}{config}</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> * window_width &amp; unsigned &amp; 0 &amp;   Width of the application window. $</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'> * window_height &amp; unsigned &amp; 0 &amp;  Height of the application window. $</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'> *</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'> *</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> * min_width &amp; unsigned &amp; 0 &amp;      The minimum width of the widget. $</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> * min_height &amp; unsigned &amp; 0 &amp;     The minimum height of the widget. $</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'> *</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'> *</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'> * default_width &amp; unsigned &amp; 0 &amp;  The default width of the widget. $</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> * default_height &amp; unsigned &amp; 0 &amp; The default height of the widget. $</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'> *</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'> *</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> * max_width &amp; unsigned &amp; 0 &amp;      The maximum width of the widget. $</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> * max_height &amp; unsigned &amp; 0 &amp;     The maximum height of the widget. $</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'> *</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> * text_extra_width &amp; unsigned &amp; 0 &amp;</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'> *     The extra width needed to determine the minimal size for the text. $</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'> *</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'> * text_extra_height &amp; unsigned &amp; 0 &amp;</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'> *     The extra height needed to determine the minimal size for the text. $</em>
+<a id='L71' name='L71'></a>  71 <em class='comment'> *</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'> * text_font_family &amp; font_family &amp; "" &amp;</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'> *     The font family, needed to determine the minimal size for the text. $</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'> *</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'> * text_font_size &amp; unsigned &amp; 0 &amp;</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'> *     The font size, which needs to be used to determine the minimal size for</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'> *     the text. $</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'> *</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'> * text_font_style &amp; font_style &amp; "" &amp;</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'> *     The font style, which needs to be used to determine the minimal size for</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'> *     the text. $</em>
+<a id='L82' name='L82'></a>  82 <em class='comment'> *</em>
+<a id='L83' name='L83'></a>  83 <em class='comment'> *</em>
+<a id='L84' name='L84'></a>  84 <em class='comment'> * state &amp; section &amp; &amp;</em>
+<a id='L85' name='L85'></a>  85 <em class='comment'> *     Every widget has one or more state sections. Note they aren't called</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'> *     state but state_xxx the exact names are listed per widget. $</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'> * @end{table}</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'> * @end{tag}{name="resolution"}</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'> * @end{parent}{name=generic/widget_definition/}</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'> */</em>
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92 <a href='../S/522.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>::<a href='../S/522.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>(<strong class='reserved'>const</strong> <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L93' name='L93'></a>  93         : <a href='../Y/21638.html' title='Multiple used in 28 places.'>window_width</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["window_width"])
+<a id='L94' name='L94'></a>  94         , <a href='../Y/21634.html' title='Multiple used in 28 places.'>window_height</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["window_height"])
+<a id='L95' name='L95'></a>  95         , <a href='../Y/14003.html' title='Multiple used in 47 places.'>min_width</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["min_width"])
+<a id='L96' name='L96'></a>  96         , <a href='../Y/13980.html' title='Multiple used in 54 places.'>min_height</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["min_height"])
+<a id='L97' name='L97'></a>  97         , <a href='../Y/8377.html' title='Multiple used in 50 places.'>default_width</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["default_width"])
+<a id='L98' name='L98'></a>  98         , <a href='../Y/8337.html' title='Multiple used in 50 places.'>default_height</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["default_height"])
+<a id='L99' name='L99'></a>  99         , <a href='../Y/13786.html' title='Multiple used in 71 places.'>max_width</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["max_width"])
+<a id='L100' name='L100'></a> 100         , <a href='../Y/13713.html' title='Multiple used in 76 places.'>max_height</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["max_height"])
+<a id='L101' name='L101'></a> 101         , <a href='../Y/12999.html' title='Multiple used in 8 places.'>linked_groups</a>()
+<a id='L102' name='L102'></a> 102         , <a href='../Y/19745.html' title='Multiple used in 18 places.'>text_extra_width</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["text_extra_width"])
+<a id='L103' name='L103'></a> 103         , <a href='../Y/19744.html' title='Multiple used in 10 places.'>text_extra_height</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["text_extra_height"])
+<a id='L104' name='L104'></a> 104         , <a href='../Y/19749.html' title='Multiple used in 30 places.'>text_font_size</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["text_font_size"])
+<a id='L105' name='L105'></a> 105         , <a href='../Y/19748.html' title='Multiple used in 6 places.'>text_font_family</a>(<a href='../D/6398.html' title='Multiple defined in 30 places.'>font</a>::<a href='../S/1144.html#L31' title='Defined at 31 in src/font/font_options.hpp.'>str_to_family_class</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["text_font_family"]))
+<a id='L106' name='L106'></a> 106         , <a href='../Y/19750.html' title='Multiple used in 15 places.'>text_font_style</a>(<a href='../S/551.html#L51' title='Defined at 51 in src/gui/widgets/helper.cpp.'>decode_font_style</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["text_font_style"]))
+<a id='L107' name='L107'></a> 107         , <a href='../R/13438.html' title='Multiple referred from 1002 places.'>state</a>()
+<a id='L108' name='L108'></a> 108 <em class='brace'>{</em>
+<a id='L109' name='L109'></a> 109         <a href='../S/506.html#L68' title='Defined at 68 in src/gui/core/log.hpp.'>DBG_GUI_P</a> &lt;&lt; "Parsing resolution " &lt;&lt; <a href='../Y/21638.html' title='Multiple used in 28 places.'>window_width</a> &lt;&lt; ", " &lt;&lt; <a href='../Y/21634.html' title='Multiple used in 28 places.'>window_height</a>
+<a id='L110' name='L110'></a> 110                           &lt;&lt; '\n';
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112         <a href='../Y/12999.html' title='Multiple used in 8 places.'>linked_groups</a> = <a href='../S/511.html#L24' title='Defined at 24 in src/gui/core/linked_group_definition.cpp.'>parse_linked_group_definitions</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L113' name='L113'></a> 113 <em class='brace'>}</em>
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115 <em class='comment'>/*WIKI</em>
+<a id='L116' name='L116'></a> 116 <em class='comment'> * @page = GUIWidgetDefinitionWML</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'> * @order = 1</em>
+<a id='L118' name='L118'></a> 118 <em class='comment'> *</em>
+<a id='L119' name='L119'></a> 119 <em class='comment'> * {{Autogenerated}}</em>
+<a id='L120' name='L120'></a> 120 <em class='comment'> *</em>
+<a id='L121' name='L121'></a> 121 <em class='comment'> * = Widget definition =</em>
+<a id='L122' name='L122'></a> 122 <em class='comment'> *</em>
+<a id='L123' name='L123'></a> 123 <em class='comment'> * This page describes the definition of all widgets in the toolkit. Every</em>
+<a id='L124' name='L124'></a> 124 <em class='comment'> * widget has some parts in common, first of all; every definition has the</em>
+<a id='L125' name='L125'></a> 125 <em class='comment'> * following fields.</em>
+<a id='L126' name='L126'></a> 126 <em class='comment'> * @begin{parent}{name="generic/"}</em>
+<a id='L127' name='L127'></a> 127 <em class='comment'> * @begin{tag}{name=widget_definition}{min=0}{max=1}</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'> * @begin{table}{config}</em>
+<a id='L129' name='L129'></a> 129 <em class='comment'> *     id &amp; string &amp; &amp;               Unique id for this gui (theme). $</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'> *     description &amp; t_string &amp; &amp;    Unique translatable name for this gui. $</em>
+<a id='L131' name='L131'></a> 131 <em class='comment'> *</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'> *     resolution &amp; section &amp; &amp;      The definitions of the widget in various</em>
+<a id='L133' name='L133'></a> 133 <em class='comment'> *                                   resolutions. $</em>
+<a id='L134' name='L134'></a> 134 <em class='comment'> * @end{table}</em>
+<a id='L135' name='L135'></a> 135 <em class='comment'> * @end{tag}{name=widget_definition}</em>
+<a id='L136' name='L136'></a> 136 <em class='comment'> * @end{parent}{name="generic/"}</em>
+<a id='L137' name='L137'></a> 137 <em class='comment'> */</em>
+<a id='L138' name='L138'></a> 138 <a href='../S/522.html#L93' title='Defined at 93 in src/gui/core/widget_definition.hpp.'>styled_widget_definition</a>::<a href='../S/522.html#L93' title='Defined at 93 in src/gui/core/widget_definition.hpp.'>styled_widget_definition</a>(<strong class='reserved'>const</strong> <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L139' name='L139'></a> 139         : <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["id"]), <a href='../D/5378.html' title='Multiple defined in 14 places.'>description</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["description"].<a href='../S/83.html#L296' title='Defined at 296 in src/config_attribute_value.cpp.'>t_str</a>()), <a href='../R/11701.html' title='Multiple referred from 17 places.'>resolutions</a>()
+<a id='L140' name='L140'></a> 140 <em class='brace'>{</em>
+<a id='L141' name='L141'></a> 141         <a href='../S/1103.html#L42' title='Defined at 42 in src/wml_exception.hpp.'>VALIDATE</a>(!<a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a>.<a href='../D/5832.html' title='Multiple defined in 31 places.'>empty</a>(), <a href='../S/1053.html#L70' title='Defined at 70 in src/wml_exception.cpp.'>missing_mandatory_wml_key</a>("styled_widget", "id"));
+<a id='L142' name='L142'></a> 142         <a href='../S/1103.html#L42' title='Defined at 42 in src/wml_exception.hpp.'>VALIDATE</a>(!<a href='../D/5378.html' title='Multiple defined in 14 places.'>description</a>.<a href='../D/5832.html' title='Multiple defined in 31 places.'>empty</a>(),
+<a id='L143' name='L143'></a> 143                          <a href='../S/1053.html#L70' title='Defined at 70 in src/wml_exception.cpp.'>missing_mandatory_wml_key</a>("styled_widget", "description"));
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145         <em class='comment'>/*</em>
+<a id='L146' name='L146'></a> 146 <em class='comment'>         * Do this validation here instead of in load_resolutions so the</em>
+<a id='L147' name='L147'></a> 147 <em class='comment'>         * translatable string is not in the header and we don't need to pull in</em>
+<a id='L148' name='L148'></a> 148 <em class='comment'>         * extra header dependencies.</em>
+<a id='L149' name='L149'></a> 149 <em class='comment'>         */</em>
+<a id='L150' name='L150'></a> 150         <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>::<a href='../S/1097.html#L227' title='Defined at 227 in src/config.hpp.'>const_child_itors</a> <a href='../Y/12349.html' title='Multiple used in 44 places.'>itors</a> = <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4410.html' title='Multiple defined in 2 places.'>child_range</a>("resolution");
+<a id='L151' name='L151'></a> 151         <a href='../S/1103.html#L42' title='Defined at 42 in src/wml_exception.hpp.'>VALIDATE</a>(!<a href='../Y/12349.html' title='Multiple used in 44 places.'>itors</a>.<a href='../D/5832.html' title='Multiple defined in 31 places.'>empty</a>(), <a href='../D/2641.html' title='Multiple defined in 3 places.'>_</a>("No resolution defined."));
+<a id='L152' name='L152'></a> 152 <em class='brace'>}</em>
+<a id='L153' name='L153'></a> 153 
+<a id='L154' name='L154'></a> 154 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L107'>[^]</a><a href='#L139'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

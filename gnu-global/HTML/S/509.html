@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/gui/core/timer.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5837.html'>gui</a>/<a href='../files/5840.html'>core</a>/timer.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2028.html' title='Multiple included from 12 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2009 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * Contains the gui2 timer routines.</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> *</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * This code avoids the following problems with the sdl timers:</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * - the callback must be a C function with a fixed signature.</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * - the callback needs to push an event in the event queue, between the</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *   pushing and execution of that event the timer can't be stopped. (Makes</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> *   sense since the timer has expired, but not what the user wants.)</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> *</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * With these functions it's possible to remove the event between pushing in</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * the queue and the actual execution. Since the callback is a std::function</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> * object it's possible to make the callback as fancy as wanted.</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> */</em>
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#pragma</em> once
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='872.html'>utils/functional.hpp</a>"
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;SDL_types.h&gt;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>namespace</strong> <a href='../R/7397.html' title='Multiple referred from 720 places.'>gui2</a>
+<a id='L37' name='L37'></a>  37 <em class='brace'>{</em>
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 <em class='comment'>/**</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * Adds a new timer.</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> *</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> * @param interval                The timer interval in ms.</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * @param callback                The function to call when the timer expires,</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> *                                the id send as parameter is the id of the</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> *                                timer.</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> * @param repeat                  If true the timer will restart after it</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> *                                expires.</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> *</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> * @returns                       The id of the timer.</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * @retval [0]                    Failed to create a timer.</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> */</em>
+<a id='L52' name='L52'></a>  52 <a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../S/507.html#L112' title='Defined at 112 in src/gui/core/timer.cpp.'>add_timer</a>(<strong class='reserved'>const</strong> <a href='../Y/2935.html' title='Multiple used in 166 places.'>Uint32</a> <a href='../Y/12020.html' title='Multiple used in 16 places.'>interval</a>,
+<a id='L53' name='L53'></a>  53                                  <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10347.html' title='Multiple used in 249 places.'>function</a>&lt;<strong class='reserved'>void</strong>(<a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a>)&gt;&amp; <a href='../S/507.html#L29' title='Defined at 29 in src/gui/core/timer.cpp.'>callback</a>,
+<a id='L54' name='L54'></a>  54                                  <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/17177.html' title='Multiple used in 20 places.'>repeat</a> = <strong class='reserved'>false</strong>);
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56 <em class='comment'>/**</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'> * Removes a timer.</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'> *</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'> * It's save to remove a timer in its own callback, only the value returned</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> * might not be accurate. The destruction is postponed until the execution is</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'> * finished  and the return value is whether the postponing was successful.</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'> *</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> * @param id                      The id of the timer to remove, this is the id</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> *                                returned by add_timer.</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'> *</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> * @returns                       Status, false if the timer couldn't be</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'> *                                removed.</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'> */</em>
+<a id='L69' name='L69'></a>  69 <strong class='reserved'>bool</strong> <a href='../S/507.html#L144' title='Defined at 144 in src/gui/core/timer.cpp.'>remove_timer</a>(<strong class='reserved'>const</strong> <a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a>);
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71 <em class='comment'>/**</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'> * Executes a timer.</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'> *</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'> * @note this function is only meant to be executed by the event handling</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'> * system.</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'> *</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'> * @param id                      The id of the timer to execute, this is the</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'> *                                id returned by add_timer.</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'> *</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'> * @returns                       Status, false if the timer couldn't be</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'> *                                executed.</em>
+<a id='L82' name='L82'></a>  82 <em class='comment'> */</em>
+<a id='L83' name='L83'></a>  83 <strong class='reserved'>bool</strong> <a href='../S/507.html#L175' title='Defined at 175 in src/gui/core/timer.cpp.'>execute_timer</a>(<strong class='reserved'>const</strong> <a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a>);
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

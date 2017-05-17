@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/ai/lua/lua_object.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5814.html'>ai</a>/<a href='../files/5818.html'>lua</a>/lua_object.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L63'>[^]</a><a href='#L196'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1700.html' title='Multiple included from 5 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L63' title='Defined at 63.'>get</a></li>
+<li><a href='#L68' title='Defined at 68.'>store</a></li>
+<li><a href='#L76' title='Defined at 76.'>to_type</a></li>
+<li><a href='#L85' title='Defined at 85.'>to_type</a></li>
+<li><a href='#L91' title='Defined at 91.'>to_type</a></li>
+<li><a href='#L97' title='Defined at 97.'>to_type</a></li>
+<li><a href='#L103' title='Defined at 103.'>to_type</a></li>
+<li><a href='#L109' title='Defined at 109.'>to_type</a></li>
+<li><a href='#L126' title='Defined at 126.'>to_type</a></li>
+<li><a href='#L134' title='Defined at 134.'>to_type</a></li>
+<li><a href='#L147' title='Defined at 147.'>to_type</a></li>
+<li><a href='#L196' title='Defined at 196.'>to_type</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2011 - 2017 by Dmitry Kovalenko &lt;nephro.wes@gmail.com&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * Lua object(value) wrapper implementation</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> */</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#ifndef</em> <a href='../S/296.html#L22' title='Defined at 22 in src/ai/lua/lua_object.hpp.'>LUA_OBJECT_HPP_INCLUDED</a>
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#define</em> <a href='../S/296.html#L21' title='Referred from 21 in src/ai/lua/lua_object.hpp.'>LUA_OBJECT_HPP_INCLUDED</a>
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='../I/1741.html'>config.hpp</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1217.html'>lua/lua.h</a>"
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1091.html'>map/location.hpp</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='676.html'>resources.hpp</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='212.html'>scripting/lua_common.hpp</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='../I/1981.html'>terrain/filter.hpp</a>"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='1101.html'>variable.hpp</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='../I/1645.html'>ai/default/contexts.hpp</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='298.html'>ai/lua/aspect_advancements.hpp</a>"
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;iterator&gt;
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> &lt;string&gt;
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#include</em> &lt;vector&gt;
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 <strong class='reserved'>namespace</strong> <a href='../R/2846.html' title='Multiple referred from 501 places.'>ai</a> <em class='brace'>{</em>
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <strong class='reserved'>class</strong> <a href='../R/9482.html' title='Multiple referred from 5 places.'>lua_object_base</a> <em class='brace'>{</em>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 <strong class='reserved'>public</strong>:
+<a id='L45' name='L45'></a>  45         <a href='../D/10449.html' title='Multiple defined in 2 places.'>lua_object_base</a>();
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>virtual</strong> ~lua_object_base() <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/14677.html' title='Multiple defined in 5 places.'>store</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>) = 0;
+<a id='L49' name='L49'></a>  49 <em class='brace'>}</em>;
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>typename</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>class</strong> <a href='../R/9481.html' title='Multiple referred from 20 places.'>lua_object</a> : <strong class='reserved'>public</strong> <a href='../D/10449.html' title='Multiple defined in 2 places.'>lua_object_base</a>
+<a id='L53' name='L53'></a>  53 <em class='brace'>{</em>
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <strong class='reserved'>public</strong>:
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57         lua_object()
+<a id='L58' name='L58'></a>  58                 : <a href='../D/15834.html' title='Multiple defined in 7 places.'>value_</a>()
+<a id='L59' name='L59'></a>  59         <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60                 <em class='comment'>// empty</em>
+<a id='L61' name='L61'></a>  61         <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../R/5978.html' title='Multiple referred from 1296 places.'>get</a>()
+<a id='L64' name='L64'></a>  64         <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65                 <strong class='reserved'>return</strong> <a href='../D/15834.html' title='Multiple defined in 7 places.'>value_</a>;
+<a id='L66' name='L66'></a>  66         <em class='brace'>}</em>
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>void</strong> <a href='../R/13482.html' title='Multiple referred from 45 places.'>store</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L69' name='L69'></a>  69         <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70                 <strong class='reserved'>this</strong>-&gt;<a href='../D/15834.html' title='Multiple defined in 7 places.'>value_</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;(<a href='../D/15162.html' title='Multiple defined in 11 places.'>to_type</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../S/1174.html#L160' title='Defined at 160 in src/lua/lapi.cpp.'>lua_absindex</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)));
+<a id='L71' name='L71'></a>  71         <em class='brace'>}</em>
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73 <strong class='reserved'>protected</strong>:
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75         <em class='comment'>// A group of functions that deal with the translation of the results to C++</em>
+<a id='L76' name='L76'></a>  76         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *, <strong class='reserved'>int</strong>)
+<a id='L77' name='L77'></a>  77         <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>return</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;();
+<a id='L79' name='L79'></a>  79         <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../D/15834.html' title='Multiple defined in 7 places.'>value_</a>;
+<a id='L82' name='L82'></a>  82 <em class='brace'>}</em>;
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>double</strong>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<strong class='reserved'>double</strong>&gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L86' name='L86'></a>  86 <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>return</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>double</strong>&gt;(<strong class='reserved'>new</strong> <strong class='reserved'>double</strong>(<a href='../S/1217.html#L341' title='Defined at 341 in src/lua/lua.h.'>lua_tonumber</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)));
+<a id='L88' name='L88'></a>  88 <em class='brace'>}</em>
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L91' name='L91'></a>  91 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L92' name='L92'></a>  92 <em class='brace'>{</em>
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>return</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt;(<strong class='reserved'>new</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>(<a href='../S/1217.html#L366' title='Defined at 366 in src/lua/lua.h.'>lua_tostring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)));
+<a id='L94' name='L94'></a>  94 <em class='brace'>}</em>
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L97' name='L97'></a>  97 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>bool</strong>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<strong class='reserved'>bool</strong>&gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L98' name='L98'></a>  98 <em class='brace'>{</em>
+<a id='L99' name='L99'></a>  99         <strong class='reserved'>return</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>bool</strong>&gt;(<strong class='reserved'>new</strong> <strong class='reserved'>bool</strong>(<a href='../S/196.html#L847' title='Defined at 847 in src/scripting/lua_common.cpp.'>luaW_toboolean</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)));
+<a id='L100' name='L100'></a> 100 <em class='brace'>}</em>
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L103' name='L103'></a> 103 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>int</strong>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<strong class='reserved'>int</strong>&gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L104' name='L104'></a> 104 <em class='brace'>{</em>
+<a id='L105' name='L105'></a> 105         <strong class='reserved'>return</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>int</strong>&gt;(<strong class='reserved'>new</strong> <strong class='reserved'>int</strong>(<strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/1217.html#L342' title='Defined at 342 in src/lua/lua.h.'>lua_tointeger</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>))));
+<a id='L106' name='L106'></a> 106 <em class='brace'>}</em>
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L109' name='L109'></a> 109 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt; <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt; &gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt; <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt; &gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L110' name='L110'></a> 110 <em class='brace'>{</em>
+<a id='L111' name='L111'></a> 111         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt; <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt; &gt; <a href='../Y/21073.html' title='Multiple used in 1371 places.'>v</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt; <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt; &gt;(<strong class='reserved'>new</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt;());
+<a id='L112' name='L112'></a> 112         <strong class='reserved'>int</strong> <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a> = <a href='../S/1174.html#L392' title='Defined at 392 in src/lua/lapi.cpp.'>lua_rawlen</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>);
+<a id='L113' name='L113'></a> 113         <strong class='reserved'>for</strong> (<strong class='reserved'>int</strong> <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> = 1; <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> &lt; <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a> + 1; ++<a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>)
+<a id='L114' name='L114'></a> 114         <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 <a href='../S/1174.html#L466' title='Defined at 466 in src/lua/lapi.cpp.'>lua_pushinteger</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>);
+<a id='L116' name='L116'></a> 116                 <a href='../S/1174.html#L611' title='Defined at 611 in src/lua/lapi.cpp.'>lua_gettable</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>);
+<a id='L117' name='L117'></a> 117                 <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>  <a href='../Y/17583.html' title='Multiple used in 1703 places.'>s</a> = <a href='../S/1217.html#L366' title='Defined at 366 in src/lua/lua.h.'>lua_tostring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1);
+<a id='L118' name='L118'></a> 118                 <a href='../S/1174.html#L172' title='Defined at 172 in src/lua/lapi.cpp.'>lua_settop</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>);
+<a id='L119' name='L119'></a> 119                 <a href='../Y/21073.html' title='Multiple used in 1371 places.'>v</a>-&gt;<a href='../D/12169.html' title='Multiple defined in 3 places.'>push_back</a>(<a href='../Y/17583.html' title='Multiple used in 1703 places.'>s</a>);
+<a id='L120' name='L120'></a> 120         <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <strong class='reserved'>return</strong> <a href='../Y/21073.html' title='Multiple used in 1371 places.'>v</a>;
+<a id='L123' name='L123'></a> 123 <em class='brace'>}</em>
+<a id='L124' name='L124'></a> 124 
+<a id='L125' name='L125'></a> 125 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L126' name='L126'></a> 126 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L127' name='L127'></a> 127 <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&gt; <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&gt;(<strong class='reserved'>new</strong> <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>());
+<a id='L129' name='L129'></a> 129         <a href='../S/196.html#L702' title='Defined at 702 in src/scripting/lua_common.cpp.'>luaW_toconfig</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>, *<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L130' name='L130'></a> 130         <strong class='reserved'>return</strong> <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>;
+<a id='L131' name='L131'></a> 131 <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L134' name='L134'></a> 134 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/14945.html' title='Multiple defined in 2 places.'>terrain_filter</a>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<a href='../D/14945.html' title='Multiple defined in 2 places.'>terrain_filter</a>&gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L135' name='L135'></a> 135 <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&gt; <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&gt;(<strong class='reserved'>new</strong> <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>());
+<a id='L137' name='L137'></a> 137         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/15893.html' title='Multiple defined in 2 places.'>vconfig</a>&gt; <a href='../Y/21213.html' title='Multiple used in 151 places.'>vcfg</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/15893.html' title='Multiple defined in 2 places.'>vconfig</a>&gt;(<strong class='reserved'>new</strong> <a href='../D/15893.html' title='Multiple defined in 2 places.'>vconfig</a>(*<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>));
+<a id='L138' name='L138'></a> 138         <strong class='reserved'>if</strong> (!<a href='../S/196.html#L793' title='Defined at 793 in src/scripting/lua_common.cpp.'>luaW_tovconfig</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>, *<a href='../Y/21213.html' title='Multiple used in 151 places.'>vcfg</a>)) <em class='brace'>{</em>
+<a id='L139' name='L139'></a> 139                 <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>-&gt;<a href='../D/2850.html' title='Multiple defined in 8 places.'>add_child</a>("not");
+<a id='L140' name='L140'></a> 140         <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141         <a href='../Y/21213.html' title='Multiple used in 151 places.'>vcfg</a>-&gt;<a href='../S/933.html#L118' title='Defined at 118 in src/variable.cpp.'>make_safe</a>();
+<a id='L142' name='L142'></a> 142         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/14945.html' title='Multiple defined in 2 places.'>terrain_filter</a>&gt; <a href='../Y/19790.html' title='Multiple used in 4 places.'>tf</a>(<strong class='reserved'>new</strong> <a href='../D/14945.html' title='Multiple defined in 2 places.'>terrain_filter</a>(*<a href='../Y/21213.html' title='Multiple used in 151 places.'>vcfg</a>, <a href='../D/12838.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/9848.html' title='Multiple used in 57 places.'>filter_con</a>));
+<a id='L143' name='L143'></a> 143         <strong class='reserved'>return</strong> <a href='../Y/19790.html' title='Multiple used in 4 places.'>tf</a>;
+<a id='L144' name='L144'></a> 144 <em class='brace'>}</em>
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L147' name='L147'></a> 147 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>&gt; &gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt; <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>&gt; &gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L148' name='L148'></a> 148 <em class='brace'>{</em>
+<a id='L149' name='L149'></a> 149         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>&gt; &gt; <a href='../Y/19389.html' title='Multiple used in 56 places.'>targets</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>&gt; &gt;(<strong class='reserved'>new</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>&gt;());
+<a id='L150' name='L150'></a> 150         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/6057.html' title='Multiple used in 58 places.'>back_insert_iterator</a>&lt; <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>&gt; &gt; <a href='../Y/19792.html' title='Multiple used in 24 places.'>tg</a>(*<a href='../Y/19389.html' title='Multiple used in 56 places.'>targets</a>);
+<a id='L151' name='L151'></a> 151         <strong class='reserved'>int</strong> <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a> = <a href='../S/1174.html#L392' title='Defined at 392 in src/lua/lapi.cpp.'>lua_rawlen</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>);
+<a id='L152' name='L152'></a> 152 
+<a id='L153' name='L153'></a> 153         <strong class='reserved'>for</strong> (<strong class='reserved'>int</strong> <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> = 1; <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> &lt;= <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>; ++<a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>)
+<a id='L154' name='L154'></a> 154         <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155                 <a href='../S/1174.html#L657' title='Defined at 657 in src/lua/lapi.cpp.'>lua_rawgeti</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>, <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>); <em class='comment'>// st n + 1  TABLE @ N    table @ n + 1</em>
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157                 <a href='../S/1174.html#L491' title='Defined at 491 in src/lua/lapi.cpp.'>lua_pushstring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, "loc"); <em class='comment'>// st n + 2</em>
+<a id='L158' name='L158'></a> 158                 <a href='../S/1174.html#L646' title='Defined at 646 in src/lua/lapi.cpp.'>lua_rawget</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -2); <em class='comment'>// st n + 2</em>
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160                 <a href='../S/1174.html#L491' title='Defined at 491 in src/lua/lapi.cpp.'>lua_pushstring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, "x"); <em class='comment'>// st n + 3</em>
+<a id='L161' name='L161'></a> 161                 <a href='../S/1174.html#L646' title='Defined at 646 in src/lua/lapi.cpp.'>lua_rawget</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -2); <em class='comment'>// st n + 3</em>
+<a id='L162' name='L162'></a> 162                 <strong class='reserved'>int</strong> <a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a> = <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/1217.html#L342' title='Defined at 342 in src/lua/lua.h.'>lua_tointeger</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1)); <em class='comment'>// st n + 3</em>
+<a id='L163' name='L163'></a> 163                 <a href='../S/1217.html#L344' title='Defined at 344 in src/lua/lua.h.'>lua_pop</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, 1); <em class='comment'>// st n + 2</em>
+<a id='L164' name='L164'></a> 164 
+<a id='L165' name='L165'></a> 165                 <a href='../S/1174.html#L491' title='Defined at 491 in src/lua/lapi.cpp.'>lua_pushstring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, "y"); <em class='comment'>// st n + 3</em>
+<a id='L166' name='L166'></a> 166                 <a href='../S/1174.html#L646' title='Defined at 646 in src/lua/lapi.cpp.'>lua_rawget</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -2); <em class='comment'>// st n + 3</em>
+<a id='L167' name='L167'></a> 167                 <strong class='reserved'>int</strong> <a href='../D/16486.html' title='Multiple defined in 8 places.'>y</a> = <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/1217.html#L342' title='Defined at 342 in src/lua/lua.h.'>lua_tointeger</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1)); <em class='comment'>// st n + 3</em>
+<a id='L168' name='L168'></a> 168 
+<a id='L169' name='L169'></a> 169                 <a href='../S/1217.html#L344' title='Defined at 344 in src/lua/lua.h.'>lua_pop</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, 2); <em class='comment'>// st n + 1</em>
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171                 <a href='../S/1174.html#L491' title='Defined at 491 in src/lua/lapi.cpp.'>lua_pushstring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, "type"); <em class='comment'>// st n + 2</em>
+<a id='L172' name='L172'></a> 172                 <a href='../S/1174.html#L646' title='Defined at 646 in src/lua/lapi.cpp.'>lua_rawget</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -2);  <em class='comment'>// st n + 2</em>
+<a id='L173' name='L173'></a> 173                 <a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>::<a href='../D/2227.html' title='Multiple defined in 3 places.'>TYPE</a> <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a> = <a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>::<a href='../D/2227.html' title='Multiple defined in 3 places.'>TYPE</a>::<a href='../Y/692.html' title='Multiple used in 4 places.'>EXPLICIT</a>;
+<a id='L174' name='L174'></a> 174                 <strong class='reserved'>if</strong>(<a href='../S/1174.html#L276' title='Defined at 276 in src/lua/lapi.cpp.'>lua_isnumber</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1)) <em class='brace'>{</em>
+<a id='L175' name='L175'></a> 175                         <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a> = <a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>::<a href='../D/2227.html' title='Multiple defined in 3 places.'>TYPE</a>::<a href='../Y/10294.html' title='Multiple used in 4 places.'>from_int</a>(<strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/1217.html#L342' title='Defined at 342 in src/lua/lua.h.'>lua_tointeger</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1)));  <em class='comment'>// st n + 2</em>
+<a id='L176' name='L176'></a> 176                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<a href='../S/1174.html#L283' title='Defined at 283 in src/lua/lapi.cpp.'>lua_isstring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1)) <em class='brace'>{</em>
+<a id='L177' name='L177'></a> 177                         <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a> = <a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>::<a href='../D/2227.html' title='Multiple defined in 3 places.'>TYPE</a>::<a href='../Y/19060.html' title='Multiple used in 17 places.'>string_to_enum</a>(<a href='../S/1217.html#L366' title='Defined at 366 in src/lua/lua.h.'>lua_tostring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1));  <em class='comment'>// st n + 2</em>
+<a id='L178' name='L178'></a> 178                 <em class='brace'>}</em>
+<a id='L179' name='L179'></a> 179                 <a href='../S/1217.html#L344' title='Defined at 344 in src/lua/lua.h.'>lua_pop</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, 1); <em class='comment'>// st n + 1</em>
+<a id='L180' name='L180'></a> 180 
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182                 <a href='../S/1174.html#L491' title='Defined at 491 in src/lua/lapi.cpp.'>lua_pushstring</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, "value");
+<a id='L183' name='L183'></a> 183                 <a href='../S/1174.html#L646' title='Defined at 646 in src/lua/lapi.cpp.'>lua_rawget</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -2);
+<a id='L184' name='L184'></a> 184                 <strong class='reserved'>int</strong> <a href='../D/15833.html' title='Multiple defined in 19 places.'>value</a> = <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/1217.html#L342' title='Defined at 342 in src/lua/lua.h.'>lua_tointeger</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, -1));
+<a id='L185' name='L185'></a> 185 
+<a id='L186' name='L186'></a> 186                 <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../Y/14069.html' title='Multiple used in 7 places.'>ml</a>(<a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16486.html' title='Multiple defined in 8 places.'>y</a>, <a href='../S/1091.html#L30' title='Defined at 30 in src/map/location.hpp.'>wml_loc</a>());
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188                 *<a href='../Y/19792.html' title='Multiple used in 24 places.'>tg</a> = <a href='../D/14875.html' title='Multiple defined in 2 places.'>target</a>(<a href='../Y/14069.html' title='Multiple used in 7 places.'>ml</a>, <a href='../D/15833.html' title='Multiple defined in 19 places.'>value</a>, <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a>);
+<a id='L189' name='L189'></a> 189         <em class='brace'>}</em>
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191         <a href='../S/1174.html#L172' title='Defined at 172 in src/lua/lapi.cpp.'>lua_settop</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>);
+<a id='L192' name='L192'></a> 192         <strong class='reserved'>return</strong> <a href='../Y/19389.html' title='Multiple used in 56 places.'>targets</a>;
+<a id='L193' name='L193'></a> 193 <em class='brace'>}</em>
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L196' name='L196'></a> 196 <strong class='reserved'>inline</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/15462.html' title='Multiple defined in 2 places.'>unit_advancements_aspect</a>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<a href='../D/15462.html' title='Multiple defined in 2 places.'>unit_advancements_aspect</a>&gt;::<a href='../R/13908.html' title='Multiple referred from 2 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>)
+<a id='L197' name='L197'></a> 197 <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/15462.html' title='Multiple defined in 2 places.'>unit_advancements_aspect</a>&gt; <a href='../Y/20611.html' title='Multiple used in 4 places.'>uaa</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/15462.html' title='Multiple defined in 2 places.'>unit_advancements_aspect</a>&gt;(<strong class='reserved'>new</strong> <a href='../D/15462.html' title='Multiple defined in 2 places.'>unit_advancements_aspect</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>));
+<a id='L199' name='L199'></a> 199         <strong class='reserved'>return</strong> <a href='../Y/20611.html' title='Multiple used in 4 places.'>uaa</a>;
+<a id='L200' name='L200'></a> 200 <em class='brace'>}</em>
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202 <em class='comment'>// This one is too complex to define in the header.</em>
+<a id='L203' name='L203'></a> 203 <strong class='reserved'>struct</strong> <a href='../S/239.html#L80' title='Defined at 80 in src/ai/default/aspect_attacks.hpp.'>aspect_attacks_lua_filter</a>;
+<a id='L204' name='L204'></a> 204 <strong class='reserved'>template</strong> &lt;&gt;
+<a id='L205' name='L205'></a> 205 <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../S/239.html#L80' title='Defined at 80 in src/ai/default/aspect_attacks.hpp.'>aspect_attacks_lua_filter</a>&gt; <a href='../S/296.html#L52' title='Defined at 52 in src/ai/lua/lua_object.hpp.'>lua_object</a>&lt;<a href='../S/239.html#L80' title='Defined at 80 in src/ai/default/aspect_attacks.hpp.'>aspect_attacks_lua_filter</a>&gt;::<a href='../D/15162.html' title='Multiple defined in 11 places.'>to_type</a>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>int</strong> <a href='../Y/14438.html' title='Multiple used in 1551 places.'>n</a>);
+<a id='L206' name='L206'></a> 206 <em class='brace'>}</em> <em class='comment'>// end of namespace ai</em>
+<a id='L207' name='L207'></a> 207 
+<a id='L208' name='L208'></a> 208 
+<a id='L209' name='L209'></a> 209 <em class='sharp'>#endif</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L63'>[^]</a><a href='#L196'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

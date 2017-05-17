@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/editor/action/action_unit.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5824.html'>editor</a>/<a href='../files/5825.html'>action</a>/action_unit.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L95'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1786.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L43' title='Defined at 43.'>u_</a></li>
+<li><a href='#L49' title='Defined at 49.'>get_name</a></li>
+<li><a href='#L67' title='Defined at 67.'>get_name</a></li>
+<li><a href='#L74' title='Defined at 74.'>new_loc_</a></li>
+<li><a href='#L80' title='Defined at 80.'>get_name</a></li>
+<li><a href='#L89' title='Defined at 89.'>old_direction_</a></li>
+<li><a href='#L95' title='Defined at 95.'>get_name</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2008 - 2017 by Fabian Mueller &lt;fabianmueller5@gmx.de&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * Editor action classes. Some important points:</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * - This is a polymorphic hierarchy of classes, so actions are usually passed around</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> *   as editor_action pointers</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * - The pointers can, in general, be null. Always check for null before doing anything.</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> *   The helper functions perform_ that take a pointer do that.</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> * - The perform() functions can throw when an error occurs. Use smart pointers if you</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> *   need to ensure the pointer is deleted.</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> */</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#pragma</em> once
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='../I/1777.html'>editor/action/action.hpp</a>"
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='988.html'>units/unit.hpp</a>"
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>namespace</strong> <a href='../R/5077.html' title='Multiple referred from 204 places.'>editor</a> <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 <em class='comment'>/**</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * place a new unit on the map</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> */</em>
+<a id='L38' name='L38'></a>  38 <strong class='reserved'>class</strong> <a href='../R/5104.html' title='Multiple referred from 8 places.'>editor_action_unit</a> : <strong class='reserved'>public</strong> <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>
+<a id='L39' name='L39'></a>  39 <em class='brace'>{</em>
+<a id='L40' name='L40'></a>  40         <strong class='reserved'>public</strong>:
+<a id='L41' name='L41'></a>  41                 <a href='../S/62.html#L38' title='Defined at 38 in src/editor/action/action_unit.hpp.'>editor_action_unit</a>(<a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>,
+<a id='L42' name='L42'></a>  42                                 <strong class='reserved'>const</strong> <a href='../D/15453.html' title='Multiple defined in 4 places.'>unit</a>&amp; <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>)
+<a id='L43' name='L43'></a>  43                 : <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>(<a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>), <a href='../R/14116.html' title='Multiple referred from 127 places.'>u_</a>(<a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>)
+<a id='L44' name='L44'></a>  44                 <em class='brace'>{</em>
+<a id='L45' name='L45'></a>  45                 <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46                 <a href='../S/62.html#L38' title='Defined at 38 in src/editor/action/action_unit.hpp.'>editor_action_unit</a>* <a href='../D/4547.html' title='Multiple defined in 30 places.'>clone</a>() <strong class='reserved'>const</strong>;
+<a id='L47' name='L47'></a>  47                 <a href='../D/5760.html' title='Multiple defined in 3 places.'>editor_action</a>* <a href='../D/11777.html' title='Multiple defined in 25 places.'>perform</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L48' name='L48'></a>  48                 <strong class='reserved'>void</strong> <a href='../D/11789.html' title='Multiple defined in 27 places.'>perform_without_undo</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L49' name='L49'></a>  49                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/6890.html' title='Multiple referred from 74 places.'>get_name</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> "unit"; <em class='brace'>}</em>
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>protected</strong>:
+<a id='L51' name='L51'></a>  51                 <a href='../D/15453.html' title='Multiple defined in 4 places.'>unit</a> <a href='../D/15383.html' title='Multiple defined in 6 places.'>u_</a>;
+<a id='L52' name='L52'></a>  52 <em class='brace'>}</em>;
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <em class='comment'>/**</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> * Remove a unit from the map.</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> */</em>
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>class</strong> <a href='../R/5105.html' title='Multiple referred from 7 places.'>editor_action_unit_delete</a> : <strong class='reserved'>public</strong> <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>
+<a id='L58' name='L58'></a>  58 <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59         <strong class='reserved'>public</strong>:
+<a id='L60' name='L60'></a>  60                 editor_action_unit_delete(<a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>)
+<a id='L61' name='L61'></a>  61                 : <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>(<a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>)
+<a id='L62' name='L62'></a>  62                 <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63                 <em class='brace'>}</em>
+<a id='L64' name='L64'></a>  64                 <a href='../S/62.html#L57' title='Defined at 57 in src/editor/action/action_unit.hpp.'>editor_action_unit_delete</a>* <a href='../D/4547.html' title='Multiple defined in 30 places.'>clone</a>() <strong class='reserved'>const</strong>;
+<a id='L65' name='L65'></a>  65                 <a href='../D/5760.html' title='Multiple defined in 3 places.'>editor_action</a>* <a href='../D/11777.html' title='Multiple defined in 25 places.'>perform</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L66' name='L66'></a>  66                 <strong class='reserved'>void</strong> <a href='../D/11789.html' title='Multiple defined in 27 places.'>perform_without_undo</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L67' name='L67'></a>  67                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/6890.html' title='Multiple referred from 74 places.'>get_name</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> "unit_delete"; <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 <em class='brace'>}</em>;
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <strong class='reserved'>class</strong> <a href='../R/5107.html' title='Multiple referred from 8 places.'>editor_action_unit_replace</a> : <strong class='reserved'>public</strong> <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>
+<a id='L71' name='L71'></a>  71 <em class='brace'>{</em>
+<a id='L72' name='L72'></a>  72         <strong class='reserved'>public</strong>:
+<a id='L73' name='L73'></a>  73                 <a href='../S/62.html#L70' title='Defined at 70 in src/editor/action/action_unit.hpp.'>editor_action_unit_replace</a>(<a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>, <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../Y/14713.html' title='Multiple used in 18 places.'>new_loc</a>)
+<a id='L74' name='L74'></a>  74                 : <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>(<a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>), <a href='../R/10217.html' title='Multiple referred from 7 places.'>new_loc_</a>(<a href='../Y/14713.html' title='Multiple used in 18 places.'>new_loc</a>)
+<a id='L75' name='L75'></a>  75                 <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76                 <em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77                 <a href='../S/62.html#L70' title='Defined at 70 in src/editor/action/action_unit.hpp.'>editor_action_unit_replace</a>* <a href='../D/4547.html' title='Multiple defined in 30 places.'>clone</a>() <strong class='reserved'>const</strong>;
+<a id='L78' name='L78'></a>  78                 <a href='../D/5760.html' title='Multiple defined in 3 places.'>editor_action</a>* <a href='../D/11777.html' title='Multiple defined in 25 places.'>perform</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L79' name='L79'></a>  79                 <strong class='reserved'>void</strong> <a href='../D/11789.html' title='Multiple defined in 27 places.'>perform_without_undo</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L80' name='L80'></a>  80                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/6890.html' title='Multiple referred from 74 places.'>get_name</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> "unit_replace"; <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>protected</strong>:
+<a id='L82' name='L82'></a>  82                 <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../D/11271.html' title='Multiple defined in 2 places.'>new_loc_</a>;
+<a id='L83' name='L83'></a>  83 <em class='brace'>}</em>;
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>class</strong> <a href='../R/5106.html' title='Multiple referred from 7 places.'>editor_action_unit_facing</a> : <strong class='reserved'>public</strong> <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>
+<a id='L86' name='L86'></a>  86 <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>public</strong>:
+<a id='L88' name='L88'></a>  88         <a href='../S/62.html#L85' title='Defined at 85 in src/editor/action/action_unit.hpp.'>editor_action_unit_facing</a>(<a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>, <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/342.html' title='Multiple defined in 2 places.'>DIRECTION</a> <a href='../Y/14672.html' title='Multiple used in 4 places.'>new_direction</a>, <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/342.html' title='Multiple defined in 2 places.'>DIRECTION</a> <a href='../Y/15284.html' title='Multiple used in 4 places.'>old_direction</a>)
+<a id='L89' name='L89'></a>  89         : <a href='../S/61.html#L176' title='Defined at 176 in src/editor/action/action.hpp.'>editor_action_location</a>(<a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>), <a href='../Y/14673.html' title='Multiple used in 7 places.'>new_direction_</a>(<a href='../Y/14672.html' title='Multiple used in 4 places.'>new_direction</a>), <a href='../R/10378.html' title='Multiple referred from 4 places.'>old_direction_</a>(<a href='../Y/15284.html' title='Multiple used in 4 places.'>old_direction</a>)
+<a id='L90' name='L90'></a>  90         <em class='brace'>{</em>
+<a id='L91' name='L91'></a>  91         <em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92         <a href='../S/62.html#L85' title='Defined at 85 in src/editor/action/action_unit.hpp.'>editor_action_unit_facing</a>* <a href='../D/4547.html' title='Multiple defined in 30 places.'>clone</a>() <strong class='reserved'>const</strong>;
+<a id='L93' name='L93'></a>  93         <a href='../D/5760.html' title='Multiple defined in 3 places.'>editor_action</a>* <a href='../D/11777.html' title='Multiple defined in 25 places.'>perform</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L94' name='L94'></a>  94         <strong class='reserved'>void</strong> <a href='../D/11789.html' title='Multiple defined in 27 places.'>perform_without_undo</a>(<a href='../D/10693.html' title='Multiple defined in 2 places.'>map_context</a>&amp; <a href='../Y/13824.html' title='Multiple used in 217 places.'>mc</a>) <strong class='reserved'>const</strong>;
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/6890.html' title='Multiple referred from 74 places.'>get_name</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> "unit_facing"; <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96 <strong class='reserved'>protected</strong>:
+<a id='L97' name='L97'></a>  97         <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/342.html' title='Multiple defined in 2 places.'>DIRECTION</a> <a href='../Y/14673.html' title='Multiple used in 7 places.'>new_direction_</a>;
+<a id='L98' name='L98'></a>  98         <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/342.html' title='Multiple defined in 2 places.'>DIRECTION</a> <a href='../D/11447.html' title='Multiple defined in 2 places.'>old_direction_</a>;
+<a id='L99' name='L99'></a>  99 <em class='brace'>}</em>;
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102 <em class='brace'>}</em> <em class='comment'>//end namespace editor</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L95'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

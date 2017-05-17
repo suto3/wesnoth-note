@@ -1,0 +1,277 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/gui/widgets/horizontal_scrollbar.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5837.html'>gui</a>/<a href='../files/5849.html'>widgets</a>/horizontal_scrollbar.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L34'>[^]</a><a href='#L180'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L34' title='Defined at 34.'>REGISTER_WIDGET</a></li>
+<li><a href='#L46' title='Defined at 46.'>maximum_positioner_length</a></li>
+<li><a href='#L56' title='Defined at 56.'>offset_before</a></li>
+<li><a href='#L66' title='Defined at 66.'>offset_after</a></li>
+<li><a href='#L76' title='Defined at 76.'>on_positioner</a></li>
+<li><a href='#L85' title='Defined at 85.'>on_bar</a></li>
+<li><a href='#L105' title='Defined at 105.'>in_orthogonal_range</a></li>
+<li><a href='#L110' title='Defined at 110.'>get_control_type</a></li>
+<li><a href='#L180' title='Defined at 180.'>right_offset</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2008 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#define</em> <a href='../R/577.html' title='Multiple referred from 20 places.'>GETTEXT_DOMAIN</a> "wesnoth-lib"
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='554.html'>gui/widgets/horizontal_scrollbar.hpp</a>"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='521.html'>gui/core/register_widget.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='../I/1551.html'>gui/core/widget_definition.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/1553.html'>gui/core/window_builder.hpp</a>"
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='../I/2272.html'>gui/widgets/settings.hpp</a>"
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1103.html'>wml_exception.hpp</a>"
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='872.html'>utils/functional.hpp</a>"
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>namespace</strong> <a href='../R/7397.html' title='Multiple referred from 720 places.'>gui2</a>
+<a id='L30' name='L30'></a>  30 <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='comment'>// ------------ WIDGET -----------{</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <a href='../R/1661.html' title='Multiple referred from 14 places.'>REGISTER_WIDGET</a>(<a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>)
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>unsigned</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../S/604.html#L159' title='Defined at 159 in src/gui/widgets/slider.cpp.'>minimum_positioner_length</a>() <strong class='reserved'>const</strong>
+<a id='L37' name='L37'></a>  37 <em class='brace'>{</em>
+<a id='L38' name='L38'></a>  38         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::<a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;
+<a id='L39' name='L39'></a>  39         <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18910.html' title='Multiple used in 46 places.'>static_pointer_cast</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::
+<a id='L40' name='L40'></a>  40                                                                                            <a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;(<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>());
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42         <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>);
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>return</strong> <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>-&gt;<a href='../S/604.html#L159' title='Defined at 159 in src/gui/widgets/slider.cpp.'>minimum_positioner_length</a>;
+<a id='L44' name='L44'></a>  44 <em class='brace'>}</em>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <strong class='reserved'>unsigned</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../R/9839.html' title='Multiple referred from 19 places.'>maximum_positioner_length</a>() <strong class='reserved'>const</strong>
+<a id='L47' name='L47'></a>  47 <em class='brace'>{</em>
+<a id='L48' name='L48'></a>  48         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::<a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;
+<a id='L49' name='L49'></a>  49         <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18910.html' title='Multiple used in 46 places.'>static_pointer_cast</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::
+<a id='L50' name='L50'></a>  50                                                                                            <a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;(<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>());
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>);
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>return</strong> <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>-&gt;<a href='../D/10838.html' title='Multiple defined in 3 places.'>maximum_positioner_length</a>;
+<a id='L54' name='L54'></a>  54 <em class='brace'>}</em>
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56 <strong class='reserved'>unsigned</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../R/10373.html' title='Multiple referred from 8 places.'>offset_before</a>() <strong class='reserved'>const</strong>
+<a id='L57' name='L57'></a>  57 <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::<a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;
+<a id='L59' name='L59'></a>  59         <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18910.html' title='Multiple used in 46 places.'>static_pointer_cast</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::
+<a id='L60' name='L60'></a>  60                                                                                            <a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;(<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>());
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62         <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>);
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>return</strong> <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>-&gt;<a href='../Y/12886.html' title='Multiple used in 10 places.'>left_offset</a>;
+<a id='L64' name='L64'></a>  64 <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66 <strong class='reserved'>unsigned</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../R/10372.html' title='Multiple referred from 8 places.'>offset_after</a>() <strong class='reserved'>const</strong>
+<a id='L67' name='L67'></a>  67 <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::<a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;
+<a id='L69' name='L69'></a>  69         <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18910.html' title='Multiple used in 46 places.'>static_pointer_cast</a>&lt;<strong class='reserved'>const</strong> <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::
+<a id='L70' name='L70'></a>  70                                                                                            <a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;(<a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>());
+<a id='L71' name='L71'></a>  71         <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>);
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73         <strong class='reserved'>return</strong> <a href='../Y/7640.html' title='Multiple used in 117 places.'>conf</a>-&gt;<a href='../D/12910.html' title='Multiple defined in 2 places.'>right_offset</a>;
+<a id='L74' name='L74'></a>  74 <em class='brace'>}</em>
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76 <strong class='reserved'>bool</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../R/10418.html' title='Multiple referred from 8 places.'>on_positioner</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>) <strong class='reserved'>const</strong>
+<a id='L77' name='L77'></a>  77 <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78         <em class='comment'>// Note we assume the positioner is over the entire height of the widget.</em>
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>return</strong> <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a> &gt;= <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/574.html#L174' title='Defined at 174 in src/gui/widgets/scrollbar.hpp.'>get_positioner_offset</a>())
+<a id='L80' name='L80'></a>  80                    &amp;&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a> &lt; <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/574.html#L174' title='Defined at 174 in src/gui/widgets/scrollbar.hpp.'>get_positioner_offset</a>()
+<a id='L81' name='L81'></a>  81                                                                                           + <a href='../S/574.html#L179' title='Defined at 179 in src/gui/widgets/scrollbar.hpp.'>get_positioner_length</a>())
+<a id='L82' name='L82'></a>  82                    &amp;&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16486.html' title='Multiple defined in 8 places.'>y</a> &gt; 0 &amp;&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16486.html' title='Multiple defined in 8 places.'>y</a> &lt; <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../D/7534.html' title='Multiple defined in 3 places.'>get_height</a>());
+<a id='L83' name='L83'></a>  83 <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>int</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../R/10385.html' title='Multiple referred from 5 places.'>on_bar</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>) <strong class='reserved'>const</strong>
+<a id='L86' name='L86'></a>  86 <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87         <em class='comment'>// Not on the widget, leave.</em>
+<a id='L88' name='L88'></a>  88         <strong class='reserved'>if</strong>(<strong class='reserved'>static_cast</strong>&lt;<a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a>&gt;(<a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a>) &gt; <a href='../D/8123.html' title='Multiple defined in 3 places.'>get_width</a>()
+<a id='L89' name='L89'></a>  89            || <strong class='reserved'>static_cast</strong>&lt;<a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a>&gt;(<a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16486.html' title='Multiple defined in 8 places.'>y</a>) &gt; <a href='../D/7534.html' title='Multiple defined in 3 places.'>get_height</a>()) <em class='brace'>{</em>
+<a id='L90' name='L90'></a>  90                 <strong class='reserved'>return</strong> 0;
+<a id='L91' name='L91'></a>  91         <em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93         <em class='comment'>// we also assume the bar is over the entire width of the widget.</em>
+<a id='L94' name='L94'></a>  94         <strong class='reserved'>if</strong>(<strong class='reserved'>static_cast</strong>&lt;<a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a>&gt;(<a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a>) &lt; <a href='../S/574.html#L174' title='Defined at 174 in src/gui/widgets/scrollbar.hpp.'>get_positioner_offset</a>()) <em class='brace'>{</em>
+<a id='L95' name='L95'></a>  95                 <strong class='reserved'>return</strong> -1;
+<a id='L96' name='L96'></a>  96         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<strong class='reserved'>static_cast</strong>&lt;<a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a>&gt;(<a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a>) &gt; <a href='../S/574.html#L174' title='Defined at 174 in src/gui/widgets/scrollbar.hpp.'>get_positioner_offset</a>()
+<a id='L97' name='L97'></a>  97                                                                                                   + <a href='../S/574.html#L179' title='Defined at 179 in src/gui/widgets/scrollbar.hpp.'>get_positioner_length</a>()) <em class='brace'>{</em>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99                 <strong class='reserved'>return</strong> 1;
+<a id='L100' name='L100'></a> 100         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L101' name='L101'></a> 101                 <strong class='reserved'>return</strong> 0;
+<a id='L102' name='L102'></a> 102         <em class='brace'>}</em>
+<a id='L103' name='L103'></a> 103 <em class='brace'>}</em>
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105 <strong class='reserved'>bool</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../R/7884.html' title='Multiple referred from 5 places.'>in_orthogonal_range</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>) <strong class='reserved'>const</strong>
+<a id='L106' name='L106'></a> 106 <em class='brace'>{</em>
+<a id='L107' name='L107'></a> 107         <strong class='reserved'>return</strong> <strong class='reserved'>static_cast</strong>&lt;<a href='../Y/18513.html' title='Multiple used in 1720 places.'>size_t</a>&gt;(<a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>.<a href='../D/16471.html' title='Multiple defined in 2 places.'>x</a>) &lt; <a href='../D/8123.html' title='Multiple defined in 3 places.'>get_width</a>();
+<a id='L108' name='L108'></a> 108 <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110 <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>::<a href='../R/6580.html' title='Multiple referred from 65 places.'>get_control_type</a>() <strong class='reserved'>const</strong>
+<a id='L111' name='L111'></a> 111 <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112         <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a> = "horizontal_scrollbar";
+<a id='L113' name='L113'></a> 113         <strong class='reserved'>return</strong> <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a>;
+<a id='L114' name='L114'></a> 114 <em class='brace'>}</em>
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116 <em class='comment'>// }---------- DEFINITION ---------{</em>
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118 <a href='../R/7685.html' title='Multiple referred from 11 places.'>horizontal_scrollbar_definition</a>::<a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>(
+<a id='L119' name='L119'></a> 119                 <strong class='reserved'>const</strong> <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L120' name='L120'></a> 120         : <a href='../S/522.html#L93' title='Defined at 93 in src/gui/core/widget_definition.hpp.'>styled_widget_definition</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L121' name='L121'></a> 121 <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122         <a href='../S/506.html#L68' title='Defined at 68 in src/gui/core/log.hpp.'>DBG_GUI_P</a> &lt;&lt; "Parsing horizontal scrollbar " &lt;&lt; <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a> &lt;&lt; '\n';
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124         <a href='../S/522.html#L98' title='Defined at 98 in src/gui/core/widget_definition.hpp.'>load_resolutions</a>&lt;<a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>&gt;(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L125' name='L125'></a> 125 <em class='brace'>}</em>
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <em class='comment'>/*WIKI</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'> * @page = GUIWidgetDefinitionWML</em>
+<a id='L129' name='L129'></a> 129 <em class='comment'> * @order = 1_vertical_scrollbar</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'> *</em>
+<a id='L131' name='L131'></a> 131 <em class='comment'> * == Horizontal scrollbar ==</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'> *</em>
+<a id='L133' name='L133'></a> 133 <em class='comment'> * @macro = horizontal_scrollbar_description</em>
+<a id='L134' name='L134'></a> 134 <em class='comment'> * @begin{parent}{name="gui/"}</em>
+<a id='L135' name='L135'></a> 135 <em class='comment'> * @begin{tag}{name="horizontal_scrollbar_definition"}{min=0}{max=-1}{super="generic/widget_definition"}</em>
+<a id='L136' name='L136'></a> 136 <em class='comment'> * The resolution for a horizontal scrollbar also contains the following keys:</em>
+<a id='L137' name='L137'></a> 137 <em class='comment'> * @begin{tag}{name="resolution"}{min=0}{max=-1}{super="generic/widget_definition/resolution"}</em>
+<a id='L138' name='L138'></a> 138 <em class='comment'> * @begin{table}{config}</em>
+<a id='L139' name='L139'></a> 139 <em class='comment'> *     minimum_positioner_length &amp; unsigned &amp; &amp;</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'> *                                     The minimum size the positioner is</em>
+<a id='L141' name='L141'></a> 141 <em class='comment'> *                                     allowed to be. The engine needs to know</em>
+<a id='L142' name='L142'></a> 142 <em class='comment'> *                                     this in order to calculate the best size</em>
+<a id='L143' name='L143'></a> 143 <em class='comment'> *                                     for the positioner. $</em>
+<a id='L144' name='L144'></a> 144 <em class='comment'> *     maximum_positioner_length &amp; unsigned &amp; 0 &amp;</em>
+<a id='L145' name='L145'></a> 145 <em class='comment'> *                                     The maximum size the positioner is</em>
+<a id='L146' name='L146'></a> 146 <em class='comment'> *                                     allowed to be. If minimum and maximum are</em>
+<a id='L147' name='L147'></a> 147 <em class='comment'> *                                     the same value the positioner is fixed</em>
+<a id='L148' name='L148'></a> 148 <em class='comment'> *                                     size. If the maximum is 0 (and the</em>
+<a id='L149' name='L149'></a> 149 <em class='comment'> *                                     minimum not) there's no maximum. $</em>
+<a id='L150' name='L150'></a> 150 <em class='comment'> *     left_offset &amp; unsigned &amp; 0 &amp;      The number of pixels at the left which</em>
+<a id='L151' name='L151'></a> 151 <em class='comment'> *                                     can't be used by the positioner. $</em>
+<a id='L152' name='L152'></a> 152 <em class='comment'> *     right_offset &amp; unsigned &amp; 0 &amp;     The number of pixels at the right which</em>
+<a id='L153' name='L153'></a> 153 <em class='comment'> *                                     can't be used by the positioner. $</em>
+<a id='L154' name='L154'></a> 154 <em class='comment'> * @end{table}</em>
+<a id='L155' name='L155'></a> 155 <em class='comment'> *</em>
+<a id='L156' name='L156'></a> 156 <em class='comment'> * The following states exist:</em>
+<a id='L157' name='L157'></a> 157 <em class='comment'> * * state_enabled, the horizontal scrollbar is enabled.</em>
+<a id='L158' name='L158'></a> 158 <em class='comment'> * * state_disabled, the horizontal scrollbar is disabled.</em>
+<a id='L159' name='L159'></a> 159 <em class='comment'> * * state_pressed, the left mouse button is down on the positioner of the</em>
+<a id='L160' name='L160'></a> 160 <em class='comment'> *   horizontal scrollbar.</em>
+<a id='L161' name='L161'></a> 161 <em class='comment'> * * state_focused, the mouse is over the positioner of the horizontal</em>
+<a id='L162' name='L162'></a> 162 <em class='comment'> *   scrollbar.</em>
+<a id='L163' name='L163'></a> 163 <em class='comment'> * @begin{tag}{name="state_enabled"}{min=0}{max=1}{super="generic/state"}</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'> * @end{tag}{name="state_enabled"}</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'> * @begin{tag}{name="state_disabled"}{min=0}{max=1}{super="generic/state"}</em>
+<a id='L166' name='L166'></a> 166 <em class='comment'> * @end{tag}{name="state_disabled"}</em>
+<a id='L167' name='L167'></a> 167 <em class='comment'> * @begin{tag}{name="state_pressed"}{min=0}{max=1}{super="generic/state"}</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'> * @end{tag}{name="state_pressed"}</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'> * @begin{tag}{name="state_focused"}{min=0}{max=1}{super="generic/state"}</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'> * @end{tag}{name="state_focused"}</em>
+<a id='L171' name='L171'></a> 171 <em class='comment'> * @end{tag}{name="resolution"}</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'> * @end{tag}{name="horizontal_scrollbar_definition"}</em>
+<a id='L173' name='L173'></a> 173 <em class='comment'> * @end{parent}{name="gui/"}</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'> */</em>
+<a id='L175' name='L175'></a> 175 <a href='../D/8555.html' title='Multiple defined in 2 places.'>horizontal_scrollbar_definition</a>::<a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>::<a href='../D/12815.html' title='Multiple defined in 41 places.'>resolution</a>(<strong class='reserved'>const</strong> <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L176' name='L176'></a> 176         : <a href='../S/522.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L177' name='L177'></a> 177         , <a href='../S/604.html#L159' title='Defined at 159 in src/gui/widgets/slider.cpp.'>minimum_positioner_length</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["minimum_positioner_length"])
+<a id='L178' name='L178'></a> 178         , <a href='../D/10838.html' title='Multiple defined in 3 places.'>maximum_positioner_length</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["maximum_positioner_length"])
+<a id='L179' name='L179'></a> 179         , <a href='../Y/12886.html' title='Multiple used in 10 places.'>left_offset</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["left_offset"])
+<a id='L180' name='L180'></a> 180         , <a href='../R/11781.html' title='Multiple referred from 9 places.'>right_offset</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>["right_offset"])
+<a id='L181' name='L181'></a> 181 <em class='brace'>{</em>
+<a id='L182' name='L182'></a> 182         <a href='../S/1103.html#L42' title='Defined at 42 in src/wml_exception.hpp.'>VALIDATE</a>(<a href='../S/604.html#L159' title='Defined at 159 in src/gui/widgets/slider.cpp.'>minimum_positioner_length</a>,
+<a id='L183' name='L183'></a> 183                          <a href='../S/1053.html#L70' title='Defined at 70 in src/wml_exception.cpp.'>missing_mandatory_wml_key</a>("resolution",
+<a id='L184' name='L184'></a> 184                                                                            "minimum_positioner_length"));
+<a id='L185' name='L185'></a> 185 
+<a id='L186' name='L186'></a> 186         <em class='comment'>// Note the order should be the same as the enum state_t is scrollbar.hpp.</em>
+<a id='L187' name='L187'></a> 187         <a href='../D/14633.html' title='Multiple defined in 3 places.'>state</a>.<a href='../Y/9108.html' title='Multiple used in 418 places.'>emplace_back</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4396.html' title='Multiple defined in 14 places.'>child</a>("state_enabled"));
+<a id='L188' name='L188'></a> 188         <a href='../D/14633.html' title='Multiple defined in 3 places.'>state</a>.<a href='../Y/9108.html' title='Multiple used in 418 places.'>emplace_back</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4396.html' title='Multiple defined in 14 places.'>child</a>("state_disabled"));
+<a id='L189' name='L189'></a> 189         <a href='../D/14633.html' title='Multiple defined in 3 places.'>state</a>.<a href='../Y/9108.html' title='Multiple used in 418 places.'>emplace_back</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4396.html' title='Multiple defined in 14 places.'>child</a>("state_pressed"));
+<a id='L190' name='L190'></a> 190         <a href='../D/14633.html' title='Multiple defined in 3 places.'>state</a>.<a href='../Y/9108.html' title='Multiple used in 418 places.'>emplace_back</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4396.html' title='Multiple defined in 14 places.'>child</a>("state_focused"));
+<a id='L191' name='L191'></a> 191 <em class='brace'>}</em>
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193 <em class='comment'>// }---------- BUILDER -----------{</em>
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195 <em class='comment'>/*WIKI_MACRO</em>
+<a id='L196' name='L196'></a> 196 <em class='comment'> * @begin{macro}{horizontal_scrollbar_description}</em>
+<a id='L197' name='L197'></a> 197 <em class='comment'> *</em>
+<a id='L198' name='L198'></a> 198 <em class='comment'> *        A horizontal scrollbar is a widget that shows a horizontal scrollbar.</em>
+<a id='L199' name='L199'></a> 199 <em class='comment'> *        This widget is most of the time used in a container to control the</em>
+<a id='L200' name='L200'></a> 200 <em class='comment'> *        scrolling of its contents.</em>
+<a id='L201' name='L201'></a> 201 <em class='comment'> * @end{macro}</em>
+<a id='L202' name='L202'></a> 202 <em class='comment'> */</em>
+<a id='L203' name='L203'></a> 203 
+<a id='L204' name='L204'></a> 204 <em class='comment'>/*WIKI</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'> * @page = GUIToolkitWML</em>
+<a id='L206' name='L206'></a> 206 <em class='comment'> * @order = 2_horizontal_scrollbar</em>
+<a id='L207' name='L207'></a> 207 <em class='comment'> *</em>
+<a id='L208' name='L208'></a> 208 <em class='comment'> * == Horizontal scrollbar ==</em>
+<a id='L209' name='L209'></a> 209 <em class='comment'> *</em>
+<a id='L210' name='L210'></a> 210 <em class='comment'> * @macro = horizontal_scrollbar_description</em>
+<a id='L211' name='L211'></a> 211 <em class='comment'> * @begin{parent}{name="gui/window/resolution/grid/row/column/"}</em>
+<a id='L212' name='L212'></a> 212 <em class='comment'> * @begin{tag}{name="horizontal_scrollbar"}{min=0}{max=-1}{super="generic/widget_instance"}</em>
+<a id='L213' name='L213'></a> 213 <em class='comment'> * @end{tag}{name="horizontal_scrollbar"}</em>
+<a id='L214' name='L214'></a> 214 <em class='comment'> * @end{parent}{name="gui/window/resolution/grid/row/column/"}</em>
+<a id='L215' name='L215'></a> 215 <em class='comment'> * A horizontal scrollbar has no special fields.</em>
+<a id='L216' name='L216'></a> 216 <em class='comment'> */</em>
+<a id='L217' name='L217'></a> 217 
+<a id='L218' name='L218'></a> 218 <strong class='reserved'>namespace</strong> <a href='../R/7872.html' title='Multiple referred from 53 places.'>implementation</a>
+<a id='L219' name='L219'></a> 219 <em class='brace'>{</em>
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221 <a href='../R/3378.html' title='Multiple referred from 3 places.'>builder_horizontal_scrollbar</a>::<a href='../D/3797.html' title='Multiple defined in 2 places.'>builder_horizontal_scrollbar</a>(<strong class='reserved'>const</strong> <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L222' name='L222'></a> 222         : <a href='../S/609.html#L547' title='Defined at 547 in src/gui/widgets/styled_widget.hpp.'>builder_styled_widget</a>(<a href='../D/4175.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L223' name='L223'></a> 223 <em class='brace'>{</em>
+<a id='L224' name='L224'></a> 224 <em class='brace'>}</em>
+<a id='L225' name='L225'></a> 225 
+<a id='L226' name='L226'></a> 226 <a href='../D/16227.html' title='Multiple defined in 8 places.'>widget</a>* <a href='../D/3797.html' title='Multiple defined in 2 places.'>builder_horizontal_scrollbar</a>::<a href='../R/3347.html' title='Multiple referred from 167 places.'>build</a>() <strong class='reserved'>const</strong>
+<a id='L227' name='L227'></a> 227 <em class='brace'>{</em>
+<a id='L228' name='L228'></a> 228         <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>* <a href='../D/16227.html' title='Multiple defined in 8 places.'>widget</a> = <strong class='reserved'>new</strong> <a href='../D/8554.html' title='Multiple defined in 2 places.'>horizontal_scrollbar</a>();
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230         <a href='../S/550.html#L712' title='Defined at 712 in src/gui/widgets/styled_widget.cpp.'>init_control</a>(<a href='../D/16227.html' title='Multiple defined in 8 places.'>widget</a>);
+<a id='L231' name='L231'></a> 231 
+<a id='L232' name='L232'></a> 232         <a href='../S/506.html#L40' title='Defined at 40 in src/gui/core/log.hpp.'>DBG_GUI_G</a> &lt;&lt; "Window builder:"
+<a id='L233' name='L233'></a> 233                           &lt;&lt; " placed horizontal scrollbar '" &lt;&lt; <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a> &lt;&lt; "' with definition '"
+<a id='L234' name='L234'></a> 234                           &lt;&lt; <a href='../Y/8467.html' title='Multiple used in 1346 places.'>definition</a> &lt;&lt; "'.\n";
+<a id='L235' name='L235'></a> 235 
+<a id='L236' name='L236'></a> 236         <strong class='reserved'>return</strong> <a href='../D/16227.html' title='Multiple defined in 8 places.'>widget</a>;
+<a id='L237' name='L237'></a> 237 <em class='brace'>}</em>
+<a id='L238' name='L238'></a> 238 
+<a id='L239' name='L239'></a> 239 <em class='brace'>}</em> <em class='comment'>// namespace implementation</em>
+<a id='L240' name='L240'></a> 240 
+<a id='L241' name='L241'></a> 241 <em class='comment'>// }------------ END --------------</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L34'>[^]</a><a href='#L180'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

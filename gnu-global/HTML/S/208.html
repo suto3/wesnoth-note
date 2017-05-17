@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/scripting/lua_cpp_function.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5857.html'>scripting</a>/lua_cpp_function.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L168'>[^]</a><a href='#L203'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2519.html' title='Multiple included from 4 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L168' title='Defined at 168.'>set_functions</a></li>
+<li><a href='#L203' title='Defined at 203.'>set_functions</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by Chris Beck &lt;render787@gmail.com&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * This namespace makes the possibility to push not just C style functions,</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * but CPP style functions to lua, if they are cast as a std::function.</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * Using this, for example, C++ method functions may be std::bind'ed and</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * then pushed into the lua environment and called like usual.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> *</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * They are represented as user data with a call operator, which uses a</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> * dispatcher implemented as a C-style function to retrieve the boost</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> * function and execute it. Thus effectively all that we have to provide</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * is a "value type" user data (full userdata, not light userdata) in lua</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * which wraps the std::function type and implements a garbage collector.</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> *</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * -- Why? --</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> *</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * There are a few basic approaches to connect lua and C++, with various</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * degrees of power. Lua, being a C library, has no concept of C++ specific</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * types, even when compiled as C++. Lua has only two functions which</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * introduce C functions to the scripting environment:</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * lua_pushcfunction, and lua_pushcclosure. (The helper library only provides</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * functions which use these.) These functions can only accept C-style function</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * pointers of type int (lua_State*). Boost bind cannot be used to make a match</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * to this type signature, nor can C++ method functions be used.</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> *</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> * In many cases C-style functions are sufficient, but if one ever wants to</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * refer to an instance of a class or a member variable (which one does as most</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> * of our project is written in C++ object oriented style), it's not enough.</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> *</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * The basic lua-provided approach to this is to pass objects as "userdata".</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> * Userdata comes in two flavors, "regular" and "light", for representing</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> * value and reference types respectively. Lightuserdata is meant to hold a</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> * pointer to an object -- full userdata is meant to hold an instance of an</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> * object which is either copied with memcpy or constructed using placement new.</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> * Proper memory management may require using lua's __gc metamethod to call a</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> * destructor. In the normal idiom, every class which is passed to lua this</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * way should have C-function shim provided for each method which may be called</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> * by lua -- the object's "this" is retrieved from the userdata type on the</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'> * stack, and used to call the appopriate method. A metatable is defined, which</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'> * may be the same as the "lua module" placed in the global namespace which may</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'> * also provide access to a constructor.</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> *</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> * This approach is often quite good for small objects. Wesnoth uses full userdata</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'> * to represent "rng" objects used in lua random map generation, to represent lua</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'> * "private units", to represent vconfigs and translatable strings. Wesnoth uses</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'> * lightuserdata for many AI related objects.</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> *</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'> * However it is not ideal for "large" objects like the game engine itself or its</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'> * helpers. In this case full translation to userdata is out of the question --</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> * in case of lightuserdata, it is problematic because the lua api is not actually</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> * trying to directly represent a wesnoth engine object (which doesn't exist!)</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'> * the wesnoth table in lua instead has a medley of callbacks implemented variously</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> * by grabbing from the gamemap, the unit map, the game_config namespace, etc. etc.</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'> * for instance even the wesnoth.game_config table is not backed up by any one object,</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'> * instead its callbacks may variously alter game_config namespace or the current tod</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'> * manager object etc. etc.</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'> *</em>
+<a id='L71' name='L71'></a>  71 <em class='comment'> * Circa 2012, the solution was to implement every callback function in the wesnoth</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'> * table simply as a C function, whcih grabs whatever engine features it needs from</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'> * a collection of pointers with external linkage in resources.hpp. The pointers</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'> * must be reset by the play controller object whenver it is created or destroyed...</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'> * or reset (replay controller), and always in a particular order because eventually</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'> * all of the objects themselves are also grabbing these pointers, leading to segfaults</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'> * if they are initialized in the wrong order, or left with danging pointers...</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'> * in short it was very messy. While the organization of everything as pure C functions</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'> * allows us to flexibly organize the wesnoth table using subtables holding functions</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'> * as we like, (which wouldn't be possible if it were based on a lightuserdata), the</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'> * requirement to base it all on externally-linked pointer variables comes at great cost.</em>
+<a id='L82' name='L82'></a>  82 <em class='comment'> * Further it means that we can never hope to have a correct deep-copy constructor of the</em>
+<a id='L83' name='L83'></a>  83 <em class='comment'> * gamestate, meaning that features like "replay moves since my last turn" or "AI based</em>
+<a id='L84' name='L84'></a>  84 <em class='comment'> * on exploratory simulations" are much more difficult to produce if not impossible.</em>
+<a id='L85' name='L85'></a>  85 <em class='comment'> *</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'> * The lua cpp functions code permits us to refactor this by (1) passing all the engine</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'> * resources needed by the lua environment, to the "lua kernel" at construction time,</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'> * which holds them as private variables (2) declaring all callbacks which need these</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'> * as private member functions (3) using boost bind to bind them to the lua kernel and</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'> * this code to push the result into the scripting environment, at construction time</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'> * of the lua kernel. Now there is no longer any question about dangling pointers in lua,</em>
+<a id='L92' name='L92'></a>  92 <em class='comment'> * or issues about making deep copies, since a lua state may be copied and the pointers</em>
+<a id='L93' name='L93'></a>  93 <em class='comment'> * in the kernel rebound, and the pointers in lua all die when the kernel is destroyed.</em>
+<a id='L94' name='L94'></a>  94 <em class='comment'> *</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'> * More generally, this code makes it easy to assemble "mixins" for lua using the member</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'> * functions of several different classes, if this is desired.</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'> *</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'> * The implementation details are also extremely simple -- whereas there are many popular</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'> * lua -&gt; C++ binding utilities like LuaPlus, luabind, etc. many of these only truly</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'> * support automatic generation of bindings for *all* of the methods of an object, rely</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'> * on the userdata approach, and require substantial template metaprogramming which will</em>
+<a id='L102' name='L102'></a> 102 <em class='comment'> * turn up in any associated stacktraces. This technique used here essentially delegates</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'> * all of the templating work to boost, and is implemented in only a few hundred lines.</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'> *</em>
+<a id='L105' name='L105'></a> 105 <em class='comment'> *</em>
+<a id='L106' name='L106'></a> 106 <em class='comment'> * -- Caveats: --</em>
+<a id='L107' name='L107'></a> 107 <em class='comment'> *</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'> * Essentially, we provide C++ versions of the lua library calls 'lua_pushcfunction',</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'> * 'lua_setfuncs', 'lua_pushcclosure'.</em>
+<a id='L110' name='L110'></a> 110 <em class='comment'> *</em>
+<a id='L111' name='L111'></a> 111 <em class='comment'> * - They are "C++" versions in that they take std::function&lt;int (lua_State*)&gt; rather</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'> * than int(lua_State*).</em>
+<a id='L113' name='L113'></a> 113 <em class='comment'> * - While for lua, "lua_pushcfunction(L, f)" is essentially the same as</em>
+<a id='L114' name='L114'></a> 114 <em class='comment'> * "lua_pushcclosure(L, f, 0)", for the functions below that is not the case.</em>
+<a id='L115' name='L115'></a> 115 <em class='comment'> * lua_cpp::push_function generates a userdata "helper" object with a _call operator,</em>
+<a id='L116' name='L116'></a> 116 <em class='comment'> * not technically a function. lua_cpp::push_closure generates a true lua closure.</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'> * Therefore push_closure is the most general and most compatible form -- push_function</em>
+<a id='L118' name='L118'></a> 118 <em class='comment'> * is slightly simpler and more efficient though.</em>
+<a id='L119' name='L119'></a> 119 <em class='comment'> * - Similarly lua_cpp::set_functions(L, l) differs from lua_cpp::set_functions(L,l,nups).</em>
+<a id='L120' name='L120'></a> 120 <em class='comment'> * - Closures created by lua_cpp::push_closure are not *exactly* the same as lua closures,</em>
+<a id='L121' name='L121'></a> 121 <em class='comment'> * in that the first upvalue is used by the implementation. A closure created with two</em>
+<a id='L122' name='L122'></a> 122 <em class='comment'> * upvalues will find them at upvalue indices 2 and 3, and should not touch upvalue 1.</em>
+<a id='L123' name='L123'></a> 123 <em class='comment'> */</em>
+<a id='L124' name='L124'></a> 124 
+<a id='L125' name='L125'></a> 125 <em class='sharp'>#pragma</em> once
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <em class='sharp'>#include</em> "<a href='872.html'>utils/functional.hpp</a>"
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <em class='sharp'>#include</em> &lt;vector&gt;
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131 <strong class='reserved'>struct</strong> <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>;
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133 <strong class='reserved'>namespace</strong> <a href='../R/9415.html' title='Multiple referred from 16 places.'>lua_cpp</a> <em class='brace'>{</em>
+<a id='L134' name='L134'></a> 134 
+<a id='L135' name='L135'></a> 135 <strong class='reserved'>typedef</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10347.html' title='Multiple used in 249 places.'>function</a>&lt;<strong class='reserved'>int</strong>(<a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>*)&gt; <a href='../R/9422.html' title='Multiple referred from 17 places.'>lua_function</a>;
+<a id='L136' name='L136'></a> 136 
+<a id='L137' name='L137'></a> 137 <strong class='reserved'>typedef</strong> <strong class='reserved'>struct</strong> <em class='brace'>{</em>
+<a id='L138' name='L138'></a> 138         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../D/11221.html' title='Multiple defined in 26 places.'>name</a>;
+<a id='L139' name='L139'></a> 139         <a href='../S/208.html#L135' title='Defined at 135 in src/scripting/lua_cpp_function.hpp.'>lua_function</a> <a href='../Y/10342.html' title='Multiple used in 169 places.'>func</a>;
+<a id='L140' name='L140'></a> 140 <em class='brace'>}</em> <a href='../R/1703.html' title='Multiple referred from 19 places.'>Reg</a>;
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142 <strong class='reserved'>void</strong> <a href='../D/12538.html' title='Multiple defined in 4 places.'>register_metatable</a> ( <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a> );
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144 <em class='comment'>/**</em>
+<a id='L145' name='L145'></a> 145 <em class='comment'> * Pushes a std::function wrapper object onto the stack. It does</em>
+<a id='L146' name='L146'></a> 146 <em class='comment'> * not support up-values. If you need that use push_closure (a little slower).</em>
+<a id='L147' name='L147'></a> 147 <em class='comment'> *</em>
+<a id='L148' name='L148'></a> 148 <em class='comment'> * NOTE: This object has type userdata, not function. Its metatable has a call operator.</em>
+<a id='L149' name='L149'></a> 149 <em class='comment'> * If this is not sufficient for your needs then use push_closure.</em>
+<a id='L150' name='L150'></a> 150 <em class='comment'> */</em>
+<a id='L151' name='L151'></a> 151 <strong class='reserved'>void</strong> <a href='../S/202.html#L85' title='Defined at 85 in src/scripting/lua_cpp_function.cpp.'>push_function</a>( <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>const</strong> <a href='../S/208.html#L135' title='Defined at 135 in src/scripting/lua_cpp_function.hpp.'>lua_function</a> &amp; <a href='../D/6089.html' title='Multiple defined in 9 places.'>f</a> );
+<a id='L152' name='L152'></a> 152 
+<a id='L153' name='L153'></a> 153 <em class='comment'>/**</em>
+<a id='L154' name='L154'></a> 154 <em class='comment'> * Analogous to lua_setfuncs, it registers a collection of function wrapper</em>
+<a id='L155' name='L155'></a> 155 <em class='comment'> * objects into a table, using push_function.</em>
+<a id='L156' name='L156'></a> 156 <em class='comment'> *</em>
+<a id='L157' name='L157'></a> 157 <em class='comment'> * The note above applies.</em>
+<a id='L158' name='L158'></a> 158 <em class='comment'> */</em>
+<a id='L159' name='L159'></a> 159 <strong class='reserved'>void</strong> <a href='../D/13716.html' title='Multiple defined in 4 places.'>set_functions</a>( <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/10379.html' title='Multiple defined in 2 places.'>lua_cpp</a>::<a href='../D/1857.html' title='Multiple defined in 2 places.'>Reg</a>&gt;&amp; <a href='../Y/10353.html' title='Multiple used in 29 places.'>functions</a>);
+<a id='L160' name='L160'></a> 160 
+<a id='L161' name='L161'></a> 161 <em class='comment'>/**</em>
+<a id='L162' name='L162'></a> 162 <em class='comment'> * Analogous to lua_setfuncs, it registers a collection of function wrapper</em>
+<a id='L163' name='L163'></a> 163 <em class='comment'> * objects into a table, using push_function.</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'> *</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'> * The note above applies.</em>
+<a id='L166' name='L166'></a> 166 <em class='comment'> */</em>
+<a id='L167' name='L167'></a> 167 <strong class='reserved'>template</strong>&lt;<strong class='reserved'>int</strong> <a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>&gt;
+<a id='L168' name='L168'></a> 168 <strong class='reserved'>void</strong> <a href='../R/12556.html' title='Multiple referred from 5 places.'>set_functions</a>( <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>const</strong> <a href='../D/10379.html' title='Multiple defined in 2 places.'>lua_cpp</a>::<a href='../D/1857.html' title='Multiple defined in 2 places.'>Reg</a>(&amp; <a href='../Y/10353.html' title='Multiple used in 29 places.'>functions</a>)[<a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>])
+<a id='L169' name='L169'></a> 169 <em class='brace'>{</em>
+<a id='L170' name='L170'></a> 170         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/10379.html' title='Multiple defined in 2 places.'>lua_cpp</a>::<a href='../D/1857.html' title='Multiple defined in 2 places.'>Reg</a>&gt; <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>;
+<a id='L171' name='L171'></a> 171         <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>.<a href='../Y/17280.html' title='Multiple used in 24 places.'>reserve</a>(<a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>);
+<a id='L172' name='L172'></a> 172         <strong class='reserved'>for</strong>(<strong class='reserved'>int</strong> <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> = 0; <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> &lt; <a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>; <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L173' name='L173'></a> 173                 <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>.<a href='../D/12169.html' title='Multiple defined in 3 places.'>push_back</a>(<a href='../Y/10353.html' title='Multiple used in 29 places.'>functions</a>[<a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>]);
+<a id='L174' name='L174'></a> 174         <em class='brace'>}</em>
+<a id='L175' name='L175'></a> 175         <a href='../D/13716.html' title='Multiple defined in 4 places.'>set_functions</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>);
+<a id='L176' name='L176'></a> 176 <em class='brace'>}</em>
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178 <em class='comment'>/**</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'> * Pushes a closure which retains a std::function object as its first up-value.</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'> * Note that this is *NOT* strictly compatible with the lua c function push_closure --</em>
+<a id='L181' name='L181'></a> 181 <em class='comment'> * if you request additional upvalues they will be indexed starting at 2 rather than 1.</em>
+<a id='L182' name='L182'></a> 182 <em class='comment'> *</em>
+<a id='L183' name='L183'></a> 183 <em class='comment'> * Note that unlike push_function above this results in a function and not userdata</em>
+<a id='L184' name='L184'></a> 184 <em class='comment'> * being pushed on the stack.</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'> */</em>
+<a id='L186' name='L186'></a> 186 <strong class='reserved'>void</strong> <a href='../S/202.html#L108' title='Defined at 108 in src/scripting/lua_cpp_function.cpp.'>push_closure</a>( <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>const</strong> <a href='../S/208.html#L135' title='Defined at 135 in src/scripting/lua_cpp_function.hpp.'>lua_function</a> &amp; <a href='../D/6089.html' title='Multiple defined in 9 places.'>f</a>, <strong class='reserved'>int</strong> <a href='../Y/15160.html' title='Multiple used in 35 places.'>nup</a>);
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188 <em class='comment'>/**</em>
+<a id='L189' name='L189'></a> 189 <em class='comment'> * Analogous to lua_setfuncs and set_functions above, but pushes closures.</em>
+<a id='L190' name='L190'></a> 190 <em class='comment'> *</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'> * NOTE: set_functions(L, l, 0) is NOT the same as set_functions(L, l), as</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'> * the latter produces userdata and the former doesn't.</em>
+<a id='L193' name='L193'></a> 193 <em class='comment'> */</em>
+<a id='L194' name='L194'></a> 194 <strong class='reserved'>void</strong> <a href='../D/13716.html' title='Multiple defined in 4 places.'>set_functions</a>( <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/10379.html' title='Multiple defined in 2 places.'>lua_cpp</a>::<a href='../D/1857.html' title='Multiple defined in 2 places.'>Reg</a>&gt;&amp; <a href='../Y/10353.html' title='Multiple used in 29 places.'>functions</a>, <strong class='reserved'>int</strong> <a href='../Y/15160.html' title='Multiple used in 35 places.'>nup</a>);
+<a id='L195' name='L195'></a> 195 
+<a id='L196' name='L196'></a> 196 <em class='comment'>/**</em>
+<a id='L197' name='L197'></a> 197 <em class='comment'> * Analogous to lua_setfuncs and set_functions above, but pushes closures.</em>
+<a id='L198' name='L198'></a> 198 <em class='comment'> *</em>
+<a id='L199' name='L199'></a> 199 <em class='comment'> * NOTE: set_functions(L, l, 0) is NOT the same as set_functions(L, l), as</em>
+<a id='L200' name='L200'></a> 200 <em class='comment'> * the latter produces userdata and the former doesn't.</em>
+<a id='L201' name='L201'></a> 201 <em class='comment'> */</em>
+<a id='L202' name='L202'></a> 202 <strong class='reserved'>template</strong>&lt;<strong class='reserved'>int</strong> <a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>&gt;
+<a id='L203' name='L203'></a> 203 <strong class='reserved'>void</strong> <a href='../R/12556.html' title='Multiple referred from 5 places.'>set_functions</a>( <a href='../D/10347.html' title='Multiple defined in 2 places.'>lua_State</a>* <a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <strong class='reserved'>const</strong> <a href='../D/10379.html' title='Multiple defined in 2 places.'>lua_cpp</a>::<a href='../D/1857.html' title='Multiple defined in 2 places.'>Reg</a>(&amp; <a href='../Y/10353.html' title='Multiple used in 29 places.'>functions</a>)[<a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>], <strong class='reserved'>int</strong> <a href='../Y/15160.html' title='Multiple used in 35 places.'>nup</a>)
+<a id='L204' name='L204'></a> 204 <em class='brace'>{</em>
+<a id='L205' name='L205'></a> 205         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21224.html' title='Multiple used in 2730 places.'>vector</a>&lt;<a href='../D/10379.html' title='Multiple defined in 2 places.'>lua_cpp</a>::<a href='../D/1857.html' title='Multiple defined in 2 places.'>Reg</a>&gt; <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>;
+<a id='L206' name='L206'></a> 206         <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>.<a href='../Y/17280.html' title='Multiple used in 24 places.'>reserve</a>(<a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>);
+<a id='L207' name='L207'></a> 207         <strong class='reserved'>for</strong>(<strong class='reserved'>int</strong> <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> = 0; <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a> &lt; <a href='../Y/1947.html' title='Multiple used in 62 places.'>N</a>; <a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L208' name='L208'></a> 208                 <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>.<a href='../D/12169.html' title='Multiple defined in 3 places.'>push_back</a>(<a href='../Y/10353.html' title='Multiple used in 29 places.'>functions</a>[<a href='../D/8593.html' title='Multiple defined in 5 places.'>i</a>]);
+<a id='L209' name='L209'></a> 209         <em class='brace'>}</em>
+<a id='L210' name='L210'></a> 210         <a href='../D/13716.html' title='Multiple defined in 4 places.'>set_functions</a>(<a href='../Y/1668.html' title='Multiple used in 7256 places.'>L</a>, <a href='../Y/12535.html' title='Multiple used in 583 places.'>l</a>, <a href='../Y/15160.html' title='Multiple used in 35 places.'>nup</a>);
+<a id='L211' name='L211'></a> 211 <em class='brace'>}</em>
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213 <em class='brace'>}</em> <em class='comment'>// end namespace lua_cpp_func</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L168'>[^]</a><a href='#L203'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

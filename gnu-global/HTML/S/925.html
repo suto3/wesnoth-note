@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/random.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/random.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L45'>[^]</a><a href='#L133'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L45' title='Defined at 45.'>next_random_impl</a></li>
+<li><a href='#L70' title='Defined at 70.'>default_instance</a></li>
+<li><a href='#L76' title='Defined at 76.'>get_random_calls</a></li>
+<li><a href='#L81' title='Defined at 81.'>next_random</a></li>
+<li><a href='#L102' title='Defined at 102.'>get_random_int_in_range_zero_to</a></li>
+<li><a href='#L108' title='Defined at 108.'>get_random_double</a></li>
+<li><a href='#L133' title='Defined at 133.'>get_random_bool</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='814.html'>random.hpp</a>"
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> "<a href='../I/2015.html'>log.hpp</a>"
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;cassert&gt;
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;cstdlib&gt;
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;random&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;boost/random/random_device.hpp&gt;
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>static</strong> <a href='../D/9731.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/9939.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13270.html' title='Multiple used in 20 places.'>log_random</a>("random");
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#define</em> <a href='../R/272.html' title='Multiple referred from 3 places.'>DBG_RND</a> <a href='../S/658.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/5234.html' title='Multiple defined in 16 places.'>debug</a>, <a href='../Y/13270.html' title='Multiple used in 20 places.'>log_random</a>)
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#define</em> <a href='../S/916.html#L38' title='Referred from 38 in src/random_synced.cpp.'>LOG_RND</a> <a href='../S/658.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8794.html' title='Multiple defined in 2 places.'>info</a>, <a href='../Y/13270.html' title='Multiple used in 20 places.'>log_random</a>)
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#define</em> WRN_RND <a href='../S/658.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/840.html#L84' title='Defined at 84 in src/log.cpp.'>warn</a>, <a href='../Y/13270.html' title='Multiple used in 20 places.'>log_random</a>)
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#define</em> ERR_RND <a href='../S/658.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/840.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>, <a href='../Y/13270.html' title='Multiple used in 20 places.'>log_random</a>)
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>namespace</strong> <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32         <strong class='reserved'>class</strong> <a href='../S/925.html#L72' title='Referred from 72 in src/random.cpp.'>rng_default</a> : <strong class='reserved'>public</strong> <a href='../D/12279.html' title='Multiple defined in 11 places.'>randomness</a>::<a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>
+<a id='L33' name='L33'></a>  33         <em class='brace'>{</em>
+<a id='L34' name='L34'></a>  34         <strong class='reserved'>public</strong>:
+<a id='L35' name='L35'></a>  35                 rng_default()
+<a id='L36' name='L36'></a>  36                         : <a href='../S/916.html#L26' title='Defined at 26 in src/random_synced.cpp.'>gen_</a>()
+<a id='L37' name='L37'></a>  37                 <em class='brace'>{</em>
+<a id='L38' name='L38'></a>  38                         <em class='comment'>/* Note: do not replace this with std::random_device.</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'>                         * @cbeck88 told in IRC (2016-10-16) that std::random_device</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'>                         * is very poorly implemented in MinGW. */</em>
+<a id='L41' name='L41'></a>  41                         <a href='../D/3726.html' title='Multiple defined in 3 places.'>boost</a>::<a href='../Y/16735.html' title='Multiple used in 2 places.'>random_device</a> <a href='../Y/9307.html' title='Multiple used in 2 places.'>entropy_source</a>;
+<a id='L42' name='L42'></a>  42                         <a href='../S/916.html#L26' title='Defined at 26 in src/random_synced.cpp.'>gen_</a>.<a href='../Y/17910.html' title='Multiple used in 79 places.'>seed</a>(<a href='../Y/9307.html' title='Multiple used in 2 places.'>entropy_source</a>());
+<a id='L43' name='L43'></a>  43                 <em class='brace'>}</em>
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>protected</strong>:
+<a id='L45' name='L45'></a>  45                 <strong class='reserved'>virtual</strong> <a href='../Y/20636.html' title='Multiple used in 258 places.'>uint32_t</a> <a href='../R/10252.html' title='Multiple referred from 4 places.'>next_random_impl</a>()
+<a id='L46' name='L46'></a>  46                 <em class='brace'>{</em>
+<a id='L47' name='L47'></a>  47                         <strong class='reserved'>return</strong> <a href='../S/916.html#L26' title='Defined at 26 in src/random_synced.cpp.'>gen_</a>();
+<a id='L48' name='L48'></a>  48                 <em class='brace'>}</em>
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>private</strong>:
+<a id='L50' name='L50'></a>  50                 <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/14321.html' title='Multiple used in 14 places.'>mt19937</a> <a href='../S/916.html#L26' title='Defined at 26 in src/random_synced.cpp.'>gen_</a>;
+<a id='L51' name='L51'></a>  51         <em class='brace'>}</em>;
+<a id='L52' name='L52'></a>  52 <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <strong class='reserved'>namespace</strong> <a href='../R/11176.html' title='Multiple referred from 79 places.'>randomness</a>
+<a id='L55' name='L55'></a>  55 <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57         <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>* <a href='../D/6688.html' title='Multiple defined in 5 places.'>generator</a> = &amp;<a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>::<a href='../S/925.html#L70' title='Defined at 70 in src/random.cpp.'>default_instance</a>();
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59         <a href='../R/11786.html' title='Multiple referred from 109 places.'>rng</a>::<a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>()
+<a id='L60' name='L60'></a>  60                 : <a href='../D/12265.html' title='Multiple defined in 3 places.'>random_calls_</a>(0)
+<a id='L61' name='L61'></a>  61         <em class='brace'>{</em>
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63         <em class='brace'>}</em>
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65         <a href='../R/11786.html' title='Multiple referred from 109 places.'>rng</a>::~<a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>()
+<a id='L66' name='L66'></a>  66         <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68         <em class='brace'>}</em>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70         <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>&amp; <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>::<a href='../R/4636.html' title='Multiple referred from 6 places.'>default_instance</a>()
+<a id='L71' name='L71'></a>  71         <em class='brace'>{</em>
+<a id='L72' name='L72'></a>  72                 <strong class='reserved'>static</strong> <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>* <a href='../Y/8275.html' title='Multiple used in 251 places.'>def</a> = <strong class='reserved'>new</strong> <a href='../S/925.html#L32' title='Defined at 32 in src/random.cpp.'>rng_default</a>();
+<a id='L73' name='L73'></a>  73                 <strong class='reserved'>return</strong> *<a href='../Y/8275.html' title='Multiple used in 251 places.'>def</a>;
+<a id='L74' name='L74'></a>  74         <em class='brace'>}</em>
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>::<a href='../R/6983.html' title='Multiple referred from 16 places.'>get_random_calls</a>() <strong class='reserved'>const</strong>
+<a id='L77' name='L77'></a>  77         <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>return</strong> <a href='../D/12265.html' title='Multiple defined in 3 places.'>random_calls_</a>;
+<a id='L79' name='L79'></a>  79         <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81         <a href='../Y/20636.html' title='Multiple used in 258 places.'>uint32_t</a> <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>::<a href='../R/10251.html' title='Multiple referred from 12 places.'>next_random</a>()
+<a id='L82' name='L82'></a>  82         <em class='brace'>{</em>
+<a id='L83' name='L83'></a>  83                 <a href='../D/12265.html' title='Multiple defined in 3 places.'>random_calls_</a>++;
+<a id='L84' name='L84'></a>  84                 <strong class='reserved'>return</strong> <a href='../D/11306.html' title='Multiple defined in 3 places.'>next_random_impl</a>();
+<a id='L85' name='L85'></a>  85         <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87         <em class='comment'>/**</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'>         *  This code is based on the boost implementation of uniform_smallint.</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>         *  http://www.boost.org/doc/libs/1_55_0/boost/random/uniform_smallint.hpp</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>         *  Using that code would be ideal, except that boost, and C++11, do not</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>         *  guarantee that it will work the same way on all platforms, or that the</em>
+<a id='L92' name='L92'></a>  92 <em class='comment'>         *  results may not be different in future versions of the library.</em>
+<a id='L93' name='L93'></a>  93 <em class='comment'>         *  The simplified version I have written should work the same on all</em>
+<a id='L94' name='L94'></a>  94 <em class='comment'>         *  platforms, which is the most important thing for us.</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'>         *  The existence of "modulo bias" seems less important when we have moved</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'>         *  to std::mt19937, since it guarantees that there are no "bad bits"</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'>         *  and has a very large range.</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>         *</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>         *  If a standard cross platform version becomes available then this should</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>         *  be replaced.</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'>         */</em>
+<a id='L102' name='L102'></a> 102         <strong class='reserved'>int</strong> <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>::<a href='../R/6987.html' title='Multiple referred from 2 places.'>get_random_int_in_range_zero_to</a>(<strong class='reserved'>int</strong> <a href='../D/10810.html' title='Multiple defined in 3 places.'>max</a>)
+<a id='L103' name='L103'></a> 103         <em class='brace'>{</em>
+<a id='L104' name='L104'></a> 104                 <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../D/10810.html' title='Multiple defined in 3 places.'>max</a> &gt;= 0);
+<a id='L105' name='L105'></a> 105                 <strong class='reserved'>return</strong> <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt; (<a href='../S/925.html#L81' title='Defined at 81 in src/random.cpp.'>next_random</a>() % (<strong class='reserved'>static_cast</strong>&lt;<a href='../Y/20636.html' title='Multiple used in 258 places.'>uint32_t</a>&gt;(<a href='../D/10810.html' title='Multiple defined in 3 places.'>max</a>)+1));
+<a id='L106' name='L106'></a> 106         <em class='brace'>}</em>
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108         <strong class='reserved'>double</strong> <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>::<a href='../R/6984.html' title='Multiple referred from 3 places.'>get_random_double</a>()
+<a id='L109' name='L109'></a> 109         <em class='brace'>{</em>
+<a id='L110' name='L110'></a> 110                 <strong class='reserved'>union</strong>
+<a id='L111' name='L111'></a> 111                 <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112                         <strong class='reserved'>double</strong> <a href='../Y/10065.html' title='Multiple used in 6 places.'>floating_point_number</a>;
+<a id='L113' name='L113'></a> 113                         <a href='../Y/20637.html' title='Multiple used in 9 places.'>uint64_t</a> <a href='../Y/11999.html' title='Multiple used in 12 places.'>integer</a>;
+<a id='L114' name='L114'></a> 114                 <em class='brace'>}</em> <a href='../S/305.html#L43' title='Defined at 43 in src/terrain/terrain.hpp.'>number</a>;
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116                 <a href='../S/305.html#L43' title='Defined at 43 in src/terrain/terrain.hpp.'>number</a>.<a href='../Y/11999.html' title='Multiple used in 12 places.'>integer</a> = 0u;
+<a id='L117' name='L117'></a> 117                 <em class='comment'>/* Exponent. It's set to zero.</em>
+<a id='L118' name='L118'></a> 118 <em class='comment'>                Exponent bias is 1023 in double precision, and therefore the value 1023</em>
+<a id='L119' name='L119'></a> 119 <em class='comment'>                needs to be encoded. */</em>
+<a id='L120' name='L120'></a> 120                 <a href='../S/305.html#L43' title='Defined at 43 in src/terrain/terrain.hpp.'>number</a>.<a href='../Y/11999.html' title='Multiple used in 12 places.'>integer</a> |= <strong class='reserved'>static_cast</strong>&lt;<a href='../Y/20637.html' title='Multiple used in 9 places.'>uint64_t</a>&gt;(1023) &lt;&lt; 52;
+<a id='L121' name='L121'></a> 121                 <em class='comment'>/* Significand. A double-precision floating point number stores 52 significand bits.</em>
+<a id='L122' name='L122'></a> 122 <em class='comment'>                The underlying RNG only gives us 32 bits, so we need to shift the bits 20 positions</em>
+<a id='L123' name='L123'></a> 123 <em class='comment'>                to the left. The last 20 significand bits we can leave at zero, we don't need</em>
+<a id='L124' name='L124'></a> 124 <em class='comment'>                the full 52 bits of randomness allowed by the double-precision format. */</em>
+<a id='L125' name='L125'></a> 125                 <a href='../S/305.html#L43' title='Defined at 43 in src/terrain/terrain.hpp.'>number</a>.<a href='../Y/11999.html' title='Multiple used in 12 places.'>integer</a> |= <strong class='reserved'>static_cast</strong>&lt;<a href='../Y/20637.html' title='Multiple used in 9 places.'>uint64_t</a>&gt;(<a href='../S/925.html#L81' title='Defined at 81 in src/random.cpp.'>next_random</a>()) &lt;&lt; (52 - 32);
+<a id='L126' name='L126'></a> 126                 <em class='comment'>/* At this point, the exponent is zero. The significand, taking into account the</em>
+<a id='L127' name='L127'></a> 127 <em class='comment'>                implicit leading one bit, is at least exactly one and at most almost two.</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>                In other words, interpreting the value as a double gives us a number in the range</em>
+<a id='L129' name='L129'></a> 129 <em class='comment'>                [1, 2[. Simply subtract one from that value and return it. */</em>
+<a id='L130' name='L130'></a> 130                 <strong class='reserved'>return</strong> <a href='../S/305.html#L43' title='Defined at 43 in src/terrain/terrain.hpp.'>number</a>.<a href='../Y/10065.html' title='Multiple used in 6 places.'>floating_point_number</a> - 1.0;
+<a id='L131' name='L131'></a> 131         <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133         <strong class='reserved'>bool</strong> <a href='../D/12915.html' title='Multiple defined in 7 places.'>rng</a>::<a href='../R/6982.html' title='Multiple referred from 5 places.'>get_random_bool</a>(<strong class='reserved'>double</strong> <a href='../Y/16520.html' title='Multiple used in 114 places.'>probability</a>)
+<a id='L134' name='L134'></a> 134         <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                 <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../Y/16520.html' title='Multiple used in 114 places.'>probability</a> &gt;= 0.0 &amp;&amp; <a href='../Y/16520.html' title='Multiple used in 114 places.'>probability</a> &lt;= 1.0);
+<a id='L136' name='L136'></a> 136                 <strong class='reserved'>return</strong> <a href='../S/925.html#L108' title='Defined at 108 in src/random.cpp.'>get_random_double</a>() &lt; <a href='../Y/16520.html' title='Multiple used in 114 places.'>probability</a>;
+<a id='L137' name='L137'></a> 137         <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L45'>[^]</a><a href='#L133'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

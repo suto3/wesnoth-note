@@ -102,7 +102,7 @@ default:\
 
 ↓
 ```
-#       :langmap=Modelica\:.mo:\
+       #:langmap=Modelica\:.mo:\
 ```
 
 3 以下の行を追加（.cfg .pbl をWMLと認識させる）
@@ -141,7 +141,10 @@ html の作成
 hatags -ganFs
 ```
 
-テキストエディタから使う  Edit
+here -> [Wesnoth-Dev](HTML/index.html "Wesnoth-Dev")
+
+
+テキストエディタから使う
 
 ```
 vim _main.cfg

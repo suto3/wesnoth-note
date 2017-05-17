@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>utils/appveyor/irc-notify.py</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5873.html'>utils</a>/<a href='../files/5875.html'>appveyor</a>/irc-notify.py</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L64'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L64' title='Defined at 64.'>appveyor_vars</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 """
+<a id='L2' name='L2'></a>   2 From: https:<em class='comment'>//raw.githubusercontent.com/nexB/scancode-toolkit/48aeaf76ce9f53d02223c41c1b2ad1d1ad73b851/etc/scripts/irc-notify.py</em>
+<a id='L3' name='L3'></a>   3 
+<a id='L4' name='L4'></a>   4 Copyright (C) 2015-2016 Christopher R. Wood
+<a id='L5' name='L5'></a>   5 
+<a id='L6' name='L6'></a>   6 This program is free software; you can redistribute it and/or modify it under the
+<a id='L7' name='L7'></a>   7 terms of the GNU General Public License as published by the Free Software Foundation;
+<a id='L8' name='L8'></a>   8 either version 2 of the License, or (at your option) any later version.
+<a id='L9' name='L9'></a>   9 
+<a id='L10' name='L10'></a>  10 This program is distributed in the hope that it will be useful, but WITHOUT ANY
+<a id='L11' name='L11'></a>  11 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+<a id='L12' name='L12'></a>  12 PARTICULAR PURPOSE. See the GNU General Public License <strong class='reserved'>for</strong> more details.
+<a id='L13' name='L13'></a>  13 
+<a id='L14' name='L14'></a>  14 You should have received a copy of the GNU General Public License along with this
+<a id='L15' name='L15'></a>  15 program; <strong class='reserved'>if</strong> not, write to the Free Software Foundation, Inc., 51 Franklin Street,
+<a id='L16' name='L16'></a>  16 Fifth Floor, Boston, MA 02110-1301 USA.
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 Simple AppVeyor IRC notification script.
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 Modified by nexB on October 2016:
+<a id='L21' name='L21'></a>  21  - rework the handling of environment variables.
+<a id='L22' name='L22'></a>  22  - made the script use functions
+<a id='L23' name='L23'></a>  23  - support only Appveyor loading its environment variable to craft IRC notices.
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 Modified by Jyrki Vesterinen on November 2016:
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27  - join the channel instead of sending an external message.
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 The first argument is a Frenode channel. Other arguments passed to the script will be
+<a id='L30' name='L30'></a>  30 sent as notice messages content and any <em class='brace'>{</em>var<em class='brace'>}</em>-formatted environment variables will be
+<a id='L31' name='L31'></a>  31 expanded automatically, replaced with a corresponding Appveyor environment variable
+<a id='L32' name='L32'></a>  32 value. se commas to delineate multiple messages.
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 Example:
+<a id='L36' name='L36'></a>  36 export APPVEYOR_URL=https:<em class='comment'>//ci.appveyor.com</em>
+<a id='L37' name='L37'></a>  37 export APPVEYOR_PROJECT_NAME=attributecode
+<a id='L38' name='L38'></a>  38 export APPVEYOR_REPO_COMMIT_AUTHOR=pombredanne
+<a id='L39' name='L39'></a>  39 export APPVEYOR_REPO_COMMIT_TIMESTAMP=2016-10-31
+<a id='L40' name='L40'></a>  40 export APPVEYOR_REPO_PROVIDER=gihub
+<a id='L41' name='L41'></a>  41 export APPVEYOR_REPO_BRANCH=repo_branch
+<a id='L42' name='L42'></a>  42 export APPVEYOR_PULL_REQUEST_TITLE=pull_request_title
+<a id='L43' name='L43'></a>  43 export APPVEYOR_BUILD_VERSION=1
+<a id='L44' name='L44'></a>  44 export APPVEYOR_REPO_COMMIT=22c95b72e29248dc4de9b85e590ee18f6f587de8
+<a id='L45' name='L45'></a>  45 export APPVEYOR_REPO_COMMIT_MESSAGE="some IRC test"
+<a id='L46' name='L46'></a>  46 export APPVEYOR_ACCOUNT_NAME=nexB
+<a id='L47' name='L47'></a>  47 export APPVEYOR_PULL_REQUEST_NUMBER=pull_request_number
+<a id='L48' name='L48'></a>  48 export APPVEYOR_REPO_NAME=nexB/attributecode
+<a id='L49' name='L49'></a>  49 python etc/scripts/irc-notify.py aboutcode '[{project_name}:{branch}] {short_commit}: "{message}" ({author}) {color_red}Succeeded','Details: {build_url} | Commit: {commit_url}'
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51 See also https:<em class='comment'>//github.com/gridsync/gridsync/blob/master/appveyor.yml for examples</em>
+<a id='L52' name='L52'></a>  52 in Appveyor's YAML:
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54     on_success:
+<a id='L55' name='L55'></a>  55       - "python etc/scripts/irc-notify.py channel [{project_name}:{branch}] {short_commit}: \"{message}\" ({author}) {color_green}Succeeded,Details: {build_url},Commit: {commit_url}"
+<a id='L56' name='L56'></a>  56     on_failure:
+<a id='L57' name='L57'></a>  57       - "python etc/scripts/irc-notify.py channel [{project_name}:{branch}] {short_commit}: \"{message}\" ({author}) {color_red}Failed,Details: {build_url},Commit: {commit_url}"
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59 """
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 import <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>, <a href='../Y/16730.html' title='Multiple used in 60 places.'>random</a>, <a href='../D/14505.html' title='Multiple defined in 3 places.'>socket</a>, <a href='../Y/18813.html' title='Multiple used in 2 places.'>ssl</a>, <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>, <a href='../D/15101.html' title='Multiple defined in 4 places.'>time</a>
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64 def <a href='../S/1330.html#L128' title='Referred from 128 in utils/appveyor/irc-notify.py.'>appveyor_vars</a>():
+<a id='L65' name='L65'></a>  65     """
+<a id='L66' name='L66'></a>  66     Return a dict of key value carfted from appveyor environment variables.
+<a id='L67' name='L67'></a>  67     """
+<a id='L68' name='L68'></a>  68     from <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a> import <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70     <a href='../Y/5637.html' title='Multiple used in 2 places.'>appveyor_url</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_URL')
+<a id='L71' name='L71'></a>  71     <a href='../Y/13888.html' title='Multiple used in 2 places.'>message_extended</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED')
+<a id='L72' name='L72'></a>  72     <a href='../Y/7655.html' title='Multiple used in 2 places.'>configuration_name</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('CONFIGURATION')
+<a id='L73' name='L73'></a>  73     <a href='../Y/6481.html' title='Multiple used in 12 places.'>branch</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_BRANCH')
+<a id='L74' name='L74'></a>  74     <a href='../Y/5942.html' title='Multiple used in 14 places.'>author</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_COMMIT_AUTHOR')
+<a id='L75' name='L75'></a>  75     <a href='../Y/5943.html' title='Multiple used in 2 places.'>author_email</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL')
+<a id='L76' name='L76'></a>  76     <a href='../Y/19966.html' title='Multiple used in 24 places.'>timestamp</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_COMMIT_TIMESTAMP')
+<a id='L77' name='L77'></a>  77     <a href='../Y/17211.html' title='Multiple used in 2 places.'>repo_provider</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_PROVIDER')
+<a id='L78' name='L78'></a>  78     <a href='../Y/16555.html' title='Multiple used in 2 places.'>project_name</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_PROJECT_NAME')
+<a id='L79' name='L79'></a>  79     <a href='../Y/16556.html' title='Multiple used in 2 places.'>project_slug</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_PROJECT_SLUG')
+<a id='L80' name='L80'></a>  80     <a href='../Y/16605.html' title='Multiple used in 2 places.'>pull_request_title</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_PULL_REQUEST_TITLE')
+<a id='L81' name='L81'></a>  81     <a href='../Y/6560.html' title='Multiple used in 2 places.'>build_version</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_BUILD_VERSION')
+<a id='L82' name='L82'></a>  82     <a href='../S/4079.html#L170' title='Defined at 170 in data/tools/wesnoth/libgithub.py.'>commit</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_COMMIT')
+<a id='L83' name='L83'></a>  83     <a href='../D/10886.html' title='Multiple defined in 7 places.'>message</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_COMMIT_MESSAGE')
+<a id='L84' name='L84'></a>  84     <a href='../Y/5055.html' title='Multiple used in 2 places.'>account_name</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_ACCOUNT_NAME')
+<a id='L85' name='L85'></a>  85     <a href='../Y/16604.html' title='Multiple used in 2 places.'>pull_request_number</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_PULL_REQUEST_NUMBER')
+<a id='L86' name='L86'></a>  86     <a href='../Y/17210.html' title='Multiple used in 2 places.'>repo_name</a> = <a href='../Y/9320.html' title='Multiple used in 40 places.'>environ</a>.<a href='../D/6718.html' title='Multiple defined in 44 places.'>get</a>('APPVEYOR_REPO_NAME')
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88     <a href='../Y/18281.html' title='Multiple used in 2 places.'>short_commit</a> = <a href='../S/4079.html#L170' title='Defined at 170 in data/tools/wesnoth/libgithub.py.'>commit</a>[:7]
+<a id='L89' name='L89'></a>  89     <a href='../Y/6559.html' title='Multiple used in 2 places.'>build_url</a> = '{appveyor_url}/project/{account_name}/{project_slug}/build/{build_version}'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(**<a href='../Y/13145.html' title='Multiple used in 15 places.'>locals</a>())
+<a id='L90' name='L90'></a>  90     <a href='../Y/7569.html' title='Multiple used in 2 places.'>commit_url</a> = 'https://{repo_provider}.com/{repo_name}/commit/{commit}'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(**<a href='../Y/13145.html' title='Multiple used in 15 places.'>locals</a>())
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92     <a href='../S/448.html#L498' title='Defined at 498 in src/gui/dialogs/gamestate_inspector.cpp.'>vars</a> = <a href='../Y/8611.html' title='Multiple used in 30 places.'>dict</a>(
+<a id='L93' name='L93'></a>  93         <a href='../Y/5637.html' title='Multiple used in 2 places.'>appveyor_url</a>=appveyor_url,
+<a id='L94' name='L94'></a>  94         <a href='../Y/5055.html' title='Multiple used in 2 places.'>account_name</a>=account_name,
+<a id='L95' name='L95'></a>  95         <a href='../Y/16555.html' title='Multiple used in 2 places.'>project_name</a>=project_name,
+<a id='L96' name='L96'></a>  96         <a href='../Y/16556.html' title='Multiple used in 2 places.'>project_slug</a>=project_slug,
+<a id='L97' name='L97'></a>  97         <a href='../Y/6560.html' title='Multiple used in 2 places.'>build_version</a>=build_version,
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99         <a href='../Y/6559.html' title='Multiple used in 2 places.'>build_url</a>=build_url,
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101         <a href='../Y/17211.html' title='Multiple used in 2 places.'>repo_provider</a>=repo_provider,
+<a id='L102' name='L102'></a> 102         <a href='../Y/17210.html' title='Multiple used in 2 places.'>repo_name</a>=repo_name,
+<a id='L103' name='L103'></a> 103         <a href='../Y/6481.html' title='Multiple used in 12 places.'>branch</a>=branch,
+<a id='L104' name='L104'></a> 104         <a href='../Y/7655.html' title='Multiple used in 2 places.'>configuration_name</a>=configuration_name,
+<a id='L105' name='L105'></a> 105         <a href='../Y/5942.html' title='Multiple used in 14 places.'>author</a>=author,
+<a id='L106' name='L106'></a> 106         <a href='../Y/5943.html' title='Multiple used in 2 places.'>author_email</a>=author_email,
+<a id='L107' name='L107'></a> 107         <a href='../Y/19966.html' title='Multiple used in 24 places.'>timestamp</a>=timestamp,
+<a id='L108' name='L108'></a> 108         <a href='../S/4079.html#L170' title='Defined at 170 in data/tools/wesnoth/libgithub.py.'>commit</a>=commit,
+<a id='L109' name='L109'></a> 109         <a href='../Y/18281.html' title='Multiple used in 2 places.'>short_commit</a>=short_commit,
+<a id='L110' name='L110'></a> 110         <a href='../D/10886.html' title='Multiple defined in 7 places.'>message</a>=message,
+<a id='L111' name='L111'></a> 111         <a href='../Y/13888.html' title='Multiple used in 2 places.'>message_extended</a>=message_extended,
+<a id='L112' name='L112'></a> 112 
+<a id='L113' name='L113'></a> 113         <a href='../Y/16605.html' title='Multiple used in 2 places.'>pull_request_title</a>=pull_request_title,
+<a id='L114' name='L114'></a> 114         <a href='../Y/16604.html' title='Multiple used in 2 places.'>pull_request_number</a>=pull_request_number,
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <a href='../Y/7569.html' title='Multiple used in 2 places.'>commit_url</a>=commit_url,
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118         color_green='\x033',
+<a id='L119' name='L119'></a> 119         color_red='\x034',
+<a id='L120' name='L120'></a> 120         <a href='../S/811.html#L395' title='Defined at 395 in src/help/help_impl.hpp.'>bold</a>='\x02',
+<a id='L121' name='L121'></a> 121         <a href='../Y/20670.html' title='Multiple used in 3 places.'>underline</a>='\x1f',
+<a id='L122' name='L122'></a> 122         <a href='../Y/16124.html' title='Multiple used in 6 places.'>plain</a>='\x0f',
+<a id='L123' name='L123'></a> 123     )
+<a id='L124' name='L124'></a> 124     <strong class='reserved'>return</strong> <a href='../S/448.html#L498' title='Defined at 498 in src/gui/dialogs/gamestate_inspector.cpp.'>vars</a>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <strong class='reserved'>if</strong> <a href='../Y/4755.html' title='Multiple used in 17 places.'>__name__</a> == '__main__':
+<a id='L128' name='L128'></a> 128     <a href='../S/1330.html#L134' title='Referred from 134 in utils/appveyor/irc-notify.py.'>apvy_vars</a> = <a href='../S/1330.html#L64' title='Defined at 64 in utils/appveyor/irc-notify.py.'>appveyor_vars</a>()
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130     <a href='../R/3724.html' title='Multiple referred from 90 places.'>channel</a> = <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/5675.html' title='Multiple used in 101 places.'>argv</a>[1]
+<a id='L131' name='L131'></a> 131     <a href='../R/9897.html' title='Multiple referred from 7 places.'>messages</a> = <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/5675.html' title='Multiple used in 101 places.'>argv</a>[2:]
+<a id='L132' name='L132'></a> 132     <a href='../R/9897.html' title='Multiple referred from 7 places.'>messages</a> = ' '.<a href='../D/9496.html' title='Multiple defined in 3 places.'>join</a>(messages)
+<a id='L133' name='L133'></a> 133     <a href='../R/9897.html' title='Multiple referred from 7 places.'>messages</a> = messages.<a href='../D/14564.html' title='Multiple defined in 2 places.'>split</a>(',')
+<a id='L134' name='L134'></a> 134     <a href='../R/9897.html' title='Multiple referred from 7 places.'>messages</a> = [<a href='../S/781.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(**<a href='../S/1330.html#L128' title='Defined at 128 in utils/appveyor/irc-notify.py.'>apvy_vars</a>).<a href='../Y/19070.html' title='Multiple used in 128 places.'>strip</a>() <strong class='reserved'>for</strong> msg in messages]
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136     <a href='../R/8284.html' title='Multiple referred from 2 places.'>irc_username</a> = 'Appveyor'
+<a id='L137' name='L137'></a> 137     <a href='../S/1330.html#L155' title='Referred from 155 in utils/appveyor/irc-notify.py.'>irc_nick</a> = <a href='../S/1330.html#L136' title='Defined at 136 in utils/appveyor/irc-notify.py.'>irc_username</a> + <a href='../D/14684.html' title='Multiple defined in 25 places.'>str</a>(<a href='../Y/16730.html' title='Multiple used in 60 places.'>random</a>.<a href='../Y/16729.html' title='Multiple used in 2 places.'>randint</a>(1, 9999))
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139     try:
+<a id='L140' name='L140'></a> 140         # establish connection
+<a id='L141' name='L141'></a> 141         <a href='../R/8283.html' title='Multiple referred from 7 places.'>irc_sock</a> = <a href='../Y/18813.html' title='Multiple used in 2 places.'>ssl</a>.wrap_socket(<a href='../D/14505.html' title='Multiple defined in 3 places.'>socket</a>.socket(socket.<a href='../Y/145.html' title='Multiple used in 2 places.'>AF_INET</a>, socket.<a href='../Y/2676.html' title='Multiple used in 3 places.'>SOCK_STREAM</a>))
+<a id='L142' name='L142'></a> 142         <a href='../S/1330.html#L141' title='Defined at 141 in utils/appveyor/irc-notify.py.'>irc_sock</a>.<a href='../D/4790.html' title='Multiple defined in 6 places.'>connect</a>((<a href='../D/14505.html' title='Multiple defined in 3 places.'>socket</a>.gethostbyname('chat.freenode.net'), 6697))
+<a id='L143' name='L143'></a> 143         <a href='../S/1330.html#L141' title='Defined at 141 in utils/appveyor/irc-notify.py.'>irc_sock</a>.<a href='../D/13367.html' title='Multiple defined in 3 places.'>send</a>('NICK {0}\r\nUSER {0} * 0 :{0}\r\n'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(<a href='../S/1330.html#L136' title='Defined at 136 in utils/appveyor/irc-notify.py.'>irc_username</a>).<a href='../D/5853.html' title='Multiple defined in 3 places.'>encode</a>('utf_8'))
+<a id='L144' name='L144'></a> 144         <a href='../R/8281.html' title='Multiple referred from 3 places.'>irc_file</a> = <a href='../S/1330.html#L141' title='Defined at 141 in utils/appveyor/irc-notify.py.'>irc_sock</a>.makefile()
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146         <strong class='reserved'>while</strong> <a href='../S/1330.html#L144' title='Defined at 144 in utils/appveyor/irc-notify.py.'>irc_file</a>:
+<a id='L147' name='L147'></a> 147             <a href='../R/8819.html' title='Multiple referred from 634 places.'>line</a> = <a href='../S/1330.html#L144' title='Defined at 144 in utils/appveyor/irc-notify.py.'>irc_file</a>.<a href='../Y/16834.html' title='Multiple used in 7 places.'>readline</a>()
+<a id='L148' name='L148'></a> 148             print(<a href='../D/9747.html' title='Multiple defined in 3 places.'>line</a>.<a href='../Y/17554.html' title='Multiple used in 20 places.'>rstrip</a>())
+<a id='L149' name='L149'></a> 149             <a href='../R/11719.html' title='Multiple referred from 71 places.'>response</a> = <a href='../D/9747.html' title='Multiple defined in 3 places.'>line</a>.<a href='../D/14564.html' title='Multiple defined in 2 places.'>split</a>()
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151             <strong class='reserved'>if</strong> <a href='../S/1330.html#L149' title='Defined at 149 in utils/appveyor/irc-notify.py.'>response</a>[0] == 'PING':
+<a id='L152' name='L152'></a> 152                 <a href='../S/1330.html#L144' title='Defined at 144 in utils/appveyor/irc-notify.py.'>irc_file</a>.<a href='../D/13367.html' title='Multiple defined in 3 places.'>send</a>('PONG {}\r\n'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(reponse[1]).<a href='../D/5853.html' title='Multiple defined in 3 places.'>encode</a>('utf_8'))
+<a id='L153' name='L153'></a> 153 
+<a id='L154' name='L154'></a> 154             elif <a href='../S/1330.html#L149' title='Defined at 149 in utils/appveyor/irc-notify.py.'>response</a>[1] == '433':
+<a id='L155' name='L155'></a> 155                 <a href='../S/1330.html#L141' title='Defined at 141 in utils/appveyor/irc-notify.py.'>irc_sock</a>.<a href='../D/13367.html' title='Multiple defined in 3 places.'>send</a>('NICK {}\r\n'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(<a href='../S/1330.html#L137' title='Defined at 137 in utils/appveyor/irc-notify.py.'>irc_nick</a>).<a href='../D/5853.html' title='Multiple defined in 3 places.'>encode</a>('utf_8'))
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157             elif <a href='../S/1330.html#L149' title='Defined at 149 in utils/appveyor/irc-notify.py.'>response</a>[1] == '001':
+<a id='L158' name='L158'></a> 158                 <a href='../D/15101.html' title='Multiple defined in 4 places.'>time</a>.<a href='../Y/18566.html' title='Multiple used in 3 places.'>sleep</a>(5)
+<a id='L159' name='L159'></a> 159                 # join the channel
+<a id='L160' name='L160'></a> 160                 <a href='../S/1330.html#L141' title='Defined at 141 in utils/appveyor/irc-notify.py.'>irc_sock</a>.<a href='../D/13367.html' title='Multiple defined in 3 places.'>send</a>('JOIN #{}\r\n'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/4262.html' title='Multiple defined in 2 places.'>channel</a>).<a href='../D/5853.html' title='Multiple defined in 3 places.'>encode</a>('utf_8'))
+<a id='L161' name='L161'></a> 161                 # send messages
+<a id='L162' name='L162'></a> 162                 <strong class='reserved'>for</strong> <a href='../S/781.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> in <a href='../D/10897.html' title='Multiple defined in 4 places.'>messages</a>:
+<a id='L163' name='L163'></a> 163                     print('PRIVMSG #{} :{}'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/4262.html' title='Multiple defined in 2 places.'>channel</a>, <a href='../S/781.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>))
+<a id='L164' name='L164'></a> 164                     <a href='../S/1330.html#L141' title='Defined at 141 in utils/appveyor/irc-notify.py.'>irc_sock</a>.<a href='../D/13367.html' title='Multiple defined in 3 places.'>send</a>('PRIVMSG #{} :{}\r\n'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/4262.html' title='Multiple defined in 2 places.'>channel</a>, <a href='../S/781.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>).<a href='../D/5853.html' title='Multiple defined in 3 places.'>encode</a>('utf_8'))
+<a id='L165' name='L165'></a> 165                 <a href='../D/15101.html' title='Multiple defined in 4 places.'>time</a>.<a href='../Y/18566.html' title='Multiple used in 3 places.'>sleep</a>(5)
+<a id='L166' name='L166'></a> 166                 # leave the channel
+<a id='L167' name='L167'></a> 167                 <a href='../S/1330.html#L141' title='Defined at 141 in utils/appveyor/irc-notify.py.'>irc_sock</a>.<a href='../D/13367.html' title='Multiple defined in 3 places.'>send</a>('PART #{}\r\n'.<a href='../D/6428.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/4262.html' title='Multiple defined in 2 places.'>channel</a>).<a href='../D/5853.html' title='Multiple defined in 3 places.'>encode</a>('utf_8'))
+<a id='L168' name='L168'></a> 168                 <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/9525.html' title='Multiple used in 111 places.'>exit</a>()
+<a id='L169' name='L169'></a> 169     except:
+<a id='L170' name='L170'></a> 170         <a href='../R/5062.html' title='Multiple referred from 1338 places.'>e</a> = <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/9479.html' title='Multiple used in 3 places.'>exc_info</a>()[0]
+<a id='L171' name='L171'></a> 171         print(<a href='../D/5742.html' title='Multiple defined in 3 places.'>e</a>)
+<a id='L172' name='L172'></a> 172         <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/9525.html' title='Multiple used in 111 places.'>exit</a>()
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^]<a href='#L64'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>
