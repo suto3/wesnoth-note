@@ -144,9 +144,6 @@ html の作成
 hatags -ganFs
 ```
 
-here -> [Wesnoth-Dev](HTML/index.html "Wesnoth-Dev")
-
-
 テキストエディタから使う
 
 ```
