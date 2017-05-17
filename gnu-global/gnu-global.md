@@ -87,18 +87,20 @@ zcat /usr/share/doc/global/examples/gtags.conf.gz > ~/.globalrc
 ```
 default:\
        :tc=native:
-       ```
+```
+
 ↓
+
 ```
 default:\
        :tc=native:tc=pygments:
-       ```
-
-2 Modelica(なんだそれは)の拡張子がgettext の mo と重複するのでコメントアウト
 ```
 
+2 Modelica(なんだそれは)の拡張子がgettext の mo と重複するのでコメントアウト
+
+```
        :langmap=Modelica\:.mo:\
-       ```
+```
 
 ↓
 ```
@@ -106,21 +108,22 @@ default:\
 ```
 
 3 以下の行を追加（.cfg .pbl をWMLと認識させる）
-```
 
+```
       :langmap=WML\:.cfg.pbl:\
-      ```
+```
 
 4 これも追加
-```
 
+```
       :gtags_parser=WML\:$pygmentslib:\
-      ```
+```
 
 
 WMLファイル（ _main.cfg ） のあるディレクトリに移動して
 
 pygmentizeはPygmentsのコマンドラインツールです。
+
 ```
 pygmentize _main.cfg
 ```
