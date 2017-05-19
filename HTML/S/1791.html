@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>doc/design/gui2/unit_attack.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5794.html'>doc</a>/<a href='../files/5795.html'>design</a>/<a href='../files/5796.html'>gui2</a>/unit_attack.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L51'>[^]</a><a href='#L129'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L51' title='Defined at 51.'>best_weapon_</a></li>
+<li><a href='#L56' title='Defined at 56.'>set_label</a></li>
+<li><a href='#L67' title='Defined at 67.'>set_attacker_info</a></li>
+<li><a href='#L74' title='Defined at 74.'>set_defender_info</a></li>
+<li><a href='#L81' title='Defined at 81.'>set_weapon_info</a></li>
+<li><a href='#L120' title='Defined at 120.'>pre_show</a></li>
+<li><a href='#L129' title='Defined at 129.'>post_show</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='sharp'>#define</em> <a href='../R/577.html' title='Multiple referred from 20 places.'>GETTEXT_DOMAIN</a> "wesnoth-lib" <em class='comment'>/*@ \label{unit_attack.cpp:textdomain} @*/</em>
+<a id='L2' name='L2'></a>   2 
+<a id='L3' name='L3'></a>   3 <em class='sharp'>#include</em> "<a href='../I/1549.html'>gui/dialogs/unit_attack.hpp</a>"
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 <em class='sharp'>#include</em> "<a href='../I/2233.html'>gui/widgets/image.hpp</a>"
+<a id='L6' name='L6'></a>   6 <em class='sharp'>#include</em> "<a href='599.html'>gui/widgets/listbox.hpp</a>"
+<a id='L7' name='L7'></a>   7 <em class='sharp'>#include</em> "<a href='../I/2272.html'>gui/widgets/settings.hpp</a>"
+<a id='L8' name='L8'></a>   8 <em class='sharp'>#include</em> "<a href='../I/2305.html'>gui/widgets/window.hpp</a>"
+<a id='L9' name='L9'></a>   9 <em class='sharp'>#include</em> "<a href='987.html'>unit.hpp</a>"
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11 <strong class='reserved'>namespace</strong> <a href='../R/7395.html' title='Multiple referred from 720 places.'>gui2</a> <em class='brace'>{</em>
+<a id='L12' name='L12'></a>  12 
+<a id='L13' name='L13'></a>  13 <em class='comment'>/*@ \label{unit_attack.cpp:wiki} @*/</em> <em class='comment'>/*WIKI</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'> * @page = GUIWindowDefinitionWML</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'> * @order = 2_unit_attack</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> *</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * == Unit attack ==</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> *</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * This shows the dialog for attacking units.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> *</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * @start_table = grid</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> *     attacker_portrait (image)       Shows the portrait of the attacking unit.</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> *     attacker_icon (image)           Shows the icon of the attacking unit.</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> *     attacker_name (control)         Shows the name of the attacking unit.</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> *</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> *     defender_portrait (image)       Shows the portrait of the defending unit.</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> *     defender_icon (image)           Shows the icon of the defending unit.</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> *     defender_name (control)         Shows the name of the defending unit.</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> *</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> *</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> *     (weapon_list) (listbox)         The list with weapons to choos from.</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> *     -[attacker_weapon] (control)    The weapon for the attacker to use.</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> *     -[defender_weapon] (control)    The weapon for the defender to use.</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> *</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * @end_table</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> */</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <a href='../D/1814.html' title='Multiple defined in 2 places.'>REGISTER_WINDOW</a>(<a href='../D/15465.html' title='Multiple defined in 2 places.'>unit_attack</a>) <em class='comment'>/*@ \label{unit_attack.cpp:register} @*/</em>
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <a href='../S/1790.html#L10' title='Defined at 10 in doc/design/gui2/unit_attack.hpp.'>tunit_attack</a>::<a href='../S/1790.html#L10' title='Defined at 10 in doc/design/gui2/unit_attack.hpp.'>tunit_attack</a>(
+<a id='L43' name='L43'></a>  43                   <strong class='reserved'>const</strong> <a href='../D/15508.html' title='Multiple defined in 2 places.'>unit_map</a>::<a href='../D/9473.html' title='Multiple defined in 17 places.'>iterator</a>&amp; <a href='../Y/5871.html' title='Multiple used in 6 places.'>attacker_itor</a>
+<a id='L44' name='L44'></a>  44                 , <strong class='reserved'>const</strong> <a href='../D/15508.html' title='Multiple defined in 2 places.'>unit_map</a>::<a href='../D/9473.html' title='Multiple defined in 17 places.'>iterator</a>&amp; <a href='../Y/8405.html' title='Multiple used in 6 places.'>defender_itor</a>
+<a id='L45' name='L45'></a>  45                 , <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21225.html' title='Multiple used in 2726 places.'>vector</a>&lt;<a href='../D/3596.html' title='Multiple defined in 2 places.'>battle_context</a>&gt;&amp; <a href='../Y/21532.html' title='Multiple used in 16 places.'>weapons</a>
+<a id='L46' name='L46'></a>  46                 , <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../Y/6306.html' title='Multiple used in 15 places.'>best_weapon</a>)
+<a id='L47' name='L47'></a>  47         : <a href='../Y/18013.html' title='Multiple used in 10 places.'>selected_weapon_</a>(-1)
+<a id='L48' name='L48'></a>  48         , <a href='../Y/5872.html' title='Multiple used in 7 places.'>attacker_itor_</a>(<a href='../Y/5871.html' title='Multiple used in 6 places.'>attacker_itor</a>)
+<a id='L49' name='L49'></a>  49         , <a href='../Y/8406.html' title='Multiple used in 7 places.'>defender_itor_</a>(<a href='../Y/8405.html' title='Multiple used in 6 places.'>defender_itor</a>)
+<a id='L50' name='L50'></a>  50         , <a href='../Y/21533.html' title='Multiple used in 7 places.'>weapons_</a>(<a href='../Y/21532.html' title='Multiple used in 16 places.'>weapons</a>)
+<a id='L51' name='L51'></a>  51         , <a href='../R/3235.html' title='Multiple referred from 4 places.'>best_weapon_</a>(<a href='../Y/6306.html' title='Multiple used in 15 places.'>best_weapon</a>)
+<a id='L52' name='L52'></a>  52 <em class='brace'>{</em>
+<a id='L53' name='L53'></a>  53 <em class='brace'>}</em>
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <strong class='reserved'>template</strong>&lt;<strong class='reserved'>class</strong> <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L56' name='L56'></a>  56 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/12619.html' title='Multiple referred from 162 places.'>set_label</a>(
+<a id='L57' name='L57'></a>  57                   <a href='../Y/20477.html' title='Multiple used in 9 places.'>twindow</a>&amp; <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>
+<a id='L58' name='L58'></a>  58                 , <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8601.html' title='Multiple defined in 22 places.'>id</a>
+<a id='L59' name='L59'></a>  59                 , <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/9620.html' title='Multiple defined in 5 places.'>label</a>)
+<a id='L60' name='L60'></a>  60 <em class='brace'>{</em>
+<a id='L61' name='L61'></a>  61         <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>* <a href='../D/16224.html' title='Multiple defined in 8 places.'>widget</a> = <a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, <a href='../D/8601.html' title='Multiple defined in 22 places.'>id</a>, <strong class='reserved'>false</strong>, <strong class='reserved'>false</strong>);
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>if</strong>(<a href='../D/16224.html' title='Multiple defined in 8 places.'>widget</a>) <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63                 <a href='../D/16224.html' title='Multiple defined in 8 places.'>widget</a>-&gt;<a href='../D/13783.html' title='Multiple defined in 5 places.'>set_label</a>(<a href='../D/9620.html' title='Multiple defined in 5 places.'>label</a>);
+<a id='L64' name='L64'></a>  64         <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65 <em class='brace'>}</em>
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/1791.html#L122' title='Referred from 122 in doc/design/gui2/unit_attack.cpp.'>set_attacker_info</a>(<a href='../Y/20477.html' title='Multiple used in 9 places.'>twindow</a>&amp; <a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, <a href='../D/15450.html' title='Multiple defined in 4 places.'>unit</a>&amp; <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>)
+<a id='L68' name='L68'></a>  68 <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69         <a href='../D/13783.html' title='Multiple defined in 5 places.'>set_label</a>&lt;<a href='../Y/19923.html' title='Multiple used in 4 places.'>timage</a>&gt;(<a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, "attacker_portrait", <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>.<a href='../S/1006.html#L2290' title='Defined at 2290 in src/units/unit.cpp.'>absolute_image</a>());
+<a id='L70' name='L70'></a>  70         <a href='../D/13783.html' title='Multiple defined in 5 places.'>set_label</a>&lt;<a href='../Y/19923.html' title='Multiple used in 4 places.'>timage</a>&gt;(<a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, "attacker_icon", <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>.<a href='../S/1006.html#L2290' title='Defined at 2290 in src/units/unit.cpp.'>absolute_image</a>());
+<a id='L71' name='L71'></a>  71         <a href='../D/13783.html' title='Multiple defined in 5 places.'>set_label</a>&lt;<a href='../Y/19412.html' title='Multiple used in 4 places.'>tcontrol</a>&gt;(<a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, "attacker_name", <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>.<a href='../D/11218.html' title='Multiple defined in 26 places.'>name</a>());
+<a id='L72' name='L72'></a>  72 <em class='brace'>}</em>
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/1791.html#L123' title='Referred from 123 in doc/design/gui2/unit_attack.cpp.'>set_defender_info</a>(<a href='../Y/20477.html' title='Multiple used in 9 places.'>twindow</a>&amp; <a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, <a href='../D/15450.html' title='Multiple defined in 4 places.'>unit</a>&amp; <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>)
+<a id='L75' name='L75'></a>  75 <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76         <a href='../D/13783.html' title='Multiple defined in 5 places.'>set_label</a>&lt;<a href='../Y/19923.html' title='Multiple used in 4 places.'>timage</a>&gt;(<a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, "defender_portrait", <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>.<a href='../S/1006.html#L2290' title='Defined at 2290 in src/units/unit.cpp.'>absolute_image</a>());
+<a id='L77' name='L77'></a>  77         <a href='../D/13783.html' title='Multiple defined in 5 places.'>set_label</a>&lt;<a href='../Y/19923.html' title='Multiple used in 4 places.'>timage</a>&gt;(<a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, "defender_icon", <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>.<a href='../S/1006.html#L2290' title='Defined at 2290 in src/units/unit.cpp.'>absolute_image</a>());
+<a id='L78' name='L78'></a>  78         <a href='../D/13783.html' title='Multiple defined in 5 places.'>set_label</a>&lt;<a href='../Y/19412.html' title='Multiple used in 4 places.'>tcontrol</a>&gt;(<a href='../D/15977.html' title='Multiple defined in 6 places.'>w</a>, "defender_name", <a href='../Y/20567.html' title='Multiple used in 1983 places.'>u</a>.<a href='../D/11218.html' title='Multiple defined in 26 places.'>name</a>());
+<a id='L79' name='L79'></a>  79 <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/1791.html#L126' title='Referred from 126 in doc/design/gui2/unit_attack.cpp.'>set_weapon_info</a>(<a href='../Y/20477.html' title='Multiple used in 9 places.'>twindow</a>&amp; <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>
+<a id='L82' name='L82'></a>  82                 , <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21225.html' title='Multiple used in 2726 places.'>vector</a>&lt;<a href='../D/3596.html' title='Multiple defined in 2 places.'>battle_context</a>&gt;&amp; <a href='../Y/21532.html' title='Multiple used in 16 places.'>weapons</a>
+<a id='L83' name='L83'></a>  83                 , <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../Y/6306.html' title='Multiple used in 15 places.'>best_weapon</a>)
+<a id='L84' name='L84'></a>  84 <em class='brace'>{</em>
+<a id='L85' name='L85'></a>  85         <a href='../Y/20008.html' title='Multiple used in 3 places.'>tlistbox</a>&amp; <a href='../Y/21527.html' title='Multiple used in 10 places.'>weapon_list</a> =
+<a id='L86' name='L86'></a>  86                         <a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../Y/20008.html' title='Multiple used in 3 places.'>tlistbox</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "weapon_list", <strong class='reserved'>false</strong>);
+<a id='L87' name='L87'></a>  87         <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>.<a href='../D/9556.html' title='Multiple defined in 2 places.'>keyboard_capture</a>(&amp;<a href='../Y/21527.html' title='Multiple used in 10 places.'>weapon_list</a>);
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89         <strong class='reserved'>const</strong> <a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a> <a href='../D/5829.html' title='Multiple defined in 31 places.'>empty</a>;
+<a id='L90' name='L90'></a>  90         <a href='../S/1003.html#L34' title='Defined at 34 in src/units/attack_type.hpp.'>attack_type</a> <a href='../Y/14935.html' title='Multiple used in 4 places.'>no_weapon</a>(<a href='../D/5829.html' title='Multiple defined in 31 places.'>empty</a>);
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92         <strong class='reserved'>for</strong> (<a href='../Y/18512.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> = 0; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; <a href='../Y/21532.html' title='Multiple used in 16 places.'>weapons</a>.<a href='../D/14459.html' title='Multiple defined in 16 places.'>size</a>(); ++<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>) <em class='brace'>{</em>
+<a id='L93' name='L93'></a>  93                 <strong class='reserved'>const</strong> <a href='../D/3596.html' title='Multiple defined in 2 places.'>battle_context</a>::<a href='../Y/20806.html' title='Multiple used in 8 places.'>unit_stats</a>&amp; <a href='../Y/5853.html' title='Multiple used in 285 places.'>attacker</a> =
+<a id='L94' name='L94'></a>  94                                 <a href='../Y/21532.html' title='Multiple used in 16 places.'>weapons</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>].<a href='../S/897.html#L159' title='Defined at 159 in src/actions/attack.hpp.'>get_attacker_stats</a>();
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96                 <strong class='reserved'>const</strong> <a href='../D/3596.html' title='Multiple defined in 2 places.'>battle_context</a>::<a href='../Y/20806.html' title='Multiple used in 8 places.'>unit_stats</a>&amp; <a href='../Y/8393.html' title='Multiple used in 224 places.'>defender</a> =
+<a id='L97' name='L97'></a>  97                                 <a href='../Y/21532.html' title='Multiple used in 16 places.'>weapons</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>].<a href='../S/897.html#L162' title='Defined at 162 in src/actions/attack.hpp.'>get_defender_stats</a>();
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99                 <strong class='reserved'>const</strong> <a href='../S/1003.html#L34' title='Defined at 34 in src/units/attack_type.hpp.'>attack_type</a>&amp; <a href='../Y/5894.html' title='Multiple used in 52 places.'>attacker_weapon</a> = <a href='../S/1003.html#L34' title='Defined at 34 in src/units/attack_type.hpp.'>attack_type</a>(*<a href='../Y/5853.html' title='Multiple used in 285 places.'>attacker</a>.<a href='../S/254.html#L60' title='Defined at 60 in src/ai/formula/callable_objects.hpp.'>weapon</a>);
+<a id='L100' name='L100'></a> 100                 <strong class='reserved'>const</strong> <a href='../S/1003.html#L34' title='Defined at 34 in src/units/attack_type.hpp.'>attack_type</a>&amp; <a href='../S/254.html#L61' title='Defined at 61 in src/ai/formula/callable_objects.hpp.'>defender_weapon</a> = <a href='../S/1003.html#L34' title='Defined at 34 in src/units/attack_type.hpp.'>attack_type</a>(
+<a id='L101' name='L101'></a> 101                                 <a href='../Y/8393.html' title='Multiple used in 224 places.'>defender</a>.<a href='../S/254.html#L60' title='Defined at 60 in src/ai/formula/callable_objects.hpp.'>weapon</a> ? *<a href='../Y/8393.html' title='Multiple used in 224 places.'>defender</a>.<a href='../S/254.html#L60' title='Defined at 60 in src/ai/formula/callable_objects.hpp.'>weapon</a> : <a href='../Y/14935.html' title='Multiple used in 4 places.'>no_weapon</a>);
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103                 <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10684.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>, <a href='../D/14723.html' title='Multiple defined in 4 places.'>string_map</a>&gt; <a href='../D/5202.html' title='Multiple defined in 15 places.'>data</a>;
+<a id='L104' name='L104'></a> 104                 <a href='../D/14723.html' title='Multiple defined in 4 places.'>string_map</a> <a href='../D/9452.html' title='Multiple defined in 7 places.'>item</a>;
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106                 <a href='../D/9452.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../Y/5894.html' title='Multiple used in 52 places.'>attacker_weapon</a>.<a href='../D/11218.html' title='Multiple defined in 26 places.'>name</a>();
+<a id='L107' name='L107'></a> 107                 <a href='../D/5202.html' title='Multiple defined in 15 places.'>data</a>.<a href='../D/8888.html' title='Multiple defined in 12 places.'>insert</a>(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13536.html' title='Multiple used in 114 places.'>make_pair</a>("attacker_weapon", <a href='../D/9452.html' title='Multiple defined in 7 places.'>item</a>));
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109                 <a href='../D/9452.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/254.html#L61' title='Defined at 61 in src/ai/formula/callable_objects.hpp.'>defender_weapon</a>.<a href='../D/11218.html' title='Multiple defined in 26 places.'>name</a>();
+<a id='L110' name='L110'></a> 110                 <a href='../D/5202.html' title='Multiple defined in 15 places.'>data</a>.<a href='../D/8888.html' title='Multiple defined in 12 places.'>insert</a>(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13536.html' title='Multiple used in 114 places.'>make_pair</a>("defender_weapon", <a href='../D/9452.html' title='Multiple defined in 7 places.'>item</a>));
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112                 <a href='../Y/21527.html' title='Multiple used in 10 places.'>weapon_list</a>.<a href='../D/2950.html' title='Multiple defined in 6 places.'>add_row</a>(<a href='../D/5202.html' title='Multiple defined in 15 places.'>data</a>);
+<a id='L113' name='L113'></a> 113 
+<a id='L114' name='L114'></a> 114         <em class='brace'>}</em>
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../Y/6306.html' title='Multiple used in 15 places.'>best_weapon</a> &lt; <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../Y/21527.html' title='Multiple used in 10 places.'>weapon_list</a>.<a href='../D/7579.html' title='Multiple defined in 4 places.'>get_item_count</a>()));
+<a id='L117' name='L117'></a> 117         <a href='../Y/21527.html' title='Multiple used in 10 places.'>weapon_list</a>.<a href='../D/13336.html' title='Multiple defined in 2 places.'>select_row</a>(<a href='../Y/6306.html' title='Multiple used in 15 places.'>best_weapon</a>);
+<a id='L118' name='L118'></a> 118 <em class='brace'>}</em>
+<a id='L119' name='L119'></a> 119 
+<a id='L120' name='L120'></a> 120 <strong class='reserved'>void</strong> <a href='../S/1790.html#L10' title='Defined at 10 in doc/design/gui2/unit_attack.hpp.'>tunit_attack</a>::<a href='../R/10901.html' title='Multiple referred from 89 places.'>pre_show</a>(<a href='../D/214.html' title='Multiple defined in 2 places.'>CVideo</a>&amp; <em class='comment'>/*video*/</em>, <a href='../Y/20477.html' title='Multiple used in 9 places.'>twindow</a>&amp; <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>) <em class='comment'>/*@ \label{unit_attack.cpp:pre_show} @*/</em>
+<a id='L121' name='L121'></a> 121 <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122         <a href='../S/1791.html#L67' title='Defined at 67 in doc/design/gui2/unit_attack.cpp.'>set_attacker_info</a>(<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, *<a href='../Y/5872.html' title='Multiple used in 7 places.'>attacker_itor_</a>);
+<a id='L123' name='L123'></a> 123         <a href='../S/1791.html#L74' title='Defined at 74 in doc/design/gui2/unit_attack.cpp.'>set_defender_info</a>(<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, *<a href='../Y/8406.html' title='Multiple used in 7 places.'>defender_itor_</a>);
+<a id='L124' name='L124'></a> 124 
+<a id='L125' name='L125'></a> 125         <a href='../Y/18013.html' title='Multiple used in 10 places.'>selected_weapon_</a> = -1;
+<a id='L126' name='L126'></a> 126         <a href='../S/1791.html#L81' title='Defined at 81 in doc/design/gui2/unit_attack.cpp.'>set_weapon_info</a>(<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, <a href='../Y/21533.html' title='Multiple used in 7 places.'>weapons_</a>, <a href='../D/3616.html' title='Multiple defined in 2 places.'>best_weapon_</a>);
+<a id='L127' name='L127'></a> 127 <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <strong class='reserved'>void</strong> <a href='../S/1790.html#L10' title='Defined at 10 in doc/design/gui2/unit_attack.hpp.'>tunit_attack</a>::<a href='../R/10888.html' title='Multiple referred from 45 places.'>post_show</a>(<a href='../Y/20477.html' title='Multiple used in 9 places.'>twindow</a>&amp; <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>)
+<a id='L130' name='L130'></a> 130 <em class='brace'>{</em>
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>if</strong>(<a href='../D/7850.html' title='Multiple defined in 3 places.'>get_retval</a>() == <a href='../Y/20477.html' title='Multiple used in 9 places.'>twindow</a>::<a href='../D/1601.html' title='Multiple defined in 2 places.'>OK</a>) <em class='brace'>{</em>
+<a id='L132' name='L132'></a> 132                 <a href='../Y/18013.html' title='Multiple used in 10 places.'>selected_weapon_</a> = <a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../Y/20008.html' title='Multiple used in 3 places.'>tlistbox</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "weapon_list", <strong class='reserved'>false</strong>)
+<a id='L133' name='L133'></a> 133                                 .<a href='../D/7900.html' title='Multiple defined in 2 places.'>get_selected_row</a>();
+<a id='L134' name='L134'></a> 134         <em class='brace'>}</em>
+<a id='L135' name='L135'></a> 135 <em class='brace'>}</em>
+<a id='L136' name='L136'></a> 136 
+<a id='L137' name='L137'></a> 137 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+<a id='L138' name='L138'></a> 138 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L51'>[^]</a><a href='#L129'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

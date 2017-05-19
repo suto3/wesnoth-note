@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/gui/dialogs/editor/edit_side.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5836.html'>gui</a>/<a href='../files/5843.html'>dialogs</a>/<a href='../files/5845.html'>editor</a>/edit_side.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L57'>[^]</a><a href='#L95'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L57' title='Defined at 57.'>share_vision_</a></li>
+<li><a href='#L77' title='Defined at 77.'>pre_show</a></li>
+<li><a href='#L95' title='Defined at 95.'>post_show</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2010 - 2017 by Fabian Müller &lt;fabianmueller5@gmx.de&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#define</em> <a href='../R/577.html' title='Multiple referred from 20 places.'>GETTEXT_DOMAIN</a> "wesnoth-lib"
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='331.html'>gui/dialogs/editor/edit_side.hpp</a>"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='645.html'>gui/auxiliary/field.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='595.html'>gui/widgets/toggle_button.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/2272.html'>gui/widgets/settings.hpp</a>"
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='871.html'>utils/functional.hpp</a>"
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <strong class='reserved'>namespace</strong> <a href='../R/7395.html' title='Multiple referred from 720 places.'>gui2</a>
+<a id='L26' name='L26'></a>  26 <em class='brace'>{</em>
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>namespace</strong> <a href='../R/4743.html' title='Multiple referred from 253 places.'>dialogs</a>
+<a id='L28' name='L28'></a>  28 <em class='brace'>{</em>
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='comment'>/*WIKI</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * @page = GUIWindowDefinitionWML</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * @order = 2_edit_side</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> *</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * == Edit side ==</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> *</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * Dialog for editing gamemap sides.</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> *</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * @begin{table}{dialog_widgets}</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> *</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * title &amp; &amp; label &amp; m &amp;</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> *         Dialog title label. $</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> *</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * id &amp; &amp; text_box &amp; m &amp;</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> *         Input field for the id. $</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> *</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> * team_only_toggle &amp; &amp; toggle_button &amp; m &amp;</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> *         Checkbox for whether to make the label visible to the player's team</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> *         only or not. $</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> *</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * @end{table}</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> */</em>
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53 <a href='../D/1809.html' title='Multiple defined in 38 places.'>REGISTER_DIALOG</a>(<a href='../S/331.html#L30' title='Defined at 30 in src/gui/dialogs/editor/edit_side.hpp.'>editor_edit_side</a>)
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <a href='../S/331.html#L30' title='Defined at 30 in src/gui/dialogs/editor/edit_side.hpp.'>editor_edit_side</a>::<a href='../S/331.html#L30' title='Defined at 30 in src/gui/dialogs/editor/edit_side.hpp.'>editor_edit_side</a>(<a href='../D/5756.html' title='Multiple defined in 60 places.'>editor</a>::<a href='../S/69.html#L30' title='Defined at 30 in src/editor/map/map_context.hpp.'>editor_team_info</a>&amp; <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>)
+<a id='L56' name='L56'></a>  56         : <a href='../D/4880.html' title='Multiple defined in 2 places.'>controller_</a>(<a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/4879.html' title='Multiple defined in 7 places.'>controller</a>)
+<a id='L57' name='L57'></a>  57         , <a href='../R/13049.html' title='Multiple referred from 3 places.'>share_vision_</a>(<a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/1074.html#L383' title='Defined at 383 in src/team.hpp.'>share_vision</a>)
+<a id='L58' name='L58'></a>  58 <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59         <a href='../S/472.html#L187' title='Defined at 187 in src/gui/dialogs/modal_dialog.cpp.'>register_label</a>("side_number", <strong class='reserved'>true</strong>, <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/15155.html' title='Multiple defined in 11 places.'>to_string</a>(<a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/14358.html' title='Multiple defined in 3 places.'>side</a>), <strong class='reserved'>true</strong>);
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61         <a href='../D/12541.html' title='Multiple defined in 2 places.'>register_text</a>("team_name", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/8601.html' title='Multiple defined in 22 places.'>id</a>, <strong class='reserved'>true</strong>);
+<a id='L62' name='L62'></a>  62         <a href='../D/12541.html' title='Multiple defined in 2 places.'>register_text</a>("user_team_name", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/11218.html' title='Multiple defined in 26 places.'>name</a>, <strong class='reserved'>false</strong>);
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64         <a href='../D/12532.html' title='Multiple defined in 2 places.'>register_integer</a>("gold", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/8194.html' title='Multiple defined in 3 places.'>gold</a>);
+<a id='L65' name='L65'></a>  65         <a href='../D/12532.html' title='Multiple defined in 2 places.'>register_integer</a>("income", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/1121.html#L206' title='Defined at 206 in src/game_initialization/connect_engine.hpp.'>income</a>);
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67         <a href='../D/12532.html' title='Multiple defined in 2 places.'>register_integer</a>("village_income", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/21325.html' title='Multiple used in 13 places.'>village_income</a>);
+<a id='L68' name='L68'></a>  68         <a href='../D/12532.html' title='Multiple defined in 2 places.'>register_integer</a>("village_support", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/15943.html' title='Multiple defined in 3 places.'>village_support</a>);
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70         <a href='../D/12518.html' title='Multiple defined in 2 places.'>register_bool</a>("fog", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/789.html#L687' title='Defined at 687 in src/preferences/game.cpp.'>fog</a>);
+<a id='L71' name='L71'></a>  71         <a href='../D/12518.html' title='Multiple defined in 2 places.'>register_bool</a>("shroud", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/789.html#L697' title='Defined at 697 in src/preferences/game.cpp.'>shroud</a>);
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73         <a href='../D/12518.html' title='Multiple defined in 2 places.'>register_bool</a>("no_leader", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/1074.html#L334' title='Defined at 334 in src/team.hpp.'>no_leader</a>);
+<a id='L74' name='L74'></a>  74         <a href='../D/12518.html' title='Multiple defined in 2 places.'>register_bool</a>("hidden", <strong class='reserved'>true</strong>, <a href='../D/8791.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/8506.html' title='Multiple defined in 7 places.'>hidden</a>);
+<a id='L75' name='L75'></a>  75 <em class='brace'>}</em>
+<a id='L76' name='L76'></a>  76 
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>void</strong> <a href='../S/331.html#L30' title='Defined at 30 in src/gui/dialogs/editor/edit_side.hpp.'>editor_edit_side</a>::<a href='../R/10901.html' title='Multiple referred from 89 places.'>pre_show</a>(<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>&amp; <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>)
+<a id='L78' name='L78'></a>  78 <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79         <a href='../Y/7738.html' title='Multiple used in 6 places.'>controller_group</a>.<a href='../D/2916.html' title='Multiple defined in 2 places.'>add_member</a>(&amp;<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/595.html#L31' title='Defined at 31 in src/gui/widgets/toggle_button.hpp.'>toggle_button</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "controller_human", <strong class='reserved'>false</strong>), <a href='../D/14886.html' title='Multiple defined in 3 places.'>team</a>::<a href='../Y/431.html' title='Multiple used in 42 places.'>CONTROLLER</a>::<a href='../Y/1319.html' title='Multiple used in 12 places.'>HUMAN</a>);
+<a id='L80' name='L80'></a>  80         <a href='../Y/7738.html' title='Multiple used in 6 places.'>controller_group</a>.<a href='../D/2916.html' title='Multiple defined in 2 places.'>add_member</a>(&amp;<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/595.html#L31' title='Defined at 31 in src/gui/widgets/toggle_button.hpp.'>toggle_button</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "controller_ai", <strong class='reserved'>false</strong>),    <a href='../D/14886.html' title='Multiple defined in 3 places.'>team</a>::<a href='../Y/431.html' title='Multiple used in 42 places.'>CONTROLLER</a>::<a href='../Y/147.html' title='Multiple used in 10 places.'>AI</a>);
+<a id='L81' name='L81'></a>  81         <a href='../Y/7738.html' title='Multiple used in 6 places.'>controller_group</a>.<a href='../D/2916.html' title='Multiple defined in 2 places.'>add_member</a>(&amp;<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/595.html#L31' title='Defined at 31 in src/gui/widgets/toggle_button.hpp.'>toggle_button</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "controller_null", <strong class='reserved'>false</strong>),  <a href='../D/14886.html' title='Multiple defined in 3 places.'>team</a>::<a href='../Y/431.html' title='Multiple used in 42 places.'>CONTROLLER</a>::<a href='../S/1352.html#L143' title='Defined at 143 in utils/gdb/wesnoth_pretty_printers.py.'>EMPTY</a>);
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83         <a href='../Y/7738.html' title='Multiple used in 6 places.'>controller_group</a>.<a href='../S/544.html#L110' title='Defined at 110 in src/gui/widgets/group.hpp.'>set_member_states</a>(<a href='../D/4880.html' title='Multiple defined in 2 places.'>controller_</a>);
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85         <a href='../Y/21377.html' title='Multiple used in 6 places.'>vision_group</a>.<a href='../D/2916.html' title='Multiple defined in 2 places.'>add_member</a>(&amp;<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/595.html#L31' title='Defined at 31 in src/gui/widgets/toggle_button.hpp.'>toggle_button</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "vision_all", <strong class='reserved'>false</strong>),    <a href='../D/14886.html' title='Multiple defined in 3 places.'>team</a>::<a href='../Y/2639.html' title='Multiple used in 19 places.'>SHARE_VISION</a>::<a href='../Y/156.html' title='Multiple used in 12 places.'>ALL</a>);
+<a id='L86' name='L86'></a>  86         <a href='../Y/21377.html' title='Multiple used in 6 places.'>vision_group</a>.<a href='../D/2916.html' title='Multiple defined in 2 places.'>add_member</a>(&amp;<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/595.html#L31' title='Defined at 31 in src/gui/widgets/toggle_button.hpp.'>toggle_button</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "vision_shroud", <strong class='reserved'>false</strong>), <a href='../D/14886.html' title='Multiple defined in 3 places.'>team</a>::<a href='../Y/2639.html' title='Multiple used in 19 places.'>SHARE_VISION</a>::<a href='../S/681.html#L966' title='Defined at 966 in src/display.cpp.'>SHROUD</a>);
+<a id='L87' name='L87'></a>  87         <a href='../Y/21377.html' title='Multiple used in 6 places.'>vision_group</a>.<a href='../D/2916.html' title='Multiple defined in 2 places.'>add_member</a>(&amp;<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/595.html#L31' title='Defined at 31 in src/gui/widgets/toggle_button.hpp.'>toggle_button</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "vision_null", <strong class='reserved'>false</strong>),   <a href='../D/14886.html' title='Multiple defined in 3 places.'>team</a>::<a href='../Y/2639.html' title='Multiple used in 19 places.'>SHARE_VISION</a>::<a href='../D/1538.html' title='Multiple defined in 4 places.'>NONE</a>);
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89         <a href='../Y/21377.html' title='Multiple used in 6 places.'>vision_group</a>.<a href='../S/544.html#L110' title='Defined at 110 in src/gui/widgets/group.hpp.'>set_member_states</a>(<a href='../S/338.html#L57' title='Defined at 57 in src/gui/dialogs/editor/edit_side.cpp.'>share_vision_</a>);
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91         <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>.<a href='../S/569.html#L1343' title='Defined at 1343 in src/gui/widgets/window.cpp.'>add_to_tab_order</a>(<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/540.html#L117' title='Defined at 117 in src/gui/widgets/text_box.hpp.'>text_box</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "team_name", <strong class='reserved'>false</strong>, <strong class='reserved'>false</strong>));
+<a id='L92' name='L92'></a>  92         <a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>.<a href='../S/569.html#L1343' title='Defined at 1343 in src/gui/widgets/window.cpp.'>add_to_tab_order</a>(<a href='../D/6303.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/540.html#L117' title='Defined at 117 in src/gui/widgets/text_box.hpp.'>text_box</a>&gt;(&amp;<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>, "user_team_name", <strong class='reserved'>false</strong>, <strong class='reserved'>false</strong>));
+<a id='L93' name='L93'></a>  93 <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95 <strong class='reserved'>void</strong> <a href='../S/331.html#L30' title='Defined at 30 in src/gui/dialogs/editor/edit_side.hpp.'>editor_edit_side</a>::<a href='../R/10888.html' title='Multiple referred from 45 places.'>post_show</a>(<a href='../D/16247.html' title='Multiple defined in 6 places.'>window</a>&amp;)
+<a id='L96' name='L96'></a>  96 <em class='brace'>{</em>
+<a id='L97' name='L97'></a>  97         <a href='../D/4880.html' title='Multiple defined in 2 places.'>controller_</a> = <a href='../Y/7738.html' title='Multiple used in 6 places.'>controller_group</a>.<a href='../S/544.html#L95' title='Defined at 95 in src/gui/widgets/group.hpp.'>get_active_member_value</a>();
+<a id='L98' name='L98'></a>  98         <a href='../S/338.html#L57' title='Defined at 57 in src/gui/dialogs/editor/edit_side.cpp.'>share_vision_</a> = <a href='../Y/21377.html' title='Multiple used in 6 places.'>vision_group</a>.<a href='../S/544.html#L95' title='Defined at 95 in src/gui/widgets/group.hpp.'>get_active_member_value</a>();
+<a id='L99' name='L99'></a>  99 <em class='brace'>}</em>
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <em class='brace'>}</em> <em class='comment'>// namespace dialogs</em>
+<a id='L102' name='L102'></a> 102 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L57'>[^]</a><a href='#L95'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/server/user_handler.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5860.html'>server</a>/user_handler.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L21'>[^]</a><a href='#L40'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L21' title='Defined at 21.'>send_mail</a></li>
+<li><a href='#L37' title='Defined at 37.'>init_mailer</a></li>
+<li><a href='#L40' title='Defined at 40.'>create_salt</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2008 - 2017 by Thomas Baumhauer &lt;thomas.baumhauer@NOSPAMgmail.com&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='161.html'>server/user_handler.hpp</a>"
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> "<a href='../I/1741.html'>config.hpp</a>"
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='../I/1896.html'>serialization/string_utils.hpp</a>"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;ctime&gt;
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>bool</strong> <a href='../S/161.html#L28' title='Defined at 28 in src/server/user_handler.hpp.'>user_handler</a>::<a href='../R/12238.html' title='Multiple referred from 2 places.'>send_mail</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/20134.html' title='Multiple used in 6 places.'>to_user</a>,
+<a id='L22' name='L22'></a>  22                 <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <em class='comment'>/*subject*/</em>, <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <em class='comment'>/*message*/</em>) <em class='brace'>{</em>
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24         <em class='comment'>//If this user is registered at all</em>
+<a id='L25' name='L25'></a>  25         <strong class='reserved'>if</strong>(!<a href='../D/15751.html' title='Multiple defined in 2 places.'>user_exists</a>(<a href='../Y/20134.html' title='Multiple used in 6 places.'>to_user</a>)) <em class='brace'>{</em>
+<a id='L26' name='L26'></a>  26                 <strong class='reserved'>throw</strong> <a href='../D/5942.html' title='Multiple defined in 22 places.'>error</a>("Could not send email. No user with the name '" + <a href='../Y/20134.html' title='Multiple used in 6 places.'>to_user</a> + "' exists.");
+<a id='L27' name='L27'></a>  27         <em class='brace'>}</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29         <em class='comment'>// If this user did not provide an email</em>
+<a id='L30' name='L30'></a>  30         <strong class='reserved'>if</strong>(<a href='../D/7651.html' title='Multiple defined in 2 places.'>get_mail</a>(<a href='../Y/20134.html' title='Multiple used in 6 places.'>to_user</a>) == "") <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31                 <strong class='reserved'>throw</strong> <a href='../D/5942.html' title='Multiple defined in 22 places.'>error</a>("Could not send email. The email address of the user '" + <a href='../Y/20134.html' title='Multiple used in 6 places.'>to_user</a> + "' is empty.");
+<a id='L32' name='L32'></a>  32         <em class='brace'>}</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34         <strong class='reserved'>throw</strong> <a href='../S/161.html#L28' title='Defined at 28 in src/server/user_handler.hpp.'>user_handler</a>::<a href='../D/5942.html' title='Multiple defined in 22 places.'>error</a>("This server is configured not to send email.");
+<a id='L35' name='L35'></a>  35 <em class='brace'>}</em>
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37 <strong class='reserved'>void</strong> <a href='../S/161.html#L28' title='Defined at 28 in src/server/user_handler.hpp.'>user_handler</a>::<a href='../R/7950.html' title='Multiple referred from 2 places.'>init_mailer</a>(<strong class='reserved'>const</strong> <a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a> &amp;) <em class='brace'>{</em>
+<a id='L38' name='L38'></a>  38 <em class='brace'>}</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/161.html#L28' title='Defined at 28 in src/server/user_handler.hpp.'>user_handler</a>::<a href='../R/4451.html' title='Multiple referred from 2 places.'>create_salt</a>(<strong class='reserved'>int</strong> <a href='../Y/12895.html' title='Multiple used in 250 places.'>length</a>) <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41         <a href='../Y/18757.html' title='Multiple used in 6 places.'>srand</a>(<strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>unsigned</strong>&gt;(<a href='../D/15098.html' title='Multiple defined in 4 places.'>time</a>(<a href='../Y/15088.html' title='Multiple used in 1950 places.'>nullptr</a>)));
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19067.html' title='Multiple used in 268 places.'>stringstream</a> <a href='../Y/18810.html' title='Multiple used in 508 places.'>ss</a>;
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45         <strong class='reserved'>for</strong>(<strong class='reserved'>int</strong> <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> = 0; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; <a href='../Y/12895.html' title='Multiple used in 250 places.'>length</a>; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L46' name='L46'></a>  46                 <a href='../Y/18810.html' title='Multiple used in 508 places.'>ss</a> &lt;&lt; (<a href='../S/304.html#L337' title='Defined at 337 in src/terrain/builder.hpp.'>rand</a>() % 10);
+<a id='L47' name='L47'></a>  47         <em class='brace'>}</em>
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>return</strong>  <a href='../Y/18810.html' title='Multiple used in 508 places.'>ss</a>.<a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>();
+<a id='L50' name='L50'></a>  50 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L21'>[^]</a><a href='#L40'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

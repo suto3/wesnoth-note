@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/game_launcher.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/game_launcher.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L97'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1959.html' title='Multiple included from 5 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L40' title='Defined at 40.'>scenario_id_</a></li>
+<li><a href='#L54' title='Defined at 54.'>video</a></li>
+<li><a href='#L80' title='Defined at 80.'>jump_to_editor</a></li>
+<li><a href='#L82' title='Defined at 82.'>select_mp_server</a></li>
+<li><a href='#L93' title='Defined at 93.'>start_editor</a></li>
+<li><a href='#L97' title='Defined at 97.'>opts</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='78.html'>editor/editor_main.hpp</a>"       <em class='comment'>// for EXIT_STATUS</em>
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='1021.html'>events.hpp</a>"                   <em class='comment'>// for event_context</em>
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1150.html'>font/font_config.hpp</a>"         <em class='comment'>// for manager</em>
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='../I/2472.html'>preferences/game.hpp</a>"         <em class='comment'>// for manager</em>
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='100.html'>hotkey/hotkey_manager.hpp</a>"    <em class='comment'>// for manager</em>
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='../I/2233.html'>image.hpp</a>"                    <em class='comment'>// for manager</em>
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='931.html'>saved_game.hpp</a>"               <em class='comment'>// for saved_game</em>
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='787.html'>sound.hpp</a>"                    <em class='comment'>// for music_thinker</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> &lt;string&gt;                       <em class='comment'>// for string</em>
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;vector&gt;                       <em class='comment'>// for vector</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>class</strong> <a href='../S/1053.html#L39' title='Defined at 39 in src/commandline_options.hpp.'>commandline_options</a>;
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>class</strong> <a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a>;
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>class</strong> <a href='../D/214.html' title='Multiple defined in 2 places.'>CVideo</a>;
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>namespace</strong> <a href='../R/12047.html' title='Multiple referred from 84 places.'>savegame</a> <em class='brace'>{</em> <strong class='reserved'>struct</strong> <a href='../S/822.html#L40' title='Defined at 40 in src/savegame.hpp.'>load_game_metadata</a>; <em class='brace'>}</em>
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>struct</strong> <a href='../R/8619.html' title='Multiple referred from 4 places.'>jump_to_campaign_info</a>
+<a id='L34' name='L34'></a>  34 <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35 <strong class='reserved'>public</strong>:
+<a id='L36' name='L36'></a>  36         <a href='../S/303.html#L33' title='Defined at 33 in src/game_launcher.hpp.'>jump_to_campaign_info</a>(<strong class='reserved'>bool</strong> <a href='../S/811.html#L388' title='Defined at 388 in src/help/help_impl.hpp.'>jump</a>,<strong class='reserved'>int</strong> <a href='../Y/8627.html' title='Multiple used in 28 places.'>difficulty</a>, <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/6882.html' title='Multiple used in 18 places.'>campaign_id</a>,<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/17706.html' title='Multiple used in 14 places.'>scenario_id</a>)
+<a id='L37' name='L37'></a>  37                 : <a href='../Y/12435.html' title='Multiple used in 8 places.'>jump_</a>(<a href='../S/811.html#L388' title='Defined at 388 in src/help/help_impl.hpp.'>jump</a>)
+<a id='L38' name='L38'></a>  38                 , <a href='../Y/8628.html' title='Multiple used in 6 places.'>difficulty_</a>(<a href='../Y/8627.html' title='Multiple used in 28 places.'>difficulty</a>)
+<a id='L39' name='L39'></a>  39                 , <a href='../Y/6883.html' title='Multiple used in 13 places.'>campaign_id_</a>(<a href='../Y/6882.html' title='Multiple used in 18 places.'>campaign_id</a>)
+<a id='L40' name='L40'></a>  40                 , <a href='../R/12070.html' title='Multiple referred from 15 places.'>scenario_id_</a>(<a href='../Y/17706.html' title='Multiple used in 14 places.'>scenario_id</a>)
+<a id='L41' name='L41'></a>  41         <em class='brace'>{</em>
+<a id='L42' name='L42'></a>  42         <em class='brace'>}</em>
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>bool</strong> <a href='../Y/12435.html' title='Multiple used in 8 places.'>jump_</a>;
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>int</strong> <a href='../Y/8628.html' title='Multiple used in 6 places.'>difficulty_</a>;
+<a id='L45' name='L45'></a>  45         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/6883.html' title='Multiple used in 13 places.'>campaign_id_</a>,<a href='../S/303.html#L40' title='Defined at 40 in src/game_launcher.hpp.'>scenario_id_</a>;
+<a id='L46' name='L46'></a>  46 <em class='brace'>}</em>;
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <strong class='reserved'>class</strong> <a href='../R/5861.html' title='Multiple referred from 46 places.'>game_launcher</a>
+<a id='L49' name='L49'></a>  49 <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50 <strong class='reserved'>public</strong>:
+<a id='L51' name='L51'></a>  51         <a href='../D/6583.html' title='Multiple defined in 2 places.'>game_launcher</a>(<strong class='reserved'>const</strong> <a href='../S/1053.html#L39' title='Defined at 39 in src/commandline_options.hpp.'>commandline_options</a>&amp; <a href='../Y/7429.html' title='Multiple used in 96 places.'>cmdline_opts</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/5636.html' title='Multiple used in 3 places.'>appname</a>);
+<a id='L52' name='L52'></a>  52         ~<a href='../D/6583.html' title='Multiple defined in 2 places.'>game_launcher</a>();
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54         <a href='../D/214.html' title='Multiple defined in 2 places.'>CVideo</a>&amp; <a href='../R/14628.html' title='Multiple referred from 833 places.'>video</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> *<a href='../Y/21288.html' title='Multiple used in 100 places.'>video_</a>; <em class='brace'>}</em>
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>enum</strong> <a href='../R/10118.html' title='Multiple referred from 2 places.'>mp_selection</a> <em class='brace'>{</em><a href='../R/1346.html' title='Multiple referred from 6 places.'>MP_CONNECT</a>, <a href='../R/1348.html' title='Multiple referred from 4 places.'>MP_HOST</a>, <a href='../R/1351.html' title='Multiple referred from 4 places.'>MP_LOCAL</a><em class='brace'>}</em>;
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>bool</strong> <a href='../S/743.html#L339' title='Defined at 339 in src/game_launcher.cpp.'>init_video</a>();
+<a id='L59' name='L59'></a>  59         <strong class='reserved'>bool</strong> <a href='../S/743.html#L313' title='Defined at 313 in src/game_launcher.cpp.'>init_language</a>();
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>bool</strong> <a href='../S/743.html#L290' title='Defined at 290 in src/game_launcher.cpp.'>init_joystick</a>();
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>bool</strong> <a href='../S/743.html#L368' title='Defined at 368 in src/game_launcher.cpp.'>init_lua_script</a>();
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>bool</strong> <a href='../S/743.html#L474' title='Defined at 474 in src/game_launcher.cpp.'>play_test</a>();
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>bool</strong> <a href='../S/743.html#L567' title='Defined at 567 in src/game_launcher.cpp.'>play_screenshot_mode</a>();
+<a id='L65' name='L65'></a>  65         <strong class='reserved'>bool</strong> <a href='../S/743.html#L582' title='Defined at 582 in src/game_launcher.cpp.'>play_render_image_mode</a>();
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>int</strong> <a href='../S/743.html#L504' title='Defined at 504 in src/game_launcher.cpp.'>unit_test</a>();
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68         <strong class='reserved'>bool</strong> <a href='../S/743.html#L614' title='Defined at 614 in src/game_launcher.cpp.'>is_loading</a>() <strong class='reserved'>const</strong>;
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>void</strong> <a href='../S/743.html#L1008' title='Defined at 1008 in src/game_launcher.cpp.'>clear_loaded_game</a>();
+<a id='L70' name='L70'></a>  70         <strong class='reserved'>bool</strong> <a href='../D/9838.html' title='Multiple defined in 6 places.'>load_game</a>();
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>void</strong> <a href='../S/743.html#L696' title='Defined at 696 in src/game_launcher.cpp.'>set_tutorial</a>();
+<a id='L72' name='L72'></a>  72         <strong class='reserved'>void</strong> <a href='../S/743.html#L460' title='Defined at 460 in src/game_launcher.cpp.'>set_test</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8601.html' title='Multiple defined in 22 places.'>id</a>);
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/743.html#L727' title='Defined at 727 in src/game_launcher.cpp.'>jump_to_campaign_id</a>() <strong class='reserved'>const</strong>;
+<a id='L75' name='L75'></a>  75         <strong class='reserved'>bool</strong> <a href='../S/743.html#L716' title='Defined at 716 in src/game_launcher.cpp.'>new_campaign</a>();
+<a id='L76' name='L76'></a>  76         <strong class='reserved'>bool</strong> <a href='../S/743.html#L732' title='Defined at 732 in src/game_launcher.cpp.'>goto_campaign</a>();
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>bool</strong> <a href='../S/743.html#L746' title='Defined at 746 in src/game_launcher.cpp.'>goto_multiplayer</a>();
+<a id='L78' name='L78'></a>  78         <strong class='reserved'>bool</strong> <a href='../S/743.html#L759' title='Defined at 759 in src/game_launcher.cpp.'>goto_editor</a>();
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80         <strong class='reserved'>bool</strong> <a href='../R/8620.html' title='Multiple referred from 4 places.'>jump_to_editor</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/12438.html' title='Multiple used in 13 places.'>jump_to_editor_</a>; <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>void</strong> <a href='../R/12192.html' title='Multiple referred from 3 places.'>select_mp_server</a>(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/13409.html' title='Multiple defined in 5 places.'>server</a>) <em class='brace'>{</em> <a href='../Y/14349.html' title='Multiple used in 8 places.'>multiplayer_server_</a> = <a href='../D/13409.html' title='Multiple defined in 5 places.'>server</a>; <em class='brace'>}</em>
+<a id='L83' name='L83'></a>  83         <strong class='reserved'>bool</strong> <a href='../S/743.html#L809' title='Defined at 809 in src/game_launcher.cpp.'>play_multiplayer</a>(<a href='../S/303.html#L56' title='Defined at 56 in src/game_launcher.hpp.'>mp_selection</a> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>);
+<a id='L84' name='L84'></a>  84         <strong class='reserved'>bool</strong> <a href='../S/743.html#L887' title='Defined at 887 in src/game_launcher.cpp.'>play_multiplayer_commandline</a>();
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>bool</strong> <a href='../D/4242.html' title='Multiple defined in 2 places.'>change_language</a>();
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>void</strong> <a href='../S/743.html#L924' title='Defined at 924 in src/game_launcher.cpp.'>show_preferences</a>();
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89         <strong class='reserved'>enum</strong> <a href='../R/1667.html' title='Multiple referred from 5 places.'>RELOAD_GAME_DATA</a> <em class='brace'>{</em> <a href='../R/1666.html' title='Multiple referred from 3 places.'>RELOAD_DATA</a>, <a href='../S/743.html#L737' title='Referred from 737 in src/game_launcher.cpp.'>NO_RELOAD_DATA</a> <em class='brace'>}</em>;
+<a id='L90' name='L90'></a>  90         <strong class='reserved'>void</strong> <a href='../S/743.html#L929' title='Defined at 929 in src/game_launcher.cpp.'>launch_game</a>(<a href='../D/1818.html' title='Multiple defined in 2 places.'>RELOAD_GAME_DATA</a> <a href='../S/309.html#L208' title='Defined at 208 in src/terrain/builder.cpp.'>reload</a>=<a href='../S/303.html#L89' title='Defined at 89 in src/game_launcher.hpp.'>RELOAD_DATA</a>);
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>void</strong> <a href='../D/11861.html' title='Multiple defined in 5 places.'>play_replay</a>();
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93         <a href='../D/5756.html' title='Multiple defined in 60 places.'>editor</a>::<a href='../S/78.html#L24' title='Defined at 24 in src/editor/editor_main.hpp.'>EXIT_STATUS</a> <a href='../R/13409.html' title='Multiple referred from 4 places.'>start_editor</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/14604.html' title='Multiple defined in 2 places.'>start_editor</a>(""); <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>void</strong> <a href='../S/743.html#L773' title='Defined at 773 in src/game_launcher.cpp.'>start_wesnothd</a>();
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97         <strong class='reserved'>const</strong> <a href='../S/1053.html#L39' title='Defined at 39 in src/commandline_options.hpp.'>commandline_options</a> &amp; <a href='../R/10478.html' title='Multiple referred from 14 places.'>opts</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/7430.html' title='Multiple used in 86 places.'>cmdline_opts_</a>; <em class='brace'>}</em>
+<a id='L98' name='L98'></a>  98 <strong class='reserved'>private</strong>:
+<a id='L99' name='L99'></a>  99         <a href='../D/6583.html' title='Multiple defined in 2 places.'>game_launcher</a>(<strong class='reserved'>const</strong> <a href='../D/6583.html' title='Multiple defined in 2 places.'>game_launcher</a>&amp;);
+<a id='L100' name='L100'></a> 100         <strong class='reserved'>void</strong> <strong class='reserved'>operator</strong>=(<strong class='reserved'>const</strong> <a href='../D/6583.html' title='Multiple defined in 2 places.'>game_launcher</a>&amp;);
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102         <strong class='reserved'>void</strong> <a href='../S/743.html#L709' title='Defined at 709 in src/game_launcher.cpp.'>mark_completed_campaigns</a>(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21225.html' title='Multiple used in 2726 places.'>vector</a>&lt;<a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a>&gt;&amp; <a href='../D/4064.html' title='Multiple defined in 3 places.'>campaigns</a>);
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104         <a href='../D/5756.html' title='Multiple defined in 60 places.'>editor</a>::<a href='../S/78.html#L24' title='Defined at 24 in src/editor/editor_main.hpp.'>EXIT_STATUS</a> <a href='../D/14604.html' title='Multiple defined in 2 places.'>start_editor</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6175.html' title='Multiple defined in 4 places.'>filename</a>);
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106         <strong class='reserved'>const</strong> <a href='../S/1053.html#L39' title='Defined at 39 in src/commandline_options.hpp.'>commandline_options</a>&amp; <a href='../Y/7430.html' title='Multiple used in 86 places.'>cmdline_opts_</a>;
+<a id='L107' name='L107'></a> 107         <em class='comment'>//Never null.</em>
+<a id='L108' name='L108'></a> 108         <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/20718.html' title='Multiple used in 177 places.'>unique_ptr</a>&lt;<a href='../D/214.html' title='Multiple defined in 2 places.'>CVideo</a>&gt; <a href='../Y/21288.html' title='Multiple used in 100 places.'>video_</a>;
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110         <a href='../D/6395.html' title='Multiple defined in 30 places.'>font</a>::<a href='../D/10681.html' title='Multiple defined in 32 places.'>manager</a> <a href='../S/717.html#L60' title='Defined at 60 in src/tests/utils/game_config_manager.cpp.'>font_manager_</a>;
+<a id='L111' name='L111'></a> 111         <strong class='reserved'>const</strong> <a href='../D/12000.html' title='Multiple defined in 15 places.'>preferences</a>::<a href='../D/10681.html' title='Multiple defined in 32 places.'>manager</a> <a href='../Y/16364.html' title='Multiple used in 2 places.'>prefs_manager_</a>;
+<a id='L112' name='L112'></a> 112         <strong class='reserved'>const</strong> <a href='../D/8632.html' title='Multiple defined in 19 places.'>image</a>::<a href='../D/10681.html' title='Multiple defined in 32 places.'>manager</a> <a href='../Y/11688.html' title='Multiple used in 2 places.'>image_manager_</a>;
+<a id='L113' name='L113'></a> 113         <strong class='reserved'>const</strong> <a href='../D/5978.html' title='Multiple defined in 26 places.'>events</a>::<a href='../D/5967.html' title='Multiple defined in 3 places.'>event_context</a> <a href='../Y/13503.html' title='Multiple used in 4 places.'>main_event_context_</a>;
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>const</strong> <a href='../D/8557.html' title='Multiple defined in 11 places.'>hotkey</a>::<a href='../D/10681.html' title='Multiple defined in 32 places.'>manager</a> <a href='../Y/11472.html' title='Multiple used in 4 places.'>hotkey_manager_</a>;
+<a id='L115' name='L115'></a> 115         <a href='../D/14518.html' title='Multiple defined in 8 places.'>sound</a>::<a href='../S/787.html#L84' title='Defined at 84 in src/sound.hpp.'>music_thinker</a> <a href='../Y/14373.html' title='Multiple used in 2 places.'>music_thinker_</a>;
+<a id='L116' name='L116'></a> 116         <a href='../D/14518.html' title='Multiple defined in 8 places.'>sound</a>::<a href='../D/11194.html' title='Multiple defined in 2 places.'>music_muter</a> <a href='../Y/14368.html' title='Multiple used in 2 places.'>music_muter_</a>;
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/19708.html' title='Multiple used in 6 places.'>test_scenario_</a>;
+<a id='L119' name='L119'></a> 119 
+<a id='L120' name='L120'></a> 120         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/17770.html' title='Multiple used in 4 places.'>screenshot_map_</a>, <a href='../Y/17769.html' title='Multiple used in 4 places.'>screenshot_filename_</a>;
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <a href='../S/931.html#L24' title='Defined at 24 in src/saved_game.hpp.'>saved_game</a> <a href='../Y/18895.html' title='Multiple used in 409 places.'>state_</a>;
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>bool</strong> <a href='../Y/16133.html' title='Multiple used in 6 places.'>play_replay_</a>;
+<a id='L124' name='L124'></a> 124 
+<a id='L125' name='L125'></a> 125         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/14349.html' title='Multiple used in 8 places.'>multiplayer_server_</a>;
+<a id='L126' name='L126'></a> 126         <strong class='reserved'>bool</strong> <a href='../Y/12439.html' title='Multiple used in 7 places.'>jump_to_multiplayer_</a>;
+<a id='L127' name='L127'></a> 127         <a href='../S/303.html#L33' title='Defined at 33 in src/game_launcher.hpp.'>jump_to_campaign_info</a> <a href='../Y/12437.html' title='Multiple used in 17 places.'>jump_to_campaign_</a>;
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129         <strong class='reserved'>bool</strong> <a href='../Y/12438.html' title='Multiple used in 13 places.'>jump_to_editor_</a>;
+<a id='L130' name='L130'></a> 130         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/20718.html' title='Multiple used in 177 places.'>unique_ptr</a>&lt;<a href='../D/13182.html' title='Multiple defined in 6 places.'>savegame</a>::<a href='../S/822.html#L40' title='Defined at 40 in src/savegame.hpp.'>load_game_metadata</a>&gt; <a href='../D/9832.html' title='Multiple defined in 2 places.'>load_data_</a>;
+<a id='L131' name='L131'></a> 131 <em class='brace'>}</em>;
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L97'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/utils/sha1.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5868.html'>utils</a>/sha1.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L111'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L40' title='Defined at 40.'>display</a></li>
+<li><a href='#L51' title='Defined at 51.'>H4</a></li>
+<li><a href='#L111' title='Defined at 111.'>next</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2007 - 2017 by Benoit Timbert &lt;benoit.timbert@free.fr&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> *  @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> *  Secure Hash Algorithm 1 (SHA-1).</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> *  Used to checksum the game-config / cache.</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> */</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='comment'>/* This is supposed to be an implementation of the</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>   Secure Hash Algorithm 1 (SHA-1)</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'></em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>   Check RFC 3174 for details about the algorithm.</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'></em>
+<a id='L26' name='L26'></a>  26 <em class='comment'>   Currently this implementation might produce different results on little-</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>   and big-endian machines, but for our current usage, we don't care :)</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>*/</em>
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='867.html'>utils/sha1.hpp</a>"
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> &lt;iomanip&gt;
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> &lt;sstream&gt;
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#define</em> <a href='../R/13042.html' title='Multiple referred from 9 places.'>sha_rotl</a>(<a href='../Y/14437.html' title='Multiple used in 1546 places.'>n</a>,<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>)           ( ((<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>) &lt;&lt; (<a href='../Y/14437.html' title='Multiple used in 1546 places.'>n</a>)) | ((<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>) &gt;&gt; (32-(<a href='../Y/14437.html' title='Multiple used in 1546 places.'>n</a>))) )
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#define</em> <a href='../S/860.html#L128' title='Referred from 128 in src/utils/sha1.cpp.'>sha_ch</a>(<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16483.html' title='Multiple defined in 8 places.'>y</a>,<a href='../Y/22034.html' title='Multiple used in 83 places.'>z</a>)           ( ((<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>) &amp; (<a href='../D/16483.html' title='Multiple defined in 8 places.'>y</a>)) | ((~(<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>)) &amp; (<a href='../Y/22034.html' title='Multiple used in 83 places.'>z</a>)) )
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#define</em> <a href='../R/13041.html' title='Multiple referred from 2 places.'>sha_parity</a>(<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16483.html' title='Multiple defined in 8 places.'>y</a>,<a href='../Y/22034.html' title='Multiple used in 83 places.'>z</a>)       ( (<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>) ^ (<a href='../D/16483.html' title='Multiple defined in 8 places.'>y</a>) ^ (<a href='../Y/22034.html' title='Multiple used in 83 places.'>z</a>) )
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#define</em> <a href='../S/860.html#L144' title='Referred from 144 in src/utils/sha1.cpp.'>sha_maj</a>(<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16483.html' title='Multiple defined in 8 places.'>y</a>,<a href='../Y/22034.html' title='Multiple used in 83 places.'>z</a>)          ( ((<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>) &amp; (<a href='../D/16483.html' title='Multiple defined in 8 places.'>y</a>)) | ((<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>) &amp; (<a href='../Y/22034.html' title='Multiple used in 83 places.'>z</a>)) | ((<a href='../D/16483.html' title='Multiple defined in 8 places.'>y</a>) &amp; (<a href='../Y/22034.html' title='Multiple used in 83 places.'>z</a>)) )
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/867.html#L20' title='Defined at 20 in src/utils/sha1.hpp.'>sha1_hash</a>::<a href='../R/4789.html' title='Multiple referred from 440 places.'>display</a>() <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19067.html' title='Multiple used in 268 places.'>stringstream</a> <a href='../Y/17581.html' title='Multiple used in 1703 places.'>s</a>;
+<a id='L42' name='L42'></a>  42         <a href='../Y/17581.html' title='Multiple used in 1703 places.'>s</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/11326.html' title='Multiple used in 417 places.'>hex</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18233.html' title='Multiple used in 13 places.'>setfill</a>('0') &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18247.html' title='Multiple used in 23 places.'>setw</a>(8) &lt;&lt; <a href='../Y/1269.html' title='Multiple used in 5 places.'>H0</a>;
+<a id='L43' name='L43'></a>  43         <a href='../Y/17581.html' title='Multiple used in 1703 places.'>s</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/11326.html' title='Multiple used in 417 places.'>hex</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18233.html' title='Multiple used in 13 places.'>setfill</a>('0') &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18247.html' title='Multiple used in 23 places.'>setw</a>(8) &lt;&lt; <a href='../Y/1270.html' title='Multiple used in 5 places.'>H1</a>;
+<a id='L44' name='L44'></a>  44         <a href='../Y/17581.html' title='Multiple used in 1703 places.'>s</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/11326.html' title='Multiple used in 417 places.'>hex</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18233.html' title='Multiple used in 13 places.'>setfill</a>('0') &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18247.html' title='Multiple used in 23 places.'>setw</a>(8) &lt;&lt; <a href='../Y/1271.html' title='Multiple used in 5 places.'>H2</a>;
+<a id='L45' name='L45'></a>  45         <a href='../Y/17581.html' title='Multiple used in 1703 places.'>s</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/11326.html' title='Multiple used in 417 places.'>hex</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18233.html' title='Multiple used in 13 places.'>setfill</a>('0') &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18247.html' title='Multiple used in 23 places.'>setw</a>(8) &lt;&lt; <a href='../Y/1272.html' title='Multiple used in 5 places.'>H3</a>;
+<a id='L46' name='L46'></a>  46         <a href='../Y/17581.html' title='Multiple used in 1703 places.'>s</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/11326.html' title='Multiple used in 417 places.'>hex</a> &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18233.html' title='Multiple used in 13 places.'>setfill</a>('0') &lt;&lt; <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18247.html' title='Multiple used in 23 places.'>setw</a>(8) &lt;&lt; <a href='../S/860.html#L51' title='Defined at 51 in src/utils/sha1.cpp.'>H4</a>;
+<a id='L47' name='L47'></a>  47         <strong class='reserved'>return</strong> <a href='../Y/17581.html' title='Multiple used in 1703 places.'>s</a>.<a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>();
+<a id='L48' name='L48'></a>  48 <em class='brace'>}</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50 <a href='../S/867.html#L20' title='Defined at 20 in src/utils/sha1.hpp.'>sha1_hash</a>::<a href='../S/867.html#L20' title='Defined at 20 in src/utils/sha1.hpp.'>sha1_hash</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>)
+<a id='L51' name='L51'></a>  51 : <a href='../Y/1269.html' title='Multiple used in 5 places.'>H0</a>(0x67452301), <a href='../Y/1270.html' title='Multiple used in 5 places.'>H1</a>(0xefcdab89), <a href='../Y/1271.html' title='Multiple used in 5 places.'>H2</a>(0x98badcfe), <a href='../Y/1272.html' title='Multiple used in 5 places.'>H3</a>(0x10325476), <a href='../R/599.html' title='Multiple referred from 4 places.'>H4</a>(0xc3d2e1f0)
+<a id='L52' name='L52'></a>  52 <em class='brace'>{</em>
+<a id='L53' name='L53'></a>  53         <a href='../Y/20638.html' title='Multiple used in 70 places.'>uint8_t</a> <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[64];
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55         <strong class='reserved'>int</strong> <a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> = <a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>.<a href='../D/14459.html' title='Multiple defined in 16 places.'>size</a>();
+<a id='L56' name='L56'></a>  56         <a href='../Y/20636.html' title='Multiple used in 258 places.'>uint32_t</a> <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a> = <a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> * 8; <em class='comment'>// string length in bits</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19067.html' title='Multiple used in 268 places.'>stringstream</a> <a href='../Y/12253.html' title='Multiple used in 4 places.'>iss</a> (<a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>, <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19067.html' title='Multiple used in 268 places.'>stringstream</a>::<a href='../D/8754.html' title='Multiple defined in 4 places.'>in</a>);
+<a id='L59' name='L59'></a>  59         <em class='comment'>// cut our string in 64 bytes blocks then process it</em>
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>while</strong> (<a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> &gt; 0) <em class='brace'>{</em>
+<a id='L61' name='L61'></a>  61                 <a href='../Y/12253.html' title='Multiple used in 4 places.'>iss</a>.<a href='../D/12306.html' title='Multiple defined in 23 places.'>read</a>(<strong class='reserved'>reinterpret_cast</strong>&lt;<strong class='reserved'>char</strong>*&gt;(<a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>), 64);
+<a id='L62' name='L62'></a>  62                 <strong class='reserved'>if</strong> (<a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> &lt;= 64) <em class='brace'>{</em> <em class='comment'>// if it's the last block, pad it</em>
+<a id='L63' name='L63'></a>  63                         <strong class='reserved'>if</strong> (<a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> &lt; 64) <em class='brace'>{</em>
+<a id='L64' name='L64'></a>  64                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[<a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a>]= 0x80; <em class='comment'>// add a 1 bit right after the end of the string</em>
+<a id='L65' name='L65'></a>  65                         <em class='brace'>}</em>
+<a id='L66' name='L66'></a>  66                         <strong class='reserved'>int</strong> <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>;
+<a id='L67' name='L67'></a>  67                         <strong class='reserved'>for</strong> (<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> = 63; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &gt; <a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a>; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>--) <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>]=0; <em class='comment'>// pad our block with zeros</em>
+<a id='L69' name='L69'></a>  69                         <em class='brace'>}</em>
+<a id='L70' name='L70'></a>  70                         <strong class='reserved'>if</strong> (<a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> &lt; 56) <em class='brace'>{</em> <em class='comment'>// enough space to store the length</em>
+<a id='L71' name='L71'></a>  71                                 <em class='comment'>// put the length at the end of the block</em>
+<a id='L72' name='L72'></a>  72                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[60] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a> &gt;&gt; 24;
+<a id='L73' name='L73'></a>  73 <em class='sharp'>#ifdef</em> <a href='../Y/4696.html' title='Multiple used in 98 places.'>_MSC_VER</a>
+<a id='L74' name='L74'></a>  74 <em class='sharp'>#pragma</em> warning (push)
+<a id='L75' name='L75'></a>  75 <em class='sharp'>#pragma</em> warning (disable: 4244)
+<a id='L76' name='L76'></a>  76 <em class='sharp'>#endif</em>
+<a id='L77' name='L77'></a>  77                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[61] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a> &gt;&gt; 16;
+<a id='L78' name='L78'></a>  78                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[62] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a> &gt;&gt; 8;
+<a id='L79' name='L79'></a>  79                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[63] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a>;
+<a id='L80' name='L80'></a>  80 <em class='sharp'>#ifdef</em> <a href='../Y/4696.html' title='Multiple used in 98 places.'>_MSC_VER</a>
+<a id='L81' name='L81'></a>  81 <em class='sharp'>#pragma</em> warning (pop)
+<a id='L82' name='L82'></a>  82 <em class='sharp'>#endif</em>
+<a id='L83' name='L83'></a>  83                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em> <em class='comment'>// not enough space for the zeros =&gt; we need a new block</em>
+<a id='L84' name='L84'></a>  84                                 <a href='../D/11289.html' title='Multiple defined in 15 places.'>next</a>(<a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>);
+<a id='L85' name='L85'></a>  85                                 <em class='comment'>// new block</em>
+<a id='L86' name='L86'></a>  86                                 <strong class='reserved'>for</strong> (<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> = 0; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; 60 ; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87                                         <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>]=0; <em class='comment'>// pad our block with zeros</em>
+<a id='L88' name='L88'></a>  88                                 <em class='brace'>}</em>
+<a id='L89' name='L89'></a>  89                                 <strong class='reserved'>if</strong> (<a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> == 64) <em class='brace'>{</em>
+<a id='L90' name='L90'></a>  90                                         <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[0]= 0x80; <em class='comment'>// add a 1 bit right after the end of the string = beginning of our new block</em>
+<a id='L91' name='L91'></a>  91                                 <em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92                                 <em class='comment'>// put the length at the end of the block</em>
+<a id='L93' name='L93'></a>  93                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[60] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a> &gt;&gt; 24;
+<a id='L94' name='L94'></a>  94 <em class='sharp'>#ifdef</em> <a href='../Y/4696.html' title='Multiple used in 98 places.'>_MSC_VER</a>
+<a id='L95' name='L95'></a>  95 <em class='sharp'>#pragma</em> warning (push)
+<a id='L96' name='L96'></a>  96 <em class='sharp'>#pragma</em> warning (disable: 4244)
+<a id='L97' name='L97'></a>  97 <em class='sharp'>#endif</em>
+<a id='L98' name='L98'></a>  98                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[61] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a> &gt;&gt; 16;
+<a id='L99' name='L99'></a>  99                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[62] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a> &gt;&gt; 8;
+<a id='L100' name='L100'></a> 100                                 <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[63] = <a href='../Y/18817.html' title='Multiple used in 9 places.'>ssz</a>;
+<a id='L101' name='L101'></a> 101 <em class='sharp'>#ifdef</em> <a href='../Y/4696.html' title='Multiple used in 98 places.'>_MSC_VER</a>
+<a id='L102' name='L102'></a> 102 <em class='sharp'>#pragma</em> warning (pop)
+<a id='L103' name='L103'></a> 103 <em class='sharp'>#endif</em>
+<a id='L104' name='L104'></a> 104                         <em class='brace'>}</em>
+<a id='L105' name='L105'></a> 105                 <em class='brace'>}</em>
+<a id='L106' name='L106'></a> 106                 <a href='../D/11289.html' title='Multiple defined in 15 places.'>next</a>(<a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>);
+<a id='L107' name='L107'></a> 107                 <a href='../Y/6625.html' title='Multiple used in 10 places.'>bytes_left</a> -= 64;
+<a id='L108' name='L108'></a> 108         <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109 <em class='brace'>}</em>
+<a id='L110' name='L110'></a> 110 
+<a id='L111' name='L111'></a> 111 <strong class='reserved'>void</strong> <a href='../S/867.html#L20' title='Defined at 20 in src/utils/sha1.hpp.'>sha1_hash</a>::<a href='../R/10235.html' title='Multiple referred from 447 places.'>next</a>(<a href='../Y/20638.html' title='Multiple used in 70 places.'>uint8_t</a> <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[64]) <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112         <a href='../Y/20636.html' title='Multiple used in 258 places.'>uint32_t</a> <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[80];
+<a id='L113' name='L113'></a> 113         <a href='../Y/20636.html' title='Multiple used in 258 places.'>uint32_t</a> <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>, <a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>, <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>, <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>, <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a>, <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>;
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>int</strong> <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>;
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a> = <a href='../Y/1269.html' title='Multiple used in 5 places.'>H0</a>;
+<a id='L117' name='L117'></a> 117         <a href='../Y/257.html' title='Multiple used in 87 places.'>B</a> = <a href='../Y/1270.html' title='Multiple used in 5 places.'>H1</a>;
+<a id='L118' name='L118'></a> 118         <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a> = <a href='../Y/1271.html' title='Multiple used in 5 places.'>H2</a>;
+<a id='L119' name='L119'></a> 119         <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a> = <a href='../Y/1272.html' title='Multiple used in 5 places.'>H3</a>;
+<a id='L120' name='L120'></a> 120         <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> = <a href='../S/860.html#L51' title='Defined at 51 in src/utils/sha1.cpp.'>H4</a>;
+<a id='L121' name='L121'></a> 121         <strong class='reserved'>for</strong> (<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> = 0; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; 16; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122                 <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>]= (<a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[4 * <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>] &lt;&lt; 24) | (<a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[4 * <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> + 1] &lt;&lt; 16) | (<a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[4 * <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> + 2] &lt;&lt; 8) | <a href='../D/3703.html' title='Multiple defined in 2 places.'>block</a>[4 * <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> + 3];
+<a id='L123' name='L123'></a> 123         <em class='brace'>}</em>
+<a id='L124' name='L124'></a> 124         <strong class='reserved'>for</strong> (; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; 80; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L125' name='L125'></a> 125                 <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>]=<a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(1, <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>-3] ^ <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>-8] ^ <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>-14] ^ <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>-16]);
+<a id='L126' name='L126'></a> 126         <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127         <strong class='reserved'>for</strong> (<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> = 0; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; 20; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L128' name='L128'></a> 128                 <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(5,<a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>) + <a href='../S/860.html#L36' title='Defined at 36 in src/utils/sha1.cpp.'>sha_ch</a>(<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>,<a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>,<a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>) + <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> + <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>] + 0x5a827999;
+<a id='L129' name='L129'></a> 129                 <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> = <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>;
+<a id='L130' name='L130'></a> 130                 <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a> = <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>;
+<a id='L131' name='L131'></a> 131                 <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(30,<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>);
+<a id='L132' name='L132'></a> 132                 <a href='../Y/257.html' title='Multiple used in 87 places.'>B</a> = <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>;
+<a id='L133' name='L133'></a> 133                 <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a> = <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>;
+<a id='L134' name='L134'></a> 134         <em class='brace'>}</em>
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>for</strong> (; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; 40; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136                 <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(5,<a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>) + <a href='../S/860.html#L37' title='Defined at 37 in src/utils/sha1.cpp.'>sha_parity</a>(<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>,<a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>,<a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>) + <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> + <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>] + 0x6ed9eba1;
+<a id='L137' name='L137'></a> 137                 <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> = <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>;
+<a id='L138' name='L138'></a> 138                 <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a> = <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>;
+<a id='L139' name='L139'></a> 139                 <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(30,<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>);
+<a id='L140' name='L140'></a> 140                 <a href='../Y/257.html' title='Multiple used in 87 places.'>B</a> = <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>;
+<a id='L141' name='L141'></a> 141                 <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a> = <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>;
+<a id='L142' name='L142'></a> 142         <em class='brace'>}</em>
+<a id='L143' name='L143'></a> 143         <strong class='reserved'>for</strong> (; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; 60; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L144' name='L144'></a> 144                 <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(5,<a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>) + <a href='../S/860.html#L38' title='Defined at 38 in src/utils/sha1.cpp.'>sha_maj</a>(<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>,<a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>,<a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>) + <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> + <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>] + 0x8f1bbcdc;
+<a id='L145' name='L145'></a> 145                 <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> = <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>;
+<a id='L146' name='L146'></a> 146                 <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a> = <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>;
+<a id='L147' name='L147'></a> 147                 <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(30,<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>);
+<a id='L148' name='L148'></a> 148                 <a href='../Y/257.html' title='Multiple used in 87 places.'>B</a> = <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>;
+<a id='L149' name='L149'></a> 149                 <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a> = <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>;
+<a id='L150' name='L150'></a> 150         <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151         <strong class='reserved'>for</strong> (; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> &lt; 80; <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L152' name='L152'></a> 152                 <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(5,<a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>) + <a href='../S/860.html#L37' title='Defined at 37 in src/utils/sha1.cpp.'>sha_parity</a>(<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>,<a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>,<a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>) + <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> + <a href='../Y/2979.html' title='Multiple used in 171 places.'>W</a>[<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>] + 0xca62c1d6;
+<a id='L153' name='L153'></a> 153                 <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a> = <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>;
+<a id='L154' name='L154'></a> 154                 <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a> = <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>;
+<a id='L155' name='L155'></a> 155                 <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a> = <a href='../S/860.html#L35' title='Defined at 35 in src/utils/sha1.cpp.'>sha_rotl</a>(30,<a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>);
+<a id='L156' name='L156'></a> 156                 <a href='../Y/257.html' title='Multiple used in 87 places.'>B</a> = <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>;
+<a id='L157' name='L157'></a> 157                 <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a> = <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>;
+<a id='L158' name='L158'></a> 158         <em class='brace'>}</em>
+<a id='L159' name='L159'></a> 159         <a href='../Y/1269.html' title='Multiple used in 5 places.'>H0</a> += <a href='../Y/130.html' title='Multiple used in 29 places.'>A</a>;
+<a id='L160' name='L160'></a> 160         <a href='../Y/1270.html' title='Multiple used in 5 places.'>H1</a> += <a href='../Y/257.html' title='Multiple used in 87 places.'>B</a>;
+<a id='L161' name='L161'></a> 161         <a href='../Y/1271.html' title='Multiple used in 5 places.'>H2</a> += <a href='../Y/379.html' title='Multiple used in 25 places.'>C</a>;
+<a id='L162' name='L162'></a> 162         <a href='../Y/1272.html' title='Multiple used in 5 places.'>H3</a> += <a href='../Y/527.html' title='Multiple used in 118 places.'>D</a>;
+<a id='L163' name='L163'></a> 163         <a href='../S/860.html#L51' title='Defined at 51 in src/utils/sha1.cpp.'>H4</a> += <a href='../Y/639.html' title='Multiple used in 98 places.'>E</a>;
+<a id='L164' name='L164'></a> 164 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L111'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

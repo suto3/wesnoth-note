@@ -1,0 +1,557 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>data/tools/wesnoth/wmliterator3.py</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5624.html'>data</a>/<a href='../files/5787.html'>tools</a>/<a href='../files/5793.html'>wesnoth</a>/wmliterator3.py</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L34'>[^]</a><a href='#L456'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L34' title='Defined at 34.'>wmlfind</a></li>
+<li><a href='#L41' title='Defined at 41.'>wmlfindin</a></li>
+<li><a href='#L54' title='Defined at 54.'>isDirective</a></li>
+<li><a href='#L61' title='Defined at 61.'>isCloser</a></li>
+<li><a href='#L67' title='Defined at 67.'>isMacroCloser</a></li>
+<li><a href='#L73' title='Defined at 73.'>isOpener</a></li>
+<li><a href='#L79' title='Defined at 79.'>isExtender</a></li>
+<li><a href='#L85' title='Defined at 85.'>isMacroOpener</a></li>
+<li><a href='#L91' title='Defined at 91.'>isAttribute</a></li>
+<li><a href='#L103' title='Defined at 103.'>WmlIterator</a></li>
+<li><a href='#L126' title='Defined at 126.'>__init__</a></li>
+<li><a href='#L141' title='Defined at 141.'>parseQuotes</a></li>
+<li><a href='#L184' title='Defined at 184.'>closeScope</a></li>
+<li><a href='#L218' title='Defined at 218.'>parseElements</a></li>
+<li><a href='#L328' title='Defined at 328.'>printScopeError</a></li>
+<li><a href='#L332' title='Defined at 332.'>__iter__</a></li>
+<li><a href='#L336' title='Defined at 336.'>__eq__</a></li>
+<li><a href='#L340' title='Defined at 340.'>__gt__</a></li>
+<li><a href='#L344' title='Defined at 344.'>reset</a></li>
+<li><a href='#L354' title='Defined at 354.'>seek</a></li>
+<li><a href='#L374' title='Defined at 374.'>ancestors</a></li>
+<li><a href='#L378' title='Defined at 378.'>hasNext</a></li>
+<li><a href='#L383' title='Defined at 383.'>copy</a></li>
+<li><a href='#L390' title='Defined at 390.'>__str__</a></li>
+<li><a href='#L401' title='Defined at 401.'>__repr__</a></li>
+<li><a href='#L405' title='Defined at 405.'>__next__</a></li>
+<li><a href='#L430' title='Defined at 430.'>isOpener</a></li>
+<li><a href='#L433' title='Defined at 433.'>isCloser</a></li>
+<li><a href='#L436' title='Defined at 436.'>isExtender</a></li>
+<li><a href='#L439' title='Defined at 439.'>isMacroOpener</a></li>
+<li><a href='#L442' title='Defined at 442.'>isMacroCloser</a></li>
+<li><a href='#L445' title='Defined at 445.'>isAttribute</a></li>
+<li><a href='#L448' title='Defined at 448.'>iterScope</a></li>
+<li><a href='#L456' title='Defined at 456.'>printError</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 """
+<a id='L2' name='L2'></a>   2 wmliterator.py -- Python routines <strong class='reserved'>for</strong> navigating a Battle For Wesnoth WML tree
+<a id='L3' name='L3'></a>   3 Author: Sapient (Patrick Parker), 2007
+<a id='L4' name='L4'></a>   4 
+<a id='L5' name='L5'></a>   5 Purpose:
+<a id='L6' name='L6'></a>   6  The WmlIterator class can be used to analyze and search the structure of WML
+<a id='L7' name='L7'></a>   7  files non-invasively (i.e. preserving existing line structure), and its main
+<a id='L8' name='L8'></a>   8  use is to determine when a transformation of deprecated content needs to take
+<a id='L9' name='L9'></a>   9  place. (I wrote it was because wmllint was trying to <strong class='reserved'>do</strong> a lot of things with
+<a id='L10' name='L10'></a>  10  regular expressions which really required a more algorithmic approach. Also,
+<a id='L11' name='L11'></a>  11  wmllint was often inconsistent with correct handling of comments and values
+<a id='L12' name='L12'></a>  12  inside strings.)
+<a id='L13' name='L13'></a>  13 
+<a id='L14' name='L14'></a>  14 Limitations:
+<a id='L15' name='L15'></a>  15  The WmlIterator does not attempt to expand macros, only to recognize them as
+<a id='L16' name='L16'></a>  16  another level of nesting. Also, the handling of multiple assignment syntax
+<a id='L17' name='L17'></a>  17  is somewhat limited (<strong class='reserved'>for</strong> similar reasons). Adding seamless support <strong class='reserved'>for</strong> these
+<a id='L18' name='L18'></a>  18  would be ideal, but it presents a design challenge since the iteration is
+<a id='L19' name='L19'></a>  19  supposed to be non-invasive. Thus, the current behavior is considered good
+<a id='L20' name='L20'></a>  20  enough <strong class='reserved'>for</strong> now.
+<a id='L21' name='L21'></a>  21 """
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 from <a href='../Y/10355.html' title='Multiple used in 4 places.'>functools</a> import <a href='../Y/20281.html' title='Multiple used in 4 places.'>total_ordering</a>
+<a id='L24' name='L24'></a>  24 import <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>, <a href='../Y/16802.html' title='Multiple used in 715 places.'>re</a>, <a href='../D/4905.html' title='Multiple defined in 7 places.'>copy</a>, <a href='../Y/7448.html' title='Multiple used in 19 places.'>codecs</a>
+<a id='L25' name='L25'></a>  25 <a href='../R/8630.html' title='Multiple referred from 2 places.'>keyPattern</a> = <a href='../Y/16802.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7579.html' title='Multiple used in 102 places.'>compile</a>('(\w+)(,\s?\w+)*\s*=')
+<a id='L26' name='L26'></a>  26 <a href='../R/8631.html' title='Multiple referred from 2 places.'>keySplit</a> = <a href='../Y/16802.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7579.html' title='Multiple used in 102 places.'>compile</a>(r'[=,\s]')
+<a id='L27' name='L27'></a>  27 <a href='../R/13650.html' title='Multiple referred from 2 places.'>tagPattern</a> = <a href='../Y/16802.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7579.html' title='Multiple used in 102 places.'>compile</a>(r'(^|(?&lt;![\w|}]))(\[/?\+?[a-z _]+\])')
+<a id='L28' name='L28'></a>  28 <a href='../R/9639.html' title='Multiple referred from 2 places.'>macroOpenPattern</a> = <a href='../Y/16802.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7579.html' title='Multiple used in 102 places.'>compile</a>(r'(\{[^\s\}\{]*)')
+<a id='L29' name='L29'></a>  29 <a href='../R/9638.html' title='Multiple referred from 2 places.'>macroClosePattern</a> = <a href='../Y/16802.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7579.html' title='Multiple used in 102 places.'>compile</a>(r'\}')
+<a id='L30' name='L30'></a>  30 <a href='../R/3999.html' title='Multiple referred from 8 places.'>closeMacroType</a> = 'end of macro'
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <a href='../R/13247.html' title='Multiple referred from 8 places.'>silenceErrors</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 def wmlfind(<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>, <a href='../Y/21687.html' title='Multiple used in 8 places.'>wmlItor</a>):
+<a id='L35' name='L35'></a>  35     """Find a simple element from traversing a WML iterator"""
+<a id='L36' name='L36'></a>  36     <strong class='reserved'>for</strong> <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a> in <a href='../Y/21687.html' title='Multiple used in 8 places.'>wmlItor</a>.<a href='../D/4905.html' title='Multiple defined in 7 places.'>copy</a>():
+<a id='L37' name='L37'></a>  37         <strong class='reserved'>if</strong> <a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a> == <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>.element:
+<a id='L38' name='L38'></a>  38             <strong class='reserved'>return</strong> <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>
+<a id='L39' name='L39'></a>  39     <strong class='reserved'>return</strong> <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 def wmlfindin(<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>, <a href='../Y/17733.html' title='Multiple used in 6 places.'>scopeElement</a>, <a href='../Y/21687.html' title='Multiple used in 8 places.'>wmlItor</a>):
+<a id='L42' name='L42'></a>  42     """Find an element inside a particular type of scope element"""
+<a id='L43' name='L43'></a>  43     <strong class='reserved'>for</strong> <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a> in <a href='../Y/21687.html' title='Multiple used in 8 places.'>wmlItor</a>.<a href='../D/4905.html' title='Multiple defined in 7 places.'>copy</a>():
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>if</strong> <a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a> == <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>.element:
+<a id='L45' name='L45'></a>  45             <strong class='reserved'>if</strong> <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>:
+<a id='L46' name='L46'></a>  46                 <strong class='reserved'>if</strong> <a href='../Y/17733.html' title='Multiple used in 6 places.'>scopeElement</a> == <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>[-1].<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>:
+<a id='L47' name='L47'></a>  47                     <strong class='reserved'>return</strong> <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>
+<a id='L48' name='L48'></a>  48             elif not <a href='../Y/17733.html' title='Multiple used in 6 places.'>scopeElement</a>:
+<a id='L49' name='L49'></a>  49                 # allow searching in the empty scope
+<a id='L50' name='L50'></a>  50                 <strong class='reserved'>return</strong> <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>
+<a id='L51' name='L51'></a>  51     <strong class='reserved'>return</strong> <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 def <a href='../R/8290.html' title='Multiple referred from 8 places.'>isDirective</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L55' name='L55'></a>  55     "Identify things that shouldn't be indented."
+<a id='L56' name='L56'></a>  56     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L57' name='L57'></a>  57         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L58' name='L58'></a>  58     <strong class='reserved'>return</strong> <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>(("#ifdef", "#ifndef", "#ifhave", "#ifnhave", "#ifver", "#ifnver", "#else", "#endif", "#define", "#enddef", "#undef"))
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 def <a href='../R/8287.html' title='Multiple referred from 6 places.'>isCloser</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L62' name='L62'></a>  62     "Are we looking at a closing tag?"
+<a id='L63' name='L63'></a>  63     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L64' name='L64'></a>  64         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L65' name='L65'></a>  65     <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) == type("") and elem.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>("[/")
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67 def <a href='../R/8298.html' title='Multiple referred from 2 places.'>isMacroCloser</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L68' name='L68'></a>  68     "Are we looking at a macro closer?"
+<a id='L69' name='L69'></a>  69     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L70' name='L70'></a>  70         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L71' name='L71'></a>  71     <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) == type("") and elem == <a href='../D/4548.html' title='Multiple defined in 2 places.'>closeMacroType</a>
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73 def <a href='../R/8303.html' title='Multiple referred from 4 places.'>isOpener</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L74' name='L74'></a>  74     "Are we looking at an opening tag?"
+<a id='L75' name='L75'></a>  75     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L76' name='L76'></a>  76         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L77' name='L77'></a>  77     <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) == type("") and elem.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>("[") and not <a href='../D/9181.html' title='Multiple defined in 4 places.'>isCloser</a>(elem)
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79 def <a href='../R/8291.html' title='Multiple referred from 2 places.'>isExtender</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L80' name='L80'></a>  80     "Are we looking at an extender tag?"
+<a id='L81' name='L81'></a>  81     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L82' name='L82'></a>  82         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L83' name='L83'></a>  83     <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) == type("") and elem.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>("[+")
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 def <a href='../R/8299.html' title='Multiple referred from 2 places.'>isMacroOpener</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L86' name='L86'></a>  86     "Are we looking at a macro opener?"
+<a id='L87' name='L87'></a>  87     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L88' name='L88'></a>  88         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L89' name='L89'></a>  89     <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) == type("") and elem.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>("{")
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91 def <a href='../R/8285.html' title='Multiple referred from 2 places.'>isAttribute</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L92' name='L92'></a>  92     "Are we looking at an attribute (or attribute tuple)?"
+<a id='L93' name='L93'></a>  93     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L94' name='L94'></a>  94         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L95' name='L95'></a>  95     <strong class='reserved'>if</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) == type(()):
+<a id='L96' name='L96'></a>  96         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = elem[0]
+<a id='L97' name='L97'></a>  97     <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) == type("") and elem.<a href='../Y/9203.html' title='Multiple used in 86 places.'>endswith</a>("=")
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 # the total_ordering decorator from functools allows to define only two comparison
+<a id='L100' name='L100'></a> 100 # methods, and Python generates the remaining methods
+<a id='L101' name='L101'></a> 101 # it comes with a speed penalty, but the alternative is defining six methods by hand...
+<a id='L102' name='L102'></a> 102 @total_ordering
+<a id='L103' name='L103'></a> 103 class <a href='../R/2391.html' title='Multiple referred from 22 places.'>WmlIterator</a>(<a href='../S/1248.html#L40' title='Defined at 40 in src/theme.hpp.'>object</a>):
+<a id='L104' name='L104'></a> 104     """Return an iterable WML navigation object.
+<a id='L105' name='L105'></a> 105     Initialize with a list of lines or a file; <strong class='reserved'>if</strong> the the line list is
+<a id='L106' name='L106'></a> 106     empty and the filename is specified, lines will be read from the file.
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108     Note: <strong class='reserved'>if</strong> changes are made to lines <strong class='reserved'>while</strong> iterating, this may produce
+<a id='L109' name='L109'></a> 109     unexpected results. In such <strong class='reserved'>case</strong>, seek() to the line number of a
+<a id='L110' name='L110'></a> 110     scope behind where changes were made.
+<a id='L111' name='L111'></a> 111 Important Attributes:
+<a id='L112' name='L112'></a> 112     lines - this is an internal list of all the physical lines
+<a id='L113' name='L113'></a> 113     scopes - this is an internal list of all open scopes (as iterators)
+<a id='L114' name='L114'></a> 114              note: when retrieving an iterator from this list, always
+<a id='L115' name='L115'></a> 115              use a copy to perform seek() or next(), and not the original
+<a id='L116' name='L116'></a> 116     element - the wml tag, key, or macro name <strong class='reserved'>for</strong> this logical line
+<a id='L117' name='L117'></a> 117               (in complex cases, this may be a tuple of elements...
+<a id='L118' name='L118'></a> 118               see parseElements <strong class='reserved'>for</strong> list of possible values)
+<a id='L119' name='L119'></a> 119     text - the exact text of this logical line, as it appears in the
+<a id='L120' name='L120'></a> 120            original source, and ending with a newline
+<a id='L121' name='L121'></a> 121            note: the logical line also includes multi-line quoted strings
+<a id='L122' name='L122'></a> 122     span - the number of physical lines in this logical line:
+<a id='L123' name='L123'></a> 123            always 1, unless text contains a multi-line quoted string
+<a id='L124' name='L124'></a> 124     lineno - a zero-based line index marking where this text begins
+<a id='L125' name='L125'></a> 125     """
+<a id='L126' name='L126'></a> 126     def <a href='../R/2426.html' title='Multiple referred from 39 places.'>__init__</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>=<a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>, <a href='../D/6175.html' title='Multiple defined in 4 places.'>filename</a>=None, <a href='../D/3604.html' title='Multiple defined in 29 places.'>begin</a>=-1):
+<a id='L127' name='L127'></a> 127         "Initialize a new WmlIterator."
+<a id='L128' name='L128'></a> 128         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a> = <a href='../D/6175.html' title='Multiple defined in 4 places.'>filename</a>
+<a id='L129' name='L129'></a> 129         <strong class='reserved'>if</strong> <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a> is <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>:
+<a id='L130' name='L130'></a> 130             <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a> = []
+<a id='L131' name='L131'></a> 131             <strong class='reserved'>if</strong> <a href='../D/6175.html' title='Multiple defined in 4 places.'>filename</a>:
+<a id='L132' name='L132'></a> 132                 try:
+<a id='L133' name='L133'></a> 133                     with <a href='../Y/7448.html' title='Multiple used in 19 places.'>codecs</a>.<a href='../D/11511.html' title='Multiple defined in 3 places.'>open</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>, "r", "utf8") as <a href='../Y/11624.html' title='Multiple used in 4 places.'>ifp</a>:
+<a id='L134' name='L134'></a> 134                         <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a> = <a href='../Y/11624.html' title='Multiple used in 4 places.'>ifp</a>.<a href='../Y/16833.html' title='Multiple used in 5 places.'>readlines</a>()
+<a id='L135' name='L135'></a> 135                 except <a href='../Y/751.html' title='Multiple used in 62 places.'>Exception</a>:
+<a id='L136' name='L136'></a> 136                     <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12049.html' title='Multiple defined in 2 places.'>printError</a>('error opening file')
+<a id='L137' name='L137'></a> 137         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a> = lines
+<a id='L138' name='L138'></a> 138         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12762.html' title='Multiple defined in 13 places.'>reset</a>()
+<a id='L139' name='L139'></a> 139         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/13308.html' title='Multiple defined in 2 places.'>seek</a>(<a href='../D/3604.html' title='Multiple defined in 29 places.'>begin</a>)
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141     def <a href='../R/10576.html' title='Multiple referred from 2 places.'>parseQuotes</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>):
+<a id='L142' name='L142'></a> 142         """Return the line or multiline text if a quote spans multiple lines"""
+<a id='L143' name='L143'></a> 143         <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>[<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>]
+<a id='L144' name='L144'></a> 144         <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> = 1
+<a id='L145' name='L145'></a> 145         <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('#')
+<a id='L146' name='L146'></a> 146         <strong class='reserved'>if</strong> <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> &lt; 0:
+<a id='L147' name='L147'></a> 147             <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> = <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>
+<a id='L148' name='L148'></a> 148         <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>[:<a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a>].<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('&lt;&lt;')
+<a id='L149' name='L149'></a> 149         <strong class='reserved'>while</strong> <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> &gt;= 0:
+<a id='L150' name='L150'></a> 150             <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> = -1
+<a id='L151' name='L151'></a> 151             <a href='../Y/6214.html' title='Multiple used in 12 places.'>beginofend</a> = <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>+2
+<a id='L152' name='L152'></a> 152             <strong class='reserved'>while</strong> <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> &lt; 0:
+<a id='L153' name='L153'></a> 153                 <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('&gt;&gt;', <a href='../Y/6214.html' title='Multiple used in 12 places.'>beginofend</a>)
+<a id='L154' name='L154'></a> 154                 <strong class='reserved'>if</strong> <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> &lt; 0:
+<a id='L155' name='L155'></a> 155                     <strong class='reserved'>if</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> + <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> &gt;= <a href='../Y/12893.html' title='Multiple used in 338 places.'>len</a>(<a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>):
+<a id='L156' name='L156'></a> 156                         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12049.html' title='Multiple defined in 2 places.'>printError</a>('reached EOF due to unterminated string at line', self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>+1)
+<a id='L157' name='L157'></a> 157                         <strong class='reserved'>return</strong> <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>, <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>
+<a id='L158' name='L158'></a> 158                     <a href='../Y/6214.html' title='Multiple used in 12 places.'>beginofend</a> = <a href='../Y/12893.html' title='Multiple used in 338 places.'>len</a>(<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>)
+<a id='L159' name='L159'></a> 159                     <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> += <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>[<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> + <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>]
+<a id='L160' name='L160'></a> 160                     <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> += 1
+<a id='L161' name='L161'></a> 161             <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('#', <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a>+2)
+<a id='L162' name='L162'></a> 162             <strong class='reserved'>if</strong> <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> &lt; 0:
+<a id='L163' name='L163'></a> 163                 <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> = <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>
+<a id='L164' name='L164'></a> 164             <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>[:<a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a>].<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('&lt;&lt;', <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a>+2)
+<a id='L165' name='L165'></a> 165         <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>[:<a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a>].<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('"')
+<a id='L166' name='L166'></a> 166         <strong class='reserved'>while</strong> <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> &gt;= 0:
+<a id='L167' name='L167'></a> 167             <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> = -1
+<a id='L168' name='L168'></a> 168             <a href='../Y/6214.html' title='Multiple used in 12 places.'>beginofend</a> = <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>+1
+<a id='L169' name='L169'></a> 169             <strong class='reserved'>while</strong> <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> &lt; 0:
+<a id='L170' name='L170'></a> 170                 <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('"', <a href='../Y/6214.html' title='Multiple used in 12 places.'>beginofend</a>)
+<a id='L171' name='L171'></a> 171                 <strong class='reserved'>if</strong> <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> &lt; 0:
+<a id='L172' name='L172'></a> 172                     <strong class='reserved'>if</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> + <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> &gt;= <a href='../Y/12893.html' title='Multiple used in 338 places.'>len</a>(<a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>):
+<a id='L173' name='L173'></a> 173                         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12049.html' title='Multiple defined in 2 places.'>printError</a>('reached EOF due to unterminated string at line', self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>+1)
+<a id='L174' name='L174'></a> 174                         <strong class='reserved'>return</strong> <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>, <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>
+<a id='L175' name='L175'></a> 175                     <a href='../Y/6214.html' title='Multiple used in 12 places.'>beginofend</a> = <a href='../Y/12893.html' title='Multiple used in 338 places.'>len</a>(<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>)
+<a id='L176' name='L176'></a> 176                     <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> += <a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>[<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> + <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>]
+<a id='L177' name='L177'></a> 177                     <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> += 1
+<a id='L178' name='L178'></a> 178             <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('#', <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a>+1)
+<a id='L179' name='L179'></a> 179             <strong class='reserved'>if</strong> <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> &lt; 0:
+<a id='L180' name='L180'></a> 180                 <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> = <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>
+<a id='L181' name='L181'></a> 181             <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>[:<a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a>].<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('"', <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a>+1)
+<a id='L182' name='L182'></a> 182         <strong class='reserved'>return</strong> <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>, <a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184     def <a href='../R/4000.html' title='Multiple referred from 8 places.'>closeScope</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>, <a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a>):
+<a id='L185' name='L185'></a> 185         """Close the most recently opened scope. Return false if not enough scopes.
+<a id='L186' name='L186'></a> 186         note: directives close all the way back to the last open directive
+<a id='L187' name='L187'></a> 187         non-directives cannot close a directive and will no-op in that <strong class='reserved'>case</strong>."""
+<a id='L188' name='L188'></a> 188         try:
+<a id='L189' name='L189'></a> 189             <strong class='reserved'>if</strong> <a href='../D/9184.html' title='Multiple defined in 2 places.'>isDirective</a>(<a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a>):
+<a id='L190' name='L190'></a> 190                 <strong class='reserved'>while</strong> not <a href='../D/9184.html' title='Multiple defined in 2 places.'>isDirective</a>(<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../S/968.html#L45' title='Defined at 45 in src/image_modifications.cpp.'>pop</a>()):
+<a id='L191' name='L191'></a> 191                     pass
+<a id='L192' name='L192'></a> 192             elif (<a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a>==<a href='../D/4548.html' title='Multiple defined in 2 places.'>closeMacroType</a>):
+<a id='L193' name='L193'></a> 193                 <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = ''
+<a id='L194' name='L194'></a> 194                 <strong class='reserved'>while</strong> not <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('{'):
+<a id='L195' name='L195'></a> 195                     <a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a> = <a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../S/968.html#L45' title='Defined at 45 in src/image_modifications.cpp.'>pop</a>()
+<a id='L196' name='L196'></a> 196                     <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = <a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>
+<a id='L197' name='L197'></a> 197                     <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L198' name='L198'></a> 198                         <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = <a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L199' name='L199'></a> 199                     <strong class='reserved'>if</strong> <a href='../D/9184.html' title='Multiple defined in 2 places.'>isDirective</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>):
+<a id='L200' name='L200'></a> 200                         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12050.html' title='Multiple defined in 2 places.'>printScopeError</a>(<a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a>)
+<a id='L201' name='L201'></a> 201                         <a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(<a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>) # to reduce additional errors (hopefully)
+<a id='L202' name='L202'></a> 202                         <strong class='reserved'>return</strong> <a href='../Y/2900.html' title='Multiple used in 237 places.'>True</a>
+<a id='L203' name='L203'></a> 203             elif not <a href='../D/9184.html' title='Multiple defined in 2 places.'>isDirective</a>(<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>[-1]):
+<a id='L204' name='L204'></a> 204                 <a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a> = <a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../S/968.html#L45' title='Defined at 45 in src/image_modifications.cpp.'>pop</a>()
+<a id='L205' name='L205'></a> 205                 <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = <a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>
+<a id='L206' name='L206'></a> 206                 <strong class='reserved'>if</strong> <a href='../Y/12235.html' title='Multiple used in 82 places.'>isinstance</a>(<a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>, <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>):
+<a id='L207' name='L207'></a> 207                     <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = <a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>
+<a id='L208' name='L208'></a> 208                 <strong class='reserved'>if</strong> (<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('{') and <a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a> != <a href='../D/4548.html' title='Multiple defined in 2 places.'>closeMacroType</a>):
+<a id='L209' name='L209'></a> 209                     <a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(<a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>)
+<a id='L210' name='L210'></a> 210                 elif (<a href='../D/9198.html' title='Multiple defined in 4 places.'>isOpener</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>) and <a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a> != '[/'+elem[1:]
+<a id='L211' name='L211'></a> 211                 and '+'+<a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a> != <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>[1]+'[/'+elem[2:]):
+<a id='L212' name='L212'></a> 212                     <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12049.html' title='Multiple defined in 2 places.'>printError</a>('reached', <a href='../Y/7391.html' title='Multiple used in 16 places.'>closerElement</a>, 'at line', self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>+1, 'before closing scope', <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>)
+<a id='L213' name='L213'></a> 213                     <a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(<a href='../Y/7387.html' title='Multiple used in 22 places.'>closed</a>) # to reduce additional errors (hopefully)
+<a id='L214' name='L214'></a> 214             <strong class='reserved'>return</strong> <a href='../Y/2900.html' title='Multiple used in 237 places.'>True</a>
+<a id='L215' name='L215'></a> 215         except <a href='../Y/1615.html' title='Multiple used in 8 places.'>IndexError</a>:
+<a id='L216' name='L216'></a> 216             <strong class='reserved'>return</strong> <a href='../Y/1156.html' title='Multiple used in 250 places.'>False</a>
+<a id='L217' name='L217'></a> 217 
+<a id='L218' name='L218'></a> 218     def <a href='../R/10575.html' title='Multiple referred from 2 places.'>parseElements</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>):
+<a id='L219' name='L219'></a> 219         """Remove any closed scopes, return a list of element names
+<a id='L220' name='L220'></a> 220         and list of new unclosed scopes
+<a id='L221' name='L221'></a> 221     Element Types:
+<a id='L222' name='L222'></a> 222         tags: one of "[tag_name]" or "[/tag_name]"
+<a id='L223' name='L223'></a> 223             [tag_name] - opens a scope
+<a id='L224' name='L224'></a> 224             [/tag_name] - closes a scope
+<a id='L225' name='L225'></a> 225         keys: either "key=" or ("key1=", "key2=") <strong class='reserved'>for</strong> multi-assignment
+<a id='L226' name='L226'></a> 226             key= - does not affect the scope
+<a id='L227' name='L227'></a> 227             key1,key2= - multi-assignment returns multiple elements
+<a id='L228' name='L228'></a> 228         directives: one of "#ifdef", "#ifndef", "#ifhave", "#ifnhave", "#ifver", "#ifnver", "#else", "#endif", "#define", "#enddef"
+<a id='L229' name='L229'></a> 229 <em class='sharp'>            #ifdef</em> - opens a scope
+<a id='L230' name='L230'></a> 230 <em class='sharp'>            #ifndef</em> - opens a scope
+<a id='L231' name='L231'></a> 231             #ifhave - opens a scope
+<a id='L232' name='L232'></a> 232             #ifnhave - opens a scope
+<a id='L233' name='L233'></a> 233             #ifver - opens a scope
+<a id='L234' name='L234'></a> 234             #ifnver - opens a scope
+<a id='L235' name='L235'></a> 235 <em class='sharp'>            #else</em> - closes a scope, also opens a new scope
+<a id='L236' name='L236'></a> 236 <em class='sharp'>            #endif</em> - closes a scope
+<a id='L237' name='L237'></a> 237 <em class='sharp'>            #define</em> - opens a scope
+<a id='L238' name='L238'></a> 238             #enddef - closes a scope
+<a id='L239' name='L239'></a> 239         macro calls: "{MACRO_NAME}"
+<a id='L240' name='L240'></a> 240             <em class='brace'>{</em>MACRO_NAME - opens a scope
+<a id='L241' name='L241'></a> 241             <em class='brace'>}</em> - closes a scope
+<a id='L242' name='L242'></a> 242         """
+<a id='L243' name='L243'></a> 243         <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a> = [] #(elementType, sortPos, scopeDelta)
+<a id='L244' name='L244'></a> 244         # first remove any lua strings
+<a id='L245' name='L245'></a> 245         <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('&lt;&lt;')
+<a id='L246' name='L246'></a> 246         <strong class='reserved'>while</strong> <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> &gt;= 0:
+<a id='L247' name='L247'></a> 247             <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('&gt;&gt;', <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>+2)
+<a id='L248' name='L248'></a> 248             <strong class='reserved'>if</strong> <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> &lt; 0:
+<a id='L249' name='L249'></a> 249                 <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = text[:<a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>]
+<a id='L250' name='L250'></a> 250                 <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = -1 #terminate loop
+<a id='L251' name='L251'></a> 251             <strong class='reserved'>else</strong>:
+<a id='L252' name='L252'></a> 252                 <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = text[:<a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>] + text[<a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a>+2:]
+<a id='L253' name='L253'></a> 253                 <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('&lt;&lt;')
+<a id='L254' name='L254'></a> 254         # remove any quoted strings
+<a id='L255' name='L255'></a> 255         <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('"')
+<a id='L256' name='L256'></a> 256         <strong class='reserved'>while</strong> <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> &gt;= 0:
+<a id='L257' name='L257'></a> 257             <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('"', <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>+1)
+<a id='L258' name='L258'></a> 258             <strong class='reserved'>if</strong> <a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a> &lt; 0:
+<a id='L259' name='L259'></a> 259                 <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = text[:<a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>]
+<a id='L260' name='L260'></a> 260                 <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = -1 #terminate loop
+<a id='L261' name='L261'></a> 261             <strong class='reserved'>else</strong>:
+<a id='L262' name='L262'></a> 262                 <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = text[:<a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a>] + text[<a href='../Y/9201.html' title='Multiple used in 36 places.'>endquote</a>+1:]
+<a id='L263' name='L263'></a> 263                 <a href='../Y/6215.html' title='Multiple used in 44 places.'>beginquote</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('"')
+<a id='L264' name='L264'></a> 264         # next remove any comments
+<a id='L265' name='L265'></a> 265         <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = text.<a href='../Y/13364.html' title='Multiple used in 30 places.'>lstrip</a>()
+<a id='L266' name='L266'></a> 266         <a href='../Y/7562.html' title='Multiple used in 6 places.'>commentSearch</a> = 1
+<a id='L267' name='L267'></a> 267         <strong class='reserved'>if</strong> <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#ifdef'):
+<a id='L268' name='L268'></a> 268             <strong class='reserved'>return</strong> (['#ifdef'],)*2
+<a id='L269' name='L269'></a> 269         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#ifndef'):
+<a id='L270' name='L270'></a> 270             <strong class='reserved'>return</strong> (['#ifndef'],)*2
+<a id='L271' name='L271'></a> 271         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#ifhave'):
+<a id='L272' name='L272'></a> 272             <strong class='reserved'>return</strong> (['#ifhave'],)*2
+<a id='L273' name='L273'></a> 273         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#ifnhave'):
+<a id='L274' name='L274'></a> 274             <strong class='reserved'>return</strong> (['#ifnhave'],)*2
+<a id='L275' name='L275'></a> 275         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#ifver'):
+<a id='L276' name='L276'></a> 276             <strong class='reserved'>return</strong> (['#ifver'],)*2
+<a id='L277' name='L277'></a> 277         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#ifnver'):
+<a id='L278' name='L278'></a> 278             <strong class='reserved'>return</strong> (['#ifnver'],)*2
+<a id='L279' name='L279'></a> 279         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#else'):
+<a id='L280' name='L280'></a> 280             <strong class='reserved'>if</strong> not <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/4549.html' title='Multiple defined in 2 places.'>closeScope</a>(self.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>, '#else'):
+<a id='L281' name='L281'></a> 281                 <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12050.html' title='Multiple defined in 2 places.'>printScopeError</a>('#else')
+<a id='L282' name='L282'></a> 282             <strong class='reserved'>return</strong> (['#else'],)*2
+<a id='L283' name='L283'></a> 283         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#endif'):
+<a id='L284' name='L284'></a> 284             <strong class='reserved'>if</strong> not <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/4549.html' title='Multiple defined in 2 places.'>closeScope</a>(self.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>, '#endif'):
+<a id='L285' name='L285'></a> 285                 <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12050.html' title='Multiple defined in 2 places.'>printScopeError</a>('#endif')
+<a id='L286' name='L286'></a> 286                 <strong class='reserved'>return</strong> ['#endif'], []
+<a id='L287' name='L287'></a> 287         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#define'):
+<a id='L288' name='L288'></a> 288             <strong class='reserved'>return</strong> (['#define'],)*2
+<a id='L289' name='L289'></a> 289         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('#enddef') &gt;= 0:
+<a id='L290' name='L290'></a> 290             <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(('#enddef', <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('#enddef'), -1))
+<a id='L291' name='L291'></a> 291         elif <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/18886.html' title='Multiple used in 117 places.'>startswith</a>('#po:') or text.startswith('# po:'):
+<a id='L292' name='L292'></a> 292             <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(("#po", 0, 0))
+<a id='L293' name='L293'></a> 293         <strong class='reserved'>else</strong>:
+<a id='L294' name='L294'></a> 294             <a href='../Y/7562.html' title='Multiple used in 6 places.'>commentSearch</a> = 0
+<a id='L295' name='L295'></a> 295         <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> = <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/6236.html' title='Multiple defined in 33 places.'>find</a>('#', <a href='../Y/7562.html' title='Multiple used in 6 places.'>commentSearch</a>)
+<a id='L296' name='L296'></a> 296         <strong class='reserved'>if</strong> <a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a> &gt;= 0:
+<a id='L297' name='L297'></a> 297             <a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = text[:<a href='../Y/6210.html' title='Multiple used in 32 places.'>begincomment</a>]
+<a id='L298' name='L298'></a> 298         #now find elements in a loop
+<a id='L299' name='L299'></a> 299         <strong class='reserved'>for</strong> <a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a> in <a href='../D/14855.html' title='Multiple defined in 2 places.'>tagPattern</a>.<a href='../Y/9945.html' title='Multiple used in 15 places.'>finditer</a>(<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>):
+<a id='L300' name='L300'></a> 300             <a href='../Y/8513.html' title='Multiple used in 19 places.'>delta</a> = 1
+<a id='L301' name='L301'></a> 301             <strong class='reserved'>if</strong> <a href='../D/9181.html' title='Multiple defined in 4 places.'>isCloser</a>(<a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(2)):
+<a id='L302' name='L302'></a> 302                 <a href='../Y/8513.html' title='Multiple used in 19 places.'>delta</a> = -1
+<a id='L303' name='L303'></a> 303             <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>((<a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(2), m.<a href='../D/14593.html' title='Multiple defined in 5 places.'>start</a>(), <a href='../Y/8513.html' title='Multiple used in 19 places.'>delta</a>))
+<a id='L304' name='L304'></a> 304         <strong class='reserved'>for</strong> <a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a> in <a href='../D/9541.html' title='Multiple defined in 2 places.'>keyPattern</a>.<a href='../Y/9945.html' title='Multiple used in 15 places.'>finditer</a>(<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>):
+<a id='L305' name='L305'></a> 305             <strong class='reserved'>for</strong> <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>, <a href='../Y/12444.html' title='Multiple used in 406 places.'>k</a> in <a href='../Y/9314.html' title='Multiple used in 15 places.'>enumerate</a>(<a href='../D/9542.html' title='Multiple defined in 2 places.'>keySplit</a>.<a href='../D/14561.html' title='Multiple defined in 2 places.'>split</a>(<a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(0))):
+<a id='L306' name='L306'></a> 306                 <strong class='reserved'>if</strong> <a href='../Y/12444.html' title='Multiple used in 406 places.'>k</a>:
+<a id='L307' name='L307'></a> 307                     <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>((<a href='../Y/12444.html' title='Multiple used in 406 places.'>k</a>+'=', <a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a>.<a href='../D/14593.html' title='Multiple defined in 5 places.'>start</a>()+<a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a>, 0))
+<a id='L308' name='L308'></a> 308         <strong class='reserved'>for</strong> <a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a> in <a href='../D/10618.html' title='Multiple defined in 2 places.'>macroOpenPattern</a>.<a href='../Y/9945.html' title='Multiple used in 15 places.'>finditer</a>(<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>):
+<a id='L309' name='L309'></a> 309             <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>((<a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1), m.<a href='../D/14593.html' title='Multiple defined in 5 places.'>start</a>(), 1))
+<a id='L310' name='L310'></a> 310         <strong class='reserved'>for</strong> <a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a> in <a href='../D/10617.html' title='Multiple defined in 2 places.'>macroClosePattern</a>.<a href='../Y/9945.html' title='Multiple used in 15 places.'>finditer</a>(<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>):
+<a id='L311' name='L311'></a> 311             <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>((<a href='../D/4548.html' title='Multiple defined in 2 places.'>closeMacroType</a>, <a href='../Y/13454.html' title='Multiple used in 567 places.'>m</a>.<a href='../D/14593.html' title='Multiple defined in 5 places.'>start</a>(), -1))
+<a id='L312' name='L312'></a> 312         #sort by start position
+<a id='L313' name='L313'></a> 313         <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>.<a href='../D/14508.html' title='Multiple defined in 6 places.'>sort</a>(<a href='../D/9540.html' title='Multiple defined in 2 places.'>key</a>=lambda <a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>:x[1])
+<a id='L314' name='L314'></a> 314         <a href='../Y/17354.html' title='Multiple used in 6 places.'>resultElements</a> = []
+<a id='L315' name='L315'></a> 315         <a href='../Y/15467.html' title='Multiple used in 8 places.'>openedScopes</a> = []
+<a id='L316' name='L316'></a> 316         <strong class='reserved'>for</strong> <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>, <a href='../Y/18624.html' title='Multiple used in 2 places.'>sortPos</a>, <a href='../Y/17732.html' title='Multiple used in 10 places.'>scopeDelta</a> in <a href='../S/129.html#L101' title='Defined at 101 in src/serialization/parser.cpp.'>elements</a>:
+<a id='L317' name='L317'></a> 317             <strong class='reserved'>while</strong> <a href='../Y/17732.html' title='Multiple used in 10 places.'>scopeDelta</a> &lt; 0:
+<a id='L318' name='L318'></a> 318                 <strong class='reserved'>if</strong> not(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/4549.html' title='Multiple defined in 2 places.'>closeScope</a>(<a href='../Y/15467.html' title='Multiple used in 8 places.'>openedScopes</a>, <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>)\
+<a id='L319' name='L319'></a> 319                         or <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/4549.html' title='Multiple defined in 2 places.'>closeScope</a>(self.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>, <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>)):
+<a id='L320' name='L320'></a> 320                     <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12050.html' title='Multiple defined in 2 places.'>printScopeError</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>)
+<a id='L321' name='L321'></a> 321                 <a href='../Y/17732.html' title='Multiple used in 10 places.'>scopeDelta</a> += 1
+<a id='L322' name='L322'></a> 322             <strong class='reserved'>while</strong> <a href='../Y/17732.html' title='Multiple used in 10 places.'>scopeDelta</a> &gt; 0:
+<a id='L323' name='L323'></a> 323                 <a href='../Y/15467.html' title='Multiple used in 8 places.'>openedScopes</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>)
+<a id='L324' name='L324'></a> 324                 <a href='../Y/17732.html' title='Multiple used in 10 places.'>scopeDelta</a> -= 1
+<a id='L325' name='L325'></a> 325             <a href='../Y/17354.html' title='Multiple used in 6 places.'>resultElements</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(<a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>)
+<a id='L326' name='L326'></a> 326         <strong class='reserved'>return</strong> <a href='../Y/17354.html' title='Multiple used in 6 places.'>resultElements</a>, <a href='../Y/15467.html' title='Multiple used in 8 places.'>openedScopes</a>
+<a id='L327' name='L327'></a> 327 
+<a id='L328' name='L328'></a> 328     def <a href='../R/10956.html' title='Multiple referred from 8 places.'>printScopeError</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/9071.html' title='Multiple used in 4 places.'>elementType</a>):
+<a id='L329' name='L329'></a> 329         """Print out warning if a scope was unable to close"""
+<a id='L330' name='L330'></a> 330         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12049.html' title='Multiple defined in 2 places.'>printError</a>('attempt to close empty scope at', <a href='../Y/9071.html' title='Multiple used in 4 places.'>elementType</a>, 'line', self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>+1)
+<a id='L331' name='L331'></a> 331 
+<a id='L332' name='L332'></a> 332     def __iter__(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L333' name='L333'></a> 333         """The magic iterator method"""
+<a id='L334' name='L334'></a> 334         <strong class='reserved'>return</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>
+<a id='L335' name='L335'></a> 335 
+<a id='L336' name='L336'></a> 336     def __eq__(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/15618.html' title='Multiple used in 234 places.'>other</a>):
+<a id='L337' name='L337'></a> 337         <strong class='reserved'>return</strong> (<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>, self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>, self.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>) == \
+<a id='L338' name='L338'></a> 338                (<a href='../Y/15618.html' title='Multiple used in 234 places.'>other</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>, other.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>, other.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>)
+<a id='L339' name='L339'></a> 339 
+<a id='L340' name='L340'></a> 340     def __gt__(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/15618.html' title='Multiple used in 234 places.'>other</a>):
+<a id='L341' name='L341'></a> 341         <strong class='reserved'>return</strong> (<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>, self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>, self.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>) &gt; \
+<a id='L342' name='L342'></a> 342                (<a href='../Y/15618.html' title='Multiple used in 234 places.'>other</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>, other.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>, other.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>)
+<a id='L343' name='L343'></a> 343 
+<a id='L344' name='L344'></a> 344     def <a href='../R/11645.html' title='Multiple referred from 250 places.'>reset</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L345' name='L345'></a> 345         """Reset any line tracking information to defaults"""
+<a id='L346' name='L346'></a> 346         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> = -1
+<a id='L347' name='L347'></a> 347         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a> = []
+<a id='L348' name='L348'></a> 348         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a> = []
+<a id='L349' name='L349'></a> 349         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a> = ""
+<a id='L350' name='L350'></a> 350         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> = 1
+<a id='L351' name='L351'></a> 351         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a> = ""
+<a id='L352' name='L352'></a> 352         <strong class='reserved'>return</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>
+<a id='L353' name='L353'></a> 353 
+<a id='L354' name='L354'></a> 354     def <a href='../R/12172.html' title='Multiple referred from 4 places.'>seek</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>, <a href='../Y/7313.html' title='Multiple used in 4 places.'>clearEnd</a>=<a href='../Y/2900.html' title='Multiple used in 237 places.'>True</a>):
+<a id='L355' name='L355'></a> 355         """Move the iterator to a specific line number"""
+<a id='L356' name='L356'></a> 356         <strong class='reserved'>if</strong> <a href='../Y/7313.html' title='Multiple used in 4 places.'>clearEnd</a>:
+<a id='L357' name='L357'></a> 357             <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/9150.html' title='Multiple used in 6 places.'>endScope</a> = <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>
+<a id='L358' name='L358'></a> 358         <strong class='reserved'>if</strong> <a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> &lt; <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.lineno:
+<a id='L359' name='L359'></a> 359             <strong class='reserved'>for</strong> <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a> in <a href='../Y/17400.html' title='Multiple used in 4 places.'>reversed</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>):
+<a id='L360' name='L360'></a> 360 <em class='sharp'>                # if</em> moving backwards, try to re-use a scope iterator
+<a id='L361' name='L361'></a> 361                 <strong class='reserved'>if</strong> <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> &lt;= lineno:
+<a id='L362' name='L362'></a> 362                     # copy the scope iterator's state to self
+<a id='L363' name='L363'></a> 363                     <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/4745.html' title='Multiple used in 2 places.'>__dict__</a> = <a href='../Y/8610.html' title='Multiple used in 30 places.'>dict</a>(<a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a>.__dict__)
+<a id='L364' name='L364'></a> 364                     <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a> = <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a>.scopes[:]
+<a id='L365' name='L365'></a> 365                     <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a> = <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a>.nextScopes[:]
+<a id='L366' name='L366'></a> 366                     <strong class='reserved'>break</strong>
+<a id='L367' name='L367'></a> 367             <strong class='reserved'>else</strong>:
+<a id='L368' name='L368'></a> 368                 # moving backwards past all scopes forces a reset
+<a id='L369' name='L369'></a> 369                 <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12762.html' title='Multiple defined in 13 places.'>reset</a>()
+<a id='L370' name='L370'></a> 370         <strong class='reserved'>while</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> + self.<a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> - 1 &lt; lineno:
+<a id='L371' name='L371'></a> 371             <a href='../D/11289.html' title='Multiple defined in 15 places.'>next</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L372' name='L372'></a> 372         <strong class='reserved'>return</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>
+<a id='L373' name='L373'></a> 373 
+<a id='L374' name='L374'></a> 374     def ancestors(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L375' name='L375'></a> 375         """Return a list of tags enclosing this location, outermost first."""
+<a id='L376' name='L376'></a> 376         <strong class='reserved'>return</strong> <a href='../Y/20424.html' title='Multiple used in 23 places.'>tuple</a>([<a href='../D/16468.html' title='Multiple defined in 2 places.'>x</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a> <strong class='reserved'>for</strong> x in <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>])
+<a id='L377' name='L377'></a> 377 
+<a id='L378' name='L378'></a> 378     def <a href='../R/7524.html' title='Multiple referred from 12 places.'>hasNext</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L379' name='L379'></a> 379         """Some loops may wish to check this method instead of calling next()
+<a id='L380' name='L380'></a> 380         and handling StopIteration... note: inaccurate <strong class='reserved'>for</strong> ScopeIterators"""
+<a id='L381' name='L381'></a> 381         <strong class='reserved'>return</strong> <a href='../Y/12893.html' title='Multiple used in 338 places.'>len</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>) &gt; self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> + self.<a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>
+<a id='L382' name='L382'></a> 382 
+<a id='L383' name='L383'></a> 383     def <a href='../R/4277.html' title='Multiple referred from 77 places.'>copy</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L384' name='L384'></a> 384         """Return a copy of this iterator"""
+<a id='L385' name='L385'></a> 385         <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a> = <a href='../D/4905.html' title='Multiple defined in 7 places.'>copy</a>.copy(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L386' name='L386'></a> 386         <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a> = <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.scopes[:]
+<a id='L387' name='L387'></a> 387         <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>.<a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a> = <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.nextScopes[:]
+<a id='L388' name='L388'></a> 388         <strong class='reserved'>return</strong> <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>
+<a id='L389' name='L389'></a> 389 
+<a id='L390' name='L390'></a> 390     def <a href='../R/2428.html' title='Multiple referred from 2 places.'>__str__</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L391' name='L391'></a> 391         """Return a pretty string representation"""
+<a id='L392' name='L392'></a> 392         <strong class='reserved'>if</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> == -1:
+<a id='L393' name='L393'></a> 393             <strong class='reserved'>return</strong> 'beginning of file'
+<a id='L394' name='L394'></a> 394         <a href='../D/9890.html' title='Multiple defined in 6 places.'>loc</a> = ' at line ' + <a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>+1)
+<a id='L395' name='L395'></a> 395         <strong class='reserved'>if</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>:
+<a id='L396' name='L396'></a> 396             <strong class='reserved'>return</strong> <a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>) + <a href='../D/9890.html' title='Multiple defined in 6 places.'>loc</a>
+<a id='L397' name='L397'></a> 397         <strong class='reserved'>if</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>.<a href='../Y/19070.html' title='Multiple used in 128 places.'>strip</a>():
+<a id='L398' name='L398'></a> 398             <strong class='reserved'>return</strong> 'text' + <a href='../D/9890.html' title='Multiple defined in 6 places.'>loc</a>
+<a id='L399' name='L399'></a> 399         <strong class='reserved'>return</strong> 'whitespace' + <a href='../D/9890.html' title='Multiple defined in 6 places.'>loc</a>
+<a id='L400' name='L400'></a> 400 
+<a id='L401' name='L401'></a> 401     def __repr__(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L402' name='L402'></a> 402         """Return a very basic string representation"""
+<a id='L403' name='L403'></a> 403         <strong class='reserved'>return</strong> 'WmlIterator&lt;' + <a href='../Y/17227.html' title='Multiple used in 11 places.'>repr</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>) +', line %d&gt;'%(self.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a>+1)
+<a id='L404' name='L404'></a> 404 
+<a id='L405' name='L405'></a> 405     def __next__(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L406' name='L406'></a> 406         """Move the iterator to the next line number
+<a id='L407' name='L407'></a> 407         note: May raise StopIteration"""
+<a id='L408' name='L408'></a> 408         <strong class='reserved'>if</strong> not <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/8363.html' title='Multiple defined in 2 places.'>hasNext</a>():
+<a id='L409' name='L409'></a> 409             <strong class='reserved'>if</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>:
+<a id='L410' name='L410'></a> 410                 <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/12049.html' title='Multiple defined in 2 places.'>printError</a>("reached EOF with open scopes", self.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>)
+<a id='L411' name='L411'></a> 411             raise <a href='../Y/2780.html' title='Multiple used in 6 places.'>StopIteration</a>
+<a id='L412' name='L412'></a> 412         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> = self.lineno + self.<a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>
+<a id='L413' name='L413'></a> 413         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>, self.<a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a> = self.<a href='../D/11648.html' title='Multiple defined in 2 places.'>parseQuotes</a>(self.<a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>)
+<a id='L414' name='L414'></a> 414         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../D/6070.html' title='Multiple defined in 4 places.'>extend</a>(self.<a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a>)
+<a id='L415' name='L415'></a> 415         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>, <a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a> = self.<a href='../D/11647.html' title='Multiple defined in 2 places.'>parseElements</a>(self.<a href='../D/15039.html' title='Multiple defined in 14 places.'>text</a>)
+<a id='L416' name='L416'></a> 416         <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a> = []
+<a id='L417' name='L417'></a> 417         <strong class='reserved'>for</strong> <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> in <a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a>:
+<a id='L418' name='L418'></a> 418         # remember scopes by storing a copy of the iterator
+<a id='L419' name='L419'></a> 419             <a href='../Y/7762.html' title='Multiple used in 8 places.'>copyItor</a> = <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/4905.html' title='Multiple defined in 7 places.'>copy</a>()
+<a id='L420' name='L420'></a> 420             <a href='../Y/7762.html' title='Multiple used in 8 places.'>copyItor</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a> = <a href='../S/1113.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>
+<a id='L421' name='L421'></a> 421             <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(<a href='../Y/7762.html' title='Multiple used in 8 places.'>copyItor</a>)
+<a id='L422' name='L422'></a> 422             <a href='../Y/7762.html' title='Multiple used in 8 places.'>copyItor</a>.<a href='../Y/14835.html' title='Multiple used in 18 places.'>nextScopes</a>.<a href='../D/3310.html' title='Multiple defined in 8 places.'>append</a>(copyItor)
+<a id='L423' name='L423'></a> 423         <strong class='reserved'>if</strong>(<a href='../Y/12893.html' title='Multiple used in 338 places.'>len</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a>) == 1):
+<a id='L424' name='L424'></a> 424             # currently we only wish to handle simple single assignment syntax
+<a id='L425' name='L425'></a> 425             <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../S/129.html#L82' title='Defined at 82 in src/serialization/parser.cpp.'>element</a> = self.element[0]
+<a id='L426' name='L426'></a> 426         <strong class='reserved'>if</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/9150.html' title='Multiple used in 6 places.'>endScope</a> is not <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a> and not self.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>.<a href='../D/4932.html' title='Multiple defined in 4 places.'>count</a>(self.endScope):
+<a id='L427' name='L427'></a> 427             raise <a href='../Y/2780.html' title='Multiple used in 6 places.'>StopIteration</a>
+<a id='L428' name='L428'></a> 428         <strong class='reserved'>return</strong> <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>
+<a id='L429' name='L429'></a> 429 
+<a id='L430' name='L430'></a> 430     def <a href='../R/8303.html' title='Multiple referred from 4 places.'>isOpener</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L431' name='L431'></a> 431         <strong class='reserved'>return</strong> <a href='../D/9198.html' title='Multiple defined in 4 places.'>isOpener</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L432' name='L432'></a> 432 
+<a id='L433' name='L433'></a> 433     def <a href='../R/8287.html' title='Multiple referred from 6 places.'>isCloser</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L434' name='L434'></a> 434         <strong class='reserved'>return</strong> <a href='../D/9181.html' title='Multiple defined in 4 places.'>isCloser</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L435' name='L435'></a> 435 
+<a id='L436' name='L436'></a> 436     def <a href='../R/8291.html' title='Multiple referred from 2 places.'>isExtender</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L437' name='L437'></a> 437         <strong class='reserved'>return</strong> <a href='../D/9185.html' title='Multiple defined in 4 places.'>isExtender</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L438' name='L438'></a> 438 
+<a id='L439' name='L439'></a> 439     def <a href='../R/8299.html' title='Multiple referred from 2 places.'>isMacroOpener</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L440' name='L440'></a> 440         <strong class='reserved'>return</strong> <a href='../D/9194.html' title='Multiple defined in 4 places.'>isMacroOpener</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L441' name='L441'></a> 441 
+<a id='L442' name='L442'></a> 442     def <a href='../R/8298.html' title='Multiple referred from 2 places.'>isMacroCloser</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L443' name='L443'></a> 443         <strong class='reserved'>return</strong> <a href='../D/9193.html' title='Multiple defined in 4 places.'>isMacroCloser</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L444' name='L444'></a> 444 
+<a id='L445' name='L445'></a> 445     def <a href='../R/8285.html' title='Multiple referred from 2 places.'>isAttribute</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L446' name='L446'></a> 446         <strong class='reserved'>return</strong> <a href='../D/9179.html' title='Multiple defined in 4 places.'>isAttribute</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>)
+<a id='L447' name='L447'></a> 447 
+<a id='L448' name='L448'></a> 448     def iterScope(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>):
+<a id='L449' name='L449'></a> 449         """Return an iterator for the current scope"""
+<a id='L450' name='L450'></a> 450         <strong class='reserved'>if</strong> not <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>:
+<a id='L451' name='L451'></a> 451             <strong class='reserved'>return</strong> <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>(<a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/12979.html' title='Multiple used in 60 places.'>lines</a>, self.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>)
+<a id='L452' name='L452'></a> 452         <a href='../Y/17734.html' title='Multiple used in 6 places.'>scopeItor</a> = <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>[-1].<a href='../D/4905.html' title='Multiple defined in 7 places.'>copy</a>()
+<a id='L453' name='L453'></a> 453         <a href='../Y/17734.html' title='Multiple used in 6 places.'>scopeItor</a>.<a href='../Y/9150.html' title='Multiple used in 6 places.'>endScope</a> = <a href='../S/648.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17747.html' title='Multiple used in 50 places.'>scopes</a>[-1]
+<a id='L454' name='L454'></a> 454         <strong class='reserved'>return</strong> <a href='../Y/17734.html' title='Multiple used in 6 places.'>scopeItor</a>
+<a id='L455' name='L455'></a> 455 
+<a id='L456' name='L456'></a> 456     def <a href='../R/10955.html' title='Multiple referred from 12 places.'>printError</a>(<a href='../Y/14505.html' title='Multiple used in 14 places.'>nav</a>, *<a href='../Y/14044.html' title='Multiple used in 6 places.'>misc</a>):
+<a id='L457' name='L457'></a> 457         """Print error associated with a given file; avoid printing duplicates"""
+<a id='L458' name='L458'></a> 458         <strong class='reserved'>if</strong> <a href='../Y/14505.html' title='Multiple used in 14 places.'>nav</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>:
+<a id='L459' name='L459'></a> 459             <a href='../Y/18454.html' title='Multiple used in 6 places.'>silenceValue</a> = ' '.<a href='../D/9493.html' title='Multiple defined in 3 places.'>join</a>(<a href='../D/10684.html' title='Multiple defined in 18 places.'>map</a>(<a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>, <a href='../Y/14044.html' title='Multiple used in 6 places.'>misc</a>))
+<a id='L460' name='L460'></a> 460             <strong class='reserved'>if</strong> <a href='../Y/14505.html' title='Multiple used in 14 places.'>nav</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a> not in <a href='../D/14434.html' title='Multiple defined in 2 places.'>silenceErrors</a>:
+<a id='L461' name='L461'></a> 461                 print(<a href='../Y/14505.html' title='Multiple used in 14 places.'>nav</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>, <a href='../D/6161.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18935.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L462' name='L462'></a> 462                 <a href='../D/14434.html' title='Multiple defined in 2 places.'>silenceErrors</a>[<a href='../Y/14505.html' title='Multiple used in 14 places.'>nav</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>] = <a href='../D/13418.html' title='Multiple defined in 12 places.'>set</a>()
+<a id='L463' name='L463'></a> 463             elif <a href='../Y/18454.html' title='Multiple used in 6 places.'>silenceValue</a> in <a href='../D/14434.html' title='Multiple defined in 2 places.'>silenceErrors</a>[<a href='../Y/14505.html' title='Multiple used in 14 places.'>nav</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>]:
+<a id='L464' name='L464'></a> 464                 <strong class='reserved'>return</strong> # <strong class='reserved'>do</strong> not print a duplicate error <strong class='reserved'>for</strong> this file
+<a id='L465' name='L465'></a> 465             <a href='../D/14434.html' title='Multiple defined in 2 places.'>silenceErrors</a>[<a href='../Y/14505.html' title='Multiple used in 14 places.'>nav</a>.<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>].<a href='../D/2795.html' title='Multiple defined in 10 places.'>add</a>(<a href='../Y/18454.html' title='Multiple used in 6 places.'>silenceValue</a>)
+<a id='L466' name='L466'></a> 466         print('wmliterator:', <a href='../D/5862.html' title='Multiple defined in 29 places.'>end</a>=" ", <a href='../D/6161.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18935.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L467' name='L467'></a> 467         <strong class='reserved'>for</strong> <a href='../D/9452.html' title='Multiple defined in 7 places.'>item</a> in <a href='../Y/14044.html' title='Multiple used in 6 places.'>misc</a>:
+<a id='L468' name='L468'></a> 468             print(<a href='../D/9452.html' title='Multiple defined in 7 places.'>item</a>, <a href='../D/5862.html' title='Multiple defined in 29 places.'>end</a>=" ", <a href='../D/6161.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18935.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L469' name='L469'></a> 469         print("", <a href='../D/6161.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18935.html' title='Multiple used in 124 places.'>stderr</a>) #terminate line
+<a id='L470' name='L470'></a> 470 
+<a id='L471' name='L471'></a> 471 <strong class='reserved'>if</strong> <a href='../Y/4756.html' title='Multiple used in 17 places.'>__name__</a> == '__main__':
+<a id='L472' name='L472'></a> 472     """Perform a test run on a file or directory"""
+<a id='L473' name='L473'></a> 473     import <a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>, <a href='../Y/10851.html' title='Multiple used in 35 places.'>glob</a>
+<a id='L474' name='L474'></a> 474     <a href='../R/4745.html' title='Multiple referred from 4 places.'>didSomething</a> = <a href='../Y/1156.html' title='Multiple used in 250 places.'>False</a>
+<a id='L475' name='L475'></a> 475     <a href='../R/5661.html' title='Multiple referred from 10 places.'>flist</a> = <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/5675.html' title='Multiple used in 101 places.'>argv</a>[1:]
+<a id='L476' name='L476'></a> 476     <strong class='reserved'>if</strong> not <a href='../D/6365.html' title='Multiple defined in 2 places.'>flist</a>:
+<a id='L477' name='L477'></a> 477         print('Current directory is', <a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>.<a href='../Y/10799.html' title='Multiple used in 9 places.'>getcwd</a>())
+<a id='L478' name='L478'></a> 478         <a href='../D/6365.html' title='Multiple defined in 2 places.'>flist</a> = <a href='../Y/10851.html' title='Multiple used in 35 places.'>glob</a>.glob(<a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11747.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/9493.html' title='Multiple defined in 3 places.'>join</a>(os.<a href='../Y/10799.html' title='Multiple used in 9 places.'>getcwd</a>(), <a href='../D/8881.html' title='Multiple defined in 2 places.'>input</a>('Which file(s) would you like to test?\n')))
+<a id='L479' name='L479'></a> 479     <strong class='reserved'>while</strong> <a href='../D/6365.html' title='Multiple defined in 2 places.'>flist</a>:
+<a id='L480' name='L480'></a> 480         <a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a> = <a href='../D/6365.html' title='Multiple defined in 2 places.'>flist</a>.<a href='../S/968.html#L45' title='Defined at 45 in src/image_modifications.cpp.'>pop</a>()
+<a id='L481' name='L481'></a> 481         <strong class='reserved'>if</strong> <a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11747.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/12227.html' title='Multiple used in 26 places.'>isdir</a>(<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>):
+<a id='L482' name='L482'></a> 482             <a href='../D/6365.html' title='Multiple defined in 2 places.'>flist</a> += <a href='../Y/10851.html' title='Multiple used in 35 places.'>glob</a>.glob(<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a> + <a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11747.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/18056.html' title='Multiple used in 58 places.'>sep</a> + '*')
+<a id='L483' name='L483'></a> 483             <strong class='reserved'>continue</strong>
+<a id='L484' name='L484'></a> 484         <strong class='reserved'>if</strong> not <a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11747.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/12231.html' title='Multiple used in 13 places.'>isfile</a>(<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>) or os.path.<a href='../Y/18740.html' title='Multiple used in 8 places.'>splitext</a>(fname)[1] != '.cfg':
+<a id='L485' name='L485'></a> 485             <strong class='reserved'>continue</strong>
+<a id='L486' name='L486'></a> 486         print('Reading', <a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>+'...')
+<a id='L487' name='L487'></a> 487         <a href='../D/5406.html' title='Multiple defined in 2 places.'>didSomething</a> = <a href='../Y/2900.html' title='Multiple used in 237 places.'>True</a>
+<a id='L488' name='L488'></a> 488         with <a href='../Y/7448.html' title='Multiple used in 19 places.'>codecs</a>.<a href='../D/11511.html' title='Multiple defined in 3 places.'>open</a>(<a href='../Y/10078.html' title='Multiple used in 149 places.'>fname</a>, "r", "utf8") as <a href='../D/6086.html' title='Multiple defined in 9 places.'>f</a>:
+<a id='L489' name='L489'></a> 489             <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a> = <a href='../D/2618.html' title='Multiple defined in 2 places.'>WmlIterator</a>(<a href='../D/6086.html' title='Multiple defined in 9 places.'>f</a>.<a href='../Y/16833.html' title='Multiple used in 5 places.'>readlines</a>())
+<a id='L490' name='L490'></a> 490             <strong class='reserved'>for</strong> <a href='../D/8590.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>:
+<a id='L491' name='L491'></a> 491                 pass
+<a id='L492' name='L492'></a> 492         print(<a href='../Y/12345.html' title='Multiple used in 536 places.'>itor</a>.<a href='../Y/12974.html' title='Multiple used in 153 places.'>lineno</a> + itor.<a href='../Y/18693.html' title='Multiple used in 47 places.'>span</a>, 'lines read.')
+<a id='L493' name='L493'></a> 493     <strong class='reserved'>if</strong> not <a href='../D/5406.html' title='Multiple defined in 2 places.'>didSomething</a>:
+<a id='L494' name='L494'></a> 494         print('That is not a valid .cfg file')
+<a id='L495' name='L495'></a> 495     <strong class='reserved'>if</strong> <a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11218.html' title='Multiple defined in 26 places.'>name</a> == 'nt' and os.<a href='../D/11747.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/18740.html' title='Multiple used in 8 places.'>splitext</a>(<a href='../Y/4747.html' title='Multiple used in 6 places.'>__file__</a>)[0].<a href='../Y/9203.html' title='Multiple used in 86 places.'>endswith</a>('wmliterator') and not <a href='../Y/19246.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/5675.html' title='Multiple used in 101 places.'>argv</a>[1:]:
+<a id='L496' name='L496'></a> 496         <a href='../Y/15606.html' title='Multiple used in 412 places.'>os</a>.<a href='../Y/19252.html' title='Multiple used in 71 places.'>system</a>('pause')
+<a id='L497' name='L497'></a> 497 
+<a id='L498' name='L498'></a> 498 # wmliterator.py ends here
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L34'>[^]</a><a href='#L456'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

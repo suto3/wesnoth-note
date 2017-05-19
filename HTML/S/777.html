@@ -1,0 +1,259 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/formula/variant.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5832.html'>formula</a>/variant.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L58'>[^]</a><a href='#L162'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1900.html' title='Multiple included from 16 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L58' title='Defined at 58.'>is_null</a></li>
+<li><a href='#L59' title='Defined at 59.'>is_int</a></li>
+<li><a href='#L60' title='Defined at 60.'>is_decimal</a></li>
+<li><a href='#L61' title='Defined at 61.'>is_callable</a></li>
+<li><a href='#L62' title='Defined at 62.'>is_list</a></li>
+<li><a href='#L63' title='Defined at 63.'>is_string</a></li>
+<li><a href='#L64' title='Defined at 64.'>is_map</a></li>
+<li><a href='#L79' title='Defined at 79.'>as_callable</a></li>
+<li><a href='#L86' title='Defined at 86.'>try_convert</a></li>
+<li><a href='#L96' title='Defined at 96.'>convert_to</a></li>
+<li><a href='#L144' title='Defined at 144.'>type_string</a></li>
+<li><a href='#L153' title='Defined at 153.'>value_cast</a></li>
+<li><a href='#L162' title='Defined at 162.'>type</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2008 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='779.html'>formula/variant_value.hpp</a>"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;map&gt;
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;vector&gt;
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <strong class='reserved'>namespace</strong> <a href='../R/14830.html' title='Multiple referred from 305 places.'>wfl</a>
+<a id='L23' name='L23'></a>  23 <em class='brace'>{</em>
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>class</strong> <a href='../S/767.html#L28' title='Defined at 28 in src/formula/callable.hpp.'>formula_callable</a>;
+<a id='L25' name='L25'></a>  25 <strong class='reserved'>class</strong> <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a>;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>class</strong> <a href='../R/14571.html' title='Multiple referred from 1381 places.'>variant</a>
+<a id='L28' name='L28'></a>  28 <em class='brace'>{</em>
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>public</strong>:
+<a id='L30' name='L30'></a>  30         <strong class='reserved'>enum</strong> <a href='../R/279.html' title='Multiple referred from 4 places.'>DECIMAL_VARIANT_TYPE</a> <em class='brace'>{</em> <a href='../R/278.html' title='Multiple referred from 36 places.'>DECIMAL_VARIANT</a> <em class='brace'>}</em>;
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>();
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>explicit</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>(<strong class='reserved'>int</strong> <a href='../Y/14437.html' title='Multiple used in 1546 places.'>n</a>);
+<a id='L34' name='L34'></a>  34         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>(<strong class='reserved'>int</strong> <a href='../Y/14437.html' title='Multiple used in 1546 places.'>n</a>, <a href='../S/777.html#L30' title='Defined at 30 in src/formula/variant.hpp.'>DECIMAL_VARIANT_TYPE</a> <em class='comment'>/*type*/</em>);
+<a id='L35' name='L35'></a>  35         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>(<strong class='reserved'>double</strong> <a href='../Y/14437.html' title='Multiple used in 1546 places.'>n</a>, <a href='../S/777.html#L30' title='Defined at 30 in src/formula/variant.hpp.'>DECIMAL_VARIANT_TYPE</a> <em class='comment'>/*type*/</em>);
+<a id='L36' name='L36'></a>  36         <strong class='reserved'>explicit</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21225.html' title='Multiple used in 2726 places.'>vector</a>&lt;<a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&gt;&amp; <a href='../Y/5679.html' title='Multiple used in 183 places.'>array</a>);
+<a id='L37' name='L37'></a>  37         <strong class='reserved'>explicit</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>);
+<a id='L38' name='L38'></a>  38         <strong class='reserved'>explicit</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10684.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>, <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&gt;&amp; <a href='../D/10684.html' title='Multiple defined in 18 places.'>map</a>);
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L41' name='L41'></a>  41         variant(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18266.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../Y/6855.html' title='Multiple used in 111 places.'>callable</a>)
+<a id='L42' name='L42'></a>  42                 : <a href='../D/15831.html' title='Multiple defined in 7 places.'>value_</a>(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13538.html' title='Multiple used in 193 places.'>make_shared</a>&lt;<a href='../D/15862.html' title='Multiple defined in 3 places.'>variant_callable</a>&gt;(<a href='../Y/6855.html' title='Multiple used in 111 places.'>callable</a>))
+<a id='L43' name='L43'></a>  43         <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44                 <a href='../Y/5728.html' title='Multiple used in 1191 places.'>assert</a>(<a href='../D/15831.html' title='Multiple defined in 7 places.'>value_</a>.<a href='../D/6715.html' title='Multiple defined in 42 places.'>get</a>());
+<a id='L45' name='L45'></a>  45         <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <strong class='reserved'>operator</strong>=(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>);
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>[](<a href='../Y/18512.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../Y/14437.html' title='Multiple used in 1546 places.'>n</a>) <strong class='reserved'>const</strong>;
+<a id='L50' name='L50'></a>  50         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>[](<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>) <strong class='reserved'>const</strong>;
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <a href='../Y/18512.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../D/11395.html' title='Multiple defined in 4 places.'>num_elements</a>() <strong class='reserved'>const</strong>;
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>bool</strong> <a href='../D/9265.html' title='Multiple defined in 11 places.'>is_empty</a>() <strong class='reserved'>const</strong>;
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L285' title='Defined at 285 in src/formula/variant.cpp.'>get_member</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11218.html' title='Multiple defined in 26 places.'>name</a>) <strong class='reserved'>const</strong>;
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57         <em class='comment'>/** Functions to test the type of the internal value. */</em>
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>bool</strong> <a href='../R/8441.html' title='Multiple referred from 25 places.'>is_null</a>()     <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>() == <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2851.html' title='Multiple used in 4 places.'>TYPE_NULL</a>; <em class='brace'>}</em>
+<a id='L59' name='L59'></a>  59         <strong class='reserved'>bool</strong> <a href='../R/8407.html' title='Multiple referred from 5 places.'>is_int</a>()      <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>() == <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2848.html' title='Multiple used in 5 places.'>TYPE_INT</a>; <em class='brace'>}</em>
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>bool</strong> <a href='../R/8352.html' title='Multiple referred from 14 places.'>is_decimal</a>()  <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>() == <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2847.html' title='Multiple used in 3 places.'>TYPE_DECIMAL</a>; <em class='brace'>}</em>
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>bool</strong> <a href='../R/8341.html' title='Multiple referred from 6 places.'>is_callable</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>() == <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2844.html' title='Multiple used in 4 places.'>TYPE_CALLABLE</a>; <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>bool</strong> <a href='../R/8416.html' title='Multiple referred from 22 places.'>is_list</a>()     <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>() == <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2849.html' title='Multiple used in 10 places.'>TYPE_LIST</a>; <em class='brace'>}</em>
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>bool</strong> <a href='../R/8488.html' title='Multiple referred from 8 places.'>is_string</a>()   <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>() == <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2852.html' title='Multiple used in 5 places.'>TYPE_STRING</a>; <em class='brace'>}</em>
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>bool</strong> <a href='../R/8423.html' title='Multiple referred from 20 places.'>is_map</a>()      <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>() == <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2850.html' title='Multiple used in 6 places.'>TYPE_MAP</a>; <em class='brace'>}</em>
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>int</strong> <a href='../S/783.html#L298' title='Defined at 298 in src/formula/variant.cpp.'>as_int</a>() <strong class='reserved'>const</strong>;
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68         <em class='comment'>/** Returns variant's internal representation of decimal number: ie, 1.234 is represented as 1234 */</em>
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>int</strong> <a href='../S/783.html#L307' title='Defined at 307 in src/formula/variant.cpp.'>as_decimal</a>() <strong class='reserved'>const</strong>;
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71         <em class='comment'>/** Returns a boolean state of the variant value. The implementation is type-dependent. */</em>
+<a id='L72' name='L72'></a>  72         <strong class='reserved'>bool</strong> <a href='../D/3384.html' title='Multiple defined in 6 places.'>as_bool</a>() <strong class='reserved'>const</strong>;
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74         <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21225.html' title='Multiple used in 2726 places.'>vector</a>&lt;<a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&gt;&amp; <a href='../S/783.html#L331' title='Defined at 331 in src/formula/variant.cpp.'>as_list</a>() <strong class='reserved'>const</strong>;
+<a id='L75' name='L75'></a>  75         <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10684.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>, <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&gt;&amp; <a href='../S/783.html#L337' title='Defined at 337 in src/formula/variant.cpp.'>as_map</a>() <strong class='reserved'>const</strong>;
+<a id='L76' name='L76'></a>  76 
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/783.html#L325' title='Defined at 325 in src/formula/variant.cpp.'>as_string</a>() <strong class='reserved'>const</strong>;
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <a href='../S/773.html#L43' title='Defined at 43 in src/formula/callable_fwd.hpp.'>const_formula_callable_ptr</a> <a href='../R/3029.html' title='Multiple referred from 15 places.'>as_callable</a>() <strong class='reserved'>const</strong>
+<a id='L80' name='L80'></a>  80         <em class='brace'>{</em>
+<a id='L81' name='L81'></a>  81                 <a href='../S/783.html#L613' title='Defined at 613 in src/formula/variant.cpp.'>must_be</a>(<a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a>::<a href='../Y/2844.html' title='Multiple used in 4 places.'>TYPE_CALLABLE</a>);
+<a id='L82' name='L82'></a>  82                 <strong class='reserved'>return</strong> <a href='../D/15833.html' title='Multiple defined in 2 places.'>value_cast</a>&lt;<a href='../D/15862.html' title='Multiple defined in 3 places.'>variant_callable</a>&gt;()-&gt;<a href='../S/779.html#L329' title='Defined at 329 in src/formula/variant_value.hpp.'>get_callable</a>();
+<a id='L83' name='L83'></a>  83         <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L86' name='L86'></a>  86         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18266.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../R/14039.html' title='Multiple referred from 17 places.'>try_convert</a>() <strong class='reserved'>const</strong>
+<a id='L87' name='L87'></a>  87         <em class='brace'>{</em>
+<a id='L88' name='L88'></a>  88                 <strong class='reserved'>if</strong>(!<a href='../S/777.html#L61' title='Defined at 61 in src/formula/variant.hpp.'>is_callable</a>()) <em class='brace'>{</em>
+<a id='L89' name='L89'></a>  89                         <strong class='reserved'>return</strong> <a href='../Y/15088.html' title='Multiple used in 1950 places.'>nullptr</a>;
+<a id='L90' name='L90'></a>  90                 <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92                 <strong class='reserved'>return</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/8989.html' title='Multiple used in 30 places.'>dynamic_pointer_cast</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/7684.html' title='Multiple used in 3 places.'>const_pointer_cast</a>&lt;<a href='../S/767.html#L28' title='Defined at 28 in src/formula/callable.hpp.'>formula_callable</a>&gt;(<a href='../S/777.html#L79' title='Defined at 79 in src/formula/variant.hpp.'>as_callable</a>()));
+<a id='L93' name='L93'></a>  93         <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L96' name='L96'></a>  96         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18266.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../R/4271.html' title='Multiple referred from 128 places.'>convert_to</a>() <strong class='reserved'>const</strong>
+<a id='L97' name='L97'></a>  97         <em class='brace'>{</em>
+<a id='L98' name='L98'></a>  98                 <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18266.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a> = <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/8989.html' title='Multiple used in 30 places.'>dynamic_pointer_cast</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;(<a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/7684.html' title='Multiple used in 3 places.'>const_pointer_cast</a>&lt;<a href='../S/767.html#L28' title='Defined at 28 in src/formula/callable.hpp.'>formula_callable</a>&gt;(<a href='../S/777.html#L79' title='Defined at 79 in src/formula/variant.hpp.'>as_callable</a>()));
+<a id='L99' name='L99'></a>  99                 <strong class='reserved'>if</strong>(!<a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>) <em class='brace'>{</em>
+<a id='L100' name='L100'></a> 100                         <strong class='reserved'>throw</strong> <a href='../D/15365.html' title='Multiple defined in 2 places.'>type_error</a>("could not convert type");
+<a id='L101' name='L101'></a> 101                 <em class='brace'>}</em>
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103                 <strong class='reserved'>return</strong> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>;
+<a id='L104' name='L104'></a> 104         <em class='brace'>}</em>
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>+(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L107' name='L107'></a> 107         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>-(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L108' name='L108'></a> 108         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>*(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L109' name='L109'></a> 109         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>/(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L110' name='L110'></a> 110         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>^(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L111' name='L111'></a> 111         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>%(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L112' name='L112'></a> 112         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>-() <strong class='reserved'>const</strong>;
+<a id='L113' name='L113'></a> 113 
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>==(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L115' name='L115'></a> 115         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>!=(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L116' name='L116'></a> 116         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>&lt;(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;)  <strong class='reserved'>const</strong>;
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>&gt;(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;)  <strong class='reserved'>const</strong>;
+<a id='L118' name='L118'></a> 118         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>&lt;=(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L119' name='L119'></a> 119         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>&gt;=(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp;) <strong class='reserved'>const</strong>;
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L543' title='Defined at 543 in src/formula/variant.cpp.'>list_elements_add</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>) <strong class='reserved'>const</strong>;
+<a id='L122' name='L122'></a> 122         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L549' title='Defined at 549 in src/formula/variant.cpp.'>list_elements_sub</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>) <strong class='reserved'>const</strong>;
+<a id='L123' name='L123'></a> 123         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L555' title='Defined at 555 in src/formula/variant.cpp.'>list_elements_mul</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>) <strong class='reserved'>const</strong>;
+<a id='L124' name='L124'></a> 124         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L561' title='Defined at 561 in src/formula/variant.cpp.'>list_elements_div</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>) <strong class='reserved'>const</strong>;
+<a id='L125' name='L125'></a> 125         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L567' title='Defined at 567 in src/formula/variant.cpp.'>concatenate</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>) <strong class='reserved'>const</strong>;
+<a id='L126' name='L126'></a> 126         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L593' title='Defined at 593 in src/formula/variant.cpp.'>build_range</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/21074.html' title='Multiple used in 1371 places.'>v</a>) <strong class='reserved'>const</strong>;
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>bool</strong> <a href='../D/4847.html' title='Multiple defined in 6 places.'>contains</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/15618.html' title='Multiple used in 234 places.'>other</a>) <strong class='reserved'>const</strong>;
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L237' title='Defined at 237 in src/formula/variant.cpp.'>get_keys</a>() <strong class='reserved'>const</strong>;
+<a id='L131' name='L131'></a> 131         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L249' title='Defined at 249 in src/formula/variant.cpp.'>get_values</a>() <strong class='reserved'>const</strong>;
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a> <a href='../D/3604.html' title='Multiple defined in 29 places.'>begin</a>() <strong class='reserved'>const</strong>;
+<a id='L134' name='L134'></a> 134         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a> <a href='../D/5862.html' title='Multiple defined in 29 places.'>end</a>() <strong class='reserved'>const</strong>;
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/13406.html' title='Multiple defined in 4 places.'>serialize_to_string</a>() <strong class='reserved'>const</strong>;
+<a id='L137' name='L137'></a> 137         <strong class='reserved'>void</strong> <a href='../S/783.html#L635' title='Defined at 635 in src/formula/variant.cpp.'>serialize_from_string</a>(<strong class='reserved'>const</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14681.html' title='Multiple defined in 25 places.'>str</a>);
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/14717.html' title='Multiple defined in 7 places.'>string_cast</a>() <strong class='reserved'>const</strong>;
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/783.html#L649' title='Defined at 649 in src/formula/variant.cpp.'>to_debug_string</a>(<strong class='reserved'>bool</strong> <a href='../Y/21230.html' title='Multiple used in 73 places.'>verbose</a> = <strong class='reserved'>false</strong>, <a href='../S/773.html#L44' title='Defined at 44 in src/formula/callable_fwd.hpp.'>formula_seen_stack</a>* <a href='../Y/17927.html' title='Multiple used in 20 places.'>seen</a> = <a href='../Y/15088.html' title='Multiple used in 1950 places.'>nullptr</a>) <strong class='reserved'>const</strong>;
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143         <em class='comment'>/** Gets string name of the current value type */</em>
+<a id='L144' name='L144'></a> 144         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14714.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/14104.html' title='Multiple referred from 4 places.'>type_string</a>() <strong class='reserved'>const</strong>
+<a id='L145' name='L145'></a> 145         <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146                 <strong class='reserved'>return</strong> <a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a>().<a href='../D/15155.html' title='Multiple defined in 11 places.'>to_string</a>();
+<a id='L147' name='L147'></a> 147         <em class='brace'>}</em>
+<a id='L148' name='L148'></a> 148 
+<a id='L149' name='L149'></a> 149         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../S/783.html#L659' title='Defined at 659 in src/formula/variant.cpp.'>execute_variant</a>(<strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; to_exec);
+<a id='L150' name='L150'></a> 150 
+<a id='L151' name='L151'></a> 151 <strong class='reserved'>private</strong>:
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L153' name='L153'></a> 153         <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18266.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../R/14546.html' title='Multiple referred from 25 places.'>value_cast</a>() <strong class='reserved'>const</strong>
+<a id='L154' name='L154'></a> 154         <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155                 <strong class='reserved'>return</strong> <a href='../D/16202.html' title='Multiple defined in 33 places.'>wfl</a>::<a href='../D/15833.html' title='Multiple defined in 2 places.'>value_cast</a>&lt;<a href='../D/2083.html' title='Multiple defined in 2 places.'>T</a>&gt;(<a href='../D/15831.html' title='Multiple defined in 7 places.'>value_</a>);
+<a id='L156' name='L156'></a> 156         <em class='brace'>}</em>
+<a id='L157' name='L157'></a> 157 
+<a id='L158' name='L158'></a> 158         <strong class='reserved'>void</strong> <a href='../S/783.html#L613' title='Defined at 613 in src/formula/variant.cpp.'>must_be</a>(<a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a> <a href='../Y/19263.html' title='Multiple used in 1448 places.'>t</a>) <strong class='reserved'>const</strong>;
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160         <strong class='reserved'>void</strong> <a href='../S/783.html#L620' title='Defined at 620 in src/formula/variant.cpp.'>must_both_be</a>(<a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a> <a href='../Y/19263.html' title='Multiple used in 1448 places.'>t</a>, <strong class='reserved'>const</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../Y/17870.html' title='Multiple used in 1307 places.'>second</a>) <strong class='reserved'>const</strong>;
+<a id='L161' name='L161'></a> 161 
+<a id='L162' name='L162'></a> 162         <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a> <a href='../R/14096.html' title='Multiple referred from 6854 places.'>type</a>() <strong class='reserved'>const</strong>
+<a id='L163' name='L163'></a> 163         <em class='brace'>{</em>
+<a id='L164' name='L164'></a> 164                 <strong class='reserved'>return</strong> <a href='../D/15831.html' title='Multiple defined in 7 places.'>value_</a>-&gt;<a href='../D/8034.html' title='Multiple defined in 20 places.'>get_type</a>();
+<a id='L165' name='L165'></a> 165         <em class='brace'>}</em>
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167         <em class='comment'>/**</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'>         * Variant value.</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'>         * Each of the constructors initialized this with the appropriate helper class.</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'>         */</em>
+<a id='L171' name='L171'></a> 171         <a href='../S/779.html#L50' title='Defined at 50 in src/formula/variant_value.hpp.'>value_base_ptr</a> <a href='../D/15831.html' title='Multiple defined in 7 places.'>value_</a>;
+<a id='L172' name='L172'></a> 172 <em class='brace'>}</em>;
+<a id='L173' name='L173'></a> 173 
+<a id='L174' name='L174'></a> 174 <em class='comment'>/**</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'> * Iterator class for the variant.</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'> *</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'> * Depending on the @p type_ the @p list_iterator_ and the @p map_iterator_ are</em>
+<a id='L178' name='L178'></a> 178 <em class='comment'> * a valid iterator or singular. Since most actions on singular iterators</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'> * result in Undefined Behavior care should be taken when copying the</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'> * @p list_iterator_ and @p map_iterator_.</em>
+<a id='L181' name='L181'></a> 181 <em class='comment'> */</em>
+<a id='L182' name='L182'></a> 182 <strong class='reserved'>class</strong> <a href='../R/14577.html' title='Multiple referred from 56 places.'>variant_iterator</a>
+<a id='L183' name='L183'></a> 183 <em class='brace'>{</em>
+<a id='L184' name='L184'></a> 184 <strong class='reserved'>public</strong>:
+<a id='L185' name='L185'></a> 185         <strong class='reserved'>typedef</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <a href='../R/14554.html' title='Multiple referred from 152 places.'>value_type</a>;
+<a id='L186' name='L186'></a> 186         <strong class='reserved'>typedef</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/6331.html' title='Multiple used in 6 places.'>bidirectional_iterator_tag</a> iterator_category;
+<a id='L187' name='L187'></a> 187         <strong class='reserved'>typedef</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>&amp; <a href='../R/11386.html' title='Multiple referred from 25 places.'>reference</a>;
+<a id='L188' name='L188'></a> 188         <strong class='reserved'>typedef</strong> <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a>* <a href='../R/10847.html' title='Multiple referred from 23 places.'>pointer</a>;
+<a id='L189' name='L189'></a> 189         <strong class='reserved'>typedef</strong> <strong class='reserved'>int</strong> <a href='../R/4746.html' title='Multiple referred from 29 places.'>difference_type</a>;
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191         <em class='comment'>/**</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'>         * Constructor for a no-op iterator.</em>
+<a id='L193' name='L193'></a> 193 <em class='comment'>         */</em>
+<a id='L194' name='L194'></a> 194         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a>();
+<a id='L195' name='L195'></a> 195 
+<a id='L196' name='L196'></a> 196         <em class='comment'>/**</em>
+<a id='L197' name='L197'></a> 197 <em class='comment'>         * Constructor for a generic iterator.</em>
+<a id='L198' name='L198'></a> 198 <em class='comment'>         *</em>
+<a id='L199' name='L199'></a> 199 <em class='comment'>         * @pre @p iter is not singular.</em>
+<a id='L200' name='L200'></a> 200 <em class='comment'>         *</em>
+<a id='L201' name='L201'></a> 201 <em class='comment'>         * @param value   A pointer to a variant value representing the container.</em>
+<a id='L202' name='L202'></a> 202 <em class='comment'>         * @param iter    An underlying iterator for the underlying container.</em>
+<a id='L203' name='L203'></a> 203 <em class='comment'>         */</em>
+<a id='L204' name='L204'></a> 204         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a>(<strong class='reserved'>const</strong> <a href='../S/779.html#L89' title='Defined at 89 in src/formula/variant_value.hpp.'>variant_value_base</a>* <a href='../D/15830.html' title='Multiple defined in 19 places.'>value</a>, <strong class='reserved'>const</strong> <a href='../D/3724.html' title='Multiple defined in 3 places.'>boost</a>::<a href='../Y/5600.html' title='Multiple used in 28 places.'>any</a>&amp; <a href='../Y/12332.html' title='Multiple used in 288 places.'>iter</a>);
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206         <a href='../D/15861.html' title='Multiple defined in 8 places.'>variant</a> <strong class='reserved'>operator</strong>*() <strong class='reserved'>const</strong>;
+<a id='L207' name='L207'></a> 207         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a>&amp; <strong class='reserved'>operator</strong>++();
+<a id='L208' name='L208'></a> 208         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a> <strong class='reserved'>operator</strong>++(<strong class='reserved'>int</strong>);
+<a id='L209' name='L209'></a> 209         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a>&amp; <strong class='reserved'>operator</strong>--();
+<a id='L210' name='L210'></a> 210         <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a> <strong class='reserved'>operator</strong>--(<strong class='reserved'>int</strong>);
+<a id='L211' name='L211'></a> 211         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>==(<strong class='reserved'>const</strong> <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a>&amp; <a href='../Y/19796.html' title='Multiple used in 98 places.'>that</a>) <strong class='reserved'>const</strong>;
+<a id='L212' name='L212'></a> 212         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>!=(<strong class='reserved'>const</strong> <a href='../S/777.html#L182' title='Defined at 182 in src/formula/variant.hpp.'>variant_iterator</a>&amp; <a href='../Y/19796.html' title='Multiple used in 98 places.'>that</a>) <strong class='reserved'>const</strong>;
+<a id='L213' name='L213'></a> 213 <strong class='reserved'>private</strong>:
+<a id='L214' name='L214'></a> 214         <a href='../Y/2948.html' title='Multiple used in 46 places.'>VARIANT_TYPE</a> <a href='../D/15363.html' title='Multiple defined in 2 places.'>type_</a>;
+<a id='L215' name='L215'></a> 215         <strong class='reserved'>const</strong> <a href='../S/779.html#L89' title='Defined at 89 in src/formula/variant_value.hpp.'>variant_value_base</a>* <a href='../Y/7700.html' title='Multiple used in 54 places.'>container_</a>;
+<a id='L216' name='L216'></a> 216         <a href='../D/3724.html' title='Multiple defined in 3 places.'>boost</a>::<a href='../Y/5600.html' title='Multiple used in 28 places.'>any</a> <a href='../D/9468.html' title='Multiple defined in 2 places.'>iter_</a>;
+<a id='L217' name='L217'></a> 217 <em class='brace'>}</em>;
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L58'>[^]</a><a href='#L162'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

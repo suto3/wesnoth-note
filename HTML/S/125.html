@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/serialization/unicode_cast.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5859.html'>serialization</a>/unicode_cast.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L32'>[^]</a><a href='#L93'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2583.html' title='Multiple included from 8 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L32' title='Defined at 32.'>can_push</a></li>
+<li><a href='#L37' title='Defined at 37.'>push</a></li>
+<li><a href='#L57' title='Defined at 57.'>unicode_cast</a></li>
+<li><a href='#L93' title='Defined at 93.'>unicode_cast</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='134.html'>ucs4_convert_impl.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> &lt;iostream&gt;   <em class='comment'>//for std::cerr</em>
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;iterator&gt;
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>namespace</strong> <a href='../R/14117.html' title='Multiple referred from 7 places.'>ucs4_convert_impl</a>
+<a id='L22' name='L22'></a>  22 <em class='brace'>{</em>
+<a id='L23' name='L23'></a>  23         <em class='comment'>/**</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'>         * Transforms an output iterator to a writer for ucs4_convert_impl functions.</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'>         */</em>
+<a id='L26' name='L26'></a>  26         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../Y/15243.html' title='Multiple used in 3 places.'>oitor_t</a>&gt;
+<a id='L27' name='L27'></a>  27         <strong class='reserved'>struct</strong> <a href='../R/8575.html' title='Multiple referred from 2 places.'>iteratorwriter</a>
+<a id='L28' name='L28'></a>  28         <em class='brace'>{</em>
+<a id='L29' name='L29'></a>  29                 <a href='../Y/15243.html' title='Multiple used in 3 places.'>oitor_t</a>&amp; <a href='../Y/15664.html' title='Multiple used in 34 places.'>out_</a>;
+<a id='L30' name='L30'></a>  30                 iteratorwriter(<a href='../Y/15243.html' title='Multiple used in 3 places.'>oitor_t</a>&amp; <a href='../Y/15658.html' title='Multiple used in 687 places.'>out</a>) : <a href='../Y/15664.html' title='Multiple used in 34 places.'>out_</a>(<a href='../Y/15658.html' title='Multiple used in 687 places.'>out</a>) <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32                 <strong class='reserved'>bool</strong> <a href='../R/3548.html' title='Multiple referred from 4 places.'>can_push</a>(<a href='../Y/18512.html' title='Multiple used in 1718 places.'>size_t</a> <em class='comment'>/*count*/</em>)
+<a id='L33' name='L33'></a>  33                 <em class='brace'>{</em>
+<a id='L34' name='L34'></a>  34                         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L35' name='L35'></a>  35                 <em class='brace'>}</em>
+<a id='L36' name='L36'></a>  36                 <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../D/15841.html' title='Multiple defined in 20 places.'>value_type</a>&gt;
+<a id='L37' name='L37'></a>  37                 <strong class='reserved'>void</strong> <a href='../R/11063.html' title='Multiple referred from 90 places.'>push</a>(<a href='../D/15841.html' title='Multiple defined in 20 places.'>value_type</a> <a href='../D/15802.html' title='Multiple defined in 2 places.'>val</a>)
+<a id='L38' name='L38'></a>  38                 <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39                         *<a href='../Y/15664.html' title='Multiple used in 34 places.'>out_</a>++  = <a href='../D/15802.html' title='Multiple defined in 2 places.'>val</a>;
+<a id='L40' name='L40'></a>  40                 <em class='brace'>}</em>
+<a id='L41' name='L41'></a>  41         <em class='brace'>}</em>;
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../Y/2899.html' title='Multiple used in 2 places.'>Tret</a>, <strong class='reserved'>typename</strong> <a href='../Y/2877.html' title='Multiple used in 2 places.'>Tcheck</a>&gt;
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>struct</strong> <a href='../S/125.html#L57' title='Referred from 57 in src/serialization/unicode_cast.hpp.'>enableif</a>
+<a id='L44' name='L44'></a>  44         <em class='brace'>{</em>
+<a id='L45' name='L45'></a>  45                 <strong class='reserved'>typedef</strong> <a href='../Y/2877.html' title='Multiple used in 2 places.'>Tcheck</a> <a href='../R/7744.html' title='Multiple referred from 13 places.'>ignore</a>;
+<a id='L46' name='L46'></a>  46                 <strong class='reserved'>typedef</strong> <a href='../Y/2899.html' title='Multiple used in 2 places.'>Tret</a> <a href='../R/14096.html' title='Multiple referred from 6854 places.'>type</a>;
+<a id='L47' name='L47'></a>  47         <em class='brace'>}</em>;
+<a id='L48' name='L48'></a>  48 <em class='brace'>}</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50 <em class='comment'>/**</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> * @tparam TD Output, a collection type.</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'> * @tparam TS Input, a collection type.</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'> *</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'> * @return An instance of TD.</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> */</em>
+<a id='L56' name='L56'></a>  56 <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a> , <strong class='reserved'>typename</strong> <a href='../Y/2827.html' title='Multiple used in 4 places.'>TS</a>&gt;
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>typename</strong> <a href='../D/15384.html' title='Multiple defined in 2 places.'>ucs4_convert_impl</a>::<a href='../S/125.html#L43' title='Defined at 43 in src/serialization/unicode_cast.hpp.'>enableif</a>&lt;<a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a>, <strong class='reserved'>typename</strong> <a href='../Y/2827.html' title='Multiple used in 4 places.'>TS</a>::<a href='../D/15841.html' title='Multiple defined in 20 places.'>value_type</a>&gt;::<a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a> <a href='../R/14173.html' title='Multiple referred from 48 places.'>unicode_cast</a>(<strong class='reserved'>const</strong> <a href='../Y/2827.html' title='Multiple used in 4 places.'>TS</a>&amp; <a href='../S/640.html#L62' title='Defined at 62 in src/gui/auxiliary/tips.hpp.'>source</a>)
+<a id='L58' name='L58'></a>  58 <em class='comment'>//TD unicode_cast(const TS&amp; source)</em>
+<a id='L59' name='L59'></a>  59 <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>using</strong> <strong class='reserved'>namespace</strong> <a href='../D/15384.html' title='Multiple defined in 2 places.'>ucs4_convert_impl</a>;
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>typedef</strong> <strong class='reserved'>typename</strong> <a href='../D/4891.html' title='Multiple defined in 4 places.'>convert_impl</a>&lt;<strong class='reserved'>typename</strong> <a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a>::<a href='../D/15841.html' title='Multiple defined in 20 places.'>value_type</a>&gt;::<a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a> <a href='../R/7869.html' title='Multiple referred from 4 places.'>impl_writer</a>;
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>typedef</strong> <strong class='reserved'>typename</strong> <a href='../D/4891.html' title='Multiple defined in 4 places.'>convert_impl</a>&lt;<strong class='reserved'>typename</strong> <a href='../Y/2827.html' title='Multiple used in 4 places.'>TS</a>::<a href='../D/15841.html' title='Multiple defined in 20 places.'>value_type</a>&gt;::<a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a> <a href='../R/7810.html' title='Multiple referred from 3 places.'>impl_reader</a>;
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>typedef</strong> <strong class='reserved'>typename</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/6057.html' title='Multiple used in 58 places.'>back_insert_iterator</a>&lt;<a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a>&gt; <a href='../R/10516.html' title='Multiple referred from 4 places.'>output_itor</a>;
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>typedef</strong> <strong class='reserved'>typename</strong> <a href='../Y/2827.html' title='Multiple used in 4 places.'>TS</a>::<a href='../D/4828.html' title='Multiple defined in 13 places.'>const_iterator</a> <a href='../R/7997.html' title='Multiple referred from 2 places.'>input_itor</a>;
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>;
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>try</strong>
+<a id='L68' name='L68'></a>  68         <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69                 <a href='../D/11586.html' title='Multiple defined in 2 places.'>output_itor</a> <a href='../Y/11956.html' title='Multiple used in 14 places.'>inserter</a>(<a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>);
+<a id='L70' name='L70'></a>  70                 <a href='../S/125.html#L27' title='Defined at 27 in src/serialization/unicode_cast.hpp.'>iteratorwriter</a>&lt;<a href='../D/11586.html' title='Multiple defined in 2 places.'>output_itor</a>&gt; <a href='../D/5719.html' title='Multiple defined in 3 places.'>dst</a>(<a href='../Y/11956.html' title='Multiple used in 14 places.'>inserter</a>);
+<a id='L71' name='L71'></a>  71                 <a href='../S/125.html#L64' title='Defined at 64 in src/serialization/unicode_cast.hpp.'>input_itor</a> <a href='../Y/11534.html' title='Multiple used in 337 places.'>i1</a> = <a href='../S/640.html#L62' title='Defined at 62 in src/gui/auxiliary/tips.hpp.'>source</a>.<a href='../D/3604.html' title='Multiple defined in 29 places.'>begin</a>();
+<a id='L72' name='L72'></a>  72                 <a href='../S/125.html#L64' title='Defined at 64 in src/serialization/unicode_cast.hpp.'>input_itor</a> <a href='../Y/11537.html' title='Multiple used in 177 places.'>i2</a> = <a href='../S/640.html#L62' title='Defined at 62 in src/gui/auxiliary/tips.hpp.'>source</a>.<a href='../D/5862.html' title='Multiple defined in 29 places.'>end</a>();
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74                 <strong class='reserved'>while</strong>(<a href='../Y/11534.html' title='Multiple used in 337 places.'>i1</a> != <a href='../Y/11537.html' title='Multiple used in 177 places.'>i2</a>) <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75                         <a href='../D/8750.html' title='Multiple defined in 2 places.'>impl_writer</a>::<a href='../D/16406.html' title='Multiple defined in 55 places.'>write</a> (<a href='../D/5719.html' title='Multiple defined in 3 places.'>dst</a>, <a href='../D/8691.html' title='Multiple defined in 2 places.'>impl_reader</a>::<a href='../D/12306.html' title='Multiple defined in 23 places.'>read</a>(<a href='../Y/11534.html' title='Multiple used in 337 places.'>i1</a>, <a href='../Y/11537.html' title='Multiple used in 177 places.'>i2</a>));
+<a id='L76' name='L76'></a>  76                 <em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77         <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78         <strong class='reserved'>catch</strong>(<a href='../D/15781.html' title='Multiple defined in 3 places.'>utf8</a>::<a href='../S/128.html#L38' title='Defined at 38 in src/serialization/unicode_types.hpp.'>invalid_utf8_exception</a>&amp;)
+<a id='L79' name='L79'></a>  79         <em class='brace'>{</em>
+<a id='L80' name='L80'></a>  80                 <em class='comment'>// TODO: use a ERR_.. stream but i dont know whether i can so to in header easily.</em>
+<a id='L81' name='L81'></a>  81                 <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/7024.html' title='Multiple used in 230 places.'>cerr</a> &lt;&lt; "Failed to convert a string from " &lt;&lt; <a href='../D/8691.html' title='Multiple defined in 2 places.'>impl_reader</a>::<a href='../D/7703.html' title='Multiple defined in 55 places.'>get_name</a>() &lt;&lt; " to " &lt;&lt; <a href='../D/8750.html' title='Multiple defined in 2 places.'>impl_writer</a>::<a href='../D/7703.html' title='Multiple defined in 55 places.'>get_name</a>() &lt;&lt; "\n";
+<a id='L82' name='L82'></a>  82                 <strong class='reserved'>return</strong> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>;
+<a id='L83' name='L83'></a>  83         <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84         <strong class='reserved'>return</strong> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>;
+<a id='L85' name='L85'></a>  85 <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87 <em class='comment'>/**</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'> * @tparam TD Output, a collection type.</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'> *</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'> * @return An instance of TD.</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'> */</em>
+<a id='L92' name='L92'></a>  92 <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a>&gt;
+<a id='L93' name='L93'></a>  93 <a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a> <a href='../R/14173.html' title='Multiple referred from 48 places.'>unicode_cast</a>(<a href='../D/15383.html' title='Multiple defined in 2 places.'>ucs4</a>::<a href='../D/4264.html' title='Multiple defined in 3 places.'>char_t</a> <a href='../Y/15416.html' title='Multiple used in 2 places.'>onechar</a>)
+<a id='L94' name='L94'></a>  94 <em class='brace'>{</em>
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>using</strong> <strong class='reserved'>namespace</strong> <a href='../D/15384.html' title='Multiple defined in 2 places.'>ucs4_convert_impl</a>;
+<a id='L96' name='L96'></a>  96         <strong class='reserved'>typedef</strong> <strong class='reserved'>typename</strong> <a href='../D/4891.html' title='Multiple defined in 4 places.'>convert_impl</a>&lt;<strong class='reserved'>typename</strong> <a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a>::<a href='../D/15841.html' title='Multiple defined in 20 places.'>value_type</a>&gt;::<a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a> <a href='../R/7869.html' title='Multiple referred from 4 places.'>impl_writer</a>;
+<a id='L97' name='L97'></a>  97         <strong class='reserved'>typedef</strong> <a href='../D/4891.html' title='Multiple defined in 4 places.'>convert_impl</a>&lt;<a href='../D/15383.html' title='Multiple defined in 2 places.'>ucs4</a>::<a href='../D/4264.html' title='Multiple defined in 3 places.'>char_t</a>&gt;::<a href='../D/15360.html' title='Multiple defined in 27 places.'>type</a> <a href='../R/7810.html' title='Multiple referred from 3 places.'>impl_reader</a>;
+<a id='L98' name='L98'></a>  98         <strong class='reserved'>typedef</strong> <strong class='reserved'>typename</strong> <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/6057.html' title='Multiple used in 58 places.'>back_insert_iterator</a>&lt;<a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a>&gt; <a href='../R/10516.html' title='Multiple referred from 4 places.'>output_itor</a>;
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100         <a href='../Y/2805.html' title='Multiple used in 10 places.'>TD</a> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>;
+<a id='L101' name='L101'></a> 101         <strong class='reserved'>try</strong>
+<a id='L102' name='L102'></a> 102         <em class='brace'>{</em>
+<a id='L103' name='L103'></a> 103                 <a href='../D/11586.html' title='Multiple defined in 2 places.'>output_itor</a> <a href='../Y/11956.html' title='Multiple used in 14 places.'>inserter</a>(<a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>);
+<a id='L104' name='L104'></a> 104                 <a href='../S/125.html#L27' title='Defined at 27 in src/serialization/unicode_cast.hpp.'>iteratorwriter</a>&lt;<a href='../D/11586.html' title='Multiple defined in 2 places.'>output_itor</a>&gt; <a href='../D/5719.html' title='Multiple defined in 3 places.'>dst</a>(<a href='../Y/11956.html' title='Multiple used in 14 places.'>inserter</a>);
+<a id='L105' name='L105'></a> 105                 <a href='../D/8750.html' title='Multiple defined in 2 places.'>impl_writer</a>::<a href='../D/16406.html' title='Multiple defined in 55 places.'>write</a> (<a href='../D/5719.html' title='Multiple defined in 3 places.'>dst</a>, <a href='../Y/15416.html' title='Multiple used in 2 places.'>onechar</a>);
+<a id='L106' name='L106'></a> 106         <em class='brace'>}</em>
+<a id='L107' name='L107'></a> 107         <strong class='reserved'>catch</strong>(<a href='../D/15781.html' title='Multiple defined in 3 places.'>utf8</a>::<a href='../S/128.html#L38' title='Defined at 38 in src/serialization/unicode_types.hpp.'>invalid_utf8_exception</a>&amp;)
+<a id='L108' name='L108'></a> 108         <em class='brace'>{</em>
+<a id='L109' name='L109'></a> 109                 <em class='comment'>// TODO: use a ERR_.. stream but i dont know whether i can so to in header easily.</em>
+<a id='L110' name='L110'></a> 110                 <a href='../D/14653.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/7024.html' title='Multiple used in 230 places.'>cerr</a> &lt;&lt; "Failed to convert a string from " &lt;&lt; <a href='../D/8691.html' title='Multiple defined in 2 places.'>impl_reader</a>::<a href='../D/7703.html' title='Multiple defined in 55 places.'>get_name</a>() &lt;&lt; " to " &lt;&lt; <a href='../D/8750.html' title='Multiple defined in 2 places.'>impl_writer</a>::<a href='../D/7703.html' title='Multiple defined in 55 places.'>get_name</a>() &lt;&lt; "\n";
+<a id='L111' name='L111'></a> 111                 <strong class='reserved'>return</strong> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>;
+<a id='L112' name='L112'></a> 112         <em class='brace'>}</em>
+<a id='L113' name='L113'></a> 113         <strong class='reserved'>return</strong> <a href='../Y/17266.html' title='Multiple used in 1880 places.'>res</a>;
+<a id='L114' name='L114'></a> 114 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L32'>[^]</a><a href='#L93'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>
