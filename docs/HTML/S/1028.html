@@ -1,21 +1,21 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/desktop/dbus_notification.hpp</title>
+<title>src/desktop/notifications.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5823.html'>desktop</a>/dbus_notification.hpp</h2>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5822.html'>desktop</a>/notifications.hpp</h2>
 <em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/1759.html' title='Multiple included from 2 places.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='../J/1761.html' title='Multiple included from 5 places.'>INCLUDED FROM</a></h2>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by Chris Beck &lt;render787@gmail.com&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
@@ -32,9 +32,33 @@
 <a id='L16' name='L16'></a>  16 
 <a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> &lt;string&gt;
 <a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 <strong class='reserved'>namespace</strong> <a href='../S/1026.html#L68' title='Referred from 68 in src/desktop/notifications.cpp.'>dbus</a> <em class='brace'>{</em>
-<a id='L20' name='L20'></a>  20         <strong class='reserved'>void</strong> <a href='../S/1034.html#L205' title='Defined at 205 in src/desktop/dbus_notification.cpp.'>send_notification</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/15744.html' title='Multiple used in 85 places.'>owner</a>, <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/10886.html' title='Multiple defined in 7 places.'>message</a>, <strong class='reserved'>bool</strong> <a href='../Y/21660.html' title='Multiple used in 3 places.'>with_history</a>);
-<a id='L21' name='L21'></a>  21 <em class='brace'>}</em>
+<a id='L19' name='L19'></a>  19 <strong class='reserved'>namespace</strong> <a href='../R/4724.html' title='Multiple referred from 63 places.'>desktop</a> <em class='brace'>{</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>namespace</strong> <a href='../R/10308.html' title='Multiple referred from 23 places.'>notifications</a>
+<a id='L22' name='L22'></a>  22 <em class='brace'>{</em>
+<a id='L23' name='L23'></a>  23         <strong class='reserved'>enum</strong> <a href='../R/14099.html' title='Multiple referred from 6854 places.'>type</a> <em class='brace'>{</em><a href='../R/156.html' title='Multiple referred from 7 places.'>CHAT</a>, <a href='../R/2041.html' title='Multiple referred from 3 places.'>TURN_CHANGED</a>, <a href='../R/1557.html' title='Multiple referred from 9 places.'>OTHER</a><em class='brace'>}</em>;
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='comment'>/**</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * Displays a desktop notification @a message, from @a owner, of type @a t.</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * If it is an appropriate time to send a desktop notification (i.e. the window</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * does not have focus and the feature is not disabled by the preferences),</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * and wesnoth was compiled with support for this feature, a notification will</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> * be issued. If there is no support for notifications, this fcn is a no-op.</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> *</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * @note Currently we have support for dbus (linux), windows tray notifications,</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * and growl (Apple). To enable one of these, the corresponding compilation unit</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * dbus_notification.cpp, growl_notification.cpp, windows_tray_notification.cpp,</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * must be compiled, and the corresponding C++ symbol HAVE_LIBDBUS, HAVE_GROWL,</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * _WIN32 must be defined for that compilation unit _and for this one_.</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> */</em>
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>void</strong> <a href='../D/13367.html' title='Multiple defined in 3 places.'>send</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/15742.html' title='Multiple used in 85 places.'>owner</a>, <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/10886.html' title='Multiple defined in 7 places.'>message</a>, <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a> <a href='../Y/19261.html' title='Multiple used in 1448 places.'>t</a>);
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <em class='comment'>/** Returns whether we were compiled with support for desktop notifications. */</em>
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>bool</strong> <a href='../D/3508.html' title='Multiple defined in 3 places.'>available</a>();
+<a id='L43' name='L43'></a>  43 <em class='brace'>}</em>
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>

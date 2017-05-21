@@ -1,24 +1,23 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/game_events/action_wml.hpp</title>
+<title>src/game_events/manager.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5834.html'>game_events</a>/action_wml.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L58'>[^]</a><a href='#L61'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5833.html'>game_events</a>/manager.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L74'>[^]</a><a href='#L137'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/1919.html' title='Multiple included from 2 places.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='../J/1629.html' title='Multiple included from 85 places.'>INCLUDED FROM</a></h2>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L58' title='Defined at 58.'>begin</a></li>
-<li><a href='#L60' title='Defined at 60.'>end</a></li>
-<li><a href='#L61' title='Defined at 61.'>registry</a></li>
+<li><a href='#L74' title='Defined at 74.'>ptr_index</a></li>
+<li><a href='#L137' title='Defined at 137.'>wml_menu_items</a></li>
 </ol>
 <hr />
 <pre>
@@ -36,69 +35,137 @@ This source file includes following definitions.
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
-<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
-<a id='L17' name='L17'></a>  17 <em class='comment'> * Define actions for the game's events mechanism.</em>
-<a id='L18' name='L18'></a>  18 <em class='comment'> *</em>
-<a id='L19' name='L19'></a>  19 <em class='comment'> * Events might be units moving or fighting, or when victory or defeat occurs.</em>
-<a id='L20' name='L20'></a>  20 <em class='comment'> * A scenario's configuration file will define actions to take when certain events occur.</em>
-<a id='L21' name='L21'></a>  21 <em class='comment'> * This module is responsible for implementing some of those actions (i.e. Action WML).</em>
-<a id='L22' name='L22'></a>  22 <em class='comment'> * The actions not implemented in this module are implemented in Lua.</em>
-<a id='L23' name='L23'></a>  23 <em class='comment'> */</em>
-<a id='L24' name='L24'></a>  24 
-<a id='L25' name='L25'></a>  25 <em class='sharp'>#pragma</em> once
-<a id='L26' name='L26'></a>  26 
-<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='310.html'>terrain/type_data.hpp</a>"
-<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> &lt;map&gt;
-<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;string&gt;
-<a id='L30' name='L30'></a>  30 
-<a id='L31' name='L31'></a>  31 <strong class='reserved'>class</strong>  <a href='../D/4743.html' title='Multiple defined in 4 places.'>config</a>;
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>struct</strong> <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>;
-<a id='L33' name='L33'></a>  33 <strong class='reserved'>class</strong>  <a href='../D/15893.html' title='Multiple defined in 2 places.'>vconfig</a>;
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1066.html'>game_events/handlers.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='1061.html'>game_events/wmi_manager.hpp</a>"
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;functional&gt;
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;set&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;string&gt;
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>class</strong> <a href='../S/187.html#L47' title='Defined at 47 in src/scripting/game_lua_kernel.hpp.'>game_lua_kernel</a>;
+<a id='L25' name='L25'></a>  25 <strong class='reserved'>class</strong> <a href='../S/1050.html#L33' title='Defined at 33 in src/filter_context.hpp.'>filter_context</a>;
+<a id='L26' name='L26'></a>  26 <strong class='reserved'>class</strong> <a href='../D/6569.html' title='Multiple defined in 2 places.'>game_display</a>;
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>class</strong> <a href='../S/79.html#L28' title='Defined at 28 in src/game_data.hpp.'>game_data</a>;
+<a id='L28' name='L28'></a>  28 <strong class='reserved'>class</strong> <a href='../D/15511.html' title='Multiple defined in 2 places.'>unit_map</a>;
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>namespace</strong> <a href='../R/5854.html' title='Multiple referred from 136 places.'>game_events</a>
+<a id='L31' name='L31'></a>  31 <em class='brace'>{</em>
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>class</strong> <a href='../D/16366.html' title='Multiple defined in 3 places.'>wml_event_pump</a>;
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>class</strong> <a href='../S/1065.html#L25' title='Defined at 25 in src/game_events/manager_impl.hpp.'>event_handlers</a>;
 <a id='L34' name='L34'></a>  34 
-<a id='L35' name='L35'></a>  35 <strong class='reserved'>namespace</strong> <a href='../R/13643.html' title='Multiple referred from 500 places.'>t_translation</a> <em class='brace'>{</em>
-<a id='L36' name='L36'></a>  36         <strong class='reserved'>struct</strong> <a href='../S/312.html#L55' title='Defined at 55 in src/terrain/translation.hpp.'>terrain_code</a>;
-<a id='L37' name='L37'></a>  37 <em class='brace'>}</em>
-<a id='L38' name='L38'></a>  38 
-<a id='L39' name='L39'></a>  39 
-<a id='L40' name='L40'></a>  40 <strong class='reserved'>namespace</strong> <a href='../R/5854.html' title='Multiple referred from 134 places.'>game_events</a>
-<a id='L41' name='L41'></a>  41 <em class='brace'>{</em>
-<a id='L42' name='L42'></a>  42         <strong class='reserved'>struct</strong> <a href='../S/1063.html#L45' title='Defined at 45 in src/game_events/pump.hpp.'>queued_event</a>;
-<a id='L43' name='L43'></a>  43 
-<a id='L44' name='L44'></a>  44 
-<a id='L45' name='L45'></a>  45         <em class='comment'>// Most of the functionality in the source file is accessed via callbacks,</em>
-<a id='L46' name='L46'></a>  46         <em class='comment'>// accessed by iterating over wml_action.</em>
-<a id='L47' name='L47'></a>  47 
-<a id='L48' name='L48'></a>  48         <strong class='reserved'>class</strong> <a href='../R/14895.html' title='Multiple referred from 8 places.'>wml_action</a> <em class='brace'>{</em>
-<a id='L49' name='L49'></a>  49         <strong class='reserved'>public</strong>:
-<a id='L50' name='L50'></a>  50                 <strong class='reserved'>typedef</strong> <strong class='reserved'>void</strong> (*<a href='../Y/11091.html' title='Multiple used in 67 places.'>handler</a>)(<strong class='reserved'>const</strong> <a href='../S/1063.html#L45' title='Defined at 45 in src/game_events/pump.hpp.'>queued_event</a> &amp;, <strong class='reserved'>const</strong> <a href='../D/15893.html' title='Multiple defined in 2 places.'>vconfig</a> &amp;);
-<a id='L51' name='L51'></a>  51                 <strong class='reserved'>typedef</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../R/9705.html' title='Multiple referred from 1578 places.'>map</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>, <a href='../Y/11091.html' title='Multiple used in 67 places.'>handler</a>&gt; <a href='../D/10687.html' title='Multiple defined in 18 places.'>map</a>;
-<a id='L52' name='L52'></a>  52 
-<a id='L53' name='L53'></a>  53                 <em class='comment'>/// Using this constructor for a static object outside action_wml.cpp</em>
-<a id='L54' name='L54'></a>  54                 <em class='comment'>/// will likely lead to a static initialization fiasco.</em>
-<a id='L55' name='L55'></a>  55                 <a href='../D/16267.html' title='Multiple defined in 2 places.'>wml_action</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a> &amp; <a href='../Y/19323.html' title='Multiple used in 334 places.'>tag</a>, <a href='../Y/11091.html' title='Multiple used in 67 places.'>handler</a> <a href='../Y/10346.html' title='Multiple used in 249 places.'>function</a>);
-<a id='L56' name='L56'></a>  56 
-<a id='L57' name='L57'></a>  57                 <em class='comment'>/// The first registered action.</em>
-<a id='L58' name='L58'></a>  58                 <strong class='reserved'>static</strong> <a href='../D/10687.html' title='Multiple defined in 18 places.'>map</a>::<a href='../D/4830.html' title='Multiple defined in 14 places.'>const_iterator</a> <a href='../R/3224.html' title='Multiple referred from 1710 places.'>begin</a>()  <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/17079.html' title='Multiple used in 6 places.'>registry_</a>.<a href='../D/3606.html' title='Multiple defined in 31 places.'>begin</a>(); <em class='brace'>}</em>
-<a id='L59' name='L59'></a>  59                 <em class='comment'>/// One past the last registered action.</em>
-<a id='L60' name='L60'></a>  60                 <strong class='reserved'>static</strong> <a href='../D/10687.html' title='Multiple defined in 18 places.'>map</a>::<a href='../D/4830.html' title='Multiple defined in 14 places.'>const_iterator</a> <a href='../R/5181.html' title='Multiple referred from 2628 places.'>end</a>()    <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/17079.html' title='Multiple used in 6 places.'>registry_</a>.<a href='../D/5865.html' title='Multiple defined in 31 places.'>end</a>(); <em class='brace'>}</em>
-<a id='L61' name='L61'></a>  61                 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../D/10687.html' title='Multiple defined in 18 places.'>map</a>&amp; <a href='../R/11449.html' title='Multiple referred from 15 places.'>registry</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/17079.html' title='Multiple used in 6 places.'>registry_</a>; <em class='brace'>}</em>
-<a id='L62' name='L62'></a>  62         <strong class='reserved'>private</strong>:
-<a id='L63' name='L63'></a>  63                 <em class='comment'>/// Tracks the known action handlers.</em>
-<a id='L64' name='L64'></a>  64                 <strong class='reserved'>static</strong> <a href='../D/10687.html' title='Multiple defined in 18 places.'>map</a> <a href='../Y/17079.html' title='Multiple used in 6 places.'>registry_</a>;
-<a id='L65' name='L65'></a>  65         <em class='brace'>}</em>;
+<a id='L35' name='L35'></a>  35 <em class='comment'>/**</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * The game event manager loads the scenario configuration object,</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * and ensures that events are handled according to the</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * scenario configuration for its lifetime.</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> *</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * Thus, a manager object should be created when a scenario is played,</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> * and destroyed at the end of the scenario.</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> * If a second manager object is created before destroying the previous</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * one, the game will crash with an assertion failure.</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> */</em>
+<a id='L45' name='L45'></a>  45 <strong class='reserved'>class</strong> <a href='../R/9702.html' title='Multiple referred from 452 places.'>manager</a>
+<a id='L46' name='L46'></a>  46 <em class='brace'>{</em>
+<a id='L47' name='L47'></a>  47 <strong class='reserved'>private</strong>:
+<a id='L48' name='L48'></a>  48         <em class='comment'>/**</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'>         * This class is similar to an input iterator through event handlers,</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'>         * except each instance knows its own end (determined when constructed).</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'>         * Subsequent dereferences are not guaranteed to return the same element,</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'>         * so it is important to assign a dereference to a variable if you want</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'>         * to use it more than once. On the other hand, a dereference will not</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'>         * return a null pointer until the end of the iteration is reached (and</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'>         * this is how to detect the end of the iteration).</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>         *</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'>         * For simplicity, this class is neither assignable nor equality</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'>         * comparable nor default constructable, and there is no postincrement.</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>         * Typedefs are also skipped.</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'>         */</em>
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>class</strong> <a href='../R/8570.html' title='Multiple referred from 75 places.'>iteration</a>
+<a id='L62' name='L62'></a>  62         <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>public</strong>:
+<a id='L64' name='L64'></a>  64                 <em class='comment'>/// Event-specific constructor.</em>
+<a id='L65' name='L65'></a>  65                 <strong class='reserved'>explicit</strong> <a href='../D/9475.html' title='Multiple defined in 14 places.'>iteration</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/9457.html' title='Multiple used in 31 places.'>event_name</a>, <a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>&amp;);
 <a id='L66' name='L66'></a>  66 
-<a id='L67' name='L67'></a>  67 
-<a id='L68' name='L68'></a>  68         <em class='comment'>/**</em>
-<a id='L69' name='L69'></a>  69 <em class='comment'>         * Changes a terrain location.</em>
-<a id='L70' name='L70'></a>  70 <em class='comment'>         * Ensures that villages are properly lost and that new terrains are discovered.</em>
-<a id='L71' name='L71'></a>  71 <em class='comment'>         */</em>
-<a id='L72' name='L72'></a>  72         <strong class='reserved'>void</strong> <a href='../S/740.html#L299' title='Defined at 299 in src/game_board.cpp.'>change_terrain</a>(<strong class='reserved'>const</strong> <a href='../S/1091.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>, <strong class='reserved'>const</strong> <a href='../D/14848.html' title='Multiple defined in 5 places.'>t_translation</a>::<a href='../S/312.html#L55' title='Defined at 55 in src/terrain/translation.hpp.'>terrain_code</a> &amp;<a href='../Y/19261.html' title='Multiple used in 1448 places.'>t</a>,
-<a id='L73' name='L73'></a>  73                             <a href='../S/310.html#L21' title='Defined at 21 in src/terrain/type_data.hpp.'>terrain_type_data</a>::<a href='../S/310.html#L64' title='Defined at 64 in src/terrain/type_data.hpp.'>merge_mode</a> <a href='../S/90.html#L39' title='Defined at 39 in src/floating_textbox.hpp.'>mode</a>, <strong class='reserved'>bool</strong> <a href='../Y/17187.html' title='Multiple used in 15 places.'>replace_if_failed</a>);
-<a id='L74' name='L74'></a>  74 <em class='brace'>}</em>
+<a id='L67' name='L67'></a>  67                 <em class='comment'>// Increment:</em>
+<a id='L68' name='L68'></a>  68                 <a href='../D/9475.html' title='Multiple defined in 14 places.'>iteration</a>&amp; <strong class='reserved'>operator</strong>++();
+<a id='L69' name='L69'></a>  69                 <em class='comment'>// Dereference:</em>
+<a id='L70' name='L70'></a>  70                 <a href='../S/1066.html#L43' title='Defined at 43 in src/game_events/handlers.hpp.'>handler_ptr</a> <strong class='reserved'>operator</strong>*();
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72         <strong class='reserved'>private</strong>:
+<a id='L73' name='L73'></a>  73                 <em class='comment'>/// Gets the index from a pointer, capped at end_.</em>
+<a id='L74' name='L74'></a>  74                 <a href='../S/1066.html#L46' title='Defined at 46 in src/game_events/handlers.hpp.'>handler_vec</a>::<a href='../D/14473.html' title='Multiple defined in 2 places.'>size_type</a> <a href='../R/11048.html' title='Multiple referred from 2 places.'>ptr_index</a>(<strong class='reserved'>const</strong> <a href='../S/1066.html#L43' title='Defined at 43 in src/game_events/handlers.hpp.'>handler_ptr</a>&amp; <a href='../D/12147.html' title='Multiple defined in 3 places.'>ptr</a>) <strong class='reserved'>const</strong>
+<a id='L75' name='L75'></a>  75                 <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76                         <strong class='reserved'>return</strong> !<strong class='reserved'>bool</strong>(<a href='../D/12147.html' title='Multiple defined in 3 places.'>ptr</a>) ? <a href='../S/132.html#L551' title='Defined at 551 in src/serialization/preprocessor.cpp.'>end_</a> : <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10947.html' title='Multiple defined in 2 places.'>min</a>(<a href='../D/12147.html' title='Multiple defined in 3 places.'>ptr</a>-&gt;<a href='../D/8788.html' title='Multiple defined in 6 places.'>index</a>(), <a href='../S/132.html#L551' title='Defined at 551 in src/serialization/preprocessor.cpp.'>end_</a>);
+<a id='L77' name='L77'></a>  77                 <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>private</strong>:
+<a id='L80' name='L80'></a>  80                 <em class='comment'>/// The fixed-name event handlers for this iteration.</em>
+<a id='L81' name='L81'></a>  81                 <strong class='reserved'>const</strong> <a href='../D/8358.html' title='Multiple defined in 3 places.'>handler_list</a>&amp; <a href='../Y/13509.html' title='Multiple used in 3 places.'>main_list_</a>;
+<a id='L82' name='L82'></a>  82                 <em class='comment'>/// The varying-name event handlers for this iteration.</em>
+<a id='L83' name='L83'></a>  83                 <strong class='reserved'>const</strong> <a href='../D/8358.html' title='Multiple defined in 3 places.'>handler_list</a>&amp; <a href='../Y/21178.html' title='Multiple used in 3 places.'>var_list_</a>;
+<a id='L84' name='L84'></a>  84                 <em class='comment'>/// The event name for this iteration.</em>
+<a id='L85' name='L85'></a>  85                 <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/9458.html' title='Multiple used in 14 places.'>event_name_</a>;
+<a id='L86' name='L86'></a>  86                 <em class='comment'>/// The end of this iteration. We intentionally exclude handlers</em>
+<a id='L87' name='L87'></a>  87                 <em class='comment'>/// added after *this is constructed.</em>
+<a id='L88' name='L88'></a>  88                 <strong class='reserved'>const</strong> <a href='../S/1066.html#L46' title='Defined at 46 in src/game_events/handlers.hpp.'>handler_vec</a>::<a href='../D/14473.html' title='Multiple defined in 2 places.'>size_type</a> <a href='../S/132.html#L551' title='Defined at 551 in src/serialization/preprocessor.cpp.'>end_</a>;
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90                 <em class='comment'>/// Set to true upon dereferencing.</em>
+<a id='L91' name='L91'></a>  91                 <strong class='reserved'>bool</strong> <a href='../Y/8007.html' title='Multiple used in 6 places.'>current_is_known_</a>;
+<a id='L92' name='L92'></a>  92                 <em class='comment'>/// true if the most recent dereference was taken from main_list_.</em>
+<a id='L93' name='L93'></a>  93                 <strong class='reserved'>bool</strong> <a href='../Y/13506.html' title='Multiple used in 5 places.'>main_is_current_</a>;
+<a id='L94' name='L94'></a>  94                 <em class='comment'>/// The current (or next) element from main_list_.</em>
+<a id='L95' name='L95'></a>  95                 <a href='../D/8358.html' title='Multiple defined in 3 places.'>handler_list</a>::<a href='../D/9476.html' title='Multiple defined in 16 places.'>iterator</a> <a href='../Y/13507.html' title='Multiple used in 4 places.'>main_it_</a>;
+<a id='L96' name='L96'></a>  96                 <em class='comment'>/// The current (or next) element from var_list_.</em>
+<a id='L97' name='L97'></a>  97                 <a href='../D/8358.html' title='Multiple defined in 3 places.'>handler_list</a>::<a href='../D/9476.html' title='Multiple defined in 16 places.'>iterator</a> <a href='../Y/21177.html' title='Multiple used in 5 places.'>var_it_</a>;
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99                 <a href='../S/79.html#L28' title='Defined at 28 in src/game_data.hpp.'>game_data</a>* <a href='../S/1069.html#L109' title='Defined at 109 in src/game_events/manager.cpp.'>gamedata_</a>;
+<a id='L100' name='L100'></a> 100         <em class='brace'>}</em>;
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102         <em class='comment'>// Performs an assertion check to ensure these members are not null.</em>
+<a id='L103' name='L103'></a> 103         <strong class='reserved'>friend</strong> <strong class='reserved'>void</strong> <a href='../S/1066.html#L48' title='Defined at 48 in src/game_events/handlers.hpp.'>event_handler</a>::<a href='../D/5421.html' title='Multiple defined in 3 places.'>disable</a>();
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105         <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/20716.html' title='Multiple used in 177 places.'>unique_ptr</a>&lt;<a href='../S/1065.html#L25' title='Defined at 25 in src/game_events/manager_impl.hpp.'>event_handlers</a>&gt; <a href='../Y/9451.html' title='Multiple used in 12 places.'>event_handlers_</a>;
+<a id='L106' name='L106'></a> 106         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13421.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../Y/20821.html' title='Multiple used in 6 places.'>unit_wml_ids_</a>;
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108         <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/20716.html' title='Multiple used in 177 places.'>unique_ptr</a>&lt;<a href='../D/6572.html' title='Multiple defined in 25 places.'>game_events</a>::<a href='../D/16366.html' title='Multiple defined in 3 places.'>wml_event_pump</a>&gt; <a href='../Y/16602.html' title='Multiple used in 3 places.'>pump_</a>;
+<a id='L109' name='L109'></a> 109         <a href='../D/6572.html' title='Multiple defined in 25 places.'>game_events</a>::<a href='../D/16264.html' title='Multiple defined in 3 places.'>wmi_manager</a> <a href='../S/1069.html#L68' title='Defined at 68 in src/game_events/manager.cpp.'>wml_menu_items_</a>;
+<a id='L110' name='L110'></a> 110 
+<a id='L111' name='L111'></a> 111 <strong class='reserved'>public</strong>:
+<a id='L112' name='L112'></a> 112         <a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>(<strong class='reserved'>const</strong> <a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>&amp;) = <strong class='reserved'>delete</strong>;
+<a id='L113' name='L113'></a> 113         <a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>&amp; <strong class='reserved'>operator</strong>=(<strong class='reserved'>const</strong> <a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>&amp;) = <strong class='reserved'>delete</strong>;
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115         <strong class='reserved'>explicit</strong> <a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>();
+<a id='L116' name='L116'></a> 116         <strong class='reserved'>void</strong> <a href='../S/1069.html#L72' title='Defined at 72 in src/game_events/manager.cpp.'>read_scenario</a>(<strong class='reserved'>const</strong> <a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../Y/17699.html' title='Multiple used in 14 places.'>scenario_cfg</a>);
+<a id='L117' name='L117'></a> 117         ~<a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>();
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119         <em class='comment'>/** Create an event handler. */</em>
+<a id='L120' name='L120'></a> 120         <strong class='reserved'>void</strong> <a href='../D/2870.html' title='Multiple defined in 2 places.'>add_event_handler</a>(<strong class='reserved'>const</strong> <a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../Y/11091.html' title='Multiple used in 67 places.'>handler</a>, <strong class='reserved'>bool</strong> <a href='../S/1066.html#L61' title='Defined at 61 in src/game_events/handlers.hpp.'>is_menu_item</a> = <strong class='reserved'>false</strong>);
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <em class='comment'>/** Removes an event handler. */</em>
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>void</strong> <a href='../D/12600.html' title='Multiple defined in 2 places.'>remove_event_handler</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a>);
+<a id='L124' name='L124'></a> 124 
+<a id='L125' name='L125'></a> 125         <em class='comment'>/** Gets an event handler by ID */</em>
+<a id='L126' name='L126'></a> 126         <strong class='reserved'>const</strong> <a href='../S/1066.html#L43' title='Defined at 43 in src/game_events/handlers.hpp.'>handler_ptr</a> <a href='../D/7474.html' title='Multiple defined in 2 places.'>get_event_handler_by_id</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8604.html' title='Multiple defined in 22 places.'>id</a>);
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>void</strong> <a href='../S/1069.html#L173' title='Defined at 173 in src/game_events/manager.cpp.'>add_events</a>(<strong class='reserved'>const</strong> <a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a>::<a href='../S/1096.html#L227' title='Defined at 227 in src/config.hpp.'>const_child_itors</a>&amp; <a href='../Y/7060.html' title='Multiple used in 12 places.'>cfgs</a>, <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/15363.html' title='Multiple defined in 27 places.'>type</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>());
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130         <strong class='reserved'>void</strong> <a href='../S/1069.html#L193' title='Defined at 193 in src/game_events/manager.cpp.'>write_events</a>(<a href='../D/4741.html' title='Multiple defined in 4 places.'>config</a>&amp; <a href='../D/4173.html' title='Multiple defined in 5 places.'>cfg</a>) <strong class='reserved'>const</strong>;
+<a id='L131' name='L131'></a> 131 
+<a id='L132' name='L132'></a> 132         <strong class='reserved'>using</strong> <a href='../R/5287.html' title='Multiple referred from 2 places.'>event_func_t</a> = <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10346.html' title='Multiple used in 250 places.'>function</a>&lt;<strong class='reserved'>void</strong>(<a href='../D/6572.html' title='Multiple defined in 25 places.'>game_events</a>::<a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>&amp;, <a href='../S/1066.html#L43' title='Defined at 43 in src/game_events/handlers.hpp.'>handler_ptr</a>)&gt;;
+<a id='L133' name='L133'></a> 133         <strong class='reserved'>void</strong> <a href='../S/1069.html#L207' title='Defined at 207 in src/game_events/manager.cpp.'>execute_on_events</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/9453.html' title='Multiple used in 11 places.'>event_id</a>, <a href='../S/1071.html#L132' title='Defined at 132 in src/game_events/manager.hpp.'>event_func_t</a> <a href='../Y/10341.html' title='Multiple used in 172 places.'>func</a>);
+<a id='L134' name='L134'></a> 134 
+<a id='L135' name='L135'></a> 135         <a href='../D/6572.html' title='Multiple defined in 25 places.'>game_events</a>::<a href='../D/16366.html' title='Multiple defined in 3 places.'>wml_event_pump</a>&amp; <a href='../D/12157.html' title='Multiple defined in 3 places.'>pump</a>();
+<a id='L136' name='L136'></a> 136 
+<a id='L137' name='L137'></a> 137         <a href='../D/6572.html' title='Multiple defined in 25 places.'>game_events</a>::<a href='../D/16264.html' title='Multiple defined in 3 places.'>wmi_manager</a>&amp; <a href='../R/14903.html' title='Multiple referred from 2 places.'>wml_menu_items</a>()
+<a id='L138' name='L138'></a> 138         <em class='brace'>{</em>
+<a id='L139' name='L139'></a> 139                 <strong class='reserved'>return</strong> <a href='../S/1069.html#L68' title='Defined at 68 in src/game_events/manager.cpp.'>wml_menu_items_</a>;
+<a id='L140' name='L140'></a> 140         <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141 <em class='brace'>}</em>;
+<a id='L142' name='L142'></a> 142 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L58'>[^]</a><a href='#L61'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L74'>[^]</a><a href='#L137'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>
