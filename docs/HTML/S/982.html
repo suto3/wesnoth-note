@@ -1,105 +1,135 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/units/drawer.hpp</title>
+<title>src/replay_controller.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5867.html'>units</a>/drawer.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/replay_controller.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L30'>[^]</a><a href='#L79'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/2724.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='../J/2491.html' title='Multiple included from 2 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L30' title='Defined at 30.'>move_done</a></li>
+<li><a href='#L31' title='Defined at 31.'>new_side_turn</a></li>
+<li><a href='#L32' title='Defined at 32.'>should_stop</a></li>
+<li><a href='#L35' title='Defined at 35.'>nop</a></li>
+<li><a href='#L48' title='Defined at 48.'>should_stop</a></li>
+<li><a href='#L50' title='Defined at 50.'>is_controlling_view</a></li>
+<li><a href='#L51' title='Defined at 51.'>allow_reset_replay</a></li>
+<li><a href='#L52' title='Defined at 52.'>get_reset_state</a></li>
+<li><a href='#L53' title='Defined at 53.'>return_to_play_side</a></li>
+<li><a href='#L79' title='Defined at 79.'>replay_ui_has_all_buttons</a></li>
+</ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by Chris Beck &lt;render787@gmail.com&gt;</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
-<a id='L4' name='L4'></a>   4 <em class='comment'></em>
-<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
-<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
-<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
-<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
-<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
-<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
-<a id='L11' name='L11'></a>  11 <em class='comment'></em>
-<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
-<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
-<a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
-<a id='L16' name='L16'></a>  16 <em class='comment'> *</em>
-<a id='L17' name='L17'></a>  17 <em class='comment'> * This wrapper class should be held by the display object when it needs to draw a unit.</em>
-<a id='L18' name='L18'></a>  18 <em class='comment'> * The purpose of this is to improve encapsulation -- other parts of the engine like AI</em>
-<a id='L19' name='L19'></a>  19 <em class='comment'> * don't need to be exposed to the unit drawing code, and encapsulation like this will</em>
-<a id='L20' name='L20'></a>  20 <em class='comment'> * help us to reduce unnecessary includes.</em>
-<a id='L21' name='L21'></a>  21 <em class='comment'> *</em>
-<a id='L22' name='L22'></a>  22 <em class='comment'> **/</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2015 - 2017 by the Battle for Wesnoth Project</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'></em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   (at your option) any later version.</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'></em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>*/</em>
+<a id='L13' name='L13'></a>  13 
+<a id='L14' name='L14'></a>  14 <em class='sharp'>#pragma</em> once
+<a id='L15' name='L15'></a>  15 
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> "<a href='1025.html'>play_controller.hpp</a>"
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='829.html'>replay.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='966.html'>mouse_handler_base.hpp</a>" <em class='comment'>//events::command_disabler</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;vector&gt;
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <strong class='reserved'>class</strong> <a href='../D/15928.html' title='Multiple defined in 4 places.'>video</a>;
 <a id='L23' name='L23'></a>  23 
-<a id='L24' name='L24'></a>  24 <em class='sharp'>#pragma</em> once
-<a id='L25' name='L25'></a>  25 
-<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='1090.html'>map/location.hpp</a>"
-<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='872.html'>utils/math.hpp</a>"
-<a id='L28' name='L28'></a>  28 
-<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;map&gt;
-<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L31' name='L31'></a>  31 
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>class</strong> <a href='../D/5454.html' title='Multiple defined in 24 places.'>display</a>;
-<a id='L33' name='L33'></a>  33 <strong class='reserved'>class</strong> <a href='../S/843.html#L51' title='Defined at 51 in src/display_context.hpp.'>display_context</a>;
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>class</strong> <a href='../D/6607.html' title='Multiple defined in 2 places.'>gamemap</a>;
-<a id='L35' name='L35'></a>  35 <strong class='reserved'>namespace</strong> <a href='../R/7409.html' title='Multiple referred from 309 places.'>halo</a> <em class='brace'>{</em> <strong class='reserved'>class</strong> <a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a>; <em class='brace'>}</em>
-<a id='L36' name='L36'></a>  36 <strong class='reserved'>class</strong> <a href='../D/14889.html' title='Multiple defined in 3 places.'>team</a>;
-<a id='L37' name='L37'></a>  37 <strong class='reserved'>class</strong> <a href='../D/15453.html' title='Multiple defined in 4 places.'>unit</a>;
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>class</strong> <a href='../R/11604.html' title='Multiple referred from 41 places.'>replay_controller</a> : <strong class='reserved'>public</strong> <a href='../D/5978.html' title='Multiple defined in 26 places.'>events</a>::<a href='../S/319.html#L33' title='Defined at 33 in src/generic_event.hpp.'>observer</a>
+<a id='L25' name='L25'></a>  25 <em class='brace'>{</em>
+<a id='L26' name='L26'></a>  26 <strong class='reserved'>public</strong>:
+<a id='L27' name='L27'></a>  27         <strong class='reserved'>class</strong> <a href='../R/11623.html' title='Multiple referred from 7 places.'>replay_stop_condition</a>
+<a id='L28' name='L28'></a>  28         <em class='brace'>{</em>
+<a id='L29' name='L29'></a>  29         <strong class='reserved'>public</strong>:
+<a id='L30' name='L30'></a>  30                 <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../S/1055.html#L304' title='Referred from 304 in src/replay_controller.cpp.'>move_done</a>() <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L31' name='L31'></a>  31                 <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../R/10233.html' title='Multiple referred from 3 places.'>new_side_turn</a>(<strong class='reserved'>int</strong> , <strong class='reserved'>int</strong> ) <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L32' name='L32'></a>  32                 <strong class='reserved'>virtual</strong> <strong class='reserved'>bool</strong> <a href='../R/13073.html' title='Multiple referred from 4 places.'>should_stop</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>; <em class='brace'>}</em>
+<a id='L33' name='L33'></a>  33                 <strong class='reserved'>virtual</strong> ~replay_stop_condition()<em class='brace'>{</em><em class='brace'>}</em>
+<a id='L34' name='L34'></a>  34         <em class='brace'>}</em>;
+<a id='L35' name='L35'></a>  35         <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/982.html#L36' title='Referred from 36 in src/replay_controller.hpp.'>nop</a>() <em class='brace'>{</em><em class='brace'>}</em>;
+<a id='L36' name='L36'></a>  36         <a href='../D/12717.html' title='Multiple defined in 2 places.'>replay_controller</a>(<a href='../D/11853.html' title='Multiple defined in 2 places.'>play_controller</a>&amp; <a href='../D/4878.html' title='Multiple defined in 7 places.'>controller</a>, <strong class='reserved'>bool</strong> <a href='../Y/7739.html' title='Multiple used in 3 places.'>control_view</a>, <strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4740.html' title='Multiple defined in 5 places.'>config</a>&gt;&amp; <a href='../Y/17289.html' title='Multiple used in 3 places.'>reset_state</a>, <strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10349.html' title='Multiple used in 250 places.'>function</a>&lt;<strong class='reserved'>void</strong>()&gt;&amp; <a href='../Y/15392.html' title='Multiple used in 3 places.'>on_end_replay</a> = <a href='../S/982.html#L35' title='Defined at 35 in src/replay_controller.hpp.'>nop</a>);
+<a id='L37' name='L37'></a>  37         ~<a href='../D/12717.html' title='Multiple defined in 2 places.'>replay_controller</a>();
 <a id='L38' name='L38'></a>  38 
-<a id='L39' name='L39'></a>  39 <strong class='reserved'>struct</strong> <a href='../S/967.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a>;
-<a id='L40' name='L40'></a>  40 <strong class='reserved'>struct</strong> <a href='../Y/2553.html' title='Multiple used in 520 places.'>SDL_Rect</a>;
-<a id='L41' name='L41'></a>  41 <strong class='reserved'>class</strong> <a href='../S/976.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>;
-<a id='L42' name='L42'></a>  42 
-<a id='L43' name='L43'></a>  43 <strong class='reserved'>class</strong> <a href='../R/14213.html' title='Multiple referred from 10 places.'>unit_drawer</a>
-<a id='L44' name='L44'></a>  44 <em class='brace'>{</em>
-<a id='L45' name='L45'></a>  45 <strong class='reserved'>public</strong>:
-<a id='L46' name='L46'></a>  46         <strong class='reserved'>explicit</strong> <a href='../S/982.html#L43' title='Defined at 43 in src/units/drawer.hpp.'>unit_drawer</a>(<a href='../D/5454.html' title='Multiple defined in 24 places.'>display</a> &amp; <a href='../Y/19804.html' title='Multiple used in 4 places.'>thedisp</a>);
-<a id='L47' name='L47'></a>  47 
-<a id='L48' name='L48'></a>  48 <strong class='reserved'>private</strong>:
-<a id='L49' name='L49'></a>  49         <a href='../D/5454.html' title='Multiple defined in 24 places.'>display</a> &amp; <a href='../S/1097.html#L157' title='Defined at 157 in src/halo.cpp.'>disp</a>;
-<a id='L50' name='L50'></a>  50         <strong class='reserved'>const</strong> <a href='../S/843.html#L51' title='Defined at 51 in src/display_context.hpp.'>display_context</a> &amp; <a href='../D/5224.html' title='Multiple defined in 2 places.'>dc</a>;
-<a id='L51' name='L51'></a>  51         <strong class='reserved'>const</strong> <a href='../D/6607.html' title='Multiple defined in 2 places.'>gamemap</a> &amp; <a href='../D/10687.html' title='Multiple defined in 18 places.'>map</a>;
-<a id='L52' name='L52'></a>  52         <strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21223.html' title='Multiple used in 2725 places.'>vector</a>&lt;<a href='../D/14889.html' title='Multiple defined in 3 places.'>team</a>&gt; &amp; <a href='../D/14907.html' title='Multiple defined in 8 places.'>teams</a>;
-<a id='L53' name='L53'></a>  53         <a href='../D/8248.html' title='Multiple defined in 7 places.'>halo</a>::<a href='../D/10684.html' title='Multiple defined in 32 places.'>manager</a> &amp; <a href='../Y/11073.html' title='Multiple used in 20 places.'>halo_man</a>;
-<a id='L54' name='L54'></a>  54         <a href='../Y/18510.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../D/15939.html' title='Multiple defined in 4 places.'>viewing_team</a>;
-<a id='L55' name='L55'></a>  55         <a href='../Y/18510.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../S/957.html#L93' title='Defined at 93 in src/display.hpp.'>playing_team</a>;
-<a id='L56' name='L56'></a>  56         <strong class='reserved'>const</strong> <a href='../D/14889.html' title='Multiple defined in 3 places.'>team</a> &amp; <a href='../Y/21307.html' title='Multiple used in 4 places.'>viewing_team_ref</a>;
-<a id='L57' name='L57'></a>  57         <strong class='reserved'>const</strong> <a href='../D/14889.html' title='Multiple defined in 3 places.'>team</a> &amp; <a href='../Y/16159.html' title='Multiple used in 2 places.'>playing_team_ref</a>;
-<a id='L58' name='L58'></a>  58         <strong class='reserved'>bool</strong> <a href='../S/681.html#L504' title='Defined at 504 in src/display.cpp.'>is_blindfolded</a>;
-<a id='L59' name='L59'></a>  59         <strong class='reserved'>bool</strong> <a href='../S/957.html#L86' title='Defined at 86 in src/display.hpp.'>show_everything</a>;
-<a id='L60' name='L60'></a>  60         <a href='../S/1090.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../Y/17939.html' title='Multiple used in 6 places.'>sel_hex</a>;
-<a id='L61' name='L61'></a>  61         <a href='../S/1090.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../Y/14185.html' title='Multiple used in 3 places.'>mouse_hex</a>;
-<a id='L62' name='L62'></a>  62         <strong class='reserved'>double</strong> <a href='../Y/22048.html' title='Multiple used in 6 places.'>zoom_factor</a>;
-<a id='L63' name='L63'></a>  63 
-<a id='L64' name='L64'></a>  64         <strong class='reserved'>int</strong> <a href='../S/957.html#L255' title='Defined at 255 in src/display.hpp.'>hex_size</a>;
-<a id='L65' name='L65'></a>  65         <strong class='reserved'>int</strong> <a href='../S/1010.html#L51' title='Defined at 51 in src/units/drawer.cpp.'>hex_size_by_2</a>;
-<a id='L66' name='L66'></a>  66 
-<a id='L67' name='L67'></a>  67 <strong class='reserved'>public</strong>:
-<a id='L68' name='L68'></a>  68         <em class='comment'>/** draw a unit.  */</em>
-<a id='L69' name='L69'></a>  69         <strong class='reserved'>void</strong> <a href='../S/1010.html#L54' title='Defined at 54 in src/units/drawer.cpp.'>redraw_unit</a>(<strong class='reserved'>const</strong> <a href='../D/15453.html' title='Multiple defined in 4 places.'>unit</a> &amp; <a href='../Y/20565.html' title='Multiple used in 1983 places.'>u</a>) <strong class='reserved'>const</strong>;
-<a id='L70' name='L70'></a>  70 
-<a id='L71' name='L71'></a>  71 <strong class='reserved'>private</strong>:
-<a id='L72' name='L72'></a>  72         <em class='comment'>/** draw a health/xp bar of a unit */</em>
-<a id='L73' name='L73'></a>  73         <strong class='reserved'>void</strong> <a href='../S/1010.html#L339' title='Defined at 339 in src/units/drawer.cpp.'>draw_bar</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8635.html' title='Multiple defined in 19 places.'>image</a>, <strong class='reserved'>int</strong> <a href='../S/800.html#L68' title='Defined at 68 in src/floating_label.cpp.'>xpos</a>, <strong class='reserved'>int</strong> <a href='../Y/22011.html' title='Multiple used in 94 places.'>ypos</a>,
-<a id='L74' name='L74'></a>  74                 <strong class='reserved'>const</strong> <a href='../S/1090.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>&amp; <a href='../D/9893.html' title='Multiple defined in 6 places.'>loc</a>, <a href='../Y/18510.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../D/8457.html' title='Multiple defined in 4 places.'>height</a>, <strong class='reserved'>double</strong> <a href='../Y/9836.html' title='Multiple used in 24 places.'>filled</a>,
-<a id='L75' name='L75'></a>  75                 <strong class='reserved'>const</strong> <a href='../S/967.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a>&amp; <a href='../Y/7457.html' title='Multiple used in 290 places.'>col</a>, <a href='../D/6348.html' title='Multiple defined in 2 places.'>fixed_t</a> <a href='../Y/5463.html' title='Multiple used in 185 places.'>alpha</a>) <strong class='reserved'>const</strong>;
-<a id='L76' name='L76'></a>  76 
-<a id='L77' name='L77'></a>  77         <em class='comment'>/**</em>
-<a id='L78' name='L78'></a>  78 <em class='comment'>         * Finds the start and end rows on the energy bar image.</em>
-<a id='L79' name='L79'></a>  79 <em class='comment'>         *</em>
-<a id='L80' name='L80'></a>  80 <em class='comment'>         * White pixels are substituted for the color of the energy.</em>
-<a id='L81' name='L81'></a>  81 <em class='comment'>         */</em>
-<a id='L82' name='L82'></a>  82         <strong class='reserved'>const</strong> <a href='../Y/2553.html' title='Multiple used in 520 places.'>SDL_Rect</a>&amp; <a href='../S/1010.html#L414' title='Defined at 414 in src/units/drawer.cpp.'>calculate_energy_bar</a>(<a href='../S/976.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../D/14790.html' title='Multiple defined in 2 places.'>surf</a>) <strong class='reserved'>const</strong>;
-<a id='L83' name='L83'></a>  83 <em class='brace'>}</em>;
+<a id='L39' name='L39'></a>  39         <em class='comment'>// void reset_replay();</em>
+<a id='L40' name='L40'></a>  40         <strong class='reserved'>void</strong> <a href='../D/11869.html' title='Multiple defined in 5 places.'>play_replay</a>();
+<a id='L41' name='L41'></a>  41         <strong class='reserved'>void</strong> <a href='../D/14676.html' title='Multiple defined in 3 places.'>stop_replay</a>();
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>void</strong> <a href='../D/12724.html' title='Multiple defined in 3 places.'>replay_next_turn</a>();
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>void</strong> <a href='../D/12723.html' title='Multiple defined in 3 places.'>replay_next_side</a>();
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>void</strong> <a href='../D/12722.html' title='Multiple defined in 3 places.'>replay_next_move</a>();
+<a id='L45' name='L45'></a>  45         <a href='../S/829.html#L154' title='Defined at 154 in src/replay.hpp.'>REPLAY_RETURN</a> <a href='../D/11876.html' title='Multiple defined in 4 places.'>play_side_impl</a>();
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47         <strong class='reserved'>bool</strong> <a href='../S/1055.html#L286' title='Defined at 286 in src/replay_controller.cpp.'>recorder_at_end</a>() <strong class='reserved'>const</strong>;
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>bool</strong> <a href='../R/13073.html' title='Multiple referred from 4 places.'>should_stop</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/18972.html' title='Multiple used in 12 places.'>stop_condition_</a>-&gt;<a href='../D/14259.html' title='Multiple defined in 6 places.'>should_stop</a>(); <em class='brace'>}</em>
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>bool</strong> <a href='../D/4072.html' title='Multiple defined in 5 places.'>can_execute_command</a>(<strong class='reserved'>const</strong> <a href='../D/8563.html' title='Multiple defined in 11 places.'>hotkey</a>::<a href='../S/103.html#L212' title='Defined at 212 in src/hotkey/hotkey_command.hpp.'>hotkey_command</a>&amp; <a href='../S/912.html#L70' title='Defined at 70 in src/campaign_server/control.hpp.'>cmd</a>, <strong class='reserved'>int</strong> <a href='../D/8791.html' title='Multiple defined in 6 places.'>index</a>) <strong class='reserved'>const</strong>;
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>bool</strong> <a href='../R/8358.html' title='Multiple referred from 2 places.'>is_controlling_view</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/21375.html' title='Multiple used in 43 places.'>vision_</a>.is_initialized(); <em class='brace'>}</em>
+<a id='L51' name='L51'></a>  51         <strong class='reserved'>bool</strong> <a href='../R/2908.html' title='Multiple referred from 2 places.'>allow_reset_replay</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/17290.html' title='Multiple used in 4 places.'>reset_state_</a>.<a href='../D/6720.html' title='Multiple defined in 41 places.'>get</a>() != <a href='../Y/15090.html' title='Multiple used in 1950 places.'>nullptr</a>; <em class='brace'>}</em>
+<a id='L52' name='L52'></a>  52         <strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4740.html' title='Multiple defined in 5 places.'>config</a>&gt;&amp; <a href='../S/84.html#L680' title='Referred from 680 in src/playsingle_controller.cpp.'>get_reset_state</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/17290.html' title='Multiple used in 4 places.'>reset_state_</a>; <em class='brace'>}</em>;
+<a id='L53' name='L53'></a>  53         <strong class='reserved'>void</strong> <a href='../S/84.html#L711' title='Referred from 711 in src/playsingle_controller.cpp.'>return_to_play_side</a>(<strong class='reserved'>bool</strong> <a href='../S/705.html#L606' title='Defined at 606 in src/tests/gui/test_gui2.cpp.'>r</a> = <strong class='reserved'>true</strong>) <em class='brace'>{</em> <a href='../S/1055.html#L72' title='Defined at 72 in src/replay_controller.cpp.'>return_to_play_side_</a> = <a href='../S/705.html#L606' title='Defined at 606 in src/tests/gui/test_gui2.cpp.'>r</a>; <em class='brace'>}</em>
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>void</strong> <a href='../D/12732.html' title='Multiple defined in 3 places.'>replay_show_everything</a>();
+<a id='L55' name='L55'></a>  55         <strong class='reserved'>void</strong> <a href='../D/12731.html' title='Multiple defined in 3 places.'>replay_show_each</a>();
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>void</strong> <a href='../D/12733.html' title='Multiple defined in 3 places.'>replay_show_team1</a>();
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>void</strong> <a href='../S/1055.html#L373' title='Defined at 373 in src/replay_controller.cpp.'>update_teams</a>();
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>void</strong> <a href='../D/15716.html' title='Multiple defined in 2 places.'>update_viewing_player</a>();
+<a id='L59' name='L59'></a>  59 <strong class='reserved'>private</strong>:
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>void</strong> <a href='../S/1055.html#L91' title='Defined at 91 in src/replay_controller.cpp.'>add_replay_theme</a>();
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>void</strong> <a href='../D/8806.html' title='Multiple defined in 40 places.'>init</a>();
+<a id='L62' name='L62'></a>  62         <strong class='reserved'>void</strong> <a href='../S/1055.html#L264' title='Defined at 264 in src/replay_controller.cpp.'>update_gui</a>();
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>void</strong> <a href='../S/1055.html#L106' title='Defined at 106 in src/replay_controller.cpp.'>rebuild_replay_theme</a>();
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>void</strong> <a href='../D/8284.html' title='Multiple defined in 12 places.'>handle_generic_event</a>(<strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11226.html' title='Multiple defined in 26 places.'>name</a>) <a href='../D/11607.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>void</strong> <a href='../S/1055.html#L225' title='Defined at 225 in src/replay_controller.cpp.'>reset_replay_ui</a>();
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>void</strong> <a href='../S/1055.html#L151' title='Defined at 151 in src/replay_controller.cpp.'>update_replay_ui</a>();
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <strong class='reserved'>void</strong> <a href='../S/1055.html#L186' title='Defined at 186 in src/replay_controller.cpp.'>replay_ui_playback_should_start</a>();
+<a id='L70' name='L70'></a>  70         <strong class='reserved'>void</strong> <a href='../S/1055.html#L198' title='Defined at 198 in src/replay_controller.cpp.'>replay_ui_playback_should_stop</a>();
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/8238.html' title='Multiple defined in 28 places.'>gui</a>::<a href='../D/3836.html' title='Multiple defined in 3 places.'>button</a>&gt; <a href='../S/1055.html#L121' title='Defined at 121 in src/replay_controller.cpp.'>play_button</a>();
+<a id='L73' name='L73'></a>  73         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/8238.html' title='Multiple defined in 28 places.'>gui</a>::<a href='../D/3836.html' title='Multiple defined in 3 places.'>button</a>&gt; <a href='../S/1055.html#L126' title='Defined at 126 in src/replay_controller.cpp.'>stop_button</a>();
+<a id='L74' name='L74'></a>  74         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/8238.html' title='Multiple defined in 28 places.'>gui</a>::<a href='../D/3836.html' title='Multiple defined in 3 places.'>button</a>&gt; <a href='../S/1055.html#L131' title='Defined at 131 in src/replay_controller.cpp.'>reset_button</a>();
+<a id='L75' name='L75'></a>  75         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/8238.html' title='Multiple defined in 28 places.'>gui</a>::<a href='../D/3836.html' title='Multiple defined in 3 places.'>button</a>&gt; <a href='../S/1055.html#L136' title='Defined at 136 in src/replay_controller.cpp.'>play_turn_button</a>();
+<a id='L76' name='L76'></a>  76         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/8238.html' title='Multiple defined in 28 places.'>gui</a>::<a href='../D/3836.html' title='Multiple defined in 3 places.'>button</a>&gt; <a href='../S/1055.html#L141' title='Defined at 141 in src/replay_controller.cpp.'>play_side_button</a>();
+<a id='L77' name='L77'></a>  77         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/8238.html' title='Multiple defined in 28 places.'>gui</a>::<a href='../D/3836.html' title='Multiple defined in 3 places.'>button</a>&gt; <a href='../S/1055.html#L146' title='Defined at 146 in src/replay_controller.cpp.'>play_move_button</a>();
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>bool</strong> <a href='../R/11625.html' title='Multiple referred from 4 places.'>replay_ui_has_all_buttons</a>() <em class='brace'>{</em>
+<a id='L80' name='L80'></a>  80                 <strong class='reserved'>return</strong> <a href='../S/1055.html#L121' title='Defined at 121 in src/replay_controller.cpp.'>play_button</a>() &amp;&amp; <a href='../S/1055.html#L126' title='Defined at 126 in src/replay_controller.cpp.'>stop_button</a>() &amp;&amp; <a href='../S/1055.html#L131' title='Defined at 131 in src/replay_controller.cpp.'>reset_button</a>() &amp;&amp;
+<a id='L81' name='L81'></a>  81                        <a href='../S/1055.html#L136' title='Defined at 136 in src/replay_controller.cpp.'>play_turn_button</a>() &amp;&amp; <a href='../S/1055.html#L141' title='Defined at 141 in src/replay_controller.cpp.'>play_side_button</a>();
+<a id='L82' name='L82'></a>  82         <em class='brace'>}</em>
+<a id='L83' name='L83'></a>  83         <a href='../D/11853.html' title='Multiple defined in 2 places.'>play_controller</a>&amp; <a href='../D/4879.html' title='Multiple defined in 2 places.'>controller_</a>;
+<a id='L84' name='L84'></a>  84         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/20719.html' title='Multiple used in 177 places.'>unique_ptr</a>&lt;<a href='../S/982.html#L27' title='Defined at 27 in src/replay_controller.hpp.'>replay_stop_condition</a>&gt; <a href='../Y/18972.html' title='Multiple used in 12 places.'>stop_condition_</a>;
+<a id='L85' name='L85'></a>  85         <a href='../D/5978.html' title='Multiple defined in 26 places.'>events</a>::<a href='../D/4617.html' title='Multiple defined in 3 places.'>command_disabler</a> <a href='../D/5429.html' title='Multiple defined in 2 places.'>disabler_</a>;
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>enum</strong> <a href='../S/982.html#L93' title='Referred from 93 in src/replay_controller.hpp.'>REPLAY_VISION</a>
+<a id='L88' name='L88'></a>  88         <em class='brace'>{</em>
+<a id='L89' name='L89'></a>  89                 <a href='../R/814.html' title='Multiple referred from 3 places.'>HUMAN_TEAM</a>,
+<a id='L90' name='L90'></a>  90                 <a href='../S/1055.html#L363' title='Referred from 363 in src/replay_controller.cpp.'>CURRENT_TEAM</a>,
+<a id='L91' name='L91'></a>  91                 <a href='../R/1790.html' title='Multiple referred from 6 places.'>SHOW_ALL</a>,
+<a id='L92' name='L92'></a>  92         <em class='brace'>}</em>;
+<a id='L93' name='L93'></a>  93         <a href='../D/3723.html' title='Multiple defined in 3 places.'>boost</a>::<a href='../Y/15530.html' title='Multiple used in 119 places.'>optional</a>&lt;<a href='../S/982.html#L87' title='Defined at 87 in src/replay_controller.hpp.'>REPLAY_VISION</a>&gt; <a href='../Y/21375.html' title='Multiple used in 43 places.'>vision_</a>;
+<a id='L94' name='L94'></a>  94         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18268.html' title='Multiple used in 468 places.'>shared_ptr</a>&lt;<a href='../D/4740.html' title='Multiple defined in 5 places.'>config</a>&gt; <a href='../Y/17290.html' title='Multiple used in 4 places.'>reset_state_</a>;
+<a id='L95' name='L95'></a>  95         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10349.html' title='Multiple used in 250 places.'>function</a>&lt;<strong class='reserved'>void</strong>()&gt; <a href='../Y/15393.html' title='Multiple used in 3 places.'>on_end_replay_</a>;
+<a id='L96' name='L96'></a>  96         <strong class='reserved'>bool</strong> <a href='../S/1055.html#L72' title='Defined at 72 in src/replay_controller.cpp.'>return_to_play_side_</a>;
+<a id='L97' name='L97'></a>  97 <em class='brace'>}</em>;
+<a id='L98' name='L98'></a>  98 
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L30'>[^]</a><a href='#L79'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

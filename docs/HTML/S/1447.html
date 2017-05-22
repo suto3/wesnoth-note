@@ -1,21 +1,31 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/AntUtils.java</title>
+<title>utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/EditorUtils.java</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5872.html'>utils</a>/<a href='../files/5882.html'>umc_dev</a>/<a href='../files/5916.html'>org.wesnoth</a>/<a href='../files/5929.html'>src</a>/<a href='../files/5930.html'>org</a>/<a href='../files/5931.html'>wesnoth</a>/<a href='../files/5948.html'>utils</a>/AntUtils.java</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L76'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5873.html'>utils</a>/<a href='../files/5883.html'>umc_dev</a>/<a href='../files/5917.html'>org.wesnoth</a>/<a href='../files/5930.html'>src</a>/<a href='../files/5931.html'>org</a>/<a href='../files/5932.html'>wesnoth</a>/<a href='../files/5949.html'>utils</a>/EditorUtils.java</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L209'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L42' title='Defined at 42.'>runAnt</a></li>
-<li><a href='#L76' title='Defined at 76.'>createLogger</a></li>
+<li><a href='#L40' title='Defined at 40.'>writeInEditor</a></li>
+<li><a href='#L54' title='Defined at 54.'>writeInEditor</a></li>
+<li><a href='#L70' title='Defined at 70.'>replaceEditorText</a></li>
+<li><a href='#L84' title='Defined at 84.'>replaceEditorText</a></li>
+<li><a href='#L102' title='Defined at 102.'>getEditorDocument</a></li>
+<li><a href='#L115' title='Defined at 115.'>getEditorDocument</a></li>
+<li><a href='#L131' title='Defined at 131.'>getTextEditor</a></li>
+<li><a href='#L144' title='Defined at 144.'>getTextEditor</a></li>
+<li><a href='#L162' title='Defined at 162.'>getEditedFile</a></li>
+<li><a href='#L177' title='Defined at 177.'>openEditor</a></li>
+<li><a href='#L196' title='Defined at 196.'>openEditor</a></li>
+<li><a href='#L209' title='Defined at 209.'>openEditor</a></li>
 </ol>
 <hr />
 <pre>
@@ -27,88 +37,221 @@ This source file includes following definitions.
 <a id='L6' name='L6'></a>   6 <em class='comment'> * which accompanies this distribution, and is available at</em>
 <a id='L7' name='L7'></a>   7 <em class='comment'> * http://www.eclipse.org/legal/epl-v10.html</em>
 <a id='L8' name='L8'></a>   8 <em class='comment'> *******************************************************************************/</em>
-<a id='L9' name='L9'></a>   9 <strong class='reserved'>package</strong> <a href='../Y/15567.html' title='Multiple used in 1970 places.'>org</a>.<a href='../Y/21538.html' title='Multiple used in 2558 places.'>wesnoth</a>.<a href='../D/15790.html' title='Multiple defined in 15 places.'>utils</a>;
+<a id='L9' name='L9'></a>   9 <strong class='reserved'>package</strong> <a href='../Y/15571.html' title='Multiple used in 1970 places.'>org</a>.<a href='../Y/21541.html' title='Multiple used in 2558 places.'>wesnoth</a>.<a href='../D/15795.html' title='Multiple defined in 15 places.'>utils</a>;
 <a id='L10' name='L10'></a>  10 
-<a id='L11' name='L11'></a>  11 <strong class='reserved'>import</strong> java.io.ByteArrayOutputStream;
-<a id='L12' name='L12'></a>  12 <strong class='reserved'>import</strong> java.io.File;
-<a id='L13' name='L13'></a>  13 <strong class='reserved'>import</strong> java.io.PrintStream;
-<a id='L14' name='L14'></a>  14 <strong class='reserved'>import</strong> java.util.Iterator;
-<a id='L15' name='L15'></a>  15 <strong class='reserved'>import</strong> java.util.Map;
-<a id='L16' name='L16'></a>  16 <strong class='reserved'>import</strong> java.util.Map.Entry;
-<a id='L17' name='L17'></a>  17 
-<a id='L18' name='L18'></a>  18 <strong class='reserved'>import</strong> org.apache.tools.ant.BuildLogger;
-<a id='L19' name='L19'></a>  19 <strong class='reserved'>import</strong> org.apache.tools.ant.DefaultLogger;
-<a id='L20' name='L20'></a>  20 <strong class='reserved'>import</strong> org.apache.tools.ant.Project;
-<a id='L21' name='L21'></a>  21 <strong class='reserved'>import</strong> org.apache.tools.ant.ProjectHelper;
-<a id='L22' name='L22'></a>  22 
-<a id='L23' name='L23'></a>  23 <strong class='reserved'>import</strong> org.wesnoth.Logger;
-<a id='L24' name='L24'></a>  24 
+<a id='L11' name='L11'></a>  11 <strong class='reserved'>import</strong> org.eclipse.core.filesystem.EFS;
+<a id='L12' name='L12'></a>  12 <strong class='reserved'>import</strong> org.eclipse.core.filesystem.IFileStore;
+<a id='L13' name='L13'></a>  13 <strong class='reserved'>import</strong> org.eclipse.core.resources.IFile;
+<a id='L14' name='L14'></a>  14 <strong class='reserved'>import</strong> org.eclipse.core.runtime.Path;
+<a id='L15' name='L15'></a>  15 <strong class='reserved'>import</strong> org.eclipse.jface.text.BadLocationException;
+<a id='L16' name='L16'></a>  16 <strong class='reserved'>import</strong> org.eclipse.jface.text.IDocument;
+<a id='L17' name='L17'></a>  17 <strong class='reserved'>import</strong> org.eclipse.jface.text.ITextSelection;
+<a id='L18' name='L18'></a>  18 <strong class='reserved'>import</strong> org.eclipse.ui.IEditorPart;
+<a id='L19' name='L19'></a>  19 <strong class='reserved'>import</strong> org.eclipse.ui.IWorkbenchPage;
+<a id='L20' name='L20'></a>  20 <strong class='reserved'>import</strong> org.eclipse.ui.PartInitException;
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>import</strong> org.eclipse.ui.ide.IDE;
+<a id='L22' name='L22'></a>  22 <strong class='reserved'>import</strong> org.eclipse.ui.texteditor.AbstractTextEditor;
+<a id='L23' name='L23'></a>  23 <strong class='reserved'>import</strong> org.eclipse.ui.texteditor.IDocumentProvider;
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>import</strong> org.eclipse.ui.texteditor.ITextEditor;
 <a id='L25' name='L25'></a>  25 
-<a id='L26' name='L26'></a>  26 <em class='comment'>/**</em>
-<a id='L27' name='L27'></a>  27 <em class='comment'> * An util class that handles with ant files</em>
-<a id='L28' name='L28'></a>  28 <em class='comment'> */</em>
-<a id='L29' name='L29'></a>  29 <strong class='reserved'>public</strong> <strong class='reserved'>class</strong> <a href='../R/98.html' title='Multiple referred from 3 places.'>AntUtils</a>
-<a id='L30' name='L30'></a>  30 <em class='brace'>{</em>
-<a id='L31' name='L31'></a>  31     <em class='comment'>/**</em>
-<a id='L32' name='L32'></a>  32 <em class='comment'>     * Runs the specified ant file, and returns the output of the runned file</em>
-<a id='L33' name='L33'></a>  33 <em class='comment'>     * </em>
-<a id='L34' name='L34'></a>  34 <em class='comment'>     * @param antFile</em>
-<a id='L35' name='L35'></a>  35 <em class='comment'>     * @param properties</em>
-<a id='L36' name='L36'></a>  36 <em class='comment'>     *        the hasmap with userproperties to be added to the ant file</em>
-<a id='L37' name='L37'></a>  37 <em class='comment'>     * @param recordOutput</em>
-<a id='L38' name='L38'></a>  38 <em class='comment'>     *        true if the output of the runned file should be recorded and</em>
-<a id='L39' name='L39'></a>  39 <em class='comment'>     *        returned</em>
-<a id='L40' name='L40'></a>  40 <em class='comment'>     * @return null if the build didn't success</em>
-<a id='L41' name='L41'></a>  41 <em class='comment'>     */</em>
-<a id='L42' name='L42'></a>  42     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a> <a href='../S/1479.html#L332' title='Referred from 332 in utils/umc_dev/org.wesnoth/src/org/wesnoth/builder/WesnothProjectBuilder.java.'>runAnt</a>( <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/5598.html' title='Multiple used in 5 places.'>antFile</a>,
-<a id='L43' name='L43'></a>  43         <a href='../Y/1884.html' title='Multiple used in 77 places.'>Map</a>&lt; <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a>, <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../Y/16560.html' title='Multiple used in 20 places.'>properties</a>, <strong class='reserved'>boolean</strong> <a href='../Y/16901.html' title='Multiple used in 2 places.'>recordOutput</a> )
-<a id='L44' name='L44'></a>  44     <em class='brace'>{</em>
-<a id='L45' name='L45'></a>  45         <a href='../Y/2210.html' title='Multiple used in 3 places.'>Project</a> <a href='../D/12128.html' title='Multiple defined in 3 places.'>project</a> = <strong class='reserved'>new</strong> <a href='../Y/2210.html' title='Multiple used in 3 places.'>Project</a>( );
-<a id='L46' name='L46'></a>  46         <a href='../Y/376.html' title='Multiple used in 4 places.'>ByteArrayOutputStream</a> <a href='../Y/15656.html' title='Multiple used in 687 places.'>out</a> = <strong class='reserved'>null</strong>;
-<a id='L47' name='L47'></a>  47 
-<a id='L48' name='L48'></a>  48         <strong class='reserved'>try</strong> <em class='brace'>{</em>
-<a id='L49' name='L49'></a>  49             <a href='../Y/15656.html' title='Multiple used in 687 places.'>out</a> = <strong class='reserved'>new</strong> <a href='../Y/376.html' title='Multiple used in 4 places.'>ByteArrayOutputStream</a>( );
-<a id='L50' name='L50'></a>  50             <strong class='reserved'>if</strong>( <a href='../Y/16901.html' title='Multiple used in 2 places.'>recordOutput</a> ) <em class='brace'>{</em>
-<a id='L51' name='L51'></a>  51                 <a href='../D/12128.html' title='Multiple defined in 3 places.'>project</a>.addBuildListener( <a href='../S/1447.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/AntUtils.java.'>AntUtils</a>.<a href='../S/1447.html#L76' title='Defined at 76 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/AntUtils.java.'>createLogger</a>( <a href='../Y/15656.html' title='Multiple used in 687 places.'>out</a> ) );
-<a id='L52' name='L52'></a>  52             <em class='brace'>}</em>
-<a id='L53' name='L53'></a>  53 
-<a id='L54' name='L54'></a>  54             <a href='../D/12128.html' title='Multiple defined in 3 places.'>project</a>.<a href='../D/8803.html' title='Multiple defined in 40 places.'>init</a>( );
-<a id='L55' name='L55'></a>  55             <a href='../Y/1166.html' title='Multiple used in 91 places.'>File</a> <a href='../Y/6547.html' title='Multiple used in 2 places.'>buildFile</a> = <strong class='reserved'>new</strong> <a href='../Y/1166.html' title='Multiple used in 91 places.'>File</a>( <a href='../Y/5598.html' title='Multiple used in 5 places.'>antFile</a> );
-<a id='L56' name='L56'></a>  56             <a href='../Y/2211.html' title='Multiple used in 2 places.'>ProjectHelper</a>.configureProject( <a href='../D/12128.html' title='Multiple defined in 3 places.'>project</a>, <a href='../Y/6547.html' title='Multiple used in 2 places.'>buildFile</a> );
-<a id='L57' name='L57'></a>  57 
-<a id='L58' name='L58'></a>  58             <a href='../Y/1642.html' title='Multiple used in 81 places.'>Iterator</a>&lt; <a href='../S/4042.html#L398' title='Defined at 398 in data/tools/unit_tree/html_output.py.'>Entry</a>&lt; <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a>, <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a> &gt;&gt; <a href='../D/9476.html' title='Multiple defined in 16 places.'>iterator</a> = <a href='../Y/16560.html' title='Multiple used in 20 places.'>properties</a>.<a href='../Y/9309.html' title='Multiple used in 9 places.'>entrySet</a>( )
-<a id='L59' name='L59'></a>  59                 .<a href='../D/9476.html' title='Multiple defined in 16 places.'>iterator</a>( );
-<a id='L60' name='L60'></a>  60             <strong class='reserved'>while</strong>( <a href='../D/9476.html' title='Multiple defined in 16 places.'>iterator</a>.<a href='../D/8366.html' title='Multiple defined in 2 places.'>hasNext</a>( ) ) <em class='brace'>{</em>
-<a id='L61' name='L61'></a>  61                 <a href='../S/4042.html#L398' title='Defined at 398 in data/tools/unit_tree/html_output.py.'>Entry</a>&lt; <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a>, <a href='../Y/2782.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../D/9543.html' title='Multiple defined in 2 places.'>key</a> = <a href='../D/9476.html' title='Multiple defined in 16 places.'>iterator</a>.<a href='../D/11292.html' title='Multiple defined in 15 places.'>next</a>( );
-<a id='L62' name='L62'></a>  62                 <a href='../D/12128.html' title='Multiple defined in 3 places.'>project</a>.setUserProperty( <a href='../D/9543.html' title='Multiple defined in 2 places.'>key</a>.<a href='../Y/10616.html' title='Multiple used in 14 places.'>getKey</a>( ), <a href='../D/9543.html' title='Multiple defined in 2 places.'>key</a>.<a href='../D/7037.html' title='Multiple defined in 10 places.'>getValue</a>( ) );
-<a id='L63' name='L63'></a>  63             <em class='brace'>}</em>
-<a id='L64' name='L64'></a>  64             <a href='../D/12128.html' title='Multiple defined in 3 places.'>project</a>.executeTarget( <a href='../D/12128.html' title='Multiple defined in 3 places.'>project</a>.getDefaultTarget( ) );
-<a id='L65' name='L65'></a>  65 
-<a id='L66' name='L66'></a>  66             <strong class='reserved'>return</strong> <a href='../Y/15656.html' title='Multiple used in 687 places.'>out</a>.<a href='../D/15132.html' title='Multiple defined in 18 places.'>toString</a>( );
-<a id='L67' name='L67'></a>  67         <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/751.html' title='Multiple used in 62 places.'>Exception</a> <a href='../D/5739.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
-<a id='L68' name='L68'></a>  68             <a href='../S/1493.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>Logger</a>.<a href='../D/6871.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1493.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>logException</a>( <a href='../D/5739.html' title='Multiple defined in 3 places.'>e</a> );
-<a id='L69' name='L69'></a>  69             <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
-<a id='L70' name='L70'></a>  70         <em class='brace'>}</em>
-<a id='L71' name='L71'></a>  71     <em class='brace'>}</em>
-<a id='L72' name='L72'></a>  72 
-<a id='L73' name='L73'></a>  73     <em class='comment'>/**</em>
-<a id='L74' name='L74'></a>  74 <em class='comment'>     * Creates the default build logger for sending build events to the ant log.</em>
-<a id='L75' name='L75'></a>  75 <em class='comment'>     */</em>
-<a id='L76' name='L76'></a>  76     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <a href='../Y/365.html' title='Multiple used in 2 places.'>BuildLogger</a> <a href='../S/1447.html#L51' title='Referred from 51 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/AntUtils.java.'>createLogger</a>( <a href='../Y/376.html' title='Multiple used in 4 places.'>ByteArrayOutputStream</a> <a href='../Y/15656.html' title='Multiple used in 687 places.'>out</a> )
-<a id='L77' name='L77'></a>  77     <em class='brace'>{</em>
-<a id='L78' name='L78'></a>  78         <a href='../Y/611.html' title='Multiple used in 2 places.'>DefaultLogger</a> <a href='../S/658.html#L113' title='Defined at 113 in src/log.hpp.'>logger</a> = <strong class='reserved'>new</strong> <a href='../Y/611.html' title='Multiple used in 2 places.'>DefaultLogger</a>( );
-<a id='L79' name='L79'></a>  79 
-<a id='L80' name='L80'></a>  80         <a href='../S/658.html#L113' title='Defined at 113 in src/log.hpp.'>logger</a>.setMessageOutputLevel( <a href='../Y/2210.html' title='Multiple used in 3 places.'>Project</a>.MSG_INFO );
-<a id='L81' name='L81'></a>  81         <a href='../S/658.html#L113' title='Defined at 113 in src/log.hpp.'>logger</a>.setOutputPrintStream( <strong class='reserved'>new</strong> <a href='../Y/2203.html' title='Multiple used in 3 places.'>PrintStream</a>( <a href='../Y/15656.html' title='Multiple used in 687 places.'>out</a> ) );
-<a id='L82' name='L82'></a>  82         <a href='../S/658.html#L113' title='Defined at 113 in src/log.hpp.'>logger</a>.setErrorPrintStream( <strong class='reserved'>new</strong> <a href='../Y/2203.html' title='Multiple used in 3 places.'>PrintStream</a>( <a href='../Y/15656.html' title='Multiple used in 687 places.'>out</a> ) );
-<a id='L83' name='L83'></a>  83         <a href='../S/658.html#L113' title='Defined at 113 in src/log.hpp.'>logger</a>.setEmacsMode( <strong class='reserved'>false</strong> );
-<a id='L84' name='L84'></a>  84 
-<a id='L85' name='L85'></a>  85         <strong class='reserved'>return</strong> <a href='../S/658.html#L113' title='Defined at 113 in src/log.hpp.'>logger</a>;
-<a id='L86' name='L86'></a>  86     <em class='brace'>}</em>
-<a id='L87' name='L87'></a>  87 <em class='brace'>}</em>
+<a id='L26' name='L26'></a>  26 <strong class='reserved'>import</strong> org.wesnoth.Logger;
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <em class='comment'>/**</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * An utils class that handles Eclipse's editor</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> */</em>
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>public</strong> <strong class='reserved'>class</strong> <a href='../R/479.html' title='Multiple referred from 24 places.'>EditorUtils</a>
+<a id='L33' name='L33'></a>  33 <em class='brace'>{</em>
+<a id='L34' name='L34'></a>  34     <em class='comment'>/**</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'>     * Writes the specified content in current opened editor</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'>     * </em>
+<a id='L37' name='L37'></a>  37 <em class='comment'>     * @param content</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'>     *        the string content to write</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'>     */</em>
+<a id='L40' name='L40'></a>  40     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/14942.html' title='Multiple referred from 2 places.'>writeInEditor</a>( <a href='../Y/2783.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> )
+<a id='L41' name='L41'></a>  41     <em class='brace'>{</em>
+<a id='L42' name='L42'></a>  42         <a href='../D/16417.html' title='Multiple defined in 2 places.'>writeInEditor</a>( <a href='../S/1447.html#L162' title='Defined at 162 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/EditorUtils.java.'>getEditedFile</a>( ), <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> );
+<a id='L43' name='L43'></a>  43     <em class='brace'>}</em>
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45     <em class='comment'>/**</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'>     * Writes the specified content in the specified editor</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'>     * </em>
+<a id='L48' name='L48'></a>  48 <em class='comment'>     * @param targetEditor</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'>     *        The editor part to write the content in.</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'>     * </em>
+<a id='L51' name='L51'></a>  51 <em class='comment'>     * @param content</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'>     *        the string content to write</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'>     */</em>
+<a id='L54' name='L54'></a>  54     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/14942.html' title='Multiple referred from 2 places.'>writeInEditor</a>( <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a>, <a href='../Y/2783.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> )
+<a id='L55' name='L55'></a>  55     <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>int</strong> <a href='../S/991.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a> = ( ( <a href='../Y/1574.html' title='Multiple used in 4 places.'>ITextSelection</a> ) <a href='../D/7025.html' title='Multiple defined in 2 places.'>getTextEditor</a>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> )
+<a id='L57' name='L57'></a>  57             .<a href='../Y/10669.html' title='Multiple used in 2 places.'>getSelectionProvider</a>( ).<a href='../Y/10666.html' title='Multiple used in 27 places.'>getSelection</a>( ) ).<a href='../Y/10638.html' title='Multiple used in 10 places.'>getOffset</a>( );
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59             <a href='../D/6787.html' title='Multiple defined in 2 places.'>getEditorDocument</a>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> ).<a href='../D/12691.html' title='Multiple defined in 3 places.'>replace</a>( <a href='../S/991.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a>, 0, <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> );
+<a id='L60' name='L60'></a>  60         <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/348.html' title='Multiple used in 7 places.'>BadLocationException</a> <a href='../D/5738.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
+<a id='L61' name='L61'></a>  61         <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62     <em class='brace'>}</em>
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64     <em class='comment'>/**</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'>     * Replaces the text in current opened editor with the specified one</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'>     * </em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>     * @param content</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>     *        the string to replace the current content</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'>     */</em>
+<a id='L70' name='L70'></a>  70     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/11580.html' title='Multiple referred from 2 places.'>replaceEditorText</a>( <a href='../Y/2783.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> )
+<a id='L71' name='L71'></a>  71     <em class='brace'>{</em>
+<a id='L72' name='L72'></a>  72         <a href='../D/12692.html' title='Multiple defined in 2 places.'>replaceEditorText</a>( <a href='../S/1447.html#L162' title='Defined at 162 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/EditorUtils.java.'>getEditedFile</a>( ), <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> );
+<a id='L73' name='L73'></a>  73     <em class='brace'>}</em>
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75     <em class='comment'>/**</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'>     * Replaces the text in the specified editor with the specified one</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'>     * </em>
+<a id='L78' name='L78'></a>  78 <em class='comment'>     * @param targetEditor</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'>     *        The editor part to replace the text for.</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'>     * </em>
+<a id='L81' name='L81'></a>  81 <em class='comment'>     * @param content</em>
+<a id='L82' name='L82'></a>  82 <em class='comment'>     *        the string to replace the current content</em>
+<a id='L83' name='L83'></a>  83 <em class='comment'>     */</em>
+<a id='L84' name='L84'></a>  84     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/11580.html' title='Multiple referred from 2 places.'>replaceEditorText</a>( <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a>,
+<a id='L85' name='L85'></a>  85         <a href='../Y/2783.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> )
+<a id='L86' name='L86'></a>  86     <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>if</strong>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L88' name='L88'></a>  88             <strong class='reserved'>return</strong>;
+<a id='L89' name='L89'></a>  89         <em class='brace'>}</em>
+<a id='L90' name='L90'></a>  90         <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L91' name='L91'></a>  91             <a href='../D/6787.html' title='Multiple defined in 2 places.'>getEditorDocument</a>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> ).<a href='../D/12691.html' title='Multiple defined in 3 places.'>replace</a>( 0,
+<a id='L92' name='L92'></a>  92                 <a href='../D/6787.html' title='Multiple defined in 2 places.'>getEditorDocument</a>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> ).<a href='../Y/10626.html' title='Multiple used in 8 places.'>getLength</a>( ), <a href='../D/4850.html' title='Multiple defined in 3 places.'>content</a> );
+<a id='L93' name='L93'></a>  93         <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/348.html' title='Multiple used in 7 places.'>BadLocationException</a> <a href='../D/5738.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
+<a id='L94' name='L94'></a>  94         <em class='brace'>}</em>
+<a id='L95' name='L95'></a>  95     <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97     <em class='comment'>/**</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>     * Gets the current opened editor's document</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>     * </em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>     * @return An {@link IDocument} instance.</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'>     */</em>
+<a id='L102' name='L102'></a> 102     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1387.html' title='Multiple used in 11 places.'>IDocument</a> <a href='../R/6036.html' title='Multiple referred from 5 places.'>getEditorDocument</a>( )
+<a id='L103' name='L103'></a> 103     <em class='brace'>{</em>
+<a id='L104' name='L104'></a> 104         <strong class='reserved'>return</strong> <a href='../D/6787.html' title='Multiple defined in 2 places.'>getEditorDocument</a>( <a href='../S/1447.html#L162' title='Defined at 162 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/EditorUtils.java.'>getEditedFile</a>( ) );
+<a id='L105' name='L105'></a> 105     <em class='brace'>}</em>
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107     <em class='comment'>/**</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'>     * Gets the specified editor's document</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'>     * </em>
+<a id='L110' name='L110'></a> 110 <em class='comment'>     * @param targetEditor</em>
+<a id='L111' name='L111'></a> 111 <em class='comment'>     *        The editor part to get the document for.</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'>     * </em>
+<a id='L113' name='L113'></a> 113 <em class='comment'>     * @return An {@link IDocument} instance.</em>
+<a id='L114' name='L114'></a> 114 <em class='comment'>     */</em>
+<a id='L115' name='L115'></a> 115     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1387.html' title='Multiple used in 11 places.'>IDocument</a> <a href='../R/6036.html' title='Multiple referred from 5 places.'>getEditorDocument</a>( <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> )
+<a id='L116' name='L116'></a> 116     <em class='brace'>{</em>
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>if</strong>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L118' name='L118'></a> 118             <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
+<a id='L119' name='L119'></a> 119         <em class='brace'>}</em>
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121         <a href='../Y/1388.html' title='Multiple used in 4 places.'>IDocumentProvider</a> <a href='../Y/8868.html' title='Multiple used in 2 places.'>dp</a> = <a href='../D/7025.html' title='Multiple defined in 2 places.'>getTextEditor</a>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> )
+<a id='L122' name='L122'></a> 122             .<a href='../Y/10576.html' title='Multiple used in 3 places.'>getDocumentProvider</a>( );
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>return</strong> <a href='../Y/8868.html' title='Multiple used in 2 places.'>dp</a>.<a href='../Y/10575.html' title='Multiple used in 5 places.'>getDocument</a>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a>.<a href='../Y/10593.html' title='Multiple used in 11 places.'>getEditorInput</a>( ) );
+<a id='L124' name='L124'></a> 124     <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126     <em class='comment'>/**</em>
+<a id='L127' name='L127'></a> 127 <em class='comment'>     * Gets the text editor of the current opened editor</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>     * </em>
+<a id='L129' name='L129'></a> 129 <em class='comment'>     * @return An {@link ITextEditor} instance.</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'>     */</em>
+<a id='L131' name='L131'></a> 131     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1572.html' title='Multiple used in 6 places.'>ITextEditor</a> <a href='../R/6242.html' title='Multiple referred from 5 places.'>getTextEditor</a>( )
+<a id='L132' name='L132'></a> 132     <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133         <strong class='reserved'>return</strong> <a href='../D/7025.html' title='Multiple defined in 2 places.'>getTextEditor</a>( <a href='../S/1447.html#L162' title='Defined at 162 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/EditorUtils.java.'>getEditedFile</a>( ) );
+<a id='L134' name='L134'></a> 134     <em class='brace'>}</em>
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136     <em class='comment'>/**</em>
+<a id='L137' name='L137'></a> 137 <em class='comment'>     * Gets the text editor of the specified editor</em>
+<a id='L138' name='L138'></a> 138 <em class='comment'>     * </em>
+<a id='L139' name='L139'></a> 139 <em class='comment'>     * @param targetEditor</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'>     *        The editor part to get the text editor for.</em>
+<a id='L141' name='L141'></a> 141 <em class='comment'>     * </em>
+<a id='L142' name='L142'></a> 142 <em class='comment'>     * @return An {@link ITextEditor} instance</em>
+<a id='L143' name='L143'></a> 143 <em class='comment'>     */</em>
+<a id='L144' name='L144'></a> 144     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1572.html' title='Multiple used in 6 places.'>ITextEditor</a> <a href='../R/6242.html' title='Multiple referred from 5 places.'>getTextEditor</a>( <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> )
+<a id='L145' name='L145'></a> 145     <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146         <strong class='reserved'>if</strong>( <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L147' name='L147'></a> 147             <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
+<a id='L148' name='L148'></a> 148         <em class='brace'>}</em>
+<a id='L149' name='L149'></a> 149 
+<a id='L150' name='L150'></a> 150         <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../S/751.html#L224' title='Defined at 224 in src/storyscreen/part.hpp.'>part</a> = <a href='../Y/19359.html' title='Multiple used in 14 places.'>targetEditor</a>;
+<a id='L151' name='L151'></a> 151         <strong class='reserved'>if</strong>( ! ( <a href='../S/751.html#L224' title='Defined at 224 in src/storyscreen/part.hpp.'>part</a> <strong class='reserved'>instanceof</strong> <a href='../Y/201.html' title='Multiple used in 2 places.'>AbstractTextEditor</a> ) ) <em class='brace'>{</em>
+<a id='L152' name='L152'></a> 152             <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
+<a id='L153' name='L153'></a> 153         <em class='brace'>}</em>
+<a id='L154' name='L154'></a> 154         <strong class='reserved'>return</strong> ( <a href='../Y/1572.html' title='Multiple used in 6 places.'>ITextEditor</a> ) <a href='../S/751.html#L224' title='Defined at 224 in src/storyscreen/part.hpp.'>part</a>;
+<a id='L155' name='L155'></a> 155     <em class='brace'>}</em>
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157     <em class='comment'>/**</em>
+<a id='L158' name='L158'></a> 158 <em class='comment'>     * Gets the editor part of the current edited file</em>
+<a id='L159' name='L159'></a> 159 <em class='comment'>     * </em>
+<a id='L160' name='L160'></a> 160 <em class='comment'>     * @return An {@link IEditorPart} instance.</em>
+<a id='L161' name='L161'></a> 161 <em class='comment'>     */</em>
+<a id='L162' name='L162'></a> 162     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../R/6035.html' title='Multiple referred from 8 places.'>getEditedFile</a>( )
+<a id='L163' name='L163'></a> 163     <em class='brace'>{</em>
+<a id='L164' name='L164'></a> 164         <strong class='reserved'>return</strong> <a href='../S/1450.html#L50' title='Defined at 50 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WorkspaceUtils.java.'>WorkspaceUtils</a>.<a href='../S/1450.html#L260' title='Defined at 260 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WorkspaceUtils.java.'>getWorkbenchWindow</a>( ).<a href='../Y/10641.html' title='Multiple used in 3 places.'>getPages</a>( )[0]
+<a id='L165' name='L165'></a> 165             .getActiveEditor( );
+<a id='L166' name='L166'></a> 166     <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167 
+<a id='L168' name='L168'></a> 168     <em class='comment'>/**</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'>     * Opens the editor on the specified file</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'>     * </em>
+<a id='L171' name='L171'></a> 171 <em class='comment'>     * @param file</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'>     *        The file to open</em>
+<a id='L173' name='L173'></a> 173 <em class='comment'>     * @param activatePage</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'>     *        True to activate the opened file</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'>     * @return An {@link IEditorPart} instance</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'>     */</em>
+<a id='L177' name='L177'></a> 177     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../R/10451.html' title='Multiple referred from 10 places.'>openEditor</a>( <a href='../Y/1399.html' title='Multiple used in 112 places.'>IFile</a> <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>, <strong class='reserved'>boolean</strong> <a href='../Y/5100.html' title='Multiple used in 2 places.'>activatePage</a> )
+<a id='L178' name='L178'></a> 178     <em class='brace'>{</em>
+<a id='L179' name='L179'></a> 179         <a href='../Y/1592.html' title='Multiple used in 19 places.'>IWorkbenchPage</a> <a href='../S/448.html#L225' title='Defined at 225 in src/gui/dialogs/gamestate_inspector.cpp.'>page</a> = <a href='../S/1450.html#L50' title='Defined at 50 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WorkspaceUtils.java.'>WorkspaceUtils</a>.<a href='../S/1450.html#L260' title='Defined at 260 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WorkspaceUtils.java.'>getWorkbenchWindow</a>( )
+<a id='L180' name='L180'></a> 180             .<a href='../Y/10532.html' title='Multiple used in 9 places.'>getActivePage</a>( );
+<a id='L181' name='L181'></a> 181         <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L182' name='L182'></a> 182             <strong class='reserved'>return</strong> <a href='../Y/1366.html' title='Multiple used in 19 places.'>IDE</a>.<a href='../D/11520.html' title='Multiple defined in 3 places.'>openEditor</a>( <a href='../S/448.html#L225' title='Defined at 225 in src/gui/dialogs/gamestate_inspector.cpp.'>page</a>, <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>, <a href='../Y/5100.html' title='Multiple used in 2 places.'>activatePage</a> );
+<a id='L183' name='L183'></a> 183         <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/2177.html' title='Multiple used in 12 places.'>PartInitException</a> <a href='../D/5738.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
+<a id='L184' name='L184'></a> 184             <a href='../S/1494.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>Logger</a>.<a href='../D/6874.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1494.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>logException</a>( <a href='../D/5738.html' title='Multiple defined in 3 places.'>e</a> );
+<a id='L185' name='L185'></a> 185             <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
+<a id='L186' name='L186'></a> 186         <em class='brace'>}</em>
+<a id='L187' name='L187'></a> 187     <em class='brace'>}</em>
+<a id='L188' name='L188'></a> 188 
+<a id='L189' name='L189'></a> 189     <em class='comment'>/**</em>
+<a id='L190' name='L190'></a> 190 <em class='comment'>     * Opens the editor on the specified file (will use IFileStore)</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'>     * </em>
+<a id='L192' name='L192'></a> 192 <em class='comment'>     * @param file</em>
+<a id='L193' name='L193'></a> 193 <em class='comment'>     *        The file to open</em>
+<a id='L194' name='L194'></a> 194 <em class='comment'>     * @return An {@link IEditorPart} instance.</em>
+<a id='L195' name='L195'></a> 195 <em class='comment'>     */</em>
+<a id='L196' name='L196'></a> 196     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../R/10451.html' title='Multiple referred from 10 places.'>openEditor</a>( <a href='../Y/2783.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a> )
+<a id='L197' name='L197'></a> 197     <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198         <strong class='reserved'>return</strong> <a href='../D/11520.html' title='Multiple defined in 3 places.'>openEditor</a>( <a href='../Y/654.html' title='Multiple used in 6 places.'>EFS</a>.<a href='../Y/10628.html' title='Multiple used in 2 places.'>getLocalFileSystem</a>( )
+<a id='L199' name='L199'></a> 199             .<a href='../Y/10683.html' title='Multiple used in 3 places.'>getStore</a>( <strong class='reserved'>new</strong> <a href='../Y/2178.html' title='Multiple used in 49 places.'>Path</a>( <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a> ) ) );
+<a id='L200' name='L200'></a> 200     <em class='brace'>}</em>
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202     <em class='comment'>/**</em>
+<a id='L203' name='L203'></a> 203 <em class='comment'>     * Opens the editor on the specified file (will use IFileStore)</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'>     * </em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>     * @param file</em>
+<a id='L206' name='L206'></a> 206 <em class='comment'>     *        The file to open</em>
+<a id='L207' name='L207'></a> 207 <em class='comment'>     * @return An {@link IEditorPart} instance.</em>
+<a id='L208' name='L208'></a> 208 <em class='comment'>     */</em>
+<a id='L209' name='L209'></a> 209     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1395.html' title='Multiple used in 12 places.'>IEditorPart</a> <a href='../R/10451.html' title='Multiple referred from 10 places.'>openEditor</a>( <a href='../Y/1401.html' title='Multiple used in 8 places.'>IFileStore</a> <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a> )
+<a id='L210' name='L210'></a> 210     <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211         <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L212' name='L212'></a> 212             <strong class='reserved'>return</strong> <a href='../Y/1366.html' title='Multiple used in 19 places.'>IDE</a>.openEditorOnFileStore( <a href='../S/1450.html#L50' title='Defined at 50 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WorkspaceUtils.java.'>WorkspaceUtils</a>
+<a id='L213' name='L213'></a> 213                 .<a href='../S/1450.html#L260' title='Defined at 260 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WorkspaceUtils.java.'>getWorkbenchWindow</a>( ).<a href='../Y/10532.html' title='Multiple used in 9 places.'>getActivePage</a>( ), <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a> );
+<a id='L214' name='L214'></a> 214         <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/751.html' title='Multiple used in 62 places.'>Exception</a> <a href='../D/5738.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
+<a id='L215' name='L215'></a> 215             <a href='../S/1494.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>Logger</a>.<a href='../D/6874.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1494.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>logException</a>( <a href='../D/5738.html' title='Multiple defined in 3 places.'>e</a> );
+<a id='L216' name='L216'></a> 216             <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
+<a id='L217' name='L217'></a> 217         <em class='brace'>}</em>
+<a id='L218' name='L218'></a> 218     <em class='brace'>}</em>
+<a id='L219' name='L219'></a> 219 
+<a id='L220' name='L220'></a> 220 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L76'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L209'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

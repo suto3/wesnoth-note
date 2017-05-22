@@ -1,27 +1,29 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/font/text_surface.hpp</title>
+<title>src/font/text.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>src</a>/<a href='../files/5830.html'>font</a>/text_surface.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/<a href='../files/5831.html'>font</a>/text.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L201'>[^]</a><a href='#L241'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/1878.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='../J/1871.html' title='Multiple included from 11 places.'>INCLUDED FROM</a></h2>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L43' title='Defined at 43.'>is_rtl</a></li>
+<li><a href='#L201' title='Defined at 201.'>get_length</a></li>
+<li><a href='#L219' title='Defined at 219.'>text</a></li>
+<li><a href='#L241' title='Defined at 241.'>link_aware</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2016 - 2017 by Chris Beck&lt;render787@gmail.com&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2008 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
@@ -36,59 +38,403 @@ This source file includes following definitions.
 <a id='L14' name='L14'></a>  14 
 <a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
 <a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1132.html'>font_id.hpp</a>" <em class='comment'>// for text_chunk</em>
-<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='967.html'>color.hpp</a>"
-<a id='L19' name='L19'></a>  19 
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;SDL_ttf.h&gt;
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1144.html'>font/font_options.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='969.html'>color.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='978.html'>sdl/surface.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='128.html'>serialization/unicode_types.hpp</a>"
 <a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;string&gt;
-<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> &lt;vector&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;pango/pango.h&gt;
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> &lt;pango/pangocairo.h&gt;
 <a id='L24' name='L24'></a>  24 
-<a id='L25' name='L25'></a>  25 <em class='comment'>/***</em>
-<a id='L26' name='L26'></a>  26 <em class='comment'> * Note: This is specific to the SDL_TTF codepath.</em>
-<a id='L27' name='L27'></a>  27 <em class='comment'> */</em>
-<a id='L28' name='L28'></a>  28 <strong class='reserved'>class</strong> <a href='../S/976.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>;
-<a id='L29' name='L29'></a>  29 
-<a id='L30' name='L30'></a>  30 <strong class='reserved'>namespace</strong> <a href='../R/5692.html' title='Multiple referred from 449 places.'>font</a> <em class='brace'>{</em>
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;string&gt;
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> &lt;vector&gt;
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <em class='comment'>/***</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> * Note: This is the cairo-pango code path, not the SDL_TTF code path.</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> */</em>
 <a id='L31' name='L31'></a>  31 
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>class</strong> <a href='../R/13809.html' title='Multiple referred from 22 places.'>text_surface</a>
-<a id='L33' name='L33'></a>  33 <em class='brace'>{</em>
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>public</strong>:
-<a id='L35' name='L35'></a>  35         <a href='../S/1134.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14684.html' title='Multiple defined in 25 places.'>str</a>, <strong class='reserved'>int</strong> <a href='../D/14462.html' title='Multiple defined in 16 places.'>size</a>, <a href='../S/967.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../D/4585.html' title='Multiple defined in 5 places.'>color</a>, <strong class='reserved'>int</strong> <a href='../D/14750.html' title='Multiple defined in 5 places.'>style</a>);
-<a id='L36' name='L36'></a>  36         <a href='../S/1134.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>(<strong class='reserved'>int</strong> <a href='../D/14462.html' title='Multiple defined in 16 places.'>size</a>, <a href='../S/967.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../D/4585.html' title='Multiple defined in 5 places.'>color</a>, <strong class='reserved'>int</strong> <a href='../D/14750.html' title='Multiple defined in 5 places.'>style</a>);
-<a id='L37' name='L37'></a>  37         <strong class='reserved'>void</strong> <a href='../D/14055.html' title='Multiple defined in 8 places.'>set_text</a>(<strong class='reserved'>const</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14684.html' title='Multiple defined in 25 places.'>str</a>);
-<a id='L38' name='L38'></a>  38 
-<a id='L39' name='L39'></a>  39         <strong class='reserved'>void</strong> <a href='../S/1142.html#L132' title='Defined at 132 in src/font/text_surface.cpp.'>measure</a>() <strong class='reserved'>const</strong>;
-<a id='L40' name='L40'></a>  40         <a href='../Y/18510.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../D/16239.html' title='Multiple defined in 2 places.'>width</a>() <strong class='reserved'>const</strong>;
-<a id='L41' name='L41'></a>  41         <a href='../Y/18510.html' title='Multiple used in 1718 places.'>size_t</a> <a href='../D/8457.html' title='Multiple defined in 4 places.'>height</a>() <strong class='reserved'>const</strong>;
-<a id='L42' name='L42'></a>  42 <em class='sharp'>#ifdef</em>  <a href='../Y/1282.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L43' name='L43'></a>  43         <strong class='reserved'>bool</strong> <a href='../R/8471.html' title='Multiple referred from 2 places.'>is_rtl</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/9373.html' title='Multiple defined in 2 places.'>is_rtl_</a>; <em class='brace'>}</em> <em class='comment'>// Right-To-Left alignment</em>
-<a id='L44' name='L44'></a>  44 <em class='sharp'>#endif</em>
-<a id='L45' name='L45'></a>  45         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21223.html' title='Multiple used in 2725 places.'>vector</a>&lt;<a href='../S/976.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&gt; <strong class='reserved'>const</strong> &amp; <a href='../S/1142.html#L171' title='Defined at 171 in src/font/text_surface.cpp.'>get_surfaces</a>() <strong class='reserved'>const</strong>;
-<a id='L46' name='L46'></a>  46 
-<a id='L47' name='L47'></a>  47         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>==(<a href='../S/1134.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a> <strong class='reserved'>const</strong> &amp;<a href='../Y/19261.html' title='Multiple used in 1448 places.'>t</a>) <strong class='reserved'>const</strong>;
-<a id='L48' name='L48'></a>  48         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>!=(<a href='../S/1134.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a> <strong class='reserved'>const</strong> &amp;<a href='../Y/19261.html' title='Multiple used in 1448 places.'>t</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> !<strong class='reserved'>operator</strong>==(<a href='../Y/19261.html' title='Multiple used in 1448 places.'>t</a>); <em class='brace'>}</em>
-<a id='L49' name='L49'></a>  49 <strong class='reserved'>private</strong>:
-<a id='L50' name='L50'></a>  50         <strong class='reserved'>int</strong> <a href='../S/304.html#L404' title='Defined at 404 in src/terrain/builder.hpp.'>hash_</a>;
-<a id='L51' name='L51'></a>  51         <strong class='reserved'>int</strong> <a href='../Y/10123.html' title='Multiple used in 32 places.'>font_size_</a>;
-<a id='L52' name='L52'></a>  52         <a href='../S/967.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../S/673.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a>;
-<a id='L53' name='L53'></a>  53         <strong class='reserved'>int</strong> <a href='../Y/19103.html' title='Multiple used in 27 places.'>style_</a>;
-<a id='L54' name='L54'></a>  54         <strong class='reserved'>mutable</strong> <strong class='reserved'>int</strong> <a href='../Y/21429.html' title='Multiple used in 51 places.'>w_</a>, <a href='../S/1086.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a>;
-<a id='L55' name='L55'></a>  55         <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14717.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/19003.html' title='Multiple used in 51 places.'>str_</a>;
-<a id='L56' name='L56'></a>  56         <strong class='reserved'>mutable</strong> <strong class='reserved'>bool</strong> <a href='../Y/11905.html' title='Multiple used in 21 places.'>initialized_</a>;
-<a id='L57' name='L57'></a>  57         <strong class='reserved'>mutable</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21223.html' title='Multiple used in 2725 places.'>vector</a>&lt;<a href='../S/1132.html#L56' title='Defined at 56 in src/font/font_id.hpp.'>text_chunk</a>&gt; <a href='../Y/7288.html' title='Multiple used in 9 places.'>chunks_</a>;
-<a id='L58' name='L58'></a>  58         <strong class='reserved'>mutable</strong> <a href='../D/14656.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21223.html' title='Multiple used in 2725 places.'>vector</a>&lt;<a href='../S/976.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&gt; <a href='../Y/19193.html' title='Multiple used in 7 places.'>surfs_</a>;
-<a id='L59' name='L59'></a>  59 <em class='sharp'>#ifdef</em>  <a href='../Y/1282.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L60' name='L60'></a>  60         <strong class='reserved'>bool</strong> <a href='../D/9373.html' title='Multiple defined in 2 places.'>is_rtl_</a>;
-<a id='L61' name='L61'></a>  61         <strong class='reserved'>void</strong> <a href='../S/1142.html#L41' title='Defined at 41 in src/font/text_surface.cpp.'>bidi_cvt</a>();
-<a id='L62' name='L62'></a>  62 <em class='sharp'>#endif</em>
-<a id='L63' name='L63'></a>  63         <strong class='reserved'>void</strong> <a href='../D/8425.html' title='Multiple defined in 5 places.'>hash</a>();
-<a id='L64' name='L64'></a>  64 <em class='brace'>}</em>;
-<a id='L65' name='L65'></a>  65 
-<a id='L66' name='L66'></a>  66 <em class='brace'>}</em> <em class='comment'>// end namespace font</em>
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>struct</strong> <a href='../S/694.html#L26' title='Defined at 26 in src/language.hpp.'>language_def</a>;
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>namespace</strong> <a href='../R/7401.html' title='Multiple referred from 720 places.'>gui2</a> <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35         <strong class='reserved'>struct</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>;
+<a id='L36' name='L36'></a>  36 <em class='brace'>}</em> <em class='comment'>// namespace gui2;</em>
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <strong class='reserved'>namespace</strong> <a href='../R/5692.html' title='Multiple referred from 452 places.'>font</a> <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <em class='comment'>// add background color and also font markup.</em>
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <em class='comment'>/**</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * Text class.</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> *</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> * This class represents text which is rendered using Pango.</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> *</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> * It takes text, as a utf-8 std::string, plus formatting options including</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> * font and color. It provides a surface object which holds the rendered text.</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> *</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * Besides this, it can do some additional calculations using the font layout.</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> *</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'> * It can take an index into the text, and convert it to pixel coordinates,</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'> * so that if we want to draw a cursor in an editbox, we know where to draw it.</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'> *</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> * It can also take a pixel coordinate with respect to the text layout, and</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> * translate it back to an index into the original text. This is useful if the</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'> * user clicks on the text, and we want to know where to move the cursor.</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'> *</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'> * The get_token method takes a pixel coordinate, which we assume represents a</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'> * click position, and gets the corresponding "token" from the string. The default</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'> * token delimiters are whitespace " \n\r\t". So, this returns the "word" that the</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'> * user clicked on.</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> *</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> * Finally, the get_link method represents special support for hyperlinks in text.</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'> * A token "looks like a link" if it begins "http://" or "https://".</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> * If a text has link_aware enabled, then any such token is rendered with an</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'> * underline and in a special color, see `link_color`.</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'> * The get_link method calls get_token and further checks if the clicked token</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'> * looks like a link.</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'> *</em>
+<a id='L71' name='L71'></a>  71 <em class='comment'> * This class stores the text to draw and uses pango with the cairo backend to</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'> * render the text. See http://pango.org for more info.</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'> *</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'> */</em>
+<a id='L75' name='L75'></a>  75 <strong class='reserved'>class</strong> <a href='../R/10564.html' title='Multiple referred from 75 places.'>pango_text</a>
+<a id='L76' name='L76'></a>  76 <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>public</strong>:
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>();
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81     <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>(<strong class='reserved'>const</strong> <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a> &amp;) = <strong class='reserved'>delete</strong>;
+<a id='L82' name='L82'></a>  82     <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a> &amp; <strong class='reserved'>operator</strong> = (<strong class='reserved'>const</strong> <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a> &amp;) = <strong class='reserved'>delete</strong>;
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84         ~<a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>();
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86         <em class='comment'>/**</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'>         * Returns the rendered text.</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'>         *</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>         * Before rendering it tests whether a redraw is needed and if so it first</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>         * redraws the surface before returning it.</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>         */</em>
+<a id='L92' name='L92'></a>  92         <a href='../S/978.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&amp; <a href='../D/12679.html' title='Multiple defined in 5 places.'>render</a>() <strong class='reserved'>const</strong>;
+<a id='L93' name='L93'></a>  93 
+<a id='L94' name='L94'></a>  94         <em class='comment'>/** Returns the width needed for the text. */</em>
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>int</strong> <a href='../D/8126.html' title='Multiple defined in 3 places.'>get_width</a>() <strong class='reserved'>const</strong>;
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97         <em class='comment'>/** Returns the height needed for the text. */</em>
+<a id='L98' name='L98'></a>  98         <strong class='reserved'>int</strong> <a href='../D/7537.html' title='Multiple defined in 3 places.'>get_height</a>() <strong class='reserved'>const</strong>;
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100         <em class='comment'>/** Returns the pixel size needed for the text. */</em>
+<a id='L101' name='L101'></a> 101         <a href='../D/8239.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../D/7939.html' title='Multiple defined in 4 places.'>get_size</a>() <strong class='reserved'>const</strong>;
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103         <em class='comment'>/** Has the text been truncated? This happens if it exceeds max width or height. */</em>
+<a id='L104' name='L104'></a> 104         <strong class='reserved'>bool</strong> <a href='../S/1157.html#L127' title='Defined at 127 in src/font/text.cpp.'>is_truncated</a>() <strong class='reserved'>const</strong>;
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106         <em class='comment'>/**</em>
+<a id='L107' name='L107'></a> 107 <em class='comment'>         * Inserts UTF-8 text.</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'>         *</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'>         * @param offset              The position to insert the text.</em>
+<a id='L110' name='L110'></a> 110 <em class='comment'>         * @param text                The UTF-8 text to insert.</em>
+<a id='L111' name='L111'></a> 111 <em class='comment'>         *</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'>         * @returns                   The number of characters inserted.</em>
+<a id='L113' name='L113'></a> 113 <em class='comment'>         */</em>
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>unsigned</strong> <a href='../D/8910.html' title='Multiple defined in 2 places.'>insert_text</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../S/991.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a>, <strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/15047.html' title='Multiple defined in 14 places.'>text</a>);
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <em class='comment'>/**</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'>         * Inserts a unicode char.</em>
+<a id='L118' name='L118'></a> 118 <em class='comment'>         *</em>
+<a id='L119' name='L119'></a> 119 <em class='comment'>         * @param offset              The position to insert the char.</em>
+<a id='L120' name='L120'></a> 120 <em class='comment'>         * @param unicode             The character to insert.</em>
+<a id='L121' name='L121'></a> 121 <em class='comment'>         *</em>
+<a id='L122' name='L122'></a> 122 <em class='comment'>         * @returns                   True upon success, false otherwise.</em>
+<a id='L123' name='L123'></a> 123 <em class='comment'>         */</em>
+<a id='L124' name='L124'></a> 124         <strong class='reserved'>bool</strong> <a href='../D/8912.html' title='Multiple defined in 2 places.'>insert_unicode</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../S/991.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a>, <a href='../D/15391.html' title='Multiple defined in 2 places.'>ucs4</a>::<a href='../D/4263.html' title='Multiple defined in 3 places.'>char_t</a> <a href='../Y/20698.html' title='Multiple used in 50 places.'>unicode</a>);
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126         <em class='comment'>/**</em>
+<a id='L127' name='L127'></a> 127 <em class='comment'>         * Inserts unicode text.</em>
+<a id='L128' name='L128'></a> 128 <em class='comment'>         *</em>
+<a id='L129' name='L129'></a> 129 <em class='comment'>         * @param offset              The position to insert the text.</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'>         * @param unicode             Vector with characters to insert.</em>
+<a id='L131' name='L131'></a> 131 <em class='comment'>         *</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'>         * @returns                   The number of characters inserted.</em>
+<a id='L133' name='L133'></a> 133 <em class='comment'>         */</em>
+<a id='L134' name='L134'></a> 134         <strong class='reserved'>unsigned</strong> <a href='../D/8912.html' title='Multiple defined in 2 places.'>insert_unicode</a>(
+<a id='L135' name='L135'></a> 135                 <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../S/991.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a>, <strong class='reserved'>const</strong> <a href='../D/15391.html' title='Multiple defined in 2 places.'>ucs4</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/20698.html' title='Multiple used in 50 places.'>unicode</a>);
+<a id='L136' name='L136'></a> 136 
+<a id='L137' name='L137'></a> 137         <em class='comment'>/***** ***** ***** ***** Font flags ***** ***** ***** *****/</em>
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139         <em class='comment'>// NOTE: these values must be powers of 2 in order to be bit-unique</em>
+<a id='L140' name='L140'></a> 140         <strong class='reserved'>enum</strong> <a href='../R/517.html' title='Multiple referred from 10 places.'>FONT_STYLE</a> <em class='brace'>{</em>
+<a id='L141' name='L141'></a> 141                 <a href='../R/1872.html' title='Multiple referred from 5 places.'>STYLE_NORMAL</a> = 0,
+<a id='L142' name='L142'></a> 142                 <a href='../R/1869.html' title='Multiple referred from 2 places.'>STYLE_BOLD</a> = 1,
+<a id='L143' name='L143'></a> 143                 <a href='../R/1870.html' title='Multiple referred from 2 places.'>STYLE_ITALIC</a> = 2,
+<a id='L144' name='L144'></a> 144                 <a href='../R/1873.html' title='Multiple referred from 3 places.'>STYLE_UNDERLINE</a> = 4,
+<a id='L145' name='L145'></a> 145                 <a href='../R/1871.html' title='Multiple referred from 2 places.'>STYLE_LIGHT</a> = 8,
+<a id='L146' name='L146'></a> 146         <em class='brace'>}</em>;
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148         <em class='comment'>/***** ***** ***** ***** Query details ***** ***** ***** *****/</em>
+<a id='L149' name='L149'></a> 149 
+<a id='L150' name='L150'></a> 150         <em class='comment'>/**</em>
+<a id='L151' name='L151'></a> 151 <em class='comment'>         * Gets the location for the cursor.</em>
+<a id='L152' name='L152'></a> 152 <em class='comment'>         *</em>
+<a id='L153' name='L153'></a> 153 <em class='comment'>         * @param column              The column offset of the cursor.</em>
+<a id='L154' name='L154'></a> 154 <em class='comment'>         * @param line                The line offset of the cursor.</em>
+<a id='L155' name='L155'></a> 155 <em class='comment'>         *</em>
+<a id='L156' name='L156'></a> 156 <em class='comment'>         * @returns                   The position of the top of the cursor. It the</em>
+<a id='L157' name='L157'></a> 157 <em class='comment'>         *                            requested location is out of range 0,0 is</em>
+<a id='L158' name='L158'></a> 158 <em class='comment'>         *                            returned.</em>
+<a id='L159' name='L159'></a> 159 <em class='comment'>         */</em>
+<a id='L160' name='L160'></a> 160         <a href='../D/8239.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../D/7402.html' title='Multiple defined in 2 places.'>get_cursor_position</a>(
+<a id='L161' name='L161'></a> 161                 <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/7515.html' title='Multiple used in 252 places.'>column</a>, <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../D/9752.html' title='Multiple defined in 3 places.'>line</a> = 0) <strong class='reserved'>const</strong>;
+<a id='L162' name='L162'></a> 162 
+<a id='L163' name='L163'></a> 163         <em class='comment'>/**</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'>         * Gets the largest collection of characters, including the token at position,</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'>         * and not including any characters from the delimiters set.</em>
+<a id='L166' name='L166'></a> 166 <em class='comment'>         *</em>
+<a id='L167' name='L167'></a> 167 <em class='comment'>         * @param position            The pixel position in the text area.</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'>         *</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'>         * @returns                   The token containing position, and none of the</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'>         *                            delimiter characters. If position is out of bounds,</em>
+<a id='L171' name='L171'></a> 171 <em class='comment'>         *                            it returns the empty string.</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'>         */</em>
+<a id='L173' name='L173'></a> 173         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/8029.html' title='Multiple defined in 2 places.'>get_token</a>(<strong class='reserved'>const</strong> <a href='../D/8239.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> &amp; <a href='../D/11967.html' title='Multiple defined in 2 places.'>position</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../Y/8514.html' title='Multiple used in 2 places.'>delimiters</a> = " \n\r\t") <strong class='reserved'>const</strong>;
+<a id='L174' name='L174'></a> 174 
+<a id='L175' name='L175'></a> 175         <em class='comment'>/**</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'>         * Checks if position points to a character in a link in the text, returns it</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'>         * if so, empty string otherwise. Link-awareness must be enabled to get results.</em>
+<a id='L178' name='L178'></a> 178 <em class='comment'>         * @param position            The pixel position in the text area.</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'>         *</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'>         * @returns                   The link if one is found, the empty string otherwise.</em>
+<a id='L181' name='L181'></a> 181 <em class='comment'>         */</em>
+<a id='L182' name='L182'></a> 182         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/1157.html#L241' title='Defined at 241 in src/font/text.cpp.'>get_link</a>(<strong class='reserved'>const</strong> <a href='../D/8239.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> &amp; <a href='../D/11967.html' title='Multiple defined in 2 places.'>position</a>) <strong class='reserved'>const</strong>;
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184         <em class='comment'>/**</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'>         * Gets the column of line of the character at the position.</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'>         *</em>
+<a id='L187' name='L187'></a> 187 <em class='comment'>         * @param position            The pixel position in the text area.</em>
+<a id='L188' name='L188'></a> 188 <em class='comment'>         *</em>
+<a id='L189' name='L189'></a> 189 <em class='comment'>         * @returns                   A point with the x value the column and the y</em>
+<a id='L190' name='L190'></a> 190 <em class='comment'>         *                            value the line of the character found (or last</em>
+<a id='L191' name='L191'></a> 191 <em class='comment'>         *                            character if not found.</em>
+<a id='L192' name='L192'></a> 192 <em class='comment'>         */</em>
+<a id='L193' name='L193'></a> 193         <a href='../D/8239.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../D/7360.html' title='Multiple defined in 2 places.'>get_column_line</a>(<strong class='reserved'>const</strong> <a href='../D/8239.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../D/11967.html' title='Multiple defined in 2 places.'>position</a>) <strong class='reserved'>const</strong>;
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195         <em class='comment'>/**</em>
+<a id='L196' name='L196'></a> 196 <em class='comment'>         * Gets the length of the text in bytes.</em>
+<a id='L197' name='L197'></a> 197 <em class='comment'>         *</em>
+<a id='L198' name='L198'></a> 198 <em class='comment'>         * The text set is UTF-8 so the length of the string might not be the length</em>
+<a id='L199' name='L199'></a> 199 <em class='comment'>         * of the text.</em>
+<a id='L200' name='L200'></a> 200 <em class='comment'>         */</em>
+<a id='L201' name='L201'></a> 201         <a href='../Y/18514.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../R/6822.html' title='Multiple referred from 14 places.'>get_length</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/12899.html' title='Multiple used in 9 places.'>length_</a>; <em class='brace'>}</em>
+<a id='L202' name='L202'></a> 202 
+<a id='L203' name='L203'></a> 203         <em class='comment'>/**</em>
+<a id='L204' name='L204'></a> 204 <em class='comment'>         * Sets the text to render.</em>
+<a id='L205' name='L205'></a> 205 <em class='comment'>         *</em>
+<a id='L206' name='L206'></a> 206 <em class='comment'>         * @param text                The text to render.</em>
+<a id='L207' name='L207'></a> 207 <em class='comment'>         * @param markedup            Should the text be rendered with pango</em>
+<a id='L208' name='L208'></a> 208 <em class='comment'>         *                            markup. If the markup is invalid it's</em>
+<a id='L209' name='L209'></a> 209 <em class='comment'>         *                            rendered as text without markup.</em>
+<a id='L210' name='L210'></a> 210 <em class='comment'>         *</em>
+<a id='L211' name='L211'></a> 211 <em class='comment'>         * @returns                   The status, if rendered as markup and the</em>
+<a id='L212' name='L212'></a> 212 <em class='comment'>         *                            markup contains errors, false is returned</em>
+<a id='L213' name='L213'></a> 213 <em class='comment'>         *                            else true.</em>
+<a id='L214' name='L214'></a> 214 <em class='comment'>         */</em>
+<a id='L215' name='L215'></a> 215         <strong class='reserved'>bool</strong> <a href='../D/14060.html' title='Multiple defined in 8 places.'>set_text</a>(<strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/15047.html' title='Multiple defined in 14 places.'>text</a>, <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/13621.html' title='Multiple used in 5 places.'>markedup</a>);
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217         <em class='comment'>/***** ***** ***** ***** Setters / getters ***** ***** ***** *****/</em>
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219         <strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../R/13796.html' title='Multiple referred from 1333 places.'>text</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15048.html' title='Multiple defined in 2 places.'>text_</a>; <em class='brace'>}</em>
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../S/1157.html#L325' title='Defined at 325 in src/font/text.cpp.'>set_family_class</a>(<a href='../D/6397.html' title='Multiple defined in 30 places.'>font</a>::<a href='../S/1144.html#L25' title='Defined at 25 in src/font/font_options.hpp.'>family_class</a> <a href='../Y/9727.html' title='Multiple used in 7 places.'>fclass</a>);
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13713.html' title='Multiple defined in 4 places.'>set_font_size</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../D/6405.html' title='Multiple defined in 3 places.'>font_size</a>);
+<a id='L224' name='L224'></a> 224 
+<a id='L225' name='L225'></a> 225         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13714.html' title='Multiple defined in 2 places.'>set_font_style</a>(<strong class='reserved'>const</strong> <a href='../S/1134.html#L140' title='Defined at 140 in src/font/text.hpp.'>FONT_STYLE</a> <a href='../Y/10128.html' title='Multiple used in 14 places.'>font_style</a>);
+<a id='L226' name='L226'></a> 226 
+<a id='L227' name='L227'></a> 227         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../S/1157.html#L359' title='Defined at 359 in src/font/text.cpp.'>set_foreground_color</a>(<strong class='reserved'>const</strong> <a href='../S/969.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a>&amp; <a href='../D/4584.html' title='Multiple defined in 5 places.'>color</a>);
+<a id='L228' name='L228'></a> 228 
+<a id='L229' name='L229'></a> 229         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13832.html' title='Multiple defined in 2 places.'>set_maximum_width</a>(<strong class='reserved'>int</strong> <a href='../D/16244.html' title='Multiple defined in 2 places.'>width</a>);
+<a id='L230' name='L230'></a> 230 
+<a id='L231' name='L231'></a> 231         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13565.html' title='Multiple defined in 2 places.'>set_characters_per_line</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/7124.html' title='Multiple used in 18 places.'>characters_per_line</a>);
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13828.html' title='Multiple defined in 2 places.'>set_maximum_height</a>(<strong class='reserved'>int</strong> <a href='../D/8460.html' title='Multiple defined in 4 places.'>height</a>, <strong class='reserved'>bool</strong> <a href='../Y/14337.html' title='Multiple used in 6 places.'>multiline</a>);
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13661.html' title='Multiple defined in 2 places.'>set_ellipse_mode</a>(<strong class='reserved'>const</strong> <a href='../Y/2165.html' title='Multiple used in 10 places.'>PangoEllipsizeMode</a> <a href='../Y/9081.html' title='Multiple used in 16 places.'>ellipse_mode</a>);
+<a id='L236' name='L236'></a> 236 
+<a id='L237' name='L237'></a> 237         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13501.html' title='Multiple defined in 3 places.'>set_alignment</a>(<strong class='reserved'>const</strong> <a href='../Y/2161.html' title='Multiple used in 23 places.'>PangoAlignment</a> <a href='../S/989.html#L360' title='Defined at 360 in src/units/unit.hpp.'>alignment</a>);
+<a id='L238' name='L238'></a> 238 
+<a id='L239' name='L239'></a> 239         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13829.html' title='Multiple defined in 2 places.'>set_maximum_length</a>(<strong class='reserved'>const</strong> <a href='../Y/18514.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../Y/13803.html' title='Multiple used in 23 places.'>maximum_length</a>);
+<a id='L240' name='L240'></a> 240 
+<a id='L241' name='L241'></a> 241         <strong class='reserved'>bool</strong> <a href='../R/8833.html' title='Multiple referred from 8 places.'>link_aware</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/12989.html' title='Multiple used in 15 places.'>link_aware_</a>; <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13802.html' title='Multiple defined in 2 places.'>set_link_aware</a>(<strong class='reserved'>bool</strong> <a href='../D/3512.html' title='Multiple defined in 3 places.'>b</a>);
+<a id='L244' name='L244'></a> 244 
+<a id='L245' name='L245'></a> 245         <a href='../D/11636.html' title='Multiple defined in 2 places.'>pango_text</a>&amp; <a href='../D/13803.html' title='Multiple defined in 2 places.'>set_link_color</a>(<strong class='reserved'>const</strong> <a href='../S/969.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a>&amp; <a href='../D/4584.html' title='Multiple defined in 5 places.'>color</a>);
+<a id='L246' name='L246'></a> 246 <strong class='reserved'>private</strong>:
+<a id='L247' name='L247'></a> 247 
+<a id='L248' name='L248'></a> 248         <em class='comment'>/***** ***** ***** *****  Pango variables ***** ***** ***** *****/</em>
+<a id='L249' name='L249'></a> 249         PangoContext* <a href='../Y/7725.html' title='Multiple used in 24 places.'>context_</a>;
+<a id='L250' name='L250'></a> 250         <a href='../Y/2169.html' title='Multiple used in 2 places.'>PangoLayout</a>* <a href='../Y/12731.html' title='Multiple used in 31 places.'>layout_</a>;
+<a id='L251' name='L251'></a> 251         <strong class='reserved'>mutable</strong> <a href='../Y/2171.html' title='Multiple used in 3 places.'>PangoRectangle</a> <a href='../S/959.html#L307' title='Defined at 307 in src/display.hpp.'>rect_</a>;
+<a id='L252' name='L252'></a> 252 
+<a id='L253' name='L253'></a> 253         <em class='comment'>/** The SDL surface to render upon used as a cache. */</em>
+<a id='L254' name='L254'></a> 254         <strong class='reserved'>mutable</strong> <a href='../S/978.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../D/14797.html' title='Multiple defined in 2 places.'>surface_</a>;
+<a id='L255' name='L255'></a> 255 
+<a id='L256' name='L256'></a> 256 
+<a id='L257' name='L257'></a> 257         <em class='comment'>/** The text to draw (stored as UTF-8). */</em>
+<a id='L258' name='L258'></a> 258         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/15048.html' title='Multiple defined in 2 places.'>text_</a>;
+<a id='L259' name='L259'></a> 259 
+<a id='L260' name='L260'></a> 260         <em class='comment'>/** Does the text contain pango markup? If different render routines must be used. */</em>
+<a id='L261' name='L261'></a> 261         <strong class='reserved'>bool</strong> <a href='../Y/13622.html' title='Multiple used in 5 places.'>markedup_text_</a>;
+<a id='L262' name='L262'></a> 262 
+<a id='L263' name='L263'></a> 263         <em class='comment'>/** Are hyperlinks in the text marked-up, and will get_link return them. */</em>
+<a id='L264' name='L264'></a> 264         <strong class='reserved'>bool</strong> <a href='../Y/12989.html' title='Multiple used in 15 places.'>link_aware_</a>;
+<a id='L265' name='L265'></a> 265 
+<a id='L266' name='L266'></a> 266         <em class='comment'>/**</em>
+<a id='L267' name='L267'></a> 267 <em class='comment'>     * The color to render links in.</em>
+<a id='L268' name='L268'></a> 268 <em class='comment'>     *</em>
+<a id='L269' name='L269'></a> 269 <em class='comment'>     * Links are formatted using pango &lt;span&gt; as follows:</em>
+<a id='L270' name='L270'></a> 270 <em class='comment'>     *</em>
+<a id='L271' name='L271'></a> 271 <em class='comment'>     * "&lt;span underline=\'single\' color=\'" + link_color_ + "\'&gt;"</em>
+<a id='L272' name='L272'></a> 272 <em class='comment'>     */</em>
+<a id='L273' name='L273'></a> 273         <a href='../S/969.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../Y/12991.html' title='Multiple used in 13 places.'>link_color_</a>;
+<a id='L274' name='L274'></a> 274 
+<a id='L275' name='L275'></a> 275         <em class='comment'>/** The font family class used. */</em>
+<a id='L276' name='L276'></a> 276         <a href='../D/6397.html' title='Multiple defined in 30 places.'>font</a>::<a href='../S/1144.html#L25' title='Defined at 25 in src/font/font_options.hpp.'>family_class</a> <a href='../Y/10119.html' title='Multiple used in 5 places.'>font_class_</a>;
+<a id='L277' name='L277'></a> 277 
+<a id='L278' name='L278'></a> 278         <em class='comment'>/** The font size to draw. */</em>
+<a id='L279' name='L279'></a> 279         <strong class='reserved'>unsigned</strong> <a href='../Y/10126.html' title='Multiple used in 32 places.'>font_size_</a>;
+<a id='L280' name='L280'></a> 280 
+<a id='L281' name='L281'></a> 281         <em class='comment'>/** The style of the font, this is an orred mask of the font flags. */</em>
+<a id='L282' name='L282'></a> 282         <a href='../S/1134.html#L140' title='Defined at 140 in src/font/text.hpp.'>FONT_STYLE</a> <a href='../Y/10129.html' title='Multiple used in 10 places.'>font_style_</a>;
+<a id='L283' name='L283'></a> 283 
+<a id='L284' name='L284'></a> 284         <em class='comment'>/** The foreground color. */</em>
+<a id='L285' name='L285'></a> 285         <a href='../S/969.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../Y/10175.html' title='Multiple used in 8 places.'>foreground_color_</a>;
+<a id='L286' name='L286'></a> 286 
+<a id='L287' name='L287'></a> 287         <em class='comment'>/**</em>
+<a id='L288' name='L288'></a> 288 <em class='comment'>         * The maximum width of the text.</em>
+<a id='L289' name='L289'></a> 289 <em class='comment'>         *</em>
+<a id='L290' name='L290'></a> 290 <em class='comment'>         * Values less or equal to 0 mean no maximum and are internally stored as</em>
+<a id='L291' name='L291'></a> 291 <em class='comment'>         * -1, since that's the value pango uses for it.</em>
+<a id='L292' name='L292'></a> 292 <em class='comment'>         *</em>
+<a id='L293' name='L293'></a> 293 <em class='comment'>         * See @ref characters_per_line_.</em>
+<a id='L294' name='L294'></a> 294 <em class='comment'>         */</em>
+<a id='L295' name='L295'></a> 295         <strong class='reserved'>int</strong> <a href='../Y/13815.html' title='Multiple used in 15 places.'>maximum_width_</a>;
+<a id='L296' name='L296'></a> 296 
+<a id='L297' name='L297'></a> 297         <em class='comment'>/**</em>
+<a id='L298' name='L298'></a> 298 <em class='comment'>         * The number of characters per line.</em>
+<a id='L299' name='L299'></a> 299 <em class='comment'>         *</em>
+<a id='L300' name='L300'></a> 300 <em class='comment'>         * This can be used as an alternative of @ref maximum_width_. The user can</em>
+<a id='L301' name='L301'></a> 301 <em class='comment'>         * select a number of characters on a line for wrapping. When the value is</em>
+<a id='L302' name='L302'></a> 302 <em class='comment'>         * non-zero it determines the maximum width based on the average character</em>
+<a id='L303' name='L303'></a> 303 <em class='comment'>         * width.</em>
+<a id='L304' name='L304'></a> 304 <em class='comment'>         *</em>
+<a id='L305' name='L305'></a> 305 <em class='comment'>         * If both @ref maximum_width_ and @ref characters_per_line_ are set the</em>
+<a id='L306' name='L306'></a> 306 <em class='comment'>         * minimum of the two will be the maximum.</em>
+<a id='L307' name='L307'></a> 307 <em class='comment'>         *</em>
+<a id='L308' name='L308'></a> 308 <em class='comment'>         * @note Long lines are often harder to read, setting this value can</em>
+<a id='L309' name='L309'></a> 309 <em class='comment'>         * automatically wrap on a number of characters regardless of the font</em>
+<a id='L310' name='L310'></a> 310 <em class='comment'>         * size. Often 66 characters is considered the optimal value for a one</em>
+<a id='L311' name='L311'></a> 311 <em class='comment'>         * column text.</em>
+<a id='L312' name='L312'></a> 312 <em class='comment'>         */</em>
+<a id='L313' name='L313'></a> 313         <strong class='reserved'>unsigned</strong> <a href='../Y/7125.html' title='Multiple used in 14 places.'>characters_per_line_</a>;
+<a id='L314' name='L314'></a> 314 
+<a id='L315' name='L315'></a> 315         <em class='comment'>/**</em>
+<a id='L316' name='L316'></a> 316 <em class='comment'>         * The maximum height of the text.</em>
+<a id='L317' name='L317'></a> 317 <em class='comment'>         *</em>
+<a id='L318' name='L318'></a> 318 <em class='comment'>         * Values less or equal to 0 mean no maximum and are internally stored as</em>
+<a id='L319' name='L319'></a> 319 <em class='comment'>         * -1, since that's the value pango uses for it.</em>
+<a id='L320' name='L320'></a> 320 <em class='comment'>         */</em>
+<a id='L321' name='L321'></a> 321         <strong class='reserved'>int</strong> <a href='../S/517.html#L1267' title='Defined at 1267 in src/gui/core/canvas.cpp.'>maximum_height_</a>;
+<a id='L322' name='L322'></a> 322 
+<a id='L323' name='L323'></a> 323         <em class='comment'>/** The way too long text is shown depends on this mode. */</em>
+<a id='L324' name='L324'></a> 324         <a href='../Y/2165.html' title='Multiple used in 10 places.'>PangoEllipsizeMode</a> <a href='../Y/9082.html' title='Multiple used in 5 places.'>ellipse_mode_</a>;
+<a id='L325' name='L325'></a> 325 
+<a id='L326' name='L326'></a> 326         <em class='comment'>/** The alignment of the text. */</em>
+<a id='L327' name='L327'></a> 327         <a href='../Y/2161.html' title='Multiple used in 23 places.'>PangoAlignment</a> <a href='../Y/5373.html' title='Multiple used in 23 places.'>alignment_</a>;
+<a id='L328' name='L328'></a> 328 
+<a id='L329' name='L329'></a> 329         <em class='comment'>/** The maximum length of the text. */</em>
+<a id='L330' name='L330'></a> 330         <a href='../Y/18514.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../Y/13804.html' title='Multiple used in 9 places.'>maximum_length_</a>;
+<a id='L331' name='L331'></a> 331 
+<a id='L332' name='L332'></a> 332         <em class='comment'>/**</em>
+<a id='L333' name='L333'></a> 333 <em class='comment'>         * The text has two dirty states:</em>
+<a id='L334' name='L334'></a> 334 <em class='comment'>         * - The setting of the state and the size calculations.</em>
+<a id='L335' name='L335'></a> 335 <em class='comment'>         * - The rendering of the surface.</em>
+<a id='L336' name='L336'></a> 336 <em class='comment'>         */</em>
+<a id='L337' name='L337'></a> 337 
+<a id='L338' name='L338'></a> 338         <em class='comment'>/** The dirty state of the calculations. */</em>
+<a id='L339' name='L339'></a> 339         <strong class='reserved'>mutable</strong> <strong class='reserved'>bool</strong> <a href='../Y/6853.html' title='Multiple used in 14 places.'>calculation_dirty_</a>;
+<a id='L340' name='L340'></a> 340 
+<a id='L341' name='L341'></a> 341         <em class='comment'>/** Length of the text. */</em>
+<a id='L342' name='L342'></a> 342         <strong class='reserved'>mutable</strong> <a href='../Y/18514.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../Y/12899.html' title='Multiple used in 9 places.'>length_</a>;
+<a id='L343' name='L343'></a> 343 
+<a id='L344' name='L344'></a> 344         <em class='comment'>/**</em>
+<a id='L345' name='L345'></a> 345 <em class='comment'>         * Recalculates the text layout.</em>
+<a id='L346' name='L346'></a> 346 <em class='comment'>         *</em>
+<a id='L347' name='L347'></a> 347 <em class='comment'>         * When the text is recalculated the surface is dirtied.</em>
+<a id='L348' name='L348'></a> 348 <em class='comment'>         *</em>
+<a id='L349' name='L349'></a> 349 <em class='comment'>         * @param force               Recalculate even if not dirty?</em>
+<a id='L350' name='L350'></a> 350 <em class='comment'>         */</em>
+<a id='L351' name='L351'></a> 351         <strong class='reserved'>void</strong> <a href='../D/12402.html' title='Multiple defined in 9 places.'>recalculate</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/10155.html' title='Multiple used in 125 places.'>force</a> = <strong class='reserved'>false</strong>) <strong class='reserved'>const</strong>;
+<a id='L352' name='L352'></a> 352 
+<a id='L353' name='L353'></a> 353         <em class='comment'>/** The dirty state of the surface. */</em>
+<a id='L354' name='L354'></a> 354         <strong class='reserved'>mutable</strong> <strong class='reserved'>bool</strong> <a href='../Y/19195.html' title='Multiple used in 17 places.'>surface_dirty_</a>;
+<a id='L355' name='L355'></a> 355 
+<a id='L356' name='L356'></a> 356         <em class='comment'>/**</em>
+<a id='L357' name='L357'></a> 357 <em class='comment'>         * Renders the text.</em>
+<a id='L358' name='L358'></a> 358 <em class='comment'>         *</em>
+<a id='L359' name='L359'></a> 359 <em class='comment'>         * It will do a recalculation first so no need to call both.</em>
+<a id='L360' name='L360'></a> 360 <em class='comment'>         *</em>
+<a id='L361' name='L361'></a> 361 <em class='comment'>         * @param force               Render even if not dirty? This parameter is</em>
+<a id='L362' name='L362'></a> 362 <em class='comment'>         *                            also send to recalculate().</em>
+<a id='L363' name='L363'></a> 363 <em class='comment'>         */</em>
+<a id='L364' name='L364'></a> 364         <strong class='reserved'>void</strong> <a href='../S/1157.html#L636' title='Defined at 636 in src/font/text.cpp.'>rerender</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/10155.html' title='Multiple used in 125 places.'>force</a> = <strong class='reserved'>false</strong>) <strong class='reserved'>const</strong>;
+<a id='L365' name='L365'></a> 365 
+<a id='L366' name='L366'></a> 366         <em class='comment'>/**</em>
+<a id='L367' name='L367'></a> 367 <em class='comment'>         * Buffer to store the image on.</em>
+<a id='L368' name='L368'></a> 368 <em class='comment'>         *</em>
+<a id='L369' name='L369'></a> 369 <em class='comment'>         * We use a cairo surface to draw on this buffer and then use the buffer as</em>
+<a id='L370' name='L370'></a> 370 <em class='comment'>         * data source for the SDL_Surface. This means the buffer needs to be stored</em>
+<a id='L371' name='L371'></a> 371 <em class='comment'>         * in the object, since SDL_Surface doesn't own its buffer.</em>
+<a id='L372' name='L372'></a> 372 <em class='comment'>         */</em>
+<a id='L373' name='L373'></a> 373         <strong class='reserved'>mutable</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21226.html' title='Multiple used in 2731 places.'>vector</a>&lt;<strong class='reserved'>unsigned</strong> <strong class='reserved'>char</strong>&gt; <a href='../S/1157.html#L68' title='Defined at 68 in src/font/text.cpp.'>surface_buffer_</a>;
+<a id='L374' name='L374'></a> 374 
+<a id='L375' name='L375'></a> 375         <em class='comment'>/**</em>
+<a id='L376' name='L376'></a> 376 <em class='comment'>         * Creates a new buffer.</em>
+<a id='L377' name='L377'></a> 377 <em class='comment'>         *</em>
+<a id='L378' name='L378'></a> 378 <em class='comment'>         * If needed frees the other surface and then creates a new buffer and</em>
+<a id='L379' name='L379'></a> 379 <em class='comment'>         * initializes the entire buffer with values 0.</em>
+<a id='L380' name='L380'></a> 380 <em class='comment'>         *</em>
+<a id='L381' name='L381'></a> 381 <em class='comment'>         * NOTE eventhough we're clearly modifying function we don't change the</em>
+<a id='L382' name='L382'></a> 382 <em class='comment'>         * state of the object. The const is needed so other functions can also be</em>
+<a id='L383' name='L383'></a> 383 <em class='comment'>         * marked const (those also don't change the state of the object.</em>
+<a id='L384' name='L384'></a> 384 <em class='comment'>         *</em>
+<a id='L385' name='L385'></a> 385 <em class='comment'>         * @param size                The required size of the buffer.</em>
+<a id='L386' name='L386'></a> 386 <em class='comment'>         */</em>
+<a id='L387' name='L387'></a> 387         <strong class='reserved'>void</strong> <a href='../S/1157.html#L696' title='Defined at 696 in src/font/text.cpp.'>create_surface_buffer</a>(<strong class='reserved'>const</strong> <a href='../Y/18514.html' title='Multiple used in 1720 places.'>size_t</a> <a href='../D/14467.html' title='Multiple defined in 16 places.'>size</a>) <strong class='reserved'>const</strong>;
+<a id='L388' name='L388'></a> 388 
+<a id='L389' name='L389'></a> 389         <em class='comment'>/**</em>
+<a id='L390' name='L390'></a> 390 <em class='comment'>         * Sets the markup'ed text.</em>
+<a id='L391' name='L391'></a> 391 <em class='comment'>         *</em>
+<a id='L392' name='L392'></a> 392 <em class='comment'>         * It tries to set the text as markup. If the markup is invalid it will try</em>
+<a id='L393' name='L393'></a> 393 <em class='comment'>         * a bit harder to recover from the errors and still set the markup.</em>
+<a id='L394' name='L394'></a> 394 <em class='comment'>         *</em>
+<a id='L395' name='L395'></a> 395 <em class='comment'>         * @param text                The text to set as markup.</em>
+<a id='L396' name='L396'></a> 396 <em class='comment'>         *</em>
+<a id='L397' name='L397'></a> 397 <em class='comment'>         * @returns                   Whether the markup was set or an</em>
+<a id='L398' name='L398'></a> 398 <em class='comment'>         *                            unrecoverable error occurred and the text is</em>
+<a id='L399' name='L399'></a> 399 <em class='comment'>         *                            set as plain text with an error message.</em>
+<a id='L400' name='L400'></a> 400 <em class='comment'>         */</em>
+<a id='L401' name='L401'></a> 401         <strong class='reserved'>bool</strong> <a href='../S/1157.html#L707' title='Defined at 707 in src/font/text.cpp.'>set_markup</a>(<strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/15047.html' title='Multiple defined in 14 places.'>text</a>);
+<a id='L402' name='L402'></a> 402 
+<a id='L403' name='L403'></a> 403         <strong class='reserved'>bool</strong> <a href='../S/1157.html#L742' title='Defined at 742 in src/font/text.cpp.'>set_markup_helper</a>(<strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> &amp; <a href='../D/15047.html' title='Multiple defined in 14 places.'>text</a>);
+<a id='L404' name='L404'></a> 404 
+<a id='L405' name='L405'></a> 405     <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/1157.html#L711' title='Defined at 711 in src/font/text.cpp.'>format_link_tokens</a>(<strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> &amp; <a href='../D/15047.html' title='Multiple defined in 14 places.'>text</a>) <strong class='reserved'>const</strong>;
+<a id='L406' name='L406'></a> 406 
+<a id='L407' name='L407'></a> 407         <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/1157.html#L733' title='Defined at 733 in src/font/text.cpp.'>handle_token</a>(<strong class='reserved'>const</strong> <a href='../D/14661.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14722.html' title='Multiple defined in 3 places.'>string</a> &amp; <a href='../D/15214.html' title='Multiple defined in 2 places.'>token</a>) <strong class='reserved'>const</strong>;
+<a id='L408' name='L408'></a> 408 <em class='brace'>}</em>;
+<a id='L409' name='L409'></a> 409 
+<a id='L410' name='L410'></a> 410 <em class='brace'>}</em> <em class='comment'>// namespace font</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^]<a href='#L43'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L201'>[^]</a><a href='#L241'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>
