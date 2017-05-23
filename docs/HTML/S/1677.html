@@ -1,52 +1,55 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>scons/config_check_utils.py</title>
+<title>scons/scanreplace.py</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5809.html'>scons</a>/config_check_utils.py</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L5'>[^]</a><a href='#L15'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5818.html'>scons</a>/scanreplace.py</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L8'>[^]</a><a href='#L24'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L5' title='Defined at 5.'>backup_env</a></li>
-<li><a href='#L11' title='Defined at 11.'>restore_env</a></li>
-<li><a href='#L15' title='Defined at 15.'>find_include</a></li>
+<li><a href='#L8' title='Defined at 8.'>PercentDelimitedTemplate</a></li>
+<li><a href='#L13' title='Defined at 13.'>replace_action</a></li>
+<li><a href='#L17' title='Defined at 17.'>replace_string</a></li>
+<li><a href='#L20' title='Defined at 20.'>generate</a></li>
+<li><a href='#L24' title='Defined at 24.'>exists</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 # vi: syntax=python:et:ts=4
-<a id='L2' name='L2'></a>   2 from <a href='../Y/10855.html' title='Multiple used in 35 places.'>glob</a> import glob
-<a id='L3' name='L3'></a>   3 from os.path import <a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>
+<a id='L2' name='L2'></a>   2 # Shamelessly stolen from scons wiki
+<a id='L3' name='L3'></a>   3 # http:<em class='comment'>//www.scons.org/wiki/ReplacementBuilder</em>
 <a id='L4' name='L4'></a>   4 
-<a id='L5' name='L5'></a>   5 def <a href='../R/3177.html' title='Multiple referred from 3 places.'>backup_env</a>(<a href='../Y/9320.html' title='Multiple used in 182 places.'>env</a>, <a href='../S/448.html#L498' title='Defined at 498 in src/gui/dialogs/gamestate_inspector.cpp.'>vars</a>):
-<a id='L6' name='L6'></a>   6     <a href='../Y/6072.html' title='Multiple used in 30 places.'>backup</a> = <a href='../Y/8613.html' title='Multiple used in 30 places.'>dict</a>()
-<a id='L7' name='L7'></a>   7     <strong class='reserved'>for</strong> <a href='../Y/21162.html' title='Multiple used in 156 places.'>var</a> in <a href='../S/448.html#L498' title='Defined at 498 in src/gui/dialogs/gamestate_inspector.cpp.'>vars</a>:
-<a id='L8' name='L8'></a>   8         <a href='../Y/6072.html' title='Multiple used in 30 places.'>backup</a>[<a href='../Y/21162.html' title='Multiple used in 156 places.'>var</a>] = <a href='../Y/9320.html' title='Multiple used in 182 places.'>env</a>.<a href='../D/6720.html' title='Multiple defined in 41 places.'>get</a>(var, [])
-<a id='L9' name='L9'></a>   9     <strong class='reserved'>return</strong> <a href='../Y/6072.html' title='Multiple used in 30 places.'>backup</a>
-<a id='L10' name='L10'></a>  10 
-<a id='L11' name='L11'></a>  11 def <a href='../R/11732.html' title='Multiple referred from 3 places.'>restore_env</a>(<a href='../Y/9320.html' title='Multiple used in 182 places.'>env</a>, <a href='../Y/6072.html' title='Multiple used in 30 places.'>backup</a>):
-<a id='L12' name='L12'></a>  12     <strong class='reserved'>for</strong> <a href='../Y/21162.html' title='Multiple used in 156 places.'>var</a> in <a href='../Y/6072.html' title='Multiple used in 30 places.'>backup</a>.<a href='../S/118.html#L277' title='Defined at 277 in src/serialization/tag.hpp.'>keys</a>():
-<a id='L13' name='L13'></a>  13         <a href='../Y/9320.html' title='Multiple used in 182 places.'>env</a>[<a href='../Y/21162.html' title='Multiple used in 156 places.'>var</a>] = <a href='../Y/6072.html' title='Multiple used in 30 places.'>backup</a>[var]
-<a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 def <a href='../R/5559.html' title='Multiple referred from 6 places.'>find_include</a>(<a href='../Y/16360.html' title='Multiple used in 21 places.'>prefixes</a>, <a href='../Y/11781.html' title='Multiple used in 2 places.'>include_file</a>, <a href='../Y/11785.html' title='Multiple used in 3 places.'>include_subdir</a>="include", <a href='../Y/8359.html' title='Multiple used in 4 places.'>default_prefixes</a>=<a href='../Y/2901.html' title='Multiple used in 237 places.'>True</a>):
-<a id='L16' name='L16'></a>  16     <strong class='reserved'>if</strong> <a href='../Y/8359.html' title='Multiple used in 4 places.'>default_prefixes</a>:
-<a id='L17' name='L17'></a>  17         <a href='../Y/16360.html' title='Multiple used in 21 places.'>prefixes</a> = prefixes + ["/usr", "/usr/local", "/sw", "/sw/local", "/opt", "/opt/local"]
-<a id='L18' name='L18'></a>  18     <a href='../Y/5387.html' title='Multiple used in 3 places.'>all_includes</a> = []
-<a id='L19' name='L19'></a>  19     <strong class='reserved'>for</strong> <a href='../S/1249.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> in <a href='../Y/16360.html' title='Multiple used in 21 places.'>prefixes</a>:
-<a id='L20' name='L20'></a>  20         <a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a> = <a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../S/1249.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a>, <a href='../Y/11785.html' title='Multiple used in 3 places.'>include_subdir</a>, <a href='../Y/11781.html' title='Multiple used in 2 places.'>include_file</a>)
-<a id='L21' name='L21'></a>  21         #print path
-<a id='L22' name='L22'></a>  22         <strong class='reserved'>for</strong> <a href='../Y/11776.html' title='Multiple used in 21 places.'>include</a> in <a href='../Y/10855.html' title='Multiple used in 35 places.'>glob</a>(<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>):
-<a id='L23' name='L23'></a>  23             <a href='../Y/5387.html' title='Multiple used in 3 places.'>all_includes</a>.<a href='../D/3309.html' title='Multiple defined in 8 places.'>append</a>((<a href='../S/1249.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a>, <a href='../Y/11776.html' title='Multiple used in 21 places.'>include</a>))
-<a id='L24' name='L24'></a>  24     <strong class='reserved'>return</strong> <a href='../Y/5387.html' title='Multiple used in 3 places.'>all_includes</a>
+<a id='L5' name='L5'></a>   5 try:
+<a id='L6' name='L6'></a>   6     from <a href='../D/14693.html' title='Multiple defined in 3 places.'>string</a> import <a href='../Y/2891.html' title='Multiple used in 2 places.'>Template</a>
+<a id='L7' name='L7'></a>   7 
+<a id='L8' name='L8'></a>   8     class <a href='../S/1677.html#L14' title='Referred from 14 in scons/scanreplace.py.'>PercentDelimitedTemplate</a>(<a href='../Y/2891.html' title='Multiple used in 2 places.'>Template</a>):
+<a id='L9' name='L9'></a>   9         delimiter = "%"
+<a id='L10' name='L10'></a>  10 except <a href='../Y/1608.html' title='Multiple used in 7 places.'>ImportError</a>:
+<a id='L11' name='L11'></a>  11     pass
+<a id='L12' name='L12'></a>  12 
+<a id='L13' name='L13'></a>  13 def <a href='../S/1677.html#L21' title='Referred from 21 in scons/scanreplace.py.'>replace_action</a>(<a href='../D/14851.html' title='Multiple defined in 2 places.'>target</a>, <a href='../S/641.html#L62' title='Defined at 62 in src/gui/auxiliary/tips.hpp.'>source</a>, <a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>):
+<a id='L14' name='L14'></a>  14         <a href='../D/11495.html' title='Multiple defined in 3 places.'>open</a>(<a href='../D/14660.html' title='Multiple defined in 25 places.'>str</a>(<a href='../D/14851.html' title='Multiple defined in 2 places.'>target</a>[0]), 'w').<a href='../D/16392.html' title='Multiple defined in 55 places.'>write</a>(<a href='../S/1677.html#L8' title='Defined at 8 in scons/scanreplace.py.'>PercentDelimitedTemplate</a>(open(str(<a href='../S/641.html#L62' title='Defined at 62 in src/gui/auxiliary/tips.hpp.'>source</a>[0]), 'r').<a href='../D/12289.html' title='Multiple defined in 23 places.'>read</a>()).substitute(<a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>))
+<a id='L15' name='L15'></a>  15     <a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>.Depends(<a href='../D/14851.html' title='Multiple defined in 2 places.'>target</a>, env.<a href='../D/2308.html' title='Multiple defined in 2 places.'>Value</a>(env.<a href='../Y/624.html' title='Multiple used in 5 places.'>Dictionary</a>()))
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 def <a href='../S/1677.html#L21' title='Referred from 21 in scons/scanreplace.py.'>replace_string</a>(<a href='../D/14851.html' title='Multiple defined in 2 places.'>target</a>, <a href='../S/641.html#L62' title='Defined at 62 in src/gui/auxiliary/tips.hpp.'>source</a>, <a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>):
+<a id='L18' name='L18'></a>  18     <strong class='reserved'>return</strong> "Generating '%s' from '%s'..." % (<a href='../D/14660.html' title='Multiple defined in 25 places.'>str</a>(<a href='../D/14851.html' title='Multiple defined in 2 places.'>target</a>[0]), str(<a href='../S/641.html#L62' title='Defined at 62 in src/gui/auxiliary/tips.hpp.'>source</a>[0]))
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 def <a href='../R/5900.html' title='Multiple referred from 30 places.'>generate</a>(<a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>, **<a href='../Y/12556.html' title='Multiple used in 23 places.'>kw</a>):
+<a id='L21' name='L21'></a>  21     <a href='../D/2736.html' title='Multiple defined in 10 places.'>action</a> = <a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>.<a href='../Y/206.html' title='Multiple used in 3 places.'>Action</a>(<a href='../S/1677.html#L13' title='Defined at 13 in scons/scanreplace.py.'>replace_action</a>, <a href='../S/1677.html#L17' title='Defined at 17 in scons/scanreplace.py.'>replace_string</a>)
+<a id='L22' name='L22'></a>  22     <a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>['BUILDERS']['ScanReplace'] = env.<a href='../Y/368.html' title='Multiple used in 8 places.'>Builder</a>(<a href='../D/2736.html' title='Multiple defined in 10 places.'>action</a>=action, <a href='../Y/18817.html' title='Multiple used in 4 places.'>src_suffix</a>='.in', <a href='../Y/18511.html' title='Multiple used in 4 places.'>single_source</a>=<a href='../Y/2912.html' title='Multiple used in 237 places.'>True</a>)
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 def <a href='../R/5310.html' title='Multiple referred from 119 places.'>exists</a>(<a href='../Y/9339.html' title='Multiple used in 182 places.'>env</a>):
+<a id='L25' name='L25'></a>  25     <strong class='reserved'>return</strong> <a href='../Y/2912.html' title='Multiple used in 237 places.'>True</a>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L5'>[^]</a><a href='#L15'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L8'>[^]</a><a href='#L24'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

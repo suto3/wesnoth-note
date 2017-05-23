@@ -1,27 +1,32 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/lua_jailbreak_exception.cpp</title>
+<title>src/cursor.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5810.html'>src</a>/lua_jailbreak_exception.cpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L21'>[^]</a><a href='#L57'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5819.html'>src</a>/cursor.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L32'>[^]</a><a href='#L199'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L21' title='Defined at 21.'>store</a></li>
-<li><a href='#L33' title='Defined at 33.'>rethrow</a></li>
-<li><a href='#L57' title='Defined at 57.'>clear</a></li>
+<li><a href='#L32' title='Defined at 32.'>use_color_cursors</a></li>
+<li><a href='#L37' title='Defined at 37.'>create_cursor</a></li>
+<li><a href='#L112' title='Defined at 112.'>get_cursor</a></li>
+<li><a href='#L129' title='Defined at 129.'>clear_cache</a></li>
+<li><a href='#L154' title='Defined at 154.'>set</a></li>
+<li><a href='#L174' title='Defined at 174.'>set_dragging</a></li>
+<li><a href='#L194' title='Defined at 194.'>get</a></li>
+<li><a href='#L199' title='Defined at 199.'>set_focus</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2011 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
@@ -34,57 +39,214 @@ This source file includes following definitions.
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='944.html'>lua_jailbreak_exception.hpp</a>"
-<a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> &lt;cassert&gt;
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 <a href='../D/10432.html' title='Multiple defined in 3 places.'>lua_jailbreak_exception</a> *<a href='../D/10432.html' title='Multiple defined in 3 places.'>lua_jailbreak_exception</a>::<a href='../Y/12386.html' title='Multiple used in 9 places.'>jailbreak_exception</a> = <a href='../Y/15090.html' title='Multiple used in 1950 places.'>nullptr</a>;
-<a id='L20' name='L20'></a>  20 
-<a id='L21' name='L21'></a>  21 <strong class='reserved'>void</strong> <a href='../D/10432.html' title='Multiple defined in 3 places.'>lua_jailbreak_exception</a>::<a href='../R/13487.html' title='Multiple referred from 45 places.'>store</a>() <strong class='reserved'>const</strong> <a href='../D/1537.html' title='Multiple defined in 5 places.'>NOEXCEPT</a>
-<a id='L22' name='L22'></a>  22 <em class='brace'>{</em>
-<a id='L23' name='L23'></a>  23         <em class='comment'>/*</em>
-<a id='L24' name='L24'></a>  24 <em class='comment'>         * It should not be  possible to call this function with an exception still</em>
-<a id='L25' name='L25'></a>  25 <em class='comment'>         * pending. It could happen if the code doesn't call</em>
-<a id='L26' name='L26'></a>  26 <em class='comment'>         * lua_jailbreak_exception::rethrow() or a logic error in the code.</em>
-<a id='L27' name='L27'></a>  27 <em class='comment'>         */</em>
-<a id='L28' name='L28'></a>  28         <a href='../Y/5730.html' title='Multiple used in 1183 places.'>assert</a>(!<a href='../Y/12386.html' title='Multiple used in 9 places.'>jailbreak_exception</a>);
-<a id='L29' name='L29'></a>  29 
-<a id='L30' name='L30'></a>  30         <a href='../Y/12386.html' title='Multiple used in 9 places.'>jailbreak_exception</a> = <strong class='reserved'>this</strong>-&gt;<a href='../D/4544.html' title='Multiple defined in 30 places.'>clone</a>();
-<a id='L31' name='L31'></a>  31 <em class='brace'>}</em>
-<a id='L32' name='L32'></a>  32 
-<a id='L33' name='L33'></a>  33 <strong class='reserved'>void</strong> <a href='../D/10432.html' title='Multiple defined in 3 places.'>lua_jailbreak_exception</a>::<a href='../R/11744.html' title='Multiple referred from 2 places.'>rethrow</a>()
-<a id='L34' name='L34'></a>  34 <em class='brace'>{</em>
-<a id='L35' name='L35'></a>  35         <strong class='reserved'>if</strong>(!<a href='../Y/12386.html' title='Multiple used in 9 places.'>jailbreak_exception</a>) <em class='brace'>{</em>
-<a id='L36' name='L36'></a>  36                 <strong class='reserved'>return</strong>;
-<a id='L37' name='L37'></a>  37         <em class='brace'>}</em>
-<a id='L38' name='L38'></a>  38 
-<a id='L39' name='L39'></a>  39         <em class='comment'>/*</em>
-<a id='L40' name='L40'></a>  40 <em class='comment'>         * We need to call lua_jailbreak_exception::clear() after the exception</em>
-<a id='L41' name='L41'></a>  41 <em class='comment'>         * is thrown. The most straightforward approach would be a small helper</em>
-<a id='L42' name='L42'></a>  42 <em class='comment'>         * class calling clear in its destructor, but alas g++ then complains about</em>
-<a id='L43' name='L43'></a>  43 <em class='comment'>         * an unused variable. Since we're sure there will be something thrown use</em>
-<a id='L44' name='L44'></a>  44 <em class='comment'>         * that fact to make sure the the function is called.</em>
-<a id='L45' name='L45'></a>  45 <em class='comment'>         */</em>
-<a id='L46' name='L46'></a>  46         <strong class='reserved'>try</strong> <em class='brace'>{</em>
-<a id='L47' name='L47'></a>  47                 <a href='../Y/12386.html' title='Multiple used in 9 places.'>jailbreak_exception</a>-&gt;<a href='../D/5987.html' title='Multiple defined in 182 places.'>execute</a>();
-<a id='L48' name='L48'></a>  48         <em class='brace'>}</em> <strong class='reserved'>catch</strong>(...) <em class='brace'>{</em>
-<a id='L49' name='L49'></a>  49                 <a href='../D/4449.html' title='Multiple defined in 37 places.'>clear</a>();
-<a id='L50' name='L50'></a>  50                 <strong class='reserved'>throw</strong>;
-<a id='L51' name='L51'></a>  51         <em class='brace'>}</em>
-<a id='L52' name='L52'></a>  52 
-<a id='L53' name='L53'></a>  53         <em class='comment'>/* We never should reach this point. */</em>
-<a id='L54' name='L54'></a>  54         <a href='../Y/5730.html' title='Multiple used in 1183 places.'>assert</a>(<strong class='reserved'>false</strong>);
-<a id='L55' name='L55'></a>  55 <em class='brace'>}</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * Support for different cursors-shapes.</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> */</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='956.html'>cursor.hpp</a>"
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='../I/2482.html'>preferences/game.hpp</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='../I/2241.html'>image.hpp</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='../I/1779.html'>preferences/display.hpp</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='980.html'>sdl/rect.hpp</a>"
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;iostream&gt;
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> &lt;boost/logic/tribool.hpp&gt;
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>using</strong> <a href='../D/3701.html' title='Multiple defined in 3 places.'>boost</a>::<a href='../Y/13312.html' title='Multiple used in 23 places.'>logic</a>::<a href='../Y/20406.html' title='Multiple used in 11 places.'>tribool</a>;
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>using</strong> <a href='../D/3701.html' title='Multiple defined in 3 places.'>boost</a>::<a href='../Y/13312.html' title='Multiple used in 23 places.'>logic</a>::<a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>;
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>static</strong> <strong class='reserved'>bool</strong> <a href='../R/14441.html' title='Multiple referred from 3 places.'>use_color_cursors</a>()
+<a id='L33' name='L33'></a>  33 <em class='brace'>{</em>
+<a id='L34' name='L34'></a>  34         <strong class='reserved'>return</strong> <a href='../D/6548.html' title='Multiple defined in 7 places.'>game_config</a>::<a href='../D/5735.html' title='Multiple defined in 60 places.'>editor</a> == <strong class='reserved'>false</strong> &amp;&amp; <a href='../D/11983.html' title='Multiple defined in 17 places.'>preferences</a>::<a href='../D/15702.html' title='Multiple defined in 2 places.'>use_color_cursors</a>();
+<a id='L35' name='L35'></a>  35 <em class='brace'>}</em>
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37 <strong class='reserved'>static</strong> <a href='../Y/2452.html' title='Multiple used in 4 places.'>SDL_Cursor</a>* <a href='../S/747.html#L121' title='Referred from 121 in src/cursor.cpp.'>create_cursor</a>(<a href='../S/977.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../D/14766.html' title='Multiple defined in 2 places.'>surf</a>)
+<a id='L38' name='L38'></a>  38 <em class='brace'>{</em>
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>const</strong> <a href='../S/977.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>(<a href='../S/979.html#L58' title='Defined at 58 in src/sdl/utils.cpp.'>make_neutral_surface</a>(<a href='../D/14766.html' title='Multiple defined in 2 places.'>surf</a>));
+<a id='L40' name='L40'></a>  40         <strong class='reserved'>if</strong>(<a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a> == <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>) <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41                 <strong class='reserved'>return</strong> <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>;
+<a id='L42' name='L42'></a>  42         <em class='brace'>}</em>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44         <em class='comment'>// The width must be a multiple of 8 (SDL requirement)</em>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#ifdef</em> <a href='../Y/4730.html' title='Multiple used in 37 places.'>__APPLE__</a>
+<a id='L47' name='L47'></a>  47         <a href='../Y/18536.html' title='Multiple used in 1733 places.'>size_t</a> <a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a> = 16;
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#else</em>
+<a id='L49' name='L49'></a>  49         <a href='../Y/18536.html' title='Multiple used in 1733 places.'>size_t</a> <a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a> = <a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>-&gt;<a href='../D/15952.html' title='Multiple defined in 6 places.'>w</a>;
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>if</strong>((<a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a>%8) != 0) <em class='brace'>{</em>
+<a id='L51' name='L51'></a>  51                 <a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a> += 8 - (<a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a>%8);
+<a id='L52' name='L52'></a>  52         <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53 <em class='sharp'>#endif</em>
+<a id='L54' name='L54'></a>  54         <a href='../D/14632.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21250.html' title='Multiple used in 2737 places.'>vector</a>&lt;<a href='../Y/2947.html' title='Multiple used in 94 places.'>Uint8</a>&gt; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>((<a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a>*<a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>-&gt;<a href='../D/8229.html' title='Multiple defined in 8 places.'>h</a>)/8,0);
+<a id='L55' name='L55'></a>  55         <a href='../D/14632.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21250.html' title='Multiple used in 2737 places.'>vector</a>&lt;<a href='../Y/2947.html' title='Multiple used in 94 places.'>Uint8</a>&gt; <a href='../D/10732.html' title='Multiple defined in 4 places.'>mask</a>(<a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>.<a href='../D/14438.html' title='Multiple defined in 17 places.'>size</a>(),0);
 <a id='L56' name='L56'></a>  56 
-<a id='L57' name='L57'></a>  57 <strong class='reserved'>void</strong> <a href='../D/10432.html' title='Multiple defined in 3 places.'>lua_jailbreak_exception</a>::<a href='../R/3904.html' title='Multiple referred from 646 places.'>clear</a>() <a href='../D/1537.html' title='Multiple defined in 5 places.'>NOEXCEPT</a>
-<a id='L58' name='L58'></a>  58 <em class='brace'>{</em>
-<a id='L59' name='L59'></a>  59         <strong class='reserved'>delete</strong> <a href='../Y/12386.html' title='Multiple used in 9 places.'>jailbreak_exception</a>;
-<a id='L60' name='L60'></a>  60         <a href='../Y/12386.html' title='Multiple used in 9 places.'>jailbreak_exception</a> = <a href='../Y/15090.html' title='Multiple used in 1950 places.'>nullptr</a>;
-<a id='L61' name='L61'></a>  61 <em class='brace'>}</em>
-<a id='L62' name='L62'></a>  62 
+<a id='L57' name='L57'></a>  57         <em class='comment'>// See http://sdldoc.csn.ul.ie/sdlcreatecursor.php for documentation</em>
+<a id='L58' name='L58'></a>  58         <em class='comment'>// on the format that data has to be in to pass to SDL_CreateCursor</em>
+<a id='L59' name='L59'></a>  59         <a href='../S/977.html#L145' title='Defined at 145 in src/sdl/surface.hpp.'>const_surface_lock</a> <a href='../S/1083.html#L416' title='Defined at 416 in src/config_cache.cpp.'>lock</a>(<a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>);
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>const</strong> <a href='../Y/2946.html' title='Multiple used in 166 places.'>Uint32</a>* <strong class='reserved'>const</strong> <a href='../S/977.html#L137' title='Defined at 137 in src/sdl/surface.hpp.'>pixels</a> = <a href='../S/1083.html#L416' title='Defined at 416 in src/config_cache.cpp.'>lock</a>.<a href='../S/977.html#L137' title='Defined at 137 in src/sdl/surface.hpp.'>pixels</a>();
+<a id='L61' name='L61'></a>  61         <strong class='reserved'>for</strong>(<strong class='reserved'>int</strong> <a href='../D/16469.html' title='Multiple defined in 8 places.'>y</a> = 0; <a href='../D/16469.html' title='Multiple defined in 8 places.'>y</a> != <a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>-&gt;<a href='../D/8229.html' title='Multiple defined in 8 places.'>h</a>; ++<a href='../D/16469.html' title='Multiple defined in 8 places.'>y</a>) <em class='brace'>{</em>
+<a id='L62' name='L62'></a>  62                 <strong class='reserved'>for</strong>(<strong class='reserved'>int</strong> <a href='../D/16454.html' title='Multiple defined in 2 places.'>x</a> = 0; <a href='../D/16454.html' title='Multiple defined in 2 places.'>x</a> != <a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>-&gt;<a href='../D/15952.html' title='Multiple defined in 6 places.'>w</a>; ++<a href='../D/16454.html' title='Multiple defined in 2 places.'>x</a>) <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64                         <strong class='reserved'>if</strong> (<strong class='reserved'>static_cast</strong>&lt;<a href='../Y/18536.html' title='Multiple used in 1733 places.'>size_t</a>&gt;(<a href='../D/16454.html' title='Multiple defined in 2 places.'>x</a>) &lt; <a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a>) <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65                                 <a href='../Y/2947.html' title='Multiple used in 94 places.'>Uint8</a> <a href='../S/704.html#L606' title='Defined at 606 in src/tests/gui/test_gui2.cpp.'>r</a>,<a href='../D/6540.html' title='Multiple defined in 2 places.'>g</a>,<a href='../D/3490.html' title='Multiple defined in 3 places.'>b</a>,<a href='../D/2705.html' title='Multiple defined in 5 places.'>a</a>;
+<a id='L66' name='L66'></a>  66                                 <a href='../Y/2482.html' title='Multiple used in 2 places.'>SDL_GetRGBA</a>(<a href='../S/977.html#L137' title='Defined at 137 in src/sdl/surface.hpp.'>pixels</a>[<a href='../D/16469.html' title='Multiple defined in 8 places.'>y</a>*<a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>-&gt;<a href='../D/15952.html' title='Multiple defined in 6 places.'>w</a> + <a href='../D/16454.html' title='Multiple defined in 2 places.'>x</a>],<a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>-&gt;<a href='../D/6408.html' title='Multiple defined in 2 places.'>format</a>,&amp;<a href='../S/704.html#L606' title='Defined at 606 in src/tests/gui/test_gui2.cpp.'>r</a>,&amp;<a href='../D/6540.html' title='Multiple defined in 2 places.'>g</a>,&amp;<a href='../D/3490.html' title='Multiple defined in 3 places.'>b</a>,&amp;<a href='../D/2705.html' title='Multiple defined in 5 places.'>a</a>);
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68                                 <strong class='reserved'>const</strong> <a href='../Y/18536.html' title='Multiple used in 1733 places.'>size_t</a> <a href='../D/8764.html' title='Multiple defined in 6 places.'>index</a> = <a href='../D/16469.html' title='Multiple defined in 8 places.'>y</a>*<a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a> + <a href='../D/16454.html' title='Multiple defined in 2 places.'>x</a>;
+<a id='L69' name='L69'></a>  69                                 <strong class='reserved'>const</strong> <a href='../Y/18536.html' title='Multiple used in 1733 places.'>size_t</a> <a href='../S/64.html#L69' title='Defined at 69 in src/editor/map/map_fragment.cpp.'>shift</a> = 7 - (<a href='../D/8764.html' title='Multiple defined in 6 places.'>index</a> % 8);
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71                                 <strong class='reserved'>const</strong> <a href='../Y/2947.html' title='Multiple used in 94 places.'>Uint8</a> <a href='../Y/20362.html' title='Multiple used in 3 places.'>trans</a> = (<a href='../D/2705.html' title='Multiple defined in 5 places.'>a</a> &lt; 128 ? 0 : 1) &lt;&lt; <a href='../S/64.html#L69' title='Defined at 69 in src/editor/map/map_fragment.cpp.'>shift</a>;
+<a id='L72' name='L72'></a>  72                                 <strong class='reserved'>const</strong> <a href='../Y/2947.html' title='Multiple used in 94 places.'>Uint8</a> <a href='../Y/6378.html' title='Multiple used in 2 places.'>black</a> = (<a href='../Y/20362.html' title='Multiple used in 3 places.'>trans</a> == 0 || (<a href='../S/704.html#L606' title='Defined at 606 in src/tests/gui/test_gui2.cpp.'>r</a>+<a href='../D/6540.html' title='Multiple defined in 2 places.'>g</a> + <a href='../D/3490.html' title='Multiple defined in 3 places.'>b</a>) / 3 &gt; 128 ? 0 : 1) &lt;&lt; <a href='../S/64.html#L69' title='Defined at 69 in src/editor/map/map_fragment.cpp.'>shift</a>;
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74                                 <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>[<a href='../D/8764.html' title='Multiple defined in 6 places.'>index</a>/8] |= <a href='../Y/6378.html' title='Multiple used in 2 places.'>black</a>;
+<a id='L75' name='L75'></a>  75                                 <a href='../D/10732.html' title='Multiple defined in 4 places.'>mask</a>[<a href='../D/8764.html' title='Multiple defined in 6 places.'>index</a>/8] |= <a href='../Y/20362.html' title='Multiple used in 3 places.'>trans</a>;
+<a id='L76' name='L76'></a>  76                         <em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77                 <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78         <em class='brace'>}</em>
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80         <strong class='reserved'>return</strong> SDL_CreateCursor(&amp;<a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>[0],&amp;<a href='../D/10732.html' title='Multiple defined in 4 places.'>mask</a>[0],<a href='../Y/8115.html' title='Multiple used in 8 places.'>cursor_width</a>,<a href='../Y/15089.html' title='Multiple used in 173 places.'>nsurf</a>-&gt;<a href='../D/8229.html' title='Multiple defined in 8 places.'>h</a>,0,0);
+<a id='L81' name='L81'></a>  81 <em class='brace'>}</em>
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83 <strong class='reserved'>namespace</strong> <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <a href='../Y/2452.html' title='Multiple used in 4 places.'>SDL_Cursor</a>* <a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>] <em class='brace'>{</em> <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>, <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>, <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>, <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>, <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>, <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>, <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>, <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a><em class='brace'>}</em>;
+<a id='L86' name='L86'></a>  86 <a href='../Y/20406.html' title='Multiple used in 11 places.'>tribool</a> <a href='../Y/6822.html' title='Multiple used in 3 places.'>cache_color</a>[<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>] <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87         <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>, <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>, <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>, <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>,
+<a id='L88' name='L88'></a>  88         <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>, <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>, <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>, <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>,
+<a id='L89' name='L89'></a>  89 <em class='brace'>}</em>;
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91 <em class='comment'>// This array must have members corresponding to cursor::CURSOR_TYPE enum members</em>
+<a id='L92' name='L92'></a>  92 <em class='comment'>// Apple need 16x16 b&amp;w cursors</em>
+<a id='L93' name='L93'></a>  93 <em class='sharp'>#ifdef</em> <a href='../Y/4730.html' title='Multiple used in 37 places.'>__APPLE__</a>
+<a id='L94' name='L94'></a>  94 <strong class='reserved'>const</strong> <a href='../D/14632.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14693.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/6630.html' title='Multiple used in 3 places.'>bw_images</a>[<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>] <em class='brace'>{</em> "normal.png", "wait-alt.png", "move.png", "attack.png", "select.png", "move_drag_alt.png" , "attack_drag_alt.png", "no_cursor.png"<em class='brace'>}</em>;
+<a id='L95' name='L95'></a>  95 <em class='sharp'>#else</em>
+<a id='L96' name='L96'></a>  96 <strong class='reserved'>const</strong> <a href='../D/14632.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14693.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/6630.html' title='Multiple used in 3 places.'>bw_images</a>[<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>] <em class='brace'>{</em> "normal.png", "wait.png", "move.png", "attack.png", "select.png", "move_drag.png", "attack_drag.png", "no_cursor.png"<em class='brace'>}</em>;
+<a id='L97' name='L97'></a>  97 <em class='sharp'>#endif</em>
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 <strong class='reserved'>const</strong> <a href='../D/14632.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14693.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/7510.html' title='Multiple used in 2 places.'>color_images</a>[<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>] <em class='brace'>{</em> "normal.png", "wait.png", "move.png", "attack.png", "select.png", "move_drag.png", "attack_drag.png", ""<em class='brace'>}</em>;
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <em class='comment'>// Position of the hotspot of the cursor, from the normal topleft</em>
+<a id='L102' name='L102'></a> 102 <em class='comment'>// These are only for the color cursors</em>
+<a id='L103' name='L103'></a> 103 <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../Y/18298.html' title='Multiple used in 4 places.'>shift_x</a>[<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>] <em class='brace'>{</em>0, 0, 0, 0, 0, 2, 3, 0<em class='brace'>}</em>;
+<a id='L104' name='L104'></a> 104 <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../Y/18299.html' title='Multiple used in 4 places.'>shift_y</a>[<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>] <em class='brace'>{</em>0, 0, 0, 0, 0, 20, 22, 0<em class='brace'>}</em>;
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106 <a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>CURSOR_TYPE</a> <a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a> = <a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../D/1537.html' title='Multiple defined in 6 places.'>NORMAL</a>;
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108 <strong class='reserved'>bool</strong> <a href='../Y/11236.html' title='Multiple used in 2 places.'>have_focus</a> = <strong class='reserved'>true</strong>;
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110 <em class='brace'>}</em>
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112 <strong class='reserved'>static</strong> <a href='../Y/2452.html' title='Multiple used in 4 places.'>SDL_Cursor</a>* <a href='../S/747.html#L165' title='Referred from 165 in src/cursor.cpp.'>get_cursor</a>(<a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>CURSOR_TYPE</a> <a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>)
+<a id='L113' name='L113'></a> 113 <em class='brace'>{</em>
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>bool</strong> <a href='../Y/12151.html' title='Multiple used in 6 places.'>is_color</a> = <a href='../D/15702.html' title='Multiple defined in 2 places.'>use_color_cursors</a>();
+<a id='L115' name='L115'></a> 115         <strong class='reserved'>if</strong>(<a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>] == <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a> || <a href='../Y/11856.html' title='Multiple used in 28 places.'>indeterminate</a>(<a href='../Y/6822.html' title='Multiple used in 3 places.'>cache_color</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>]) || <a href='../Y/6822.html' title='Multiple used in 3 places.'>cache_color</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>] != <a href='../Y/12151.html' title='Multiple used in 6 places.'>is_color</a>) <em class='brace'>{</em>
+<a id='L116' name='L116'></a> 116                 <strong class='reserved'>const</strong> <a href='../D/14632.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14693.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/1247.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = <a href='../Y/12151.html' title='Multiple used in 6 places.'>is_color</a> ? "cursors/" : "cursors-bw/";
+<a id='L117' name='L117'></a> 117                 <strong class='reserved'>const</strong> <a href='../S/977.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../D/14766.html' title='Multiple defined in 2 places.'>surf</a>(<a href='../D/8611.html' title='Multiple defined in 19 places.'>image</a>::<a href='../D/7548.html' title='Multiple defined in 4 places.'>get_image</a>(<a href='../S/1247.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> + (<a href='../Y/12151.html' title='Multiple used in 6 places.'>is_color</a> ? <a href='../Y/7510.html' title='Multiple used in 2 places.'>color_images</a> : <a href='../Y/6630.html' title='Multiple used in 3 places.'>bw_images</a>)[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>]));
+<a id='L118' name='L118'></a> 118                 <strong class='reserved'>if</strong> (<a href='../Y/12151.html' title='Multiple used in 6 places.'>is_color</a>) <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119                         <a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>] = SDL_CreateColorCursor(<a href='../D/14766.html' title='Multiple defined in 2 places.'>surf</a>.<a href='../D/6702.html' title='Multiple defined in 41 places.'>get</a>(), <a href='../Y/18298.html' title='Multiple used in 4 places.'>shift_x</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>], <a href='../Y/18299.html' title='Multiple used in 4 places.'>shift_y</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>]);
+<a id='L120' name='L120'></a> 120                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L121' name='L121'></a> 121                         <a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>] = <a href='../S/747.html#L37' title='Defined at 37 in src/cursor.cpp.'>create_cursor</a>(<a href='../D/14766.html' title='Multiple defined in 2 places.'>surf</a>);
+<a id='L122' name='L122'></a> 122                 <em class='brace'>}</em>
+<a id='L123' name='L123'></a> 123                 <a href='../Y/6822.html' title='Multiple used in 3 places.'>cache_color</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>] = <a href='../Y/12151.html' title='Multiple used in 6 places.'>is_color</a>;
+<a id='L124' name='L124'></a> 124         <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126         <strong class='reserved'>return</strong> <a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>];
+<a id='L127' name='L127'></a> 127 <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/3894.html' title='Multiple referred from 6 places.'>clear_cache</a>()
+<a id='L130' name='L130'></a> 130 <em class='brace'>{</em>
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>for</strong>(<a href='../Y/18536.html' title='Multiple used in 1733 places.'>size_t</a> <a href='../Y/14460.html' title='Multiple used in 1544 places.'>n</a> = 0; <a href='../Y/14460.html' title='Multiple used in 1544 places.'>n</a> != <a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>; ++<a href='../Y/14460.html' title='Multiple used in 1544 places.'>n</a>) <em class='brace'>{</em>
+<a id='L132' name='L132'></a> 132                 <strong class='reserved'>if</strong>(<a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../Y/14460.html' title='Multiple used in 1544 places.'>n</a>] != <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>) <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133                         SDL_FreeCursor(<a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../Y/14460.html' title='Multiple used in 1544 places.'>n</a>]);
+<a id='L134' name='L134'></a> 134                         <a href='../Y/6820.html' title='Multiple used in 207 places.'>cache</a>[<a href='../Y/14460.html' title='Multiple used in 1544 places.'>n</a>] = <a href='../Y/15110.html' title='Multiple used in 1948 places.'>nullptr</a>;
+<a id='L135' name='L135'></a> 135                 <em class='brace'>}</em>
+<a id='L136' name='L136'></a> 136         <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137 <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139 <strong class='reserved'>namespace</strong> <a href='../R/4504.html' title='Multiple referred from 60 places.'>cursor</a>
+<a id='L140' name='L140'></a> 140 <em class='brace'>{</em>
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142 <a href='../R/9694.html' title='Multiple referred from 453 places.'>manager</a>::<a href='../D/10665.html' title='Multiple defined in 32 places.'>manager</a>()
+<a id='L143' name='L143'></a> 143 <em class='brace'>{</em>
+<a id='L144' name='L144'></a> 144         <a href='../Y/2595.html' title='Multiple used in 3 places.'>SDL_ShowCursor</a>(<a href='../Y/2457.html' title='Multiple used in 6 places.'>SDL_ENABLE</a>);
+<a id='L145' name='L145'></a> 145         <a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>();
+<a id='L146' name='L146'></a> 146 <em class='brace'>}</em>
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148 <a href='../R/9694.html' title='Multiple referred from 453 places.'>manager</a>::~<a href='../D/10665.html' title='Multiple defined in 32 places.'>manager</a>()
+<a id='L149' name='L149'></a> 149 <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150         <a href='../D/4441.html' title='Multiple defined in 3 places.'>clear_cache</a>();
+<a id='L151' name='L151'></a> 151         <a href='../Y/2595.html' title='Multiple used in 3 places.'>SDL_ShowCursor</a>(<a href='../Y/2457.html' title='Multiple used in 6 places.'>SDL_ENABLE</a>);
+<a id='L152' name='L152'></a> 152 <em class='brace'>}</em>
+<a id='L153' name='L153'></a> 153 
+<a id='L154' name='L154'></a> 154 <strong class='reserved'>void</strong> <a href='../R/12276.html' title='Multiple referred from 756 places.'>set</a>(<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>CURSOR_TYPE</a> <a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>)
+<a id='L155' name='L155'></a> 155 <em class='brace'>{</em>
+<a id='L156' name='L156'></a> 156         <em class='comment'>// Change only if it's a valid cursor</em>
+<a id='L157' name='L157'></a> 157         <strong class='reserved'>if</strong> (<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a> != <a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>) <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158                 <a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a> = <a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>;
+<a id='L159' name='L159'></a> 159         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a> == <a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>NUM_CURSORS</a>) <em class='brace'>{</em>
+<a id='L160' name='L160'></a> 160                 <em class='comment'>// Except if the current one is also invalid.</em>
+<a id='L161' name='L161'></a> 161                 <em class='comment'>// In this case, change to a valid one.</em>
+<a id='L162' name='L162'></a> 162                 <a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a> = <a href='../D/1537.html' title='Multiple defined in 6 places.'>NORMAL</a>;
+<a id='L163' name='L163'></a> 163         <em class='brace'>}</em>
+<a id='L164' name='L164'></a> 164 
+<a id='L165' name='L165'></a> 165         <a href='../Y/2452.html' title='Multiple used in 4 places.'>SDL_Cursor</a> * <a href='../Y/8106.html' title='Multiple used in 2 places.'>cursor_image</a> = <a href='../S/747.html#L112' title='Defined at 112 in src/cursor.cpp.'>get_cursor</a>(<a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a>);
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167         <em class='comment'>// Causes problem on Mac:</em>
+<a id='L168' name='L168'></a> 168         <em class='comment'>//if (cursor_image != nullptr &amp;&amp; cursor_image != SDL_GetCursor())</em>
+<a id='L169' name='L169'></a> 169         SDL_SetCursor(<a href='../Y/8106.html' title='Multiple used in 2 places.'>cursor_image</a>);
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171         <a href='../Y/2595.html' title='Multiple used in 3 places.'>SDL_ShowCursor</a>(<a href='../Y/2457.html' title='Multiple used in 6 places.'>SDL_ENABLE</a>);
+<a id='L172' name='L172'></a> 172 <em class='brace'>}</em>
+<a id='L173' name='L173'></a> 173 
+<a id='L174' name='L174'></a> 174 <strong class='reserved'>void</strong> <a href='../R/12480.html' title='Multiple referred from 5 places.'>set_dragging</a>(<strong class='reserved'>bool</strong> <a href='../Y/8886.html' title='Multiple used in 6 places.'>drag</a>)
+<a id='L175' name='L175'></a> 175 <em class='brace'>{</em>
+<a id='L176' name='L176'></a> 176         <strong class='reserved'>switch</strong>(<a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a>) <em class='brace'>{</em>
+<a id='L177' name='L177'></a> 177                 <strong class='reserved'>case</strong> <a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>MOVE</a>:
+<a id='L178' name='L178'></a> 178                         <strong class='reserved'>if</strong> (<a href='../Y/8886.html' title='Multiple used in 6 places.'>drag</a>) <a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>(<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>MOVE_DRAG</a>);
+<a id='L179' name='L179'></a> 179                         <strong class='reserved'>break</strong>;
+<a id='L180' name='L180'></a> 180                 <strong class='reserved'>case</strong> <a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>ATTACK</a>:
+<a id='L181' name='L181'></a> 181                         <strong class='reserved'>if</strong> (<a href='../Y/8886.html' title='Multiple used in 6 places.'>drag</a>) <a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>(<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>ATTACK_DRAG</a>);
+<a id='L182' name='L182'></a> 182                         <strong class='reserved'>break</strong>;
+<a id='L183' name='L183'></a> 183                 <strong class='reserved'>case</strong> <a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>MOVE_DRAG</a>:
+<a id='L184' name='L184'></a> 184                         <strong class='reserved'>if</strong> (!<a href='../Y/8886.html' title='Multiple used in 6 places.'>drag</a>) <a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>(<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>MOVE</a>);
+<a id='L185' name='L185'></a> 185                         <strong class='reserved'>break</strong>;
+<a id='L186' name='L186'></a> 186                 <strong class='reserved'>case</strong> <a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>ATTACK_DRAG</a>:
+<a id='L187' name='L187'></a> 187                         <strong class='reserved'>if</strong> (!<a href='../Y/8886.html' title='Multiple used in 6 places.'>drag</a>) <a href='../D/5152.html' title='Multiple defined in 3 places.'>cursor</a>::<a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>(<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>ATTACK</a>);
+<a id='L188' name='L188'></a> 188                         <strong class='reserved'>break</strong>;
+<a id='L189' name='L189'></a> 189                 <strong class='reserved'>default</strong>:
+<a id='L190' name='L190'></a> 190                         <strong class='reserved'>break</strong>;
+<a id='L191' name='L191'></a> 191         <em class='brace'>}</em>
+<a id='L192' name='L192'></a> 192 <em class='brace'>}</em>
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194 <a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>CURSOR_TYPE</a> <a href='../R/5961.html' title='Multiple referred from 1289 places.'>get</a>()
+<a id='L195' name='L195'></a> 195 <em class='brace'>{</em>
+<a id='L196' name='L196'></a> 196         <strong class='reserved'>return</strong> <a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a>;
+<a id='L197' name='L197'></a> 197 <em class='brace'>}</em>
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199 <strong class='reserved'>void</strong> <a href='../R/12537.html' title='Multiple referred from 12 places.'>set_focus</a>(<strong class='reserved'>bool</strong> <a href='../S/668.html#L155' title='Defined at 155 in src/widgets/widget.cpp.'>focus</a>)
+<a id='L200' name='L200'></a> 200 <em class='brace'>{</em>
+<a id='L201' name='L201'></a> 201         <a href='../Y/11236.html' title='Multiple used in 2 places.'>have_focus</a> = <a href='../S/668.html#L155' title='Defined at 155 in src/widgets/widget.cpp.'>focus</a>;
+<a id='L202' name='L202'></a> 202         <strong class='reserved'>if</strong> (<a href='../S/668.html#L155' title='Defined at 155 in src/widgets/widget.cpp.'>focus</a>==<strong class='reserved'>false</strong>) <em class='brace'>{</em>
+<a id='L203' name='L203'></a> 203                 <a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>();
+<a id='L204' name='L204'></a> 204         <em class='brace'>}</em>
+<a id='L205' name='L205'></a> 205 <em class='brace'>}</em>
+<a id='L206' name='L206'></a> 206 
+<a id='L207' name='L207'></a> 207 <a href='../R/13008.html' title='Multiple referred from 24 places.'>setter</a>::<a href='../D/14180.html' title='Multiple defined in 3 places.'>setter</a>(<a href='../S/956.html#L30' title='Defined at 30 in src/cursor.hpp.'>CURSOR_TYPE</a> <a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>) : <a href='../Y/15276.html' title='Multiple used in 7 places.'>old_</a>(<a href='../Y/8002.html' title='Multiple used in 8 places.'>current_cursor</a>)
+<a id='L208' name='L208'></a> 208 <em class='brace'>{</em>
+<a id='L209' name='L209'></a> 209         <a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>(<a href='../D/15338.html' title='Multiple defined in 27 places.'>type</a>);
+<a id='L210' name='L210'></a> 210 <em class='brace'>}</em>
+<a id='L211' name='L211'></a> 211 
+<a id='L212' name='L212'></a> 212 <a href='../R/13008.html' title='Multiple referred from 24 places.'>setter</a>::~<a href='../D/14180.html' title='Multiple defined in 3 places.'>setter</a>()
+<a id='L213' name='L213'></a> 213 <em class='brace'>{</em>
+<a id='L214' name='L214'></a> 214         <a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>(<a href='../Y/15276.html' title='Multiple used in 7 places.'>old_</a>);
+<a id='L215' name='L215'></a> 215 <em class='brace'>}</em>
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217 
+<a id='L218' name='L218'></a> 218 <em class='brace'>}</em> <em class='comment'>// end namespace cursor</em>
+<a id='L219' name='L219'></a> 219 
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L21'>[^]</a><a href='#L57'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L32'>[^]</a><a href='#L199'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

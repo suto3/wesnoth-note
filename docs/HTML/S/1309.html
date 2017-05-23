@@ -1,697 +1,85 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>utils/wiki_grabber.py</title>
+<title>utils/simulate_lobby_traffic.py</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5873.html'>utils</a>/wiki_grabber.py</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L89'>[^]</a><a href='#L622'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5882.html'>utils</a>/simulate_lobby_traffic.py</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L15'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L89' title='Defined at 89.'>is_empty</a></li>
-<li><a href='#L99' title='Defined at 99.'>reindent</a></li>
-<li><a href='#L116' title='Defined at 116.'>get_value</a></li>
-<li><a href='#L129' title='Defined at 129.'>process_header</a></li>
-<li><a href='#L139' title='Defined at 139.'>debug_dump</a></li>
-<li><a href='#L150' title='Defined at 150.'>format</a></li>
-<li><a href='#L167' title='Defined at 167.'>create_config_table</a></li>
-<li><a href='#L212' title='Defined at 212.'>create_formula_table</a></li>
-<li><a href='#L243' title='Defined at 243.'>create_variable_types_table</a></li>
-<li><a href='#L268' title='Defined at 268.'>create_widget_overview_table</a></li>
-<li><a href='#L296' title='Defined at 296.'>create_window_overview_table</a></li>
-<li><a href='#L322' title='Defined at 322.'>create_dialog_widgets_table</a></li>
-<li><a href='#L372' title='Defined at 372.'>validate_table</a></li>
-<li><a href='#L396' title='Defined at 396.'>create_table</a></li>
-<li><a href='#L419' title='Defined at 419.'>create_wml_reference_description</a></li>
-<li><a href='#L442' title='Defined at 442.'>create_description</a></li>
-<li><a href='#L481' title='Defined at 481.'>process_body</a></li>
-<li><a href='#L494' title='Defined at 494.'>process</a></li>
-<li><a href='#L520' title='Defined at 520.'>create_output</a></li>
-<li><a href='#L529' title='Defined at 529.'>process_file</a></li>
-<li><a href='#L546' title='Defined at 546.'>process_directory</a></li>
-<li><a href='#L568' title='Defined at 568.'>instanciate_macro</a></li>
-<li><a href='#L579' title='Defined at 579.'>replace_macros</a></li>
-<li><a href='#L588' title='Defined at 588.'>create_macro_old</a></li>
-<li><a href='#L592' title='Defined at 592.'>create_macro</a></li>
-<li><a href='#L602' title='Defined at 602.'>process_file_macros</a></li>
-<li><a href='#L622' title='Defined at 622.'>process_directory_macros</a></li>
+<li><a href='#L15' title='Defined at 15.'>is_in_path</a></li>
 </ol>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 <em class='sharp'>#</em>!/usr/bin/env python2
-<a id='L2' name='L2'></a>   2 # vim: tabstop=4: shiftwidth=4: expandtab: softtabstop=4: autoindent:
+<a id='L1' name='L1'></a>   1 # This script launches wesnothd, followed by 20 copies of wesnoth running the simulate-lobby-activity.lua plugin.
+<a id='L2' name='L2'></a>   2 # The idea is to use the script to simulate a high amount of lobby traffic, e.g. <strong class='reserved'>for</strong> performance testing.
 <a id='L3' name='L3'></a>   3 
-<a id='L4' name='L4'></a>   4 """
-<a id='L5' name='L5'></a>   5    Copyright (C) 2007 - 2009 by Mark de Wever &lt;koraq@xs4all.nl&gt;
-<a id='L6' name='L6'></a>   6    Part of the Battle <strong class='reserved'>for</strong> Wesnoth Project http:<em class='comment'>//www.wesnoth.org/</em>
-<a id='L7' name='L7'></a>   7 
-<a id='L8' name='L8'></a>   8    This program is free software; you can redistribute it and/or modify
-<a id='L9' name='L9'></a>   9    it under the terms of the GNU General Public License.
-<a id='L10' name='L10'></a>  10    This program is distributed in the hope that it will be useful,
-<a id='L11' name='L11'></a>  11    but WITHOUT ANY WARRANTY.
-<a id='L12' name='L12'></a>  12 
-<a id='L13' name='L13'></a>  13    See the COPYING file <strong class='reserved'>for</strong> more details.
+<a id='L4' name='L4'></a>   4 import <a href='../Y/19167.html' title='Multiple used in 34 places.'>subprocess</a>
+<a id='L5' name='L5'></a>   5 from <a href='../Y/19167.html' title='Multiple used in 34 places.'>subprocess</a> import <a href='../Y/570.html' title='Multiple used in 3 places.'>DEVNULL</a>
+<a id='L6' name='L6'></a>   6 import <a href='../Y/15628.html' title='Multiple used in 412 places.'>os</a>
+<a id='L7' name='L7'></a>   7 import os.path
+<a id='L8' name='L8'></a>   8 import <a href='../Y/19269.html' title='Multiple used in 229 places.'>sys</a>
+<a id='L9' name='L9'></a>   9 import <a href='../D/15077.html' title='Multiple defined in 4 places.'>time</a>
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11 <a href='../R/1573.html' title='Multiple referred from 2 places.'>PORT</a> = 56321
+<a id='L12' name='L12'></a>  12 <a href='../S/1309.html#L39' title='Referred from 39 in utils/simulate_lobby_traffic.py.'>NUM_CLIENTS</a> = 20
+<a id='L13' name='L13'></a>  13 <a href='../S/1309.html#L49' title='Referred from 49 in utils/simulate_lobby_traffic.py.'>EXIT_WAIT_TIME</a> = 20.0
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 
-<a id='L16' name='L16'></a>  16 The wiki grabber is a tool to convert wiki comment formatting[1] into a text
-<a id='L17' name='L17'></a>  17 page which can be used in the wiki.
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 [1] http:<em class='comment'>//wesnoth.org/wiki/Wiki_grabber</em>
-<a id='L20' name='L20'></a>  20 """
-<a id='L21' name='L21'></a>  21 from <a href='../Y/4751.html' title='Multiple used in 5 places.'>__future__</a> import with_statement     # For python &lt; 2.6
-<a id='L22' name='L22'></a>  22 
-<a id='L23' name='L23'></a>  23 import <a href='../Y/15479.html' title='Multiple used in 7 places.'>operator</a>
-<a id='L24' name='L24'></a>  24 import <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>
-<a id='L25' name='L25'></a>  25 import <a href='../Y/19248.html' title='Multiple used in 229 places.'>sys</a>
-<a id='L26' name='L26'></a>  26 import <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>
-<a id='L27' name='L27'></a>  27 
-<a id='L28' name='L28'></a>  28 try:
-<a id='L29' name='L29'></a>  29     import <a href='../Y/5670.html' title='Multiple used in 21 places.'>argparse</a>
-<a id='L30' name='L30'></a>  30 except <a href='../Y/1608.html' title='Multiple used in 7 places.'>ImportError</a>:
-<a id='L31' name='L31'></a>  31     print 'Please install argparse by running "easy_install argparse"'
-<a id='L32' name='L32'></a>  32     <a href='../Y/19248.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/9528.html' title='Multiple used in 111 places.'>exit</a>(1)
+<a id='L15' name='L15'></a>  15 def <a href='../S/1309.html#L21' title='Referred from 21 in utils/simulate_lobby_traffic.py.'>is_in_path</a>(<a href='../D/6157.html' title='Multiple defined in 4 places.'>filename</a>):
+<a id='L16' name='L16'></a>  16   <strong class='reserved'>for</strong> <a href='../D/5174.html' title='Multiple defined in 2 places.'>d</a> in <a href='../Y/15628.html' title='Multiple used in 412 places.'>os</a>.get_exec_path():
+<a id='L17' name='L17'></a>  17     <strong class='reserved'>if</strong> <a href='../Y/15628.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11730.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/5998.html' title='Multiple defined in 9 places.'>exists</a>(os.path.<a href='../D/9474.html' title='Multiple defined in 3 places.'>join</a>(<a href='../D/5174.html' title='Multiple defined in 2 places.'>d</a>, <a href='../D/6157.html' title='Multiple defined in 4 places.'>filename</a>)):
+<a id='L18' name='L18'></a>  18       <strong class='reserved'>return</strong> <a href='../Y/2912.html' title='Multiple used in 237 places.'>True</a>
+<a id='L19' name='L19'></a>  19   <strong class='reserved'>return</strong> <a href='../Y/1158.html' title='Multiple used in 250 places.'>False</a>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>if</strong> (<a href='../Y/15628.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11202.html' title='Multiple defined in 26 places.'>name</a> == "nt" and not <a href='../S/1309.html#L15' title='Defined at 15 in utils/simulate_lobby_traffic.py.'>is_in_path</a>("SDL2.dll")):
+<a id='L22' name='L22'></a>  22   # Launching Wesnoth is not going to succeed
+<a id='L23' name='L23'></a>  23   <a href='../Y/19269.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/9548.html' title='Multiple used in 111 places.'>exit</a>("Error: SDL2.dll is not in PATH. This suggests that you haven't added the external\\dll directory to your PATH.")
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 print("Launching processes... ", <a href='../D/5842.html' title='Multiple defined in 27 places.'>end</a>="")
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 # Change the working directory to the parent directory of the directory where this script resides
+<a id='L28' name='L28'></a>  28 <a href='../Y/15628.html' title='Multiple used in 412 places.'>os</a>.<a href='../Y/7156.html' title='Multiple used in 5 places.'>chdir</a>(os.<a href='../D/11730.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/8698.html' title='Multiple used in 41 places.'>dirname</a>(os.path.dirname(<a href='../Y/4761.html' title='Multiple used in 6 places.'>__file__</a>)))
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 # Wesnoth restarts itself on launch <strong class='reserved'>if</strong> OMP_WAIT_POLICY isn't set. That's problematic because it makes it impossible to poll
+<a id='L31' name='L31'></a>  31 # when the client processes terminate. Thus, set OMP_WAIT_POLICY.
+<a id='L32' name='L32'></a>  32 <a href='../Y/15628.html' title='Multiple used in 412 places.'>os</a>.<a href='../Y/9342.html' title='Multiple used in 40 places.'>environ</a>["OMP_WAIT_POLICY"] = "PASSIVE"
 <a id='L33' name='L33'></a>  33 
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>if</strong> <a href='../Y/4758.html' title='Multiple used in 17 places.'>__name__</a> == "__main__":
-<a id='L35' name='L35'></a>  35     # setup and parse command line arguments
-<a id='L36' name='L36'></a>  36     # The defaults are set to the values of the older hardcoded implementation.
-<a id='L37' name='L37'></a>  37     <a href='../R/10659.html' title='Multiple referred from 159 places.'>parser</a> = <a href='../Y/5670.html' title='Multiple used in 21 places.'>argparse</a>.<a href='../Y/247.html' title='Multiple used in 10 places.'>ArgumentParser</a>(<a href='../D/5374.html' title='Multiple defined in 14 places.'>description</a>='The wiki grabber is a tool'
-<a id='L38' name='L38'></a>  38             + ' to convert wiki comment formatting into a text page which can'
-<a id='L39' name='L39'></a>  39             + ' be used in the wiki. For more details, see'
-<a id='L40' name='L40'></a>  40             + ' http://wesnoth.org/wiki/Wiki_grabber')
-<a id='L41' name='L41'></a>  41     <a href='../D/11732.html' title='Multiple defined in 7 places.'>parser</a>.<a href='../Y/5164.html' title='Multiple used in 71 places.'>add_argument</a>('-s', '--src-dir', <strong class='reserved'>default</strong>='../src/gui', <a href='../Y/8572.html' title='Multiple used in 154 places.'>dest</a>='src_dir',
-<a id='L42' name='L42'></a>  42             <a href='../R/7622.html' title='Multiple referred from 129 places.'>help</a>="the location of wesnoth's source code")
-<a id='L43' name='L43'></a>  43     <a href='../D/11732.html' title='Multiple defined in 7 places.'>parser</a>.<a href='../Y/5164.html' title='Multiple used in 71 places.'>add_argument</a>('-o', '--output', <strong class='reserved'>default</strong>='/tmp/', <a href='../Y/8572.html' title='Multiple used in 154 places.'>dest</a>='output_dir',
-<a id='L44' name='L44'></a>  44             <a href='../R/7622.html' title='Multiple referred from 129 places.'>help</a>='the output directory')
-<a id='L45' name='L45'></a>  45     <a href='../R/3008.html' title='Multiple referred from 824 places.'>args</a> = <a href='../D/11732.html' title='Multiple defined in 7 places.'>parser</a>.<a href='../S/772.html#L1115' title='Defined at 1115 in src/formula/formula.cpp.'>parse_args</a>()
+<a id='L34' name='L34'></a>  34 # Launch the server
+<a id='L35' name='L35'></a>  35 <a href='../R/12267.html' title='Multiple referred from 225 places.'>server</a> = <a href='../Y/19167.html' title='Multiple used in 34 places.'>subprocess</a>.<a href='../Y/2195.html' title='Multiple used in 15 places.'>Popen</a>(("wesnothd", "-p", <a href='../D/14660.html' title='Multiple defined in 25 places.'>str</a>(<a href='../S/1309.html#L11' title='Defined at 11 in utils/simulate_lobby_traffic.py.'>PORT</a>)), -1, <a href='../Y/2040.html' title='Multiple used in 430 places.'>None</a>, <a href='../Y/570.html' title='Multiple used in 3 places.'>DEVNULL</a>, DEVNULL, DEVNULL)
+<a id='L36' name='L36'></a>  36 
+<a id='L37' name='L37'></a>  37 # Launch the clients
+<a id='L38' name='L38'></a>  38 <a href='../R/3966.html' title='Multiple referred from 5 places.'>clients</a> = <a href='../D/13403.html' title='Multiple defined in 12 places.'>set</a>()
+<a id='L39' name='L39'></a>  39 <strong class='reserved'>for</strong> <a href='../D/8569.html' title='Multiple defined in 5 places.'>i</a> in <a href='../D/12259.html' title='Multiple defined in 4 places.'>range</a>(<a href='../S/1309.html#L12' title='Defined at 12 in utils/simulate_lobby_traffic.py.'>NUM_CLIENTS</a>):
+<a id='L40' name='L40'></a>  40   <a href='../S/1309.html#L38' title='Defined at 38 in utils/simulate_lobby_traffic.py.'>clients</a>.<a href='../D/2773.html' title='Multiple defined in 10 places.'>add</a>(<a href='../Y/19167.html' title='Multiple used in 34 places.'>subprocess</a>.<a href='../Y/2195.html' title='Multiple used in 15 places.'>Popen</a>(("wesnoth", "--plugin=simulate-lobby-activity.lua", "--server=localhost:%d" % <a href='../S/1309.html#L11' title='Defined at 11 in utils/simulate_lobby_traffic.py.'>PORT</a>, "--username=%d" % <a href='../D/8569.html' title='Multiple defined in 5 places.'>i</a>, "--nogui"),
+<a id='L41' name='L41'></a>  41     -1, <a href='../Y/2040.html' title='Multiple used in 430 places.'>None</a>, <a href='../Y/570.html' title='Multiple used in 3 places.'>DEVNULL</a>, DEVNULL, DEVNULL))
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <a href='../D/8860.html' title='Multiple defined in 2 places.'>input</a>("done.\nPress Enter when you want to terminate all processes.")
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45 <a href='../D/13394.html' title='Multiple defined in 5 places.'>server</a>.terminate()
 <a id='L46' name='L46'></a>  46 
-<a id='L47' name='L47'></a>  47     # contains all output generated:
-<a id='L48' name='L48'></a>  48 <em class='sharp'>    #</em> - key filename
-<a id='L49' name='L49'></a>  49 <em class='sharp'>    #</em> - value node list
-<a id='L50' name='L50'></a>  50 <em class='sharp'>    #</em>
-<a id='L51' name='L51'></a>  51     # every node is a list with 2 items
-<a id='L52' name='L52'></a>  52 <em class='sharp'>    #</em> - first the sorting order
-<a id='L53' name='L53'></a>  53 <em class='sharp'>    #</em> - second the actual data
-<a id='L54' name='L54'></a>  54     <a href='../R/5473.html' title='Multiple referred from 4 places.'>file_map</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L55' name='L55'></a>  55 
-<a id='L56' name='L56'></a>  56     # contains all macros:
-<a id='L57' name='L57'></a>  57 <em class='sharp'>    #</em> - key macro name
-<a id='L58' name='L58'></a>  58 <em class='sharp'>    #</em> - value macro contents
-<a id='L59' name='L59'></a>  59     <a href='../R/9649.html' title='Multiple referred from 6 places.'>macro_map</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L60' name='L60'></a>  60 
-<a id='L61' name='L61'></a>  61     <a href='../R/10522.html' title='Multiple referred from 3 places.'>output_directory</a> = <a href='../D/3364.html' title='Multiple defined in 9 places.'>args</a>.output_dir
-<a id='L62' name='L62'></a>  62     <a href='../R/13386.html' title='Multiple referred from 4 places.'>src_directory</a> = <a href='../D/3364.html' title='Multiple defined in 9 places.'>args</a>.src_dir
-<a id='L63' name='L63'></a>  63 
-<a id='L64' name='L64'></a>  64     <strong class='reserved'>if</strong> not <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/12230.html' title='Multiple used in 26 places.'>isdir</a>(<a href='../S/1309.html#L61' title='Defined at 61 in utils/wiki_grabber.py.'>output_directory</a>):
-<a id='L65' name='L65'></a>  65         raise <a href='../Y/1512.html' title='Multiple used in 13 places.'>IOError</a>("'%s' isn't a directory." % <a href='../S/1309.html#L61' title='Defined at 61 in utils/wiki_grabber.py.'>output_directory</a>)
-<a id='L66' name='L66'></a>  66     <strong class='reserved'>if</strong> not <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/12230.html' title='Multiple used in 26 places.'>isdir</a>(<a href='../S/1309.html#L62' title='Defined at 62 in utils/wiki_grabber.py.'>src_directory</a>):
-<a id='L67' name='L67'></a>  67         raise <a href='../Y/1512.html' title='Multiple used in 13 places.'>IOError</a>("'%s' isn't a directory." % <a href='../S/1309.html#L62' title='Defined at 62 in utils/wiki_grabber.py.'>src_directory</a>)
-<a id='L68' name='L68'></a>  68 
-<a id='L69' name='L69'></a>  69     # current file being processed
-<a id='L70' name='L70'></a>  70     <a href='../R/4500.html' title='Multiple referred from 8 places.'>current_file</a> = ""
-<a id='L71' name='L71'></a>  71 
-<a id='L72' name='L72'></a>  72     # current block being processed
-<a id='L73' name='L73'></a>  73     <a href='../R/4493.html' title='Multiple referred from 6 places.'>current_block</a> = ""
-<a id='L74' name='L74'></a>  74 
-<a id='L75' name='L75'></a>  75     <a href='../R/11204.html' title='Multiple referred from 6 places.'>re_record_start</a> = '^\s*'
-<a id='L76' name='L76'></a>  76     # There must be whitespace between the field separator (&amp;).
-<a id='L77' name='L77'></a>  77     # However <strong class='reserved'>if</strong> there is an empty field eg '...foo &amp; &amp; bar...'
-<a id='L78' name='L78'></a>  78     # The first field separator eats the whitespace before the second
-<a id='L79' name='L79'></a>  79     # which would \s+ cause to fail.
-<a id='L80' name='L80'></a>  80     # The solution is to make the whitespace optional and assert the
-<a id='L81' name='L81'></a>  81     # character before the ampersand is whitespace.
-<a id='L82' name='L82'></a>  82     <a href='../R/11202.html' title='Multiple referred from 12 places.'>re_field_separator</a> = '\s*(?:(?&lt;=\s))&amp;\s+'
-<a id='L83' name='L83'></a>  83     # Same issue as with the re_field_separator but then with '...foo &amp; $'
-<a id='L84' name='L84'></a>  84     <a href='../R/11203.html' title='Multiple referred from 6 places.'>re_record_end</a> = '\s*(?:(?&lt;=\s))\$$'
-<a id='L85' name='L85'></a>  85 
-<a id='L86' name='L86'></a>  86     <a href='../R/11206.html' title='Multiple referred from 8 places.'>re_variable</a> = '([a-zA-Z]\w*)'
-<a id='L87' name='L87'></a>  87     <a href='../R/11205.html' title='Multiple referred from 6 places.'>re_string</a> = '(.+?)'
-<a id='L88' name='L88'></a>  88 
-<a id='L89' name='L89'></a>  89     def <a href='../R/8375.html' title='Multiple referred from 50 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L90' name='L90'></a>  90         """
-<a id='L91' name='L91'></a>  91         This checks whether or not a table is empty and writes to stderr <strong class='reserved'>if</strong> it is.
-<a id='L92' name='L92'></a>  92         It returns True <strong class='reserved'>if</strong> the table is empty, False otherwise.
-<a id='L93' name='L93'></a>  93         """
-<a id='L94' name='L94'></a>  94         <strong class='reserved'>if</strong> not <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L95' name='L95'></a>  95             <a href='../Y/19248.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18937.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/16416.html' title='Multiple defined in 55 places.'>write</a>("Empty container:\n%s\n" % <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L96' name='L96'></a>  96             <strong class='reserved'>return</strong> <a href='../Y/2901.html' title='Multiple used in 237 places.'>True</a>
-<a id='L97' name='L97'></a>  97         <strong class='reserved'>return</strong> <a href='../Y/1156.html' title='Multiple used in 250 places.'>False</a>
-<a id='L98' name='L98'></a>  98 
-<a id='L99' name='L99'></a>  99     def <a href='../R/11456.html' title='Multiple referred from 2 places.'>reindent</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L100' name='L100'></a> 100         """Converts the raw input to an easier to use format.
-<a id='L101' name='L101'></a> 101 
-<a id='L102' name='L102'></a> 102         Lines starting with 8 spaces are concatenated with the previous line.
-<a id='L103' name='L103'></a> 103         The start of line ' *' are removed and <strong class='reserved'>if</strong> another space exists it's also
-<a id='L104' name='L104'></a> 104         removed."""
-<a id='L105' name='L105'></a> 105 
-<a id='L106' name='L106'></a> 106         # concatenate
-<a id='L107' name='L107'></a> 107         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'\n \*(?: ){8,}', " ", data)
-<a id='L108' name='L108'></a> 108 
-<a id='L109' name='L109'></a> 109         # strip
-<a id='L110' name='L110'></a> 110         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(" \*(?: |)", "", data)
-<a id='L111' name='L111'></a> 111 
-<a id='L112' name='L112'></a> 112         #annotation
-<a id='L113' name='L113'></a> 113         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'@(?:begin|end|allow|remove)\{(?:parent|tag|link|global|type|key)\}(?:\{.*\})', "", data)
-<a id='L114' name='L114'></a> 114         <strong class='reserved'>return</strong> <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>
-<a id='L115' name='L115'></a> 115 
-<a id='L116' name='L116'></a> 116     def <a href='../R/7247.html' title='Multiple referred from 116 places.'>get_value</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>, <a href='../D/9548.html' title='Multiple defined in 2 places.'>key</a>):
-<a id='L117' name='L117'></a> 117         """
-<a id='L118' name='L118'></a> 118         Extracts data from a key value pair, a key must start at the start of
-<a id='L119' name='L119'></a> 119         a line.
-<a id='L120' name='L120'></a> 120         """
-<a id='L121' name='L121'></a> 121 
-<a id='L122' name='L122'></a> 122         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("^" + <a href='../D/9548.html' title='Multiple defined in 2 places.'>key</a> + " *= *(.*)$", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a>).<a href='../D/13293.html' title='Multiple defined in 5 places.'>search</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L123' name='L123'></a> 123 
-<a id='L124' name='L124'></a> 124         <strong class='reserved'>if</strong> <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> != <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>:
-<a id='L125' name='L125'></a> 125             <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = res.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)
-<a id='L126' name='L126'></a> 126 
-<a id='L127' name='L127'></a> 127         <strong class='reserved'>return</strong> <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>
-<a id='L128' name='L128'></a> 128 
-<a id='L129' name='L129'></a> 129     def <a href='../S/1309.html#L501' title='Referred from 501 in utils/wiki_grabber.py.'>process_header</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L130' name='L130'></a> 130         """Processes the header."""
-<a id='L131' name='L131'></a> 131 
-<a id='L132' name='L132'></a> 132         <a href='../S/448.html#L225' title='Defined at 225 in src/gui/dialogs/gamestate_inspector.cpp.'>page</a> = <a href='../D/8076.html' title='Multiple defined in 52 places.'>get_value</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>, "@page")
-<a id='L133' name='L133'></a> 133         <a href='../S/659.html#L33' title='Defined at 33 in src/gui/auxiliary/iterator/policy_order.hpp.'>order</a> = <a href='../D/8076.html' title='Multiple defined in 52 places.'>get_value</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>, "@order")
-<a id='L134' name='L134'></a> 134         <strong class='reserved'>if</strong> <a href='../S/659.html#L33' title='Defined at 33 in src/gui/auxiliary/iterator/policy_order.hpp.'>order</a> == <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>:
-<a id='L135' name='L135'></a> 135             <a href='../S/659.html#L33' title='Defined at 33 in src/gui/auxiliary/iterator/policy_order.hpp.'>order</a> = 10000
-<a id='L136' name='L136'></a> 136 
-<a id='L137' name='L137'></a> 137         <strong class='reserved'>return</strong> [<a href='../S/448.html#L225' title='Defined at 225 in src/gui/dialogs/gamestate_inspector.cpp.'>page</a>, <a href='../S/659.html#L33' title='Defined at 33 in src/gui/auxiliary/iterator/policy_order.hpp.'>order</a>]
-<a id='L138' name='L138'></a> 138 
-<a id='L139' name='L139'></a> 139     def debug_dump(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>, <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>):
-<a id='L140' name='L140'></a> 140         """Show the data the regex retrieved from a match.
-<a id='L141' name='L141'></a> 141 
-<a id='L142' name='L142'></a> 142         data is the raw data the regex tried to match.
-<a id='L143' name='L143'></a> 143         res is the result of the regex.findall.
-<a id='L144' name='L144'></a> 144         """
-<a id='L145' name='L145'></a> 145         <a href='../Y/19248.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18937.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/16416.html' title='Multiple defined in 55 places.'>write</a>("data : %s" % <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L146' name='L146'></a> 146         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>, <a href='../D/15810.html' title='Multiple defined in 2 places.'>val</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L147' name='L147'></a> 147             <strong class='reserved'>for</strong> <a href='../Y/12376.html' title='Multiple used in 493 places.'>j</a>, <a href='../Y/19127.html' title='Multiple used in 2 places.'>sub_val</a> in <a href='../D/15810.html' title='Multiple defined in 2 places.'>val</a>:
-<a id='L148' name='L148'></a> 148                 <a href='../Y/19248.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18937.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/16416.html' title='Multiple defined in 55 places.'>write</a>("Line %s match %s: %s\n" % (<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>, <a href='../Y/12376.html' title='Multiple used in 493 places.'>j</a>, <a href='../Y/19127.html' title='Multiple used in 2 places.'>sub_val</a>))
-<a id='L149' name='L149'></a> 149 
-<a id='L150' name='L150'></a> 150     def <a href='../R/5721.html' title='Multiple referred from 236 places.'>format</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L151' name='L151'></a> 151         """Formats the data for the wiki.
-<a id='L152' name='L152'></a> 152 
-<a id='L153' name='L153'></a> 153         Replaces the following:
-<a id='L154' name='L154'></a> 154         -  An end of line and its surrounding whitespace to a single space.
-<a id='L155' name='L155'></a> 155         - @$ -&gt; $
-<a id='L156' name='L156'></a> 156         - @&amp; -&gt; &amp;
-<a id='L157' name='L157'></a> 157         - @* -&gt; \n* needed in a list.
-<a id='L158' name='L158'></a> 158         - @- -&gt; \n needed to add text after a list.
-<a id='L159' name='L159'></a> 159         """
-<a id='L160' name='L160'></a> 160         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'\s*\n\s*', ' ', data)
-<a id='L161' name='L161'></a> 161         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'@\$', '$', data)
-<a id='L162' name='L162'></a> 162         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'@&amp;', '&amp;', data)
-<a id='L163' name='L163'></a> 163         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'@\*', "\n*", data)
-<a id='L164' name='L164'></a> 164         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'@\-', "\n", data)
-<a id='L165' name='L165'></a> 165         <strong class='reserved'>return</strong> <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>
-<a id='L166' name='L166'></a> 166 
-<a id='L167' name='L167'></a> 167     def <a href='../S/1309.html#L406' title='Referred from 406 in utils/wiki_grabber.py.'>create_config_table</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L168' name='L168'></a> 168         """Creates a table for data in a config table.
-<a id='L169' name='L169'></a> 169 
-<a id='L170' name='L170'></a> 170         A config table is a table with info about WML configuration key value pairs.
-<a id='L171' name='L171'></a> 171         """
-<a id='L172' name='L172'></a> 172 
-<a id='L173' name='L173'></a> 173         # matches a line like
-<a id='L174' name='L174'></a> 174         # x1 &amp; f_unsigned &amp; 0 &amp;            The x coordinate of the
-<a id='L175' name='L175'></a> 175         # startpoint. $
-<a id='L176' name='L176'></a> 176         # x1 &amp; f_unsigned &amp; &amp;              The x coordinate of the
-<a id='L177' name='L177'></a> 177         # startpoint. $
-<a id='L178' name='L178'></a> 178         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("([A-Za-z]\w*) +&amp; +([A-Za-z]\w*) +&amp; +([^&amp;]*?) *&amp; +(.*) +\$")
-<a id='L179' name='L179'></a> 179         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L180' name='L180'></a> 180 
-<a id='L181' name='L181'></a> 181         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>  = <a href='../S/1309.html#L75' title='Defined at 75 in utils/wiki_grabber.py.'>re_record_start</a>
-<a id='L182' name='L182'></a> 182         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>           # 0 variable id
-<a id='L183' name='L183'></a> 183         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L184' name='L184'></a> 184         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>           # 1 variable type
-<a id='L185' name='L185'></a> 185         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L186' name='L186'></a> 186         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += '(.*?)'               # 2 optional <strong class='reserved'>default</strong> value, <strong class='reserved'>if</strong> omitted mandatory field
-<a id='L187' name='L187'></a> 187         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L188' name='L188'></a> 188         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L87' title='Defined at 87 in utils/wiki_grabber.py.'>re_string</a>             # 3 description
-<a id='L189' name='L189'></a> 189         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L84' title='Defined at 84 in utils/wiki_grabber.py.'>re_record_end</a>
-<a id='L190' name='L190'></a> 190 
-<a id='L191' name='L191'></a> 191         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex, re.<a href='../Y/589.html' title='Multiple used in 17 places.'>DOTALL</a> | re.<a href='../Y/1871.html' title='Multiple used in 6 places.'>MULTILINE</a>)
-<a id='L192' name='L192'></a> 192         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L193' name='L193'></a> 193 
-<a id='L194' name='L194'></a> 194         <strong class='reserved'>if</strong> <a href='../D/9273.html' title='Multiple defined in 11 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L195' name='L195'></a> 195             <strong class='reserved'>return</strong> "Empty table."
-<a id='L196' name='L196'></a> 196 
-<a id='L197' name='L197'></a> 197         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = '{| border="1"'
-<a id='L198' name='L198'></a> 198         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "\n!key\n!type\n!default\n!description\n"
-<a id='L199' name='L199'></a> 199         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L200' name='L200'></a> 200             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|-\n"
-<a id='L201' name='L201'></a> 201             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]
-<a id='L202' name='L202'></a> 202             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| [[GUIVariable#%s|%s]]\n" % (<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1], i[1])
-<a id='L203' name='L203'></a> 203             <strong class='reserved'>if</strong> not <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[2]:
-<a id='L204' name='L204'></a> 204                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| mandatory\n"
-<a id='L205' name='L205'></a> 205             <strong class='reserved'>else</strong>:
-<a id='L206' name='L206'></a> 206                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[2]
-<a id='L207' name='L207'></a> 207             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/6427.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[3])
-<a id='L208' name='L208'></a> 208         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|}"
-<a id='L209' name='L209'></a> 209 
-<a id='L210' name='L210'></a> 210         <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L211' name='L211'></a> 211 
-<a id='L212' name='L212'></a> 212     def <a href='../S/1309.html#L407' title='Referred from 407 in utils/wiki_grabber.py.'>create_formula_table</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L213' name='L213'></a> 213         """Creates a table for data in a formula table.
-<a id='L214' name='L214'></a> 214 
-<a id='L215' name='L215'></a> 215         A formula table is a table with info about which function parameters
-<a id='L216' name='L216'></a> 216         are available <strong class='reserved'>for</strong> processing in WML formulas.
-<a id='L217' name='L217'></a> 217         """
-<a id='L218' name='L218'></a> 218         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>  = <a href='../S/1309.html#L75' title='Defined at 75 in utils/wiki_grabber.py.'>re_record_start</a>
-<a id='L219' name='L219'></a> 219         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>           # 0 variable id
-<a id='L220' name='L220'></a> 220         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L221' name='L221'></a> 221         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>           # 1 variable type
-<a id='L222' name='L222'></a> 222         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L223' name='L223'></a> 223         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L87' title='Defined at 87 in utils/wiki_grabber.py.'>re_string</a>             # 2 description
-<a id='L224' name='L224'></a> 224         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L84' title='Defined at 84 in utils/wiki_grabber.py.'>re_record_end</a>
-<a id='L225' name='L225'></a> 225 
-<a id='L226' name='L226'></a> 226         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex, re.<a href='../Y/589.html' title='Multiple used in 17 places.'>DOTALL</a> | re.<a href='../Y/1871.html' title='Multiple used in 6 places.'>MULTILINE</a>)
-<a id='L227' name='L227'></a> 227         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L228' name='L228'></a> 228 
-<a id='L229' name='L229'></a> 229         <strong class='reserved'>if</strong> <a href='../D/9273.html' title='Multiple defined in 11 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L230' name='L230'></a> 230             <strong class='reserved'>return</strong> "Empty table."
-<a id='L231' name='L231'></a> 231 
-<a id='L232' name='L232'></a> 232         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = '{| border="1"'
-<a id='L233' name='L233'></a> 233         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "\n!Variable\n!type\n!description\n"
-<a id='L234' name='L234'></a> 234         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L235' name='L235'></a> 235             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|-\n"
-<a id='L236' name='L236'></a> 236             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]
-<a id='L237' name='L237'></a> 237             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1]
-<a id='L238' name='L238'></a> 238             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/6427.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[2])
-<a id='L239' name='L239'></a> 239         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|}"
-<a id='L240' name='L240'></a> 240 
-<a id='L241' name='L241'></a> 241         <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L242' name='L242'></a> 242 
-<a id='L243' name='L243'></a> 243     def <a href='../S/1309.html#L408' title='Referred from 408 in utils/wiki_grabber.py.'>create_variable_types_table</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L244' name='L244'></a> 244         """Creates a table for the variable types."""
-<a id='L245' name='L245'></a> 245 
-<a id='L246' name='L246'></a> 246         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>  = <a href='../S/1309.html#L75' title='Defined at 75 in utils/wiki_grabber.py.'>re_record_start</a>
-<a id='L247' name='L247'></a> 247         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>           # 0 variable type
-<a id='L248' name='L248'></a> 248         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L249' name='L249'></a> 249         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L87' title='Defined at 87 in utils/wiki_grabber.py.'>re_string</a>             # 1 description
-<a id='L250' name='L250'></a> 250         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L84' title='Defined at 84 in utils/wiki_grabber.py.'>re_record_end</a>
-<a id='L251' name='L251'></a> 251 
-<a id='L252' name='L252'></a> 252         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex, re.<a href='../Y/589.html' title='Multiple used in 17 places.'>DOTALL</a> | re.<a href='../Y/1871.html' title='Multiple used in 6 places.'>MULTILINE</a>)
-<a id='L253' name='L253'></a> 253         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L254' name='L254'></a> 254 
-<a id='L255' name='L255'></a> 255         <strong class='reserved'>if</strong> <a href='../D/9273.html' title='Multiple defined in 11 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L256' name='L256'></a> 256             <strong class='reserved'>return</strong> "Empty table."
-<a id='L257' name='L257'></a> 257 
-<a id='L258' name='L258'></a> 258         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = '{| border="1"'
-<a id='L259' name='L259'></a> 259         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "\n!Variable\n!description\n"
-<a id='L260' name='L260'></a> 260         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L261' name='L261'></a> 261             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|-\n"
-<a id='L262' name='L262'></a> 262             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += '| &lt;span id="%s"&gt;%s&lt;/span&gt;\n' % (<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0], i[0])
-<a id='L263' name='L263'></a> 263             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/6427.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1])
-<a id='L264' name='L264'></a> 264         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|}"
-<a id='L265' name='L265'></a> 265 
-<a id='L266' name='L266'></a> 266         <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L267' name='L267'></a> 267 
-<a id='L268' name='L268'></a> 268     def <a href='../S/1309.html#L409' title='Referred from 409 in utils/wiki_grabber.py.'>create_widget_overview_table</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L269' name='L269'></a> 269         """Creates a table for all available widgets."""
-<a id='L270' name='L270'></a> 270 
-<a id='L271' name='L271'></a> 271         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>  = <a href='../S/1309.html#L75' title='Defined at 75 in utils/wiki_grabber.py.'>re_record_start</a>
-<a id='L272' name='L272'></a> 272         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>           # widget type
-<a id='L273' name='L273'></a> 273         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L274' name='L274'></a> 274         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L87' title='Defined at 87 in utils/wiki_grabber.py.'>re_string</a>             # description
-<a id='L275' name='L275'></a> 275         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L84' title='Defined at 84 in utils/wiki_grabber.py.'>re_record_end</a>
-<a id='L276' name='L276'></a> 276         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex, re.<a href='../Y/589.html' title='Multiple used in 17 places.'>DOTALL</a> | re.<a href='../Y/1871.html' title='Multiple used in 6 places.'>MULTILINE</a>)
-<a id='L277' name='L277'></a> 277         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L278' name='L278'></a> 278 
-<a id='L279' name='L279'></a> 279         <strong class='reserved'>if</strong> <a href='../D/9273.html' title='Multiple defined in 11 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L280' name='L280'></a> 280             <strong class='reserved'>return</strong> "Empty table."
-<a id='L281' name='L281'></a> 281 
-<a id='L282' name='L282'></a> 282         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = '{| border="1"'
-<a id='L283' name='L283'></a> 283         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "\n!Section\n!Description\n"
-<a id='L284' name='L284'></a> 284         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L285' name='L285'></a> 285             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|-\n"
-<a id='L286' name='L286'></a> 286             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += '| &lt;span id="%s"&gt;' % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0].<a href='../Y/13352.html' title='Multiple used in 6 places.'>lower</a>()
-<a id='L287' name='L287'></a> 287             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'_', ' ', <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0])
-<a id='L288' name='L288'></a> 288             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "&lt;/span&gt;"
-<a id='L289' name='L289'></a> 289             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += " ([[GUIWidgetDefinitionWML#%s|definition]]" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]
-<a id='L290' name='L290'></a> 290             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += ", [[GUIWidgetInstanceWML#%s|instantiation]])\n" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]
-<a id='L291' name='L291'></a> 291             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/6427.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1])
-<a id='L292' name='L292'></a> 292         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|}"
-<a id='L293' name='L293'></a> 293 
-<a id='L294' name='L294'></a> 294         <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L295' name='L295'></a> 295 
-<a id='L296' name='L296'></a> 296     def <a href='../S/1309.html#L410' title='Referred from 410 in utils/wiki_grabber.py.'>create_window_overview_table</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L297' name='L297'></a> 297         """Creates a table for all available windows."""
-<a id='L298' name='L298'></a> 298 
-<a id='L299' name='L299'></a> 299         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>  = <a href='../S/1309.html#L75' title='Defined at 75 in utils/wiki_grabber.py.'>re_record_start</a>
-<a id='L300' name='L300'></a> 300         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>                # 0 window id
-<a id='L301' name='L301'></a> 301         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L302' name='L302'></a> 302         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L87' title='Defined at 87 in utils/wiki_grabber.py.'>re_string</a>                  # 1 description
-<a id='L303' name='L303'></a> 303         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L84' title='Defined at 84 in utils/wiki_grabber.py.'>re_record_end</a>
-<a id='L304' name='L304'></a> 304 
-<a id='L305' name='L305'></a> 305         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex, re.<a href='../Y/589.html' title='Multiple used in 17 places.'>DOTALL</a> | re.<a href='../Y/1871.html' title='Multiple used in 6 places.'>MULTILINE</a>)
-<a id='L306' name='L306'></a> 306         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L307' name='L307'></a> 307 
-<a id='L308' name='L308'></a> 308         <strong class='reserved'>if</strong> <a href='../D/9273.html' title='Multiple defined in 11 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L309' name='L309'></a> 309             <strong class='reserved'>return</strong> "Empty table."
-<a id='L310' name='L310'></a> 310 
-<a id='L311' name='L311'></a> 311         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = '{| border="1"'
-<a id='L312' name='L312'></a> 312         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "\n!Section\n!Description\n"
-<a id='L313' name='L313'></a> 313         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L314' name='L314'></a> 314             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|-\n"
-<a id='L315' name='L315'></a> 315             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| " + <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(r'_', ' ', <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0])
-<a id='L316' name='L316'></a> 316             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += " ([[GUIWindowDefinitionWML#%s|definition]])\n" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]
-<a id='L317' name='L317'></a> 317             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/6427.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1])
-<a id='L318' name='L318'></a> 318         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|}"
-<a id='L319' name='L319'></a> 319 
-<a id='L320' name='L320'></a> 320         <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L321' name='L321'></a> 321 
-<a id='L322' name='L322'></a> 322     def <a href='../S/1309.html#L411' title='Referred from 411 in utils/wiki_grabber.py.'>create_dialog_widgets_table</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L323' name='L323'></a> 323         """Creates a table for the widgets in a dialog."""
-<a id='L324' name='L324'></a> 324 
-<a id='L325' name='L325'></a> 325         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>  = <a href='../S/1309.html#L75' title='Defined at 75 in utils/wiki_grabber.py.'>re_record_start</a>
-<a id='L326' name='L326'></a> 326         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += '(-*)'                     # 0 indention markers
-<a id='L327' name='L327'></a> 327         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += '((?:[a-zA-Z_]?)\w*)'      # 1 optional id may start with an underscore
-<a id='L328' name='L328'></a> 328         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L329' name='L329'></a> 329         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += '(.*?)'                    # 2 optional retval
-<a id='L330' name='L330'></a> 330         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L331' name='L331'></a> 331         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L86' title='Defined at 86 in utils/wiki_grabber.py.'>re_variable</a>                # 3 type
-<a id='L332' name='L332'></a> 332         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L333' name='L333'></a> 333         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += '([om])'                   # 4 mandatory flag
-<a id='L334' name='L334'></a> 334         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L82' title='Defined at 82 in utils/wiki_grabber.py.'>re_field_separator</a>
-<a id='L335' name='L335'></a> 335         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L87' title='Defined at 87 in utils/wiki_grabber.py.'>re_string</a>                  # 5 description
-<a id='L336' name='L336'></a> 336         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> += <a href='../S/1309.html#L84' title='Defined at 84 in utils/wiki_grabber.py.'>re_record_end</a>
-<a id='L337' name='L337'></a> 337 
-<a id='L338' name='L338'></a> 338         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex, re.<a href='../Y/589.html' title='Multiple used in 17 places.'>DOTALL</a> | re.<a href='../Y/1871.html' title='Multiple used in 6 places.'>MULTILINE</a>)
-<a id='L339' name='L339'></a> 339         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L340' name='L340'></a> 340 
-<a id='L341' name='L341'></a> 341         <strong class='reserved'>if</strong> <a href='../D/9273.html' title='Multiple defined in 11 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L342' name='L342'></a> 342             <strong class='reserved'>return</strong> "Empty table."
-<a id='L343' name='L343'></a> 343 
-<a id='L344' name='L344'></a> 344         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = '{| border="1"'
-<a id='L345' name='L345'></a> 345         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "\n!ID (return value)\n!Type\n!Mandatory\n!Description\n"
-<a id='L346' name='L346'></a> 346         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L347' name='L347'></a> 347             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|-\n| " + "&amp;nbsp;" * <a href='../Y/12896.html' title='Multiple used in 338 places.'>len</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]) * 8
-<a id='L348' name='L348'></a> 348 
-<a id='L349' name='L349'></a> 349             <strong class='reserved'>if</strong> not <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1]:
-<a id='L350' name='L350'></a> 350                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "''free to choose''"
-<a id='L351' name='L351'></a> 351             <strong class='reserved'>else</strong>:
-<a id='L352' name='L352'></a> 352                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1]
-<a id='L353' name='L353'></a> 353 
-<a id='L354' name='L354'></a> 354             <strong class='reserved'>if</strong> not <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[2]:
-<a id='L355' name='L355'></a> 355                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "\n"
-<a id='L356' name='L356'></a> 356             <strong class='reserved'>else</strong>:
-<a id='L357' name='L357'></a> 357                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += " (%s)\n" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[2]
-<a id='L358' name='L358'></a> 358 
-<a id='L359' name='L359'></a> 359             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| [[GUIToolkitWML#%s|%s]]\n" % (<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[3], i[3])
-<a id='L360' name='L360'></a> 360 
-<a id='L361' name='L361'></a> 361             <strong class='reserved'>if</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[4] == 'm':
-<a id='L362' name='L362'></a> 362                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| yes\n"
-<a id='L363' name='L363'></a> 363             <strong class='reserved'>else</strong>:
-<a id='L364' name='L364'></a> 364                 <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| no\n"
-<a id='L365' name='L365'></a> 365 
-<a id='L366' name='L366'></a> 366             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "| %s\n" % <a href='../D/6427.html' title='Multiple defined in 2 places.'>format</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[5])
-<a id='L367' name='L367'></a> 367 
-<a id='L368' name='L368'></a> 368         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "|}"
-<a id='L369' name='L369'></a> 369 
-<a id='L370' name='L370'></a> 370         <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L371' name='L371'></a> 371 
-<a id='L372' name='L372'></a> 372     def <a href='../S/1309.html#L401' title='Referred from 401 in utils/wiki_grabber.py.'>validate_table</a>(<a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a>):
-<a id='L373' name='L373'></a> 373         """Validates a table.
-<a id='L374' name='L374'></a> 374 
-<a id='L375' name='L375'></a> 375         At the moments tests <strong class='reserved'>for</strong> whitespace around separators."""
-<a id='L376' name='L376'></a> 376 
-<a id='L377' name='L377'></a> 377         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = '((?&lt;![@\s])&amp;)|([^@]&amp;(?!\s))'
-<a id='L378' name='L378'></a> 378         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex)
-<a id='L379' name='L379'></a> 379         <a href='../Y/12037.html' title='Multiple used in 3 places.'>invalid_field_separators</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a>)
-<a id='L380' name='L380'></a> 380 
-<a id='L381' name='L381'></a> 381         # Not the last test should actually be (\$(?![\s\Z]) but that fails as
-<a id='L382' name='L382'></a> 382         # work-around add a space to the input so when it would match the end
-<a id='L383' name='L383'></a> 383         # of the string it now matches the added space.
-<a id='L384' name='L384'></a> 384         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = '((?&lt;![@\s])\$)|([^@]\$(?!\s))'
-<a id='L385' name='L385'></a> 385         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>(regex)
-<a id='L386' name='L386'></a> 386         <a href='../Y/12041.html' title='Multiple used in 3 places.'>invalid_record_terminator</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a> + ' ')
-<a id='L387' name='L387'></a> 387 
-<a id='L388' name='L388'></a> 388         <strong class='reserved'>if</strong> <a href='../Y/12896.html' title='Multiple used in 338 places.'>len</a>(<a href='../Y/12037.html' title='Multiple used in 3 places.'>invalid_field_separators</a>) or len(<a href='../Y/12041.html' title='Multiple used in 3 places.'>invalid_record_terminator</a>):
-<a id='L389' name='L389'></a> 389             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = "Found %i invalid field separators " % (<a href='../Y/12896.html' title='Multiple used in 338 places.'>len</a>(<a href='../Y/12037.html' title='Multiple used in 3 places.'>invalid_field_separators</a>))
-<a id='L390' name='L390'></a> 390             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "and %i invalid record separators " % (<a href='../Y/12896.html' title='Multiple used in 338 places.'>len</a>(<a href='../Y/12041.html' title='Multiple used in 3 places.'>invalid_record_terminator</a>))
-<a id='L391' name='L391'></a> 391             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "in:\n%s\n\n" % (<a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a>)
-<a id='L392' name='L392'></a> 392             <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L393' name='L393'></a> 393         <strong class='reserved'>else</strong>:
-<a id='L394' name='L394'></a> 394             <strong class='reserved'>return</strong> <a href='../Y/2035.html' title='Multiple used in 430 places.'>None</a>
-<a id='L395' name='L395'></a> 395 
-<a id='L396' name='L396'></a> 396     def <a href='../S/1309.html#L488' title='Referred from 488 in utils/wiki_grabber.py.'>create_table</a>(<a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a>):
-<a id='L397' name='L397'></a> 397         """Wrapper for creating tables."""
-<a id='L398' name='L398'></a> 398 
-<a id='L399' name='L399'></a> 399         <a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a> = <a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)
-<a id='L400' name='L400'></a> 400 
-<a id='L401' name='L401'></a> 401         <a href='../Y/9416.html' title='Multiple used in 17 places.'>errors</a> = <a href='../S/1309.html#L372' title='Defined at 372 in utils/wiki_grabber.py.'>validate_table</a>(<a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(2))
-<a id='L402' name='L402'></a> 402         <strong class='reserved'>if</strong> <a href='../Y/9416.html' title='Multiple used in 17 places.'>errors</a>:
-<a id='L403' name='L403'></a> 403             <a href='../Y/19248.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18937.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/16416.html' title='Multiple defined in 55 places.'>write</a>(<a href='../Y/9416.html' title='Multiple used in 17 places.'>errors</a>)
-<a id='L404' name='L404'></a> 404 
-<a id='L405' name='L405'></a> 405         <a href='../Y/10355.html' title='Multiple used in 29 places.'>functions</a> = <em class='brace'>{</em>
-<a id='L406' name='L406'></a> 406         "config": <a href='../S/1309.html#L167' title='Defined at 167 in utils/wiki_grabber.py.'>create_config_table</a>,
-<a id='L407' name='L407'></a> 407         "formula": <a href='../S/1309.html#L212' title='Defined at 212 in utils/wiki_grabber.py.'>create_formula_table</a>,
-<a id='L408' name='L408'></a> 408         "variable_types": <a href='../S/1309.html#L243' title='Defined at 243 in utils/wiki_grabber.py.'>create_variable_types_table</a>,
-<a id='L409' name='L409'></a> 409         "widget_overview": <a href='../S/1309.html#L268' title='Defined at 268 in utils/wiki_grabber.py.'>create_widget_overview_table</a>,
-<a id='L410' name='L410'></a> 410         "window_overview": <a href='../S/1309.html#L296' title='Defined at 296 in utils/wiki_grabber.py.'>create_window_overview_table</a>,
-<a id='L411' name='L411'></a> 411         "dialog_widgets": <a href='../S/1309.html#L322' title='Defined at 322 in utils/wiki_grabber.py.'>create_dialog_widgets_table</a><em class='brace'>}</em>
-<a id='L412' name='L412'></a> 412 
-<a id='L413' name='L413'></a> 413         try:
-<a id='L414' name='L414'></a> 414             <strong class='reserved'>return</strong> <a href='../Y/10355.html' title='Multiple used in 29 places.'>functions</a>[<a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a>](<a href='../D/14858.html' title='Multiple defined in 3 places.'>table</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(2) + "\n")
-<a id='L415' name='L415'></a> 415         except <a href='../Y/1664.html' title='Multiple used in 12 places.'>KeyError</a>:
-<a id='L416' name='L416'></a> 416             <a href='../Y/19248.html' title='Multiple used in 229 places.'>sys</a>.<a href='../Y/18937.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/16416.html' title='Multiple defined in 55 places.'>write</a>("Unknown table definition '%s'.\n" % <a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a>)
-<a id='L417' name='L417'></a> 417             <strong class='reserved'>return</strong> "Unknown table definition '%s'." % <a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a>
-<a id='L418' name='L418'></a> 418 
-<a id='L419' name='L419'></a> 419     def <a href='../S/1309.html#L447' title='Referred from 447 in utils/wiki_grabber.py.'>create_wml_reference_description</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>, <a href='../Y/14562.html' title='Multiple used in 7 places.'>nest_level</a>):
-<a id='L420' name='L420'></a> 420         """ Creates a description for wml reference purposes."""
-<a id='L421' name='L421'></a> 421         # Matches a line like:
-<a id='L422' name='L422'></a> 422         # name &amp; string &amp; "" &amp; 1.5 &amp; description
-<a id='L423' name='L423'></a> 423 <em class='sharp'>        #</em> [relative] &amp; node &amp; * &amp; &amp; description
-<a id='L424' name='L424'></a> 424 
-<a id='L425' name='L425'></a> 425         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("(.*) +&amp; +(.*) +&amp; *(.*) *&amp; +(.*) *&amp; *(.*)")
-<a id='L426' name='L426'></a> 426         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L427' name='L427'></a> 427 
-<a id='L428' name='L428'></a> 428         <strong class='reserved'>if</strong> <a href='../D/9273.html' title='Multiple defined in 11 places.'>is_empty</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>, <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L429' name='L429'></a> 429             <strong class='reserved'>return</strong> "Empty description"
-<a id='L430' name='L430'></a> 430 
-<a id='L431' name='L431'></a> 431         <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> = <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>[0]
-<a id='L432' name='L432'></a> 432         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> = "%s '''''%s''''' " % ("*" * <a href='../Y/14562.html' title='Multiple used in 7 places.'>nest_level</a>, <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0].<a href='../Y/19072.html' title='Multiple used in 128 places.'>strip</a>())
-<a id='L433' name='L433'></a> 433         <strong class='reserved'>if</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1] != 'node':
-<a id='L434' name='L434'></a> 434             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "(%s, ''%s'') " % (<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1], "default " + i[2].<a href='../Y/17554.html' title='Multiple used in 20 places.'>rstrip</a>() <strong class='reserved'>if</strong> i[2] <strong class='reserved'>else</strong> "'mandatory'")
-<a id='L435' name='L435'></a> 435         <strong class='reserved'>else</strong>:
-<a id='L436' name='L436'></a> 436             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "(%s) " % <em class='brace'>{</em>'*': "zero or more times", '+': "one or more times", '?': "zero or one times", '1': "one time", '': "empty string bug."<em class='brace'>}</em>[<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[2].<a href='../Y/17554.html' title='Multiple used in 20 places.'>rstrip</a>()]
-<a id='L437' name='L437'></a> 437         <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += "%s" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[4]
-<a id='L438' name='L438'></a> 438         <strong class='reserved'>if</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[3]:
-<a id='L439' name='L439'></a> 439             <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> += " {{DevFeature%s}}" % <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[3].<a href='../D/12691.html' title='Multiple defined in 3 places.'>replace</a>(' ', '')
-<a id='L440' name='L440'></a> 440         <strong class='reserved'>return</strong> <a href='../D/12858.html' title='Multiple defined in 10 places.'>result</a> + "\n"
-<a id='L441' name='L441'></a> 441 
-<a id='L442' name='L442'></a> 442     def <a href='../S/1309.html#L491' title='Referred from 491 in utils/wiki_grabber.py.'>create_description</a>(<a href='../D/5374.html' title='Multiple defined in 14 places.'>description</a>):
-<a id='L443' name='L443'></a> 443         """Wrapper for creating descriptions."""
-<a id='L444' name='L444'></a> 444 
-<a id='L445' name='L445'></a> 445         # List of descriptions used.
-<a id='L446' name='L446'></a> 446         <a href='../Y/8563.html' title='Multiple used in 7 places.'>descriptions</a> = <em class='brace'>{</em>
-<a id='L447' name='L447'></a> 447             "wml_reference": <a href='../S/1309.html#L419' title='Defined at 419 in utils/wiki_grabber.py.'>create_wml_reference_description</a><em class='brace'>}</em>
-<a id='L448' name='L448'></a> 448 
-<a id='L449' name='L449'></a> 449         # We use a list because it's easier to handle nested elements
-<a id='L450' name='L450'></a> 450         <a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a> = [<a href='../D/5374.html' title='Multiple defined in 14 places.'>description</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)]
-<a id='L451' name='L451'></a> 451 
-<a id='L452' name='L452'></a> 452         # The $ are the separators between rows of a description
-<a id='L453' name='L453'></a> 453         <a href='../Y/15940.html' title='Multiple used in 3 places.'>parseme</a> = <a href='../D/5374.html' title='Multiple defined in 14 places.'>description</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(2).<a href='../D/14569.html' title='Multiple defined in 2 places.'>split</a>("$")
-<a id='L454' name='L454'></a> 454         # We strip everything that we don't need
-<a id='L455' name='L455'></a> 455         <a href='../Y/15940.html' title='Multiple used in 3 places.'>parseme</a> = [<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>.<a href='../D/12691.html' title='Multiple defined in 3 places.'>replace</a>("\n", "").<a href='../Y/19072.html' title='Multiple used in 128 places.'>strip</a>() <strong class='reserved'>for</strong> i in parseme]
-<a id='L456' name='L456'></a> 456 
-<a id='L457' name='L457'></a> 457         <a href='../Y/14562.html' title='Multiple used in 7 places.'>nest_level</a> = 1
-<a id='L458' name='L458'></a> 458         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = ""
-<a id='L459' name='L459'></a> 459 
-<a id='L460' name='L460'></a> 460         <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/15940.html' title='Multiple used in 3 places.'>parseme</a>:
-<a id='L461' name='L461'></a> 461 
-<a id='L462' name='L462'></a> 462             # If it's a new block, we need to handle it.
-<a id='L463' name='L463'></a> 463             <strong class='reserved'>if</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>.<a href='../Y/18888.html' title='Multiple used in 117 places.'>startswith</a>("@begin"):
-<a id='L464' name='L464'></a> 464                 <a href='../Y/14562.html' title='Multiple used in 7 places.'>nest_level</a> += 1
-<a id='L465' name='L465'></a> 465                 <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> = i.<a href='../Y/13367.html' title='Multiple used in 30 places.'>lstrip</a>("@begin{description}{")
-<a id='L466' name='L466'></a> 466                 <a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a> += [<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[:i.<a href='../D/6237.html' title='Multiple defined in 33 places.'>find</a>("}")]]
-<a id='L467' name='L467'></a> 467                 <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> = i.<a href='../Y/19072.html' title='Multiple used in 128 places.'>strip</a>(<a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a>[<a href='../Y/14562.html' title='Multiple used in 7 places.'>nest_level</a> - 1] + "}")
-<a id='L468' name='L468'></a> 468 
-<a id='L469' name='L469'></a> 469             # We also handle end of blocks.
-<a id='L470' name='L470'></a> 470             elif <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>.<a href='../Y/18888.html' title='Multiple used in 117 places.'>startswith</a>("@end") and i != "@end{description}":
-<a id='L471' name='L471'></a> 471                 <a href='../Y/14562.html' title='Multiple used in 7 places.'>nest_level</a> -= 1
-<a id='L472' name='L472'></a> 472                 <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> = i.<a href='../Y/13367.html' title='Multiple used in 30 places.'>lstrip</a>("@end{description}")
-<a id='L473' name='L473'></a> 473                 <a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a> = type[:-1]
-<a id='L474' name='L474'></a> 474 
-<a id='L475' name='L475'></a> 475             # Send content unless special "@end" <strong class='reserved'>case</strong>.
-<a id='L476' name='L476'></a> 476             <strong class='reserved'>if</strong> not <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> == "@end{description}":
-<a id='L477' name='L477'></a> 477                 <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> += <a href='../Y/8563.html' title='Multiple used in 7 places.'>descriptions</a>[<a href='../D/15368.html' title='Multiple defined in 27 places.'>type</a>[<a href='../Y/14562.html' title='Multiple used in 7 places.'>nest_level</a>-1]](<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> + "\n", nest_level)
-<a id='L478' name='L478'></a> 478 
-<a id='L479' name='L479'></a> 479         <strong class='reserved'>return</strong> <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>
-<a id='L480' name='L480'></a> 480 
-<a id='L481' name='L481'></a> 481     def <a href='../S/1309.html#L502' title='Referred from 502 in utils/wiki_grabber.py.'>process_body</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L482' name='L482'></a> 482         """Process the body.
-<a id='L483' name='L483'></a> 483 
-<a id='L484' name='L484'></a> 484         The body needs to be stripped of known markup values.
-<a id='L485' name='L485'></a> 485         """
-<a id='L486' name='L486'></a> 486 
-<a id='L487' name='L487'></a> 487         <a href='../Y/19325.html' title='Multiple used in 2 places.'>table_regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("^@begin{table}\{(.*?)\}\n(.*?)\n@end{table}$", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a> | re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>)
-<a id='L488' name='L488'></a> 488         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/19325.html' title='Multiple used in 2 places.'>table_regex</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(lambda <a href='../D/10762.html' title='Multiple defined in 9 places.'>match</a>: <a href='../S/1309.html#L396' title='Defined at 396 in utils/wiki_grabber.py.'>create_table</a>(match), data)
-<a id='L489' name='L489'></a> 489 
-<a id='L490' name='L490'></a> 490         <a href='../Y/8562.html' title='Multiple used in 2 places.'>description_regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("^@begin{description}\{(.*?)\}\n(.*?)\n@end{description}$", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a> | re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>)
-<a id='L491' name='L491'></a> 491         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/8562.html' title='Multiple used in 2 places.'>description_regex</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(lambda <a href='../D/10762.html' title='Multiple defined in 9 places.'>match</a>: <a href='../S/1309.html#L442' title='Defined at 442 in utils/wiki_grabber.py.'>create_description</a>(match), data)
-<a id='L492' name='L492'></a> 492         <strong class='reserved'>return</strong> <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>
-<a id='L493' name='L493'></a> 493 
-<a id='L494' name='L494'></a> 494     def <a href='../R/10989.html' title='Multiple referred from 18 places.'>process</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L495' name='L495'></a> 495         """Processes a wiki block."""
-<a id='L496' name='L496'></a> 496 
-<a id='L497' name='L497'></a> 497         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../S/1309.html#L579' title='Defined at 579 in utils/wiki_grabber.py.'>replace_macros</a>(data)
-<a id='L498' name='L498'></a> 498 
-<a id='L499' name='L499'></a> 499         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("(.*?)\n\n(.*)", re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>).<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L500' name='L500'></a> 500         <strong class='reserved'>if</strong> <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L501' name='L501'></a> 501             <a href='../Y/11227.html' title='Multiple used in 44 places.'>header</a> = <a href='../S/1309.html#L129' title='Defined at 129 in utils/wiki_grabber.py.'>process_header</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>[0][0])
-<a id='L502' name='L502'></a> 502             <a href='../S/1219.html#L782' title='Defined at 782 in src/lua/lparser.cpp.'>body</a> = <a href='../S/1309.html#L481' title='Defined at 481 in utils/wiki_grabber.py.'>process_body</a>(<a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>[0][1])
-<a id='L503' name='L503'></a> 503         <strong class='reserved'>else</strong>:
-<a id='L504' name='L504'></a> 504             print "File: " + <a href='../S/1309.html#L70' title='Defined at 70 in utils/wiki_grabber.py.'>current_file</a>
-<a id='L505' name='L505'></a> 505             print "Block:\n" + <a href='../S/1309.html#L73' title='Defined at 73 in utils/wiki_grabber.py.'>current_block</a>
-<a id='L506' name='L506'></a> 506             print "\n\nInvalid wiki block, discarded."
-<a id='L507' name='L507'></a> 507             <strong class='reserved'>return</strong>
-<a id='L508' name='L508'></a> 508 
-<a id='L509' name='L509'></a> 509         <strong class='reserved'>if</strong> not <a href='../Y/11227.html' title='Multiple used in 44 places.'>header</a>[0]:
-<a id='L510' name='L510'></a> 510             print "File: " + <a href='../S/1309.html#L70' title='Defined at 70 in utils/wiki_grabber.py.'>current_file</a>
-<a id='L511' name='L511'></a> 511             print "Block:\n" + <a href='../S/1309.html#L73' title='Defined at 73 in utils/wiki_grabber.py.'>current_block</a>
-<a id='L512' name='L512'></a> 512             print "\n\nNo page defined, dropped."
-<a id='L513' name='L513'></a> 513             <strong class='reserved'>return</strong>
-<a id='L514' name='L514'></a> 514 
-<a id='L515' name='L515'></a> 515         <strong class='reserved'>if</strong> not <a href='../Y/11227.html' title='Multiple used in 44 places.'>header</a>[0] in <a href='../S/1309.html#L54' title='Defined at 54 in utils/wiki_grabber.py.'>file_map</a>:
-<a id='L516' name='L516'></a> 516             <a href='../S/1309.html#L54' title='Defined at 54 in utils/wiki_grabber.py.'>file_map</a>[<a href='../Y/11227.html' title='Multiple used in 44 places.'>header</a>[0]] = []
-<a id='L517' name='L517'></a> 517 
-<a id='L518' name='L518'></a> 518         <a href='../S/1309.html#L54' title='Defined at 54 in utils/wiki_grabber.py.'>file_map</a>[<a href='../Y/11227.html' title='Multiple used in 44 places.'>header</a>[0]].<a href='../D/3309.html' title='Multiple defined in 8 places.'>append</a>([header[1], <a href='../S/1219.html#L782' title='Defined at 782 in src/lua/lparser.cpp.'>body</a>])
-<a id='L519' name='L519'></a> 519 
-<a id='L520' name='L520'></a> 520     def <a href='../S/1309.html#L645' title='Referred from 645 in utils/wiki_grabber.py.'>create_output</a>():
-<a id='L521' name='L521'></a> 521         """Generates the output"""
-<a id='L522' name='L522'></a> 522 
-<a id='L523' name='L523'></a> 523         <strong class='reserved'>for</strong> <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>, <a href='../Y/8172.html' title='Multiple used in 3 places.'>data_list</a> in <a href='../S/1309.html#L54' title='Defined at 54 in utils/wiki_grabber.py.'>file_map</a>.<a href='../Y/12344.html' title='Multiple used in 2 places.'>iteritems</a>():
-<a id='L524' name='L524'></a> 524             <a href='../Y/8172.html' title='Multiple used in 3 places.'>data_list</a>.<a href='../D/14516.html' title='Multiple defined in 6 places.'>sort</a>(<a href='../D/9548.html' title='Multiple defined in 2 places.'>key</a>=<a href='../Y/15479.html' title='Multiple used in 7 places.'>operator</a>.itemgetter(0))
-<a id='L525' name='L525'></a> 525             with <a href='../D/11519.html' title='Multiple defined in 3 places.'>open</a>(<a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../S/1309.html#L61' title='Defined at 61 in utils/wiki_grabber.py.'>output_directory</a>, <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>), "w") as <a href='../Y/9732.html' title='Multiple used in 7 places.'>fd</a>:
-<a id='L526' name='L526'></a> 526                 <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/8172.html' title='Multiple used in 3 places.'>data_list</a>:
-<a id='L527' name='L527'></a> 527                     <a href='../Y/9732.html' title='Multiple used in 7 places.'>fd</a>.<a href='../D/16416.html' title='Multiple defined in 55 places.'>write</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1])
-<a id='L528' name='L528'></a> 528 
-<a id='L529' name='L529'></a> 529     def <a href='../R/10998.html' title='Multiple referred from 2 places.'>process_file</a>(<a href='../D/11226.html' title='Multiple defined in 26 places.'>name</a>):
-<a id='L530' name='L530'></a> 530         """Processes all wiki blocks (if any) of a file."""
-<a id='L531' name='L531'></a> 531 
-<a id='L532' name='L532'></a> 532         global <a href='../S/1309.html#L70' title='Defined at 70 in utils/wiki_grabber.py.'>current_file</a>
-<a id='L533' name='L533'></a> 533         <a href='../S/1309.html#L70' title='Defined at 70 in utils/wiki_grabber.py.'>current_file</a> = <a href='../D/11226.html' title='Multiple defined in 26 places.'>name</a>
-<a id='L534' name='L534'></a> 534         with <a href='../D/11519.html' title='Multiple defined in 3 places.'>open</a>(<a href='../D/11226.html' title='Multiple defined in 26 places.'>name</a>, "r") as <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>:
-<a id='L535' name='L535'></a> 535             <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>.<a href='../D/12314.html' title='Multiple defined in 23 places.'>read</a>()
-<a id='L536' name='L536'></a> 536 
-<a id='L537' name='L537'></a> 537         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("(/\*WIKI($.*?)^ \*/)", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a> | re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>)
-<a id='L538' name='L538'></a> 538         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L539' name='L539'></a> 539         <strong class='reserved'>if</strong> <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L540' name='L540'></a> 540             <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L541' name='L541'></a> 541                 global <a href='../S/1309.html#L73' title='Defined at 73 in utils/wiki_grabber.py.'>current_block</a>
-<a id='L542' name='L542'></a> 542                 <a href='../S/1309.html#L73' title='Defined at 73 in utils/wiki_grabber.py.'>current_block</a> = <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]
-<a id='L543' name='L543'></a> 543                 <a href='../D/13309.html' title='Multiple defined in 2 places.'>section</a> = <a href='../S/1309.html#L99' title='Defined at 99 in utils/wiki_grabber.py.'>reindent</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1])
-<a id='L544' name='L544'></a> 544                 wiki_info = <a href='../D/12085.html' title='Multiple defined in 8 places.'>process</a>(<a href='../D/13309.html' title='Multiple defined in 2 places.'>section</a>)
-<a id='L545' name='L545'></a> 545 
-<a id='L546' name='L546'></a> 546     def <a href='../R/10994.html' title='Multiple referred from 2 places.'>process_directory</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>):
-<a id='L547' name='L547'></a> 547         """Processes a directory.
-<a id='L548' name='L548'></a> 548 
-<a id='L549' name='L549'></a> 549         Recurses into the sub directory, ignoring hidden directories.
-<a id='L550' name='L550'></a> 550         Processes every .[c|h]pp file.
-<a id='L551' name='L551'></a> 551         """
-<a id='L552' name='L552'></a> 552 
-<a id='L553' name='L553'></a> 553         <a href='../D/9473.html' title='Multiple defined in 3 places.'>items</a> = <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../Y/13030.html' title='Multiple used in 9 places.'>listdir</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>)
-<a id='L554' name='L554'></a> 554 
-<a id='L555' name='L555'></a> 555         <strong class='reserved'>for</strong> <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a> in <a href='../D/9473.html' title='Multiple defined in 3 places.'>items</a>:
-<a id='L556' name='L556'></a> 556 
-<a id='L557' name='L557'></a> 557             # Ignore hidden directories.
-<a id='L558' name='L558'></a> 558             <strong class='reserved'>if</strong> <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>.<a href='../Y/18888.html' title='Multiple used in 117 places.'>startswith</a>("."):
-<a id='L559' name='L559'></a> 559                 <strong class='reserved'>continue</strong>
-<a id='L560' name='L560'></a> 560 
-<a id='L561' name='L561'></a> 561             <strong class='reserved'>if</strong> <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/12230.html' title='Multiple used in 26 places.'>isdir</a>(os.path.<a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>, <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>)):
-<a id='L562' name='L562'></a> 562                 <a href='../S/1309.html#L546' title='Defined at 546 in utils/wiki_grabber.py.'>process_directory</a>(<a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>, <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>))
-<a id='L563' name='L563'></a> 563             elif <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>.<a href='../Y/9206.html' title='Multiple used in 86 places.'>endswith</a>(".cpp") or item.endswith(".hpp"):
-<a id='L564' name='L564'></a> 564                 <a href='../D/12095.html' title='Multiple defined in 2 places.'>process_file</a>(<a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>, <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>))
-<a id='L565' name='L565'></a> 565 
-<a id='L566' name='L566'></a> 566 <em class='sharp'>    #</em>#### ##### ##### MACRO PROCESSING ##### ##### #####
-<a id='L567' name='L567'></a> 567 
-<a id='L568' name='L568'></a> 568     def <a href='../S/1309.html#L585' title='Referred from 585 in utils/wiki_grabber.py.'>instanciate_macro</a>(<a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>):
-<a id='L569' name='L569'></a> 569         """Replaces a macro text by the macro value."""
-<a id='L570' name='L570'></a> 570 
-<a id='L571' name='L571'></a> 571         global <a href='../S/1309.html#L59' title='Defined at 59 in utils/wiki_grabber.py.'>macro_map</a>
-<a id='L572' name='L572'></a> 572 
-<a id='L573' name='L573'></a> 573         <strong class='reserved'>if</strong> not <a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1) in <a href='../S/1309.html#L59' title='Defined at 59 in utils/wiki_grabber.py.'>macro_map</a>:
-<a id='L574' name='L574'></a> 574             print "Macro '%s' is not defined." % <a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)
-<a id='L575' name='L575'></a> 575             <strong class='reserved'>return</strong> <a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(0)
-<a id='L576' name='L576'></a> 576 
-<a id='L577' name='L577'></a> 577         <strong class='reserved'>return</strong> <a href='../S/1309.html#L59' title='Defined at 59 in utils/wiki_grabber.py.'>macro_map</a>[<a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)]
-<a id='L578' name='L578'></a> 578 
-<a id='L579' name='L579'></a> 579     def <a href='../S/1309.html#L497' title='Referred from 497 in utils/wiki_grabber.py.'>replace_macros</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>):
-<a id='L580' name='L580'></a> 580         """Replaces all macros found in the data.
-<a id='L581' name='L581'></a> 581 
-<a id='L582' name='L582'></a> 582         If a macro isn't defined, the text is left as is."""
-<a id='L583' name='L583'></a> 583 
-<a id='L584' name='L584'></a> 584         <a href='../Y/13485.html' title='Multiple used in 6 places.'>macro_regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("@macro *= *(\w+)", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a> | re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>)
-<a id='L585' name='L585'></a> 585         <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../Y/13485.html' title='Multiple used in 6 places.'>macro_regex</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(lambda <a href='../D/10762.html' title='Multiple defined in 9 places.'>match</a>: <a href='../S/1309.html#L568' title='Defined at 568 in utils/wiki_grabber.py.'>instanciate_macro</a>(match), data)
-<a id='L586' name='L586'></a> 586         <strong class='reserved'>return</strong> <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>
-<a id='L587' name='L587'></a> 587 
-<a id='L588' name='L588'></a> 588     def <a href='../S/1309.html#L618' title='Referred from 618 in utils/wiki_grabber.py.'>create_macro_old</a>(<a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>):
-<a id='L589' name='L589'></a> 589         print "Found old style macro '%s'" % <a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)
-<a id='L590' name='L590'></a> 590         <a href='../S/1309.html#L592' title='Defined at 592 in utils/wiki_grabber.py.'>create_macro</a>(<a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>)
-<a id='L591' name='L591'></a> 591 
-<a id='L592' name='L592'></a> 592     def <a href='../R/4437.html' title='Multiple referred from 2 places.'>create_macro</a>(<a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>):
-<a id='L593' name='L593'></a> 593         """Wrapper for creating macros."""
-<a id='L594' name='L594'></a> 594 
-<a id='L595' name='L595'></a> 595         global <a href='../S/1309.html#L59' title='Defined at 59 in utils/wiki_grabber.py.'>macro_map</a>
-<a id='L596' name='L596'></a> 596 
-<a id='L597' name='L597'></a> 597         <strong class='reserved'>if</strong> <a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1) in <a href='../S/1309.html#L59' title='Defined at 59 in utils/wiki_grabber.py.'>macro_map</a>:
-<a id='L598' name='L598'></a> 598             print "Macro '%s' is being redefined." % <a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)
-<a id='L599' name='L599'></a> 599 
-<a id='L600' name='L600'></a> 600         <a href='../S/1309.html#L59' title='Defined at 59 in utils/wiki_grabber.py.'>macro_map</a>[<a href='../Y/13470.html' title='Multiple used in 84 places.'>macro</a>.<a href='../S/544.html#L30' title='Defined at 30 in src/gui/widgets/group.hpp.'>group</a>(1)] = macro.group(2)
-<a id='L601' name='L601'></a> 601 
-<a id='L602' name='L602'></a> 602     def <a href='../S/1309.html#L638' title='Referred from 638 in utils/wiki_grabber.py.'>process_file_macros</a>(<a href='../D/11226.html' title='Multiple defined in 26 places.'>name</a>):
-<a id='L603' name='L603'></a> 603         """Processes all wiki macro blocks (if any) of a file."""
-<a id='L604' name='L604'></a> 604 
-<a id='L605' name='L605'></a> 605         global <a href='../S/1309.html#L70' title='Defined at 70 in utils/wiki_grabber.py.'>current_file</a>
-<a id='L606' name='L606'></a> 606         <a href='../S/1309.html#L70' title='Defined at 70 in utils/wiki_grabber.py.'>current_file</a> = <a href='../D/11226.html' title='Multiple defined in 26 places.'>name</a>
-<a id='L607' name='L607'></a> 607         with <a href='../D/11519.html' title='Multiple defined in 3 places.'>open</a>(<a href='../D/11226.html' title='Multiple defined in 26 places.'>name</a>, "r") as <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>:
-<a id='L608' name='L608'></a> 608             <a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a> = <a href='../D/6162.html' title='Multiple defined in 3 places.'>file</a>.<a href='../D/12314.html' title='Multiple defined in 23 places.'>read</a>()
-<a id='L609' name='L609'></a> 609 
-<a id='L610' name='L610'></a> 610         <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("(/\*WIKI_MACRO($.*?)^ \*/)", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a> | re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>)
-<a id='L611' name='L611'></a> 611         <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a> = <a href='../Y/17060.html' title='Multiple used in 134 places.'>regex</a>.<a href='../Y/9947.html' title='Multiple used in 18 places.'>findall</a>(<a href='../D/5201.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L612' name='L612'></a> 612         <strong class='reserved'>if</strong> <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L613' name='L613'></a> 613             <strong class='reserved'>for</strong> <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a> in <a href='../Y/17268.html' title='Multiple used in 1880 places.'>res</a>:
-<a id='L614' name='L614'></a> 614                 global <a href='../S/1309.html#L73' title='Defined at 73 in utils/wiki_grabber.py.'>current_block</a>
-<a id='L615' name='L615'></a> 615                 <a href='../S/1309.html#L73' title='Defined at 73 in utils/wiki_grabber.py.'>current_block</a> = <a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[0]
-<a id='L616' name='L616'></a> 616                 <a href='../D/13309.html' title='Multiple defined in 2 places.'>section</a> = <a href='../S/1309.html#L99' title='Defined at 99 in utils/wiki_grabber.py.'>reindent</a>(<a href='../D/8596.html' title='Multiple defined in 5 places.'>i</a>[1])
-<a id='L617' name='L617'></a> 617                 <a href='../Y/13485.html' title='Multiple used in 6 places.'>macro_regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("^@start_macro *= *(.*?)\n(.*?)\n@end_macro.*?$", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a> | re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>)
-<a id='L618' name='L618'></a> 618                 <a href='../Y/13485.html' title='Multiple used in 6 places.'>macro_regex</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(lambda <a href='../D/10762.html' title='Multiple defined in 9 places.'>match</a>: <a href='../S/1309.html#L588' title='Defined at 588 in utils/wiki_grabber.py.'>create_macro_old</a>(match), <a href='../D/13309.html' title='Multiple defined in 2 places.'>section</a>)
-<a id='L619' name='L619'></a> 619                 <a href='../Y/13485.html' title='Multiple used in 6 places.'>macro_regex</a> = <a href='../Y/16804.html' title='Multiple used in 715 places.'>re</a>.<a href='../Y/7581.html' title='Multiple used in 102 places.'>compile</a>("^@begin{macro}{(.*?)}\n(.*?)\n@end{macro}.*?$", re.<a href='../Y/1818.html' title='Multiple used in 151 places.'>M</a> | re.<a href='../Y/2334.html' title='Multiple used in 141 places.'>S</a>)
-<a id='L620' name='L620'></a> 620                 <a href='../Y/13485.html' title='Multiple used in 6 places.'>macro_regex</a>.<a href='../Y/19110.html' title='Multiple used in 162 places.'>sub</a>(lambda <a href='../D/10762.html' title='Multiple defined in 9 places.'>match</a>: <a href='../S/1309.html#L592' title='Defined at 592 in utils/wiki_grabber.py.'>create_macro</a>(match), <a href='../D/13309.html' title='Multiple defined in 2 places.'>section</a>)
-<a id='L621' name='L621'></a> 621 
-<a id='L622' name='L622'></a> 622     def <a href='../R/10995.html' title='Multiple referred from 2 places.'>process_directory_macros</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>):
-<a id='L623' name='L623'></a> 623         """Processes a directory looking for macros.
-<a id='L624' name='L624'></a> 624 
-<a id='L625' name='L625'></a> 625         Recurses into the sub directory, ignoring hidden directories.
-<a id='L626' name='L626'></a> 626         Processes every .[c|h]pp file.
-<a id='L627' name='L627'></a> 627         """
-<a id='L628' name='L628'></a> 628 
-<a id='L629' name='L629'></a> 629         <strong class='reserved'>for</strong> <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a> in <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../Y/13030.html' title='Multiple used in 9 places.'>listdir</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>):
-<a id='L630' name='L630'></a> 630 
-<a id='L631' name='L631'></a> 631             # Ignore hidden directories.
-<a id='L632' name='L632'></a> 632             <strong class='reserved'>if</strong> <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>.<a href='../Y/18888.html' title='Multiple used in 117 places.'>startswith</a>("."):
-<a id='L633' name='L633'></a> 633                 <strong class='reserved'>continue</strong>
-<a id='L634' name='L634'></a> 634 
-<a id='L635' name='L635'></a> 635             <strong class='reserved'>if</strong> <a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/12230.html' title='Multiple used in 26 places.'>isdir</a>(os.path.<a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>, <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>)):
-<a id='L636' name='L636'></a> 636                 <a href='../S/1309.html#L622' title='Defined at 622 in utils/wiki_grabber.py.'>process_directory_macros</a>(<a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>, <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>))
-<a id='L637' name='L637'></a> 637             elif <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>.<a href='../Y/9206.html' title='Multiple used in 86 places.'>endswith</a>(".cpp") or item.endswith(".hpp"):
-<a id='L638' name='L638'></a> 638                 <a href='../S/1309.html#L602' title='Defined at 602 in utils/wiki_grabber.py.'>process_file_macros</a>(<a href='../Y/15608.html' title='Multiple used in 412 places.'>os</a>.<a href='../D/11755.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/9501.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/8645.html' title='Multiple used in 160 places.'>dir</a>, <a href='../D/9460.html' title='Multiple defined in 7 places.'>item</a>))
-<a id='L639' name='L639'></a> 639 
-<a id='L640' name='L640'></a> 640 <em class='sharp'>    #</em>#### ##### ##### MAIN ##### ##### #####
-<a id='L641' name='L641'></a> 641 
-<a id='L642' name='L642'></a> 642     <a href='../S/1309.html#L622' title='Defined at 622 in utils/wiki_grabber.py.'>process_directory_macros</a>(<a href='../S/1309.html#L62' title='Defined at 62 in utils/wiki_grabber.py.'>src_directory</a>)
-<a id='L643' name='L643'></a> 643     <a href='../S/1309.html#L546' title='Defined at 546 in utils/wiki_grabber.py.'>process_directory</a>(<a href='../S/1309.html#L62' title='Defined at 62 in utils/wiki_grabber.py.'>src_directory</a>)
-<a id='L644' name='L644'></a> 644 
-<a id='L645' name='L645'></a> 645     <a href='../S/1309.html#L520' title='Defined at 520 in utils/wiki_grabber.py.'>create_output</a>()
+<a id='L47' name='L47'></a>  47 print("Waiting for clients to terminate...")
+<a id='L48' name='L48'></a>  48 <a href='../S/1309.html#L49' title='Referred from 49 in utils/simulate_lobby_traffic.py.'>waiting_start_time</a> = <a href='../D/15077.html' title='Multiple defined in 4 places.'>time</a>.<a href='../Y/14173.html' title='Multiple used in 2 places.'>monotonic</a>()
+<a id='L49' name='L49'></a>  49 <strong class='reserved'>while</strong> <a href='../Y/12916.html' title='Multiple used in 341 places.'>len</a>(<a href='../S/1309.html#L38' title='Defined at 38 in utils/simulate_lobby_traffic.py.'>clients</a>) &gt; 0 and <a href='../D/15077.html' title='Multiple defined in 4 places.'>time</a>.<a href='../Y/14173.html' title='Multiple used in 2 places.'>monotonic</a>() &lt; <a href='../S/1309.html#L48' title='Defined at 48 in utils/simulate_lobby_traffic.py.'>waiting_start_time</a> + <a href='../S/1309.html#L13' title='Defined at 13 in utils/simulate_lobby_traffic.py.'>EXIT_WAIT_TIME</a>:
+<a id='L50' name='L50'></a>  50   <a href='../D/15077.html' title='Multiple defined in 4 places.'>time</a>.<a href='../Y/18589.html' title='Multiple used in 3 places.'>sleep</a>(1.0)
+<a id='L51' name='L51'></a>  51   <a href='../Y/7361.html' title='Multiple used in 2 places.'>clients_copy</a> = <a href='../D/9750.html' title='Multiple defined in 2 places.'>list</a>(<a href='../S/1309.html#L38' title='Defined at 38 in utils/simulate_lobby_traffic.py.'>clients</a>)
+<a id='L52' name='L52'></a>  52   <strong class='reserved'>for</strong> <a href='../D/3845.html' title='Multiple defined in 3 places.'>c</a> in <a href='../Y/7361.html' title='Multiple used in 2 places.'>clients_copy</a>:
+<a id='L53' name='L53'></a>  53     <strong class='reserved'>if</strong> <a href='../D/3845.html' title='Multiple defined in 3 places.'>c</a>.<a href='../D/11925.html' title='Multiple defined in 6 places.'>poll</a>() != <a href='../Y/2040.html' title='Multiple used in 430 places.'>None</a>:
+<a id='L54' name='L54'></a>  54       # The process has terminated, remove it from the set.
+<a id='L55' name='L55'></a>  55       <a href='../S/1309.html#L38' title='Defined at 38 in utils/simulate_lobby_traffic.py.'>clients</a>.<a href='../D/12553.html' title='Multiple defined in 8 places.'>remove</a>(<a href='../D/3845.html' title='Multiple defined in 3 places.'>c</a>)
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 # Make sure that we get rid of the remaining processes
+<a id='L58' name='L58'></a>  58 <strong class='reserved'>for</strong> <a href='../D/3845.html' title='Multiple defined in 3 places.'>c</a> in <a href='../S/1309.html#L38' title='Defined at 38 in utils/simulate_lobby_traffic.py.'>clients</a>:
+<a id='L59' name='L59'></a>  59   <a href='../D/3845.html' title='Multiple defined in 3 places.'>c</a>.<a href='../S/1440.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>()
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L89'>[^]</a><a href='#L622'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;][^]<a href='#L15'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>
