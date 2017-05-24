@@ -6,3 +6,5 @@ The Battle for Wesnoth の覚え書き。開発ツールの使い方、デバッ
 [Doxygen](doxygen/doxygen.md "doxygen")
 
 [gettext](gettext/gettext.md "gettext")
+
+[gdb](gdb/gdb.md "gdb")
