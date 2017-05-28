@@ -21,4 +21,6 @@
 分割禁則
 連続した数字など、行末から次の行の始めにかけて分割してはいけないものを対象にします。
 
+[Requirements for Japanese Text Layout](https://www.w3.org/TR/2009/NOTE-jlreq-20090604/)
+
 [UAX #14: Unicode Line Breaking Algorithm](http://unicode.org/reports/tr14/)
