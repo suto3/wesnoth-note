@@ -1,45 +1,105 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>data/test/scenarios/order_of_nested_events.cfg</title>
+<title>data/test/scenarios/break_replay_with_lua_random.cfg</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5634.html'>data</a>/<a href='../files/5783.html'>test</a>/<a href='../files/5789.html'>scenarios</a>/order_of_nested_events.cfg</h2>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5635.html'>data</a>/<a href='../files/5784.html'>test</a>/<a href='../files/5790.html'>scenarios</a>/break_replay_with_lua_random.cfg</h2>
 <em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 # The purpose of this test is to check that a First in, First out
-<a id='L2' name='L2'></a>   2 # order of events is being respected.
-<a id='L3' name='L3'></a>   3 <em class='sharp'>#</em>
-<a id='L4' name='L4'></a>   4 # A variable X is set to 1 during prestart, and just after
-<a id='L5' name='L5'></a>   5 # a start event is registered which would set it to 0.
-<a id='L6' name='L6'></a>   6 <em class='sharp'>#</em>
-<a id='L7' name='L7'></a>   7 # Within the scenario tag, a start event is also registered
-<a id='L8' name='L8'></a>   8 # to <strong class='reserved'>return</strong> (X == 1).
-<a id='L9' name='L9'></a>   9 <em class='sharp'>#</em>
-<a id='L10' name='L10'></a>  10 # If the "nested" event runs before the outer level start event,
-<a id='L11' name='L11'></a>  11 # we fail the test. The outer event should run first because
-<a id='L12' name='L12'></a>  12 # all of the events in [scenario] are registered before any
-<a id='L13' name='L13'></a>  13 # of them is executed.
-<a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='brace'>{</em>GENERIC_UNIT_TEST "order_of_nested_events" (
-<a id='L16' name='L16'></a>  16     [event]
-<a id='L17' name='L17'></a>  17         <a href='../D/11204.html' title='Multiple defined in 26 places.'>name</a> = prestart
-<a id='L18' name='L18'></a>  18         <em class='brace'>{</em>VARIABLE X 1<em class='brace'>}</em>
-<a id='L19' name='L19'></a>  19         [event]
-<a id='L20' name='L20'></a>  20             <a href='../D/11204.html' title='Multiple defined in 26 places.'>name</a> = start
-<a id='L21' name='L21'></a>  21             <em class='brace'>{</em>VARIABLE X 0<em class='brace'>}</em>
-<a id='L22' name='L22'></a>  22         [/event]
-<a id='L23' name='L23'></a>  23     [/event]
-<a id='L24' name='L24'></a>  24     [event]
-<a id='L25' name='L25'></a>  25         <a href='../D/11204.html' title='Multiple defined in 26 places.'>name</a> = start
-<a id='L26' name='L26'></a>  26         <em class='brace'>{</em>RETURN (<em class='brace'>{</em>VARIABLE_CONDITIONAL X equals 1<em class='brace'>}</em>)<em class='brace'>}</em>
-<a id='L27' name='L27'></a>  27     [/event]
-<a id='L28' name='L28'></a>  28 )<em class='brace'>}</em>
+<a id='L1' name='L1'></a>   1 # The purpose of this test is to make a scenario that plays but goes out of sync with the replay.
+<a id='L2' name='L2'></a>   2 # This is done as a sanity check of the unit testing mechanism.
+<a id='L3' name='L3'></a>   3 # We use the unsynced rng, lua.random, to achieve this.
+<a id='L4' name='L4'></a>   4 # Basically we keep giving side 1 a random amount of gold and recruiting as
+<a id='L5' name='L5'></a>   5 # many woses as possible, killing them immediately to make space. We <strong class='reserved'>do</strong> this
+<a id='L6' name='L6'></a>   6 # for 60 turns. In the replay we will actually have a random amount of gold
+<a id='L7' name='L7'></a>   7 # each time, so <strong class='reserved'>if</strong> we have bad luck one turn we won't have enough to afford
+<a id='L8' name='L8'></a>   8 # that many woses.
+<a id='L9' name='L9'></a>   9 # For each turn its about 50-50 not to go out of sync, so the chance not to
+<a id='L10' name='L10'></a>  10 # go out of sync (<strong class='reserved'>for</strong> true randomness) would be ~ 2^<em class='brace'>{</em>-60<em class='brace'>}</em>.
+<a id='L11' name='L11'></a>  11 <em class='sharp'>#</em> (However none of our generators use more than 32 bits per seed.)
+<a id='L12' name='L12'></a>  12 
+<a id='L13' name='L13'></a>  13 <em class='sharp'>#define</em> TEST_BREAK_REPLAY ID GET_RND_NUM
+<a id='L14' name='L14'></a>  14     <em class='brace'>{</em>GENERIC_UNIT_TEST <em class='brace'>{</em>ID<em class='brace'>}</em> (
+<a id='L15' name='L15'></a>  15         [event]
+<a id='L16' name='L16'></a>  16             <a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a> = start
+<a id='L17' name='L17'></a>  17             [allow_recruit]
+<a id='L18' name='L18'></a>  18                 <a href='../D/14379.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L19' name='L19'></a>  19                 <a href='../D/15394.html' title='Multiple defined in 27 places.'>type</a>=Wose
+<a id='L20' name='L20'></a>  20             [/allow_recruit]
+<a id='L21' name='L21'></a>  21         [/event]
+<a id='L22' name='L22'></a>  22         [event]
+<a id='L23' name='L23'></a>  23             <a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a> = recruit
+<a id='L24' name='L24'></a>  24             <a href='../Y/10068.html' title='Multiple used in 591 places.'>first_time_only</a> = no
+<a id='L25' name='L25'></a>  25             [kill]
+<a id='L26' name='L26'></a>  26                 <a href='../D/16517.html' title='Multiple defined in 2 places.'>x</a> = $x1
+<a id='L27' name='L27'></a>  27                 <a href='../D/16532.html' title='Multiple defined in 8 places.'>y</a> = $y1
+<a id='L28' name='L28'></a>  28                 <a href='../S/887.html#L46' title='Defined at 46 in src/actions/advancement.hpp.'>animate</a>=yes
+<a id='L29' name='L29'></a>  29             [/kill]
+<a id='L30' name='L30'></a>  30         [/event]
+<a id='L31' name='L31'></a>  31         [event]
+<a id='L32' name='L32'></a>  32             <a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a> = side 1 turn refresh
+<a id='L33' name='L33'></a>  33             <a href='../Y/10068.html' title='Multiple used in 591 places.'>first_time_only</a>=no
+<a id='L34' name='L34'></a>  34             <em class='brace'>{</em>GET_RND_NUM<em class='brace'>}</em>
+<a id='L35' name='L35'></a>  35             [modify_side]
+<a id='L36' name='L36'></a>  36                 <a href='../D/14379.html' title='Multiple defined in 3 places.'>side</a> = 1
+<a id='L37' name='L37'></a>  37                 <a href='../D/8206.html' title='Multiple defined in 3 places.'>gold</a> = $rnd_num
+<a id='L38' name='L38'></a>  38             [/modify_side]
+<a id='L39' name='L39'></a>  39             [<strong class='reserved'>while</strong>]
+<a id='L40' name='L40'></a>  40                 <em class='brace'>{</em>VARIABLE_CONDITIONAL rnd_num greater_than_equal_to 20<em class='brace'>}</em>
+<a id='L41' name='L41'></a>  41                 [<strong class='reserved'>do</strong>]
+<a id='L42' name='L42'></a>  42                     [do_command]
+<a id='L43' name='L43'></a>  43                         [recruit]
+<a id='L44' name='L44'></a>  44                             <a href='../D/15394.html' title='Multiple defined in 27 places.'>type</a>="Wose"
+<a id='L45' name='L45'></a>  45                             <a href='../D/16517.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16532.html' title='Multiple defined in 8 places.'>y</a>=7,4
+<a id='L46' name='L46'></a>  46                             [from]
+<a id='L47' name='L47'></a>  47                                 <a href='../D/16517.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16532.html' title='Multiple defined in 8 places.'>y</a>=7,3
+<a id='L48' name='L48'></a>  48                             [/from]
+<a id='L49' name='L49'></a>  49                         [/recruit]
+<a id='L50' name='L50'></a>  50                     [/do_command]
+<a id='L51' name='L51'></a>  51                     <em class='brace'>{</em>VARIABLE_OP rnd_num sub 20<em class='brace'>}</em>
+<a id='L52' name='L52'></a>  52                 [/<strong class='reserved'>do</strong>]
+<a id='L53' name='L53'></a>  53             [/<strong class='reserved'>while</strong>]
+<a id='L54' name='L54'></a>  54             [end_turn]
+<a id='L55' name='L55'></a>  55             [/end_turn]
+<a id='L56' name='L56'></a>  56         [/event]
+<a id='L57' name='L57'></a>  57         [event]
+<a id='L58' name='L58'></a>  58             <a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a> = side 2 turn 60
+<a id='L59' name='L59'></a>  59             <em class='brace'>{</em>SUCCEED<em class='brace'>}</em>
+<a id='L60' name='L60'></a>  60         [/event]
+<a id='L61' name='L61'></a>  61         [event]
+<a id='L62' name='L62'></a>  62             <a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a> = side 2 turn refresh
+<a id='L63' name='L63'></a>  63             <a href='../Y/10068.html' title='Multiple used in 591 places.'>first_time_only</a>=no
+<a id='L64' name='L64'></a>  64             [end_turn]
+<a id='L65' name='L65'></a>  65             [/end_turn]
+<a id='L66' name='L66'></a>  66         [/event]
+<a id='L67' name='L67'></a>  67     )<em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 #enddef
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <em class='brace'>{</em>TEST_BREAK_REPLAY "break_replay_with_lua_random" (
+<a id='L71' name='L71'></a>  71     [lua]
+<a id='L72' name='L72'></a>  72         <a href='../Y/7500.html' title='Multiple used in 172 places.'>code</a> =&lt;&lt;
+<a id='L73' name='L73'></a>  73                 wesnoth.set_variable("rnd_num", math.random(200))
+<a id='L74' name='L74'></a>  74             &gt;&gt;
+<a id='L75' name='L75'></a>  75     [/lua]
+<a id='L76' name='L76'></a>  76 )<em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77 
+<a id='L78' name='L78'></a>  78 <em class='brace'>{</em>TEST_BREAK_REPLAY "fixed_lua_random_replay_with_sync_choice" (
+<a id='L79' name='L79'></a>  79     [lua]
+<a id='L80' name='L80'></a>  80         <a href='../Y/7500.html' title='Multiple used in 172 places.'>code</a> =&lt;&lt;
+<a id='L81' name='L81'></a>  81                 local <a href='../D/12869.html' title='Multiple defined in 10 places.'>result</a> = wesnoth.synchronize_choice(
+<a id='L82' name='L82'></a>  82                   function()
+<a id='L83' name='L83'></a>  83                     <strong class='reserved'>return</strong> <em class='brace'>{</em> value = math.random(200) <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84                   end)
+<a id='L85' name='L85'></a>  85                 wesnoth.set_variable("rnd_num", result.value)
+<a id='L86' name='L86'></a>  86             &gt;&gt;
+<a id='L87' name='L87'></a>  87     [/lua]
+<a id='L88' name='L88'></a>  88 )<em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>

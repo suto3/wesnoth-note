@@ -1,486 +1,117 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/server/game.hpp</title>
+<title>src/server/player_connection.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5819.html'>src</a>/<a href='../files/5870.html'>server</a>/game.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L50'>[^]</a><a href='#L306'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5820.html'>src</a>/<a href='../files/5871.html'>server</a>/player_connection.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L45'>[^]</a><a href='#L77'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/2482.html' title='Multiple included from 76 places.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='../J/2609.html' title='Multiple included from 3 places.'>INCLUDED FROM</a></h2>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L50' title='Defined at 50.'>id</a></li>
-<li><a href='#L51' title='Defined at 51.'>name</a></li>
-<li><a href='#L53' title='Defined at 53.'>is_owner</a></li>
-<li><a href='#L54' title='Defined at 54.'>is_member</a></li>
-<li><a href='#L63' title='Defined at 63.'>level_init</a></li>
-<li><a href='#L64' title='Defined at 64.'>starting_pos</a></li>
-<li><a href='#L73' title='Defined at 73.'>starting_pos</a></li>
-<li><a href='#L82' title='Defined at 82.'>get_sides_list</a></li>
-<li><a href='#L86' title='Defined at 86.'>started</a></li>
-<li><a href='#L88' title='Defined at 88.'>nplayers</a></li>
-<li><a href='#L89' title='Defined at 89.'>nobservers</a></li>
-<li><a href='#L90' title='Defined at 90.'>current_turn</a></li>
-<li><a href='#L91' title='Defined at 91.'>set_current_turn</a></li>
-<li><a href='#L190' title='Defined at 190.'>send_server_message_to_all</a></li>
-<li><a href='#L196' title='Defined at 196.'>send_server_message</a></li>
-<li><a href='#L203' title='Defined at 203.'>send_and_record_server_message</a></li>
-<li><a href='#L215' title='Defined at 215.'>level</a></li>
-<li><a href='#L222' title='Defined at 222.'>description</a></li>
-<li><a href='#L224' title='Defined at 224.'>set_password</a></li>
-<li><a href='#L225' title='Defined at 225.'>password_matches</a></li>
-<li><a href='#L229' title='Defined at 229.'>termination_reason</a></li>
-<li><a href='#L243' title='Defined at 243.'>reset_last_synced_context_id</a></li>
-<li><a href='#L253' title='Defined at 253.'>current_side</a></li>
-<li><a href='#L254' title='Defined at 254.'>current_player</a></li>
-<li><a href='#L256' title='Defined at 256.'>is_current_player</a></li>
-<li><a href='#L259' title='Defined at 259.'>all_observers_muted</a></li>
-<li><a href='#L305' title='Defined at 305.'>observers_can_label</a></li>
-<li><a href='#L306' title='Defined at 306.'>observers_can_chat</a></li>
+<li><a href='#L45' title='Defined at 45.'>info</a></li>
+<li><a href='#L46' title='Defined at 46.'>name</a></li>
+<li><a href='#L77' title='Defined at 77.'>send_to_players</a></li>
 </ol>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
-<a id='L4' name='L4'></a>   4 <em class='comment'></em>
-<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
-<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
-<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
-<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
-<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
-<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
-<a id='L11' name='L11'></a>  11 <em class='comment'></em>
-<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
-<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
-<a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
-<a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='147.html'>player_connection.hpp</a>"
-<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='167.html'>player.hpp</a>"
-<a id='L19' name='L19'></a>  19 
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='151.html'>simple_wml.hpp</a>"
+<a id='L1' name='L1'></a>   1 <em class='comment'>/* $Id$ */</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>/*</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Copyright (C) 2016 - 2017 by Sergey Popov &lt;loonycyborg@gmail.com&gt;</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'></em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   (at your option) any later version.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'></em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>*/</em>
+<a id='L15' name='L15'></a>  15 
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#pragma</em> once
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='152.html'>simple_wml.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='168.html'>player.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='151.html'>server_base.hpp</a>"
 <a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;map&gt;
-<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L24' name='L24'></a>  24 
-<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1246.html'>mt_rng.hpp</a>"
-<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='862.html'>utils/make_enum.hpp</a>"
-<a id='L27' name='L27'></a>  27 
-<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> &lt;boost/ptr_container/ptr_vector.hpp&gt;
-<a id='L29' name='L29'></a>  29 <em class='comment'>//class player;</em>
-<a id='L30' name='L30'></a>  30 
-<a id='L31' name='L31'></a>  31 <strong class='reserved'>namespace</strong> <a href='../R/14811.html' title='Multiple referred from 25 places.'>wesnothd</a> <em class='brace'>{</em>
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#ifndef</em> <a href='../Y/4750.html' title='Multiple used in 97 places.'>_WIN32</a>
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#define</em>  BOOST_ASIO_DISABLE_THREADS
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#endif</em>
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;boost/asio.hpp&gt;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;boost/multi_index_container.hpp&gt;
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> &lt;boost/multi_index/member.hpp&gt;
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;boost/multi_index/mem_fun.hpp&gt;
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> &lt;boost/multi_index/ordered_index.hpp&gt;
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> &lt;boost/multi_index/hashed_index.hpp&gt;
 <a id='L32' name='L32'></a>  32 
-<a id='L33' name='L33'></a>  33 <strong class='reserved'>typedef</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>&gt; <a href='../R/14484.html' title='Multiple referred from 20 places.'>user_vector</a>;
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>typedef</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>&gt; <a href='../R/13189.html' title='Multiple referred from 3 places.'>side_vector</a>;
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>namespace</strong> <a href='../R/14859.html' title='Multiple referred from 25 places.'>wesnothd</a>
+<a id='L34' name='L34'></a>  34 <em class='brace'>{</em>
 <a id='L35' name='L35'></a>  35 
-<a id='L36' name='L36'></a>  36 <strong class='reserved'>class</strong> <a href='../R/5826.html' title='Multiple referred from 407 places.'>game</a>
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>class</strong> <a href='../R/10832.html' title='Multiple referred from 19 places.'>player_record</a>
 <a id='L37' name='L37'></a>  37 <em class='brace'>{</em>
-<a id='L38' name='L38'></a>  38 <strong class='reserved'>public</strong>:
-<a id='L39' name='L39'></a>  39         <a href='../D/1395.html' title='Multiple defined in 5 places.'>MAKE_ENUM</a>(<a href='../Y/431.html' title='Multiple used in 42 places.'>CONTROLLER</a>,
-<a id='L40' name='L40'></a>  40                 (<a href='../Y/1318.html' title='Multiple used in 12 places.'>HUMAN</a>, "human")
-<a id='L41' name='L41'></a>  41                 (<a href='../Y/147.html' title='Multiple used in 10 places.'>AI</a>, "ai")
-<a id='L42' name='L42'></a>  42                 (<a href='../S/1351.html#L143' title='Defined at 143 in utils/gdb/wesnoth_pretty_printers.py.'>EMPTY</a>, "null")
-<a id='L43' name='L43'></a>  43         )
-<a id='L44' name='L44'></a>  44 
-<a id='L45' name='L45'></a>  45         <a href='../D/6545.html' title='Multiple defined in 6 places.'>game</a>(<a href='../S/147.html#L72' title='Defined at 72 in src/server/player_connection.hpp.'>player_connections</a>&amp; <a href='../S/147.html#L72' title='Defined at 72 in src/server/player_connection.hpp.'>player_connections</a>, <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/11485.html' title='Multiple used in 44 places.'>host</a>,
-<a id='L46' name='L46'></a>  46                         <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11204.html' title='Multiple defined in 26 places.'>name</a>="", <strong class='reserved'>bool</strong> <a href='../S/791.html#L775' title='Defined at 775 in src/preferences/game.cpp.'>save_replays</a>=<strong class='reserved'>false</strong>,
-<a id='L47' name='L47'></a>  47                         <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/17230.html' title='Multiple used in 3 places.'>replay_save_path</a>="");
-<a id='L48' name='L48'></a>  48         ~<a href='../D/6545.html' title='Multiple defined in 6 places.'>game</a>();
-<a id='L49' name='L49'></a>  49 
-<a id='L50' name='L50'></a>  50         <strong class='reserved'>int</strong> <a href='../R/7718.html' title='Multiple referred from 11901 places.'>id</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/8583.html' title='Multiple defined in 8 places.'>id_</a>; <em class='brace'>}</em>
-<a id='L51' name='L51'></a>  51         <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../R/10164.html' title='Multiple referred from 16083 places.'>name</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/11205.html' title='Multiple defined in 4 places.'>name_</a>; <em class='brace'>}</em>
+<a id='L38' name='L38'></a>  38         <strong class='reserved'>const</strong> <a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18732.html' title='Multiple used in 23 places.'>socket_</a>;
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>mutable</strong> <a href='../S/168.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a> <a href='../S/148.html#L53' title='Defined at 53 in src/server/player_connection.hpp.'>player_</a>;
+<a id='L40' name='L40'></a>  40         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18391.html' title='Multiple used in 480 places.'>shared_ptr</a>&lt;<a href='../D/6564.html' title='Multiple defined in 6 places.'>game</a>&gt; <a href='../Y/10460.html' title='Multiple used in 22 places.'>game_</a>;
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>public</strong>:
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>const</strong> <a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../R/13343.html' title='Multiple referred from 337 places.'>socket</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/18732.html' title='Multiple used in 23 places.'>socket_</a>; <em class='brace'>}</em>
+<a id='L45' name='L45'></a>  45         <a href='../S/168.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>&amp; <a href='../R/7924.html' title='Multiple referred from 674 places.'>info</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../S/148.html#L53' title='Defined at 53 in src/server/player_connection.hpp.'>player_</a>; <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../R/10194.html' title='Multiple referred from 16090 places.'>name</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../S/148.html#L53' title='Defined at 53 in src/server/player_connection.hpp.'>player_</a>.<a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a>(); <em class='brace'>}</em>
+<a id='L47' name='L47'></a>  47         <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18391.html' title='Multiple used in 480 places.'>shared_ptr</a>&lt;<a href='../D/6564.html' title='Multiple defined in 6 places.'>game</a>&gt; <a href='../D/7517.html' title='Multiple defined in 2 places.'>get_game</a>() <strong class='reserved'>const</strong>;
+<a id='L48' name='L48'></a>  48         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18391.html' title='Multiple used in 480 places.'>shared_ptr</a>&lt;<a href='../D/6564.html' title='Multiple defined in 6 places.'>game</a>&gt;&amp; <a href='../D/7517.html' title='Multiple defined in 2 places.'>get_game</a>();
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>int</strong> <a href='../S/144.html#L31' title='Defined at 31 in src/server/player_connection.cpp.'>game_id</a>() <strong class='reserved'>const</strong>;
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/144.html#L36' title='Defined at 36 in src/server/player_connection.cpp.'>set_game</a>(<a href='../S/148.html#L36' title='Defined at 36 in src/server/player_connection.hpp.'>player_record</a>&amp;, <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18391.html' title='Multiple used in 480 places.'>shared_ptr</a>&lt;<a href='../D/6564.html' title='Multiple defined in 6 places.'>game</a>&gt;);
+<a id='L51' name='L51'></a>  51         <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../S/144.html#L41' title='Defined at 41 in src/server/player_connection.cpp.'>enter_lobby</a>(<a href='../S/148.html#L36' title='Defined at 36 in src/server/player_connection.hpp.'>player_record</a>&amp;);
 <a id='L52' name='L52'></a>  52 
-<a id='L53' name='L53'></a>  53         <strong class='reserved'>bool</strong> <a href='../R/8443.html' title='Multiple referred from 7 places.'>is_owner</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> (<a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a> == <a href='../Y/15775.html' title='Multiple used in 80 places.'>owner_</a>); <em class='brace'>}</em>
-<a id='L54' name='L54'></a>  54         <strong class='reserved'>bool</strong> <a href='../R/8418.html' title='Multiple referred from 8 places.'>is_member</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong>
-<a id='L55' name='L55'></a>  55         <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../S/145.html#L167' title='Defined at 167 in src/server/game.cpp.'>is_player</a>(<a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) || <a href='../D/9326.html' title='Multiple defined in 4 places.'>is_observer</a>(<a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>); <em class='brace'>}</em>
-<a id='L56' name='L56'></a>  56         <strong class='reserved'>bool</strong> <a href='../D/3234.html' title='Multiple defined in 3 places.'>allow_observers</a>() <strong class='reserved'>const</strong>;
-<a id='L57' name='L57'></a>  57         <strong class='reserved'>bool</strong> <a href='../D/12533.html' title='Multiple defined in 3 places.'>registered_users_only</a>() <strong class='reserved'>const</strong>;
-<a id='L58' name='L58'></a>  58         <strong class='reserved'>bool</strong> <a href='../D/9326.html' title='Multiple defined in 4 places.'>is_observer</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong>;
-<a id='L59' name='L59'></a>  59         <strong class='reserved'>bool</strong> <a href='../S/145.html#L167' title='Defined at 167 in src/server/game.cpp.'>is_player</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong>;
-<a id='L60' name='L60'></a>  60 
-<a id='L61' name='L61'></a>  61         <em class='comment'>/** Checks whether the connection's ip address is banned. */</em>
-<a id='L62' name='L62'></a>  62         <strong class='reserved'>bool</strong> <a href='../S/145.html#L631' title='Defined at 631 in src/server/game.cpp.'>player_is_banned</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong>;
-<a id='L63' name='L63'></a>  63         <strong class='reserved'>bool</strong> <a href='../R/8783.html' title='Multiple referred from 4 places.'>level_init</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/9695.html' title='Multiple defined in 2 places.'>level_</a>.<a href='../D/4372.html' title='Multiple defined in 14 places.'>child</a>("snapshot") || <a href='../D/9695.html' title='Multiple defined in 2 places.'>level_</a>.<a href='../D/4372.html' title='Multiple defined in 14 places.'>child</a>("scenario"); <em class='brace'>}</em>
-<a id='L64' name='L64'></a>  64         <strong class='reserved'>static</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../R/13423.html' title='Multiple referred from 11 places.'>starting_pos</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L65' name='L65'></a>  65         <em class='brace'>{</em>
-<a id='L66' name='L66'></a>  66                 <strong class='reserved'>if</strong>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../D/13188.html' title='Multiple defined in 2 places.'>scenario</a> = <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>.<a href='../D/4372.html' title='Multiple defined in 14 places.'>child</a>("scenario"))
-<a id='L67' name='L67'></a>  67                         <strong class='reserved'>return</strong> <a href='../D/13188.html' title='Multiple defined in 2 places.'>scenario</a>;
-<a id='L68' name='L68'></a>  68                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../Y/18630.html' title='Multiple used in 69 places.'>snapshot</a> = <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>.<a href='../D/4372.html' title='Multiple defined in 14 places.'>child</a>("snapshot"))
-<a id='L69' name='L69'></a>  69                         <strong class='reserved'>return</strong> <a href='../Y/18630.html' title='Multiple used in 69 places.'>snapshot</a>;
-<a id='L70' name='L70'></a>  70                 <strong class='reserved'>else</strong>
-<a id='L71' name='L71'></a>  71                         <strong class='reserved'>return</strong> &amp;<a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>;
-<a id='L72' name='L72'></a>  72         <em class='brace'>}</em>
-<a id='L73' name='L73'></a>  73         <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../R/13423.html' title='Multiple referred from 11 places.'>starting_pos</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>)
-<a id='L74' name='L74'></a>  74         <em class='brace'>{</em>
-<a id='L75' name='L75'></a>  75                 <strong class='reserved'>if</strong>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../D/13188.html' title='Multiple defined in 2 places.'>scenario</a> = <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>.<a href='../D/4372.html' title='Multiple defined in 14 places.'>child</a>("scenario"))
-<a id='L76' name='L76'></a>  76                         <strong class='reserved'>return</strong> <a href='../D/13188.html' title='Multiple defined in 2 places.'>scenario</a>;
-<a id='L77' name='L77'></a>  77                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../Y/18630.html' title='Multiple used in 69 places.'>snapshot</a> = <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>.<a href='../D/4372.html' title='Multiple defined in 14 places.'>child</a>("snapshot"))
-<a id='L78' name='L78'></a>  78                         <strong class='reserved'>return</strong> <a href='../Y/18630.html' title='Multiple used in 69 places.'>snapshot</a>;
-<a id='L79' name='L79'></a>  79                 <strong class='reserved'>else</strong>
-<a id='L80' name='L80'></a>  80                         <strong class='reserved'>return</strong> &amp;<a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>;
-<a id='L81' name='L81'></a>  81         <em class='brace'>}</em>
-<a id='L82' name='L82'></a>  82         <strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>::<a href='../D/4378.html' title='Multiple defined in 4 places.'>child_list</a> &amp; <a href='../R/7096.html' title='Multiple referred from 9 places.'>get_sides_list</a>() <strong class='reserved'>const</strong>
-<a id='L83' name='L83'></a>  83         <em class='brace'>{</em>
-<a id='L84' name='L84'></a>  84                 <strong class='reserved'>return</strong> <a href='../D/14606.html' title='Multiple defined in 2 places.'>starting_pos</a>( <a href='../D/9695.html' title='Multiple defined in 2 places.'>level_</a>.<a href='../D/12906.html' title='Multiple defined in 2 places.'>root</a>())-&gt;<a href='../D/4388.html' title='Multiple defined in 8 places.'>children</a>("side");
-<a id='L85' name='L85'></a>  85         <em class='brace'>}</em>
-<a id='L86' name='L86'></a>  86         <strong class='reserved'>bool</strong> <a href='../R/13421.html' title='Multiple referred from 9 places.'>started</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../S/208.html#L116' title='Defined at 116 in src/scripting/application_lua_kernel.cpp.'>started_</a>; <em class='brace'>}</em>
-<a id='L87' name='L87'></a>  87 
-<a id='L88' name='L88'></a>  88         <a href='../Y/18543.html' title='Multiple used in 1735 places.'>size_t</a> <a href='../R/10317.html' title='Multiple referred from 9 places.'>nplayers</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/16184.html' title='Multiple used in 24 places.'>players_</a>.<a href='../D/14440.html' title='Multiple defined in 17 places.'>size</a>(); <em class='brace'>}</em>
-<a id='L89' name='L89'></a>  89         <a href='../Y/18543.html' title='Multiple used in 1735 places.'>size_t</a> nobservers() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/15229.html' title='Multiple used in 32 places.'>observers_</a>.<a href='../D/14440.html' title='Multiple defined in 17 places.'>size</a>(); <em class='brace'>}</em>
-<a id='L90' name='L90'></a>  90         <a href='../Y/18543.html' title='Multiple used in 1735 places.'>size_t</a> <a href='../R/4500.html' title='Multiple referred from 21 places.'>current_turn</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> (<a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a> ? <a href='../Y/9202.html' title='Multiple used in 47 places.'>end_turn_</a> / <a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a> + 1 : 0); <em class='brace'>}</em>
-<a id='L91' name='L91'></a>  91         <strong class='reserved'>void</strong> <a href='../S/145.html#L1131' title='Referred from 1131 in src/server/game.cpp.'>set_current_turn</a>(<strong class='reserved'>int</strong> <a href='../D/15321.html' title='Multiple defined in 2 places.'>turn</a>)
-<a id='L92' name='L92'></a>  92         <em class='brace'>{</em>
-<a id='L93' name='L93'></a>  93                 <strong class='reserved'>int</strong> <a href='../D/5138.html' title='Multiple defined in 2 places.'>current_side</a> = <a href='../Y/9202.html' title='Multiple used in 47 places.'>end_turn_</a> % <a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a>;
-<a id='L94' name='L94'></a>  94                 <a href='../Y/9202.html' title='Multiple used in 47 places.'>end_turn_</a> = <a href='../D/5138.html' title='Multiple defined in 2 places.'>current_side</a> + <a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a> * ( <a href='../D/15321.html' title='Multiple defined in 2 places.'>turn</a> - 1);
-<a id='L95' name='L95'></a>  95         <em class='brace'>}</em>
-<a id='L96' name='L96'></a>  96 
-<a id='L97' name='L97'></a>  97         <strong class='reserved'>void</strong> <a href='../S/145.html#L637' title='Defined at 637 in src/server/game.cpp.'>mute_all_observers</a>();
-<a id='L98' name='L98'></a>  98 
-<a id='L99' name='L99'></a>  99         <em class='comment'>/**</em>
-<a id='L100' name='L100'></a> 100 <em class='comment'>         * Mute an observer or give a message of all currently muted observers if no</em>
-<a id='L101' name='L101'></a> 101 <em class='comment'>         * name is given.</em>
-<a id='L102' name='L102'></a> 102 <em class='comment'>         */</em>
-<a id='L103' name='L103'></a> 103         <strong class='reserved'>void</strong> <a href='../S/145.html#L657' title='Defined at 657 in src/server/game.cpp.'>mute_observer</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../Y/14413.html' title='Multiple used in 5 places.'>mute</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/14416.html' title='Multiple used in 11 places.'>muter</a>);
-<a id='L104' name='L104'></a> 104 
-<a id='L105' name='L105'></a> 105         <strong class='reserved'>void</strong> <a href='../S/145.html#L697' title='Defined at 697 in src/server/game.cpp.'>unmute_observer</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../Y/20891.html' title='Multiple used in 5 places.'>unmute</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/20892.html' title='Multiple used in 8 places.'>unmuter</a>);
-<a id='L106' name='L106'></a> 106 
-<a id='L107' name='L107'></a> 107         <em class='comment'>/**</em>
-<a id='L108' name='L108'></a> 108 <em class='comment'>         * Kick a member by name.</em>
-<a id='L109' name='L109'></a> 109 <em class='comment'>         *</em>
-<a id='L110' name='L110'></a> 110 <em class='comment'>         * @return                    The network handle of the removed member if</em>
-<a id='L111' name='L111'></a> 111 <em class='comment'>         *                            successful, null pointer otherwise.</em>
-<a id='L112' name='L112'></a> 112 <em class='comment'>         */</em>
-<a id='L113' name='L113'></a> 113         <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/145.html#L737' title='Defined at 737 in src/server/game.cpp.'>kick_member</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../Y/12527.html' title='Multiple used in 5 places.'>kick</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/12531.html' title='Multiple used in 10 places.'>kicker</a>);
-<a id='L114' name='L114'></a> 114 
-<a id='L115' name='L115'></a> 115         <em class='comment'>/**</em>
-<a id='L116' name='L116'></a> 116 <em class='comment'>         * Ban and kick a user by name.</em>
-<a id='L117' name='L117'></a> 117 <em class='comment'>         *</em>
-<a id='L118' name='L118'></a> 118 <em class='comment'>         * The user does not need to be in this game but logged in.</em>
-<a id='L119' name='L119'></a> 119 <em class='comment'>         *</em>
-<a id='L120' name='L120'></a> 120 <em class='comment'>         * @return                    The network handle of the banned player if he</em>
-<a id='L121' name='L121'></a> 121 <em class='comment'>         *                            was in this game, null pointer otherwise.</em>
-<a id='L122' name='L122'></a> 122 <em class='comment'>         */</em>
-<a id='L123' name='L123'></a> 123         <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/145.html#L768' title='Defined at 768 in src/server/game.cpp.'>ban_user</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../S/149.html#L490' title='Defined at 490 in src/server/ban.cpp.'>ban</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/6118.html' title='Multiple used in 11 places.'>banner</a>);
-<a id='L124' name='L124'></a> 124 
-<a id='L125' name='L125'></a> 125         <strong class='reserved'>void</strong> <a href='../S/145.html#L806' title='Defined at 806 in src/server/game.cpp.'>unban_user</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../S/149.html#L524' title='Defined at 524 in src/server/ban.cpp.'>unban</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/20690.html' title='Multiple used in 8 places.'>unbanner</a>);
-<a id='L126' name='L126'></a> 126 
-<a id='L127' name='L127'></a> 127         <em class='comment'>/**</em>
-<a id='L128' name='L128'></a> 128 <em class='comment'>         * Add a user to the game.</em>
-<a id='L129' name='L129'></a> 129 <em class='comment'>         *</em>
-<a id='L130' name='L130'></a> 130 <em class='comment'>         * @return                    True iff the user successfully joined the game.</em>
-<a id='L131' name='L131'></a> 131 <em class='comment'>         */</em>
-<a id='L132' name='L132'></a> 132         <strong class='reserved'>bool</strong> <a href='../D/2913.html' title='Multiple defined in 2 places.'>add_player</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>, <strong class='reserved'>bool</strong> <a href='../S/318.html#L33' title='Defined at 33 in src/generic_event.hpp.'>observer</a> = <strong class='reserved'>false</strong>);
-<a id='L133' name='L133'></a> 133 
-<a id='L134' name='L134'></a> 134         <em class='comment'>/**</em>
-<a id='L135' name='L135'></a> 135 <em class='comment'>         * Removes a user from the game.</em>
-<a id='L136' name='L136'></a> 136 <em class='comment'>         *</em>
-<a id='L137' name='L137'></a> 137 <em class='comment'>         * @return                    True iff the game ends. That is, if there are</em>
-<a id='L138' name='L138'></a> 138 <em class='comment'>         *                            no more players or the host left on a not yet</em>
-<a id='L139' name='L139'></a> 139 <em class='comment'>         *                            started game.</em>
-<a id='L140' name='L140'></a> 140 <em class='comment'>         */</em>
-<a id='L141' name='L141'></a> 141         <strong class='reserved'>bool</strong> <a href='../D/12619.html' title='Multiple defined in 2 places.'>remove_player</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>, <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../D/5414.html' title='Multiple defined in 2 places.'>disconnect</a>=<strong class='reserved'>false</strong>, <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/8605.html' title='Multiple used in 6 places.'>destruct</a>=<strong class='reserved'>false</strong>);
-<a id='L142' name='L142'></a> 142 
-<a id='L143' name='L143'></a> 143         <em class='comment'>/** Adds players and observers into one vector and returns that. */</em>
-<a id='L144' name='L144'></a> 144         <strong class='reserved'>const</strong> <a href='../S/148.html#L33' title='Defined at 33 in src/server/game.hpp.'>user_vector</a> <a href='../S/145.html#L1587' title='Defined at 1587 in src/server/game.cpp.'>all_game_users</a>() <strong class='reserved'>const</strong>;
-<a id='L145' name='L145'></a> 145 
-<a id='L146' name='L146'></a> 146         <strong class='reserved'>void</strong> <a href='../D/14586.html' title='Multiple defined in 3 places.'>start_game</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18896.html' title='Multiple used in 4 places.'>starter</a>);
-<a id='L147' name='L147'></a> 147         <em class='comment'>//this is performed just before starting and before [start_game] signal</em>
-<a id='L148' name='L148'></a> 148         <em class='comment'>//send scenario_diff's specific to each client so that they locally</em>
-<a id='L149' name='L149'></a> 149         <em class='comment'>//control their human sides</em>
-<a id='L150' name='L150'></a> 150         <strong class='reserved'>void</strong> <a href='../S/145.html#L212' title='Defined at 212 in src/server/game.cpp.'>perform_controller_tweaks</a>();
-<a id='L151' name='L151'></a> 151 
-<a id='L152' name='L152'></a> 152         <strong class='reserved'>void</strong> <a href='../S/145.html#L338' title='Defined at 338 in src/server/game.cpp.'>update_game</a>();
-<a id='L153' name='L153'></a> 153 
-<a id='L154' name='L154'></a> 154         <em class='comment'>/** A user (player only?) asks for the next scenario to advance to. */</em>
-<a id='L155' name='L155'></a> 155         <strong class='reserved'>void</strong> <a href='../S/145.html#L1339' title='Defined at 1339 in src/server/game.cpp.'>load_next_scenario</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>); <em class='comment'>//const</em>
-<a id='L156' name='L156'></a> 156         <em class='comment'>// iceiceice: I unmarked this const because I want to send and record server messages when I fail to tweak sides properly</em>
-<a id='L157' name='L157'></a> 157 
-<a id='L158' name='L158'></a> 158         <em class='comment'>/** Resets the side configuration according to the scenario data. */</em>
-<a id='L159' name='L159'></a> 159         <strong class='reserved'>void</strong> <a href='../S/145.html#L400' title='Defined at 400 in src/server/game.cpp.'>update_side_data</a>();
-<a id='L160' name='L160'></a> 160 
-<a id='L161' name='L161'></a> 161         <em class='comment'>/** Let's a player owning a side give it to another player or observer. */</em>
-<a id='L162' name='L162'></a> 162         <strong class='reserved'>void</strong> <a href='../S/145.html#L464' title='Defined at 464 in src/server/game.cpp.'>transfer_side_control</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>, <strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../D/4151.html' title='Multiple defined in 5 places.'>cfg</a>);
-<a id='L163' name='L163'></a> 163 
-<a id='L164' name='L164'></a> 164         <strong class='reserved'>void</strong> <a href='../D/12082.html' title='Multiple defined in 2 places.'>process_message</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>);
-<a id='L165' name='L165'></a> 165 
-<a id='L166' name='L166'></a> 166         <em class='comment'>/**</em>
-<a id='L167' name='L167'></a> 167 <em class='comment'>         * Handles [end_turn], repackages [commands] with private [speak]s in them</em>
-<a id='L168' name='L168'></a> 168 <em class='comment'>         * and sends the data.</em>
-<a id='L169' name='L169'></a> 169 <em class='comment'>         * Also filters commands from all but the current player.</em>
-<a id='L170' name='L170'></a> 170 <em class='comment'>         * Currently removes all commands but [speak] for observers and all but</em>
-<a id='L171' name='L171'></a> 171 <em class='comment'>         * [speak], [label] and [rename] for players.</em>
-<a id='L172' name='L172'></a> 172 <em class='comment'>         *</em>
-<a id='L173' name='L173'></a> 173 <em class='comment'>         * @returns                   True if the turn ended.</em>
-<a id='L174' name='L174'></a> 174 <em class='comment'>         */</em>
-<a id='L175' name='L175'></a> 175         <strong class='reserved'>bool</strong> <a href='../S/145.html#L887' title='Defined at 887 in src/server/game.cpp.'>process_turn</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>);
-<a id='L176' name='L176'></a> 176 
-<a id='L177' name='L177'></a> 177         <em class='comment'>/** Handles incoming [whiteboard] data. */</em>
-<a id='L178' name='L178'></a> 178         <strong class='reserved'>void</strong> <a href='../S/145.html#L1094' title='Defined at 1094 in src/server/game.cpp.'>process_whiteboard</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>);
-<a id='L179' name='L179'></a> 179         <em class='comment'>/** Handles incoming [change_turns_wml] data. */</em>
-<a id='L180' name='L180'></a> 180         <strong class='reserved'>void</strong> <a href='../S/145.html#L1119' title='Defined at 1119 in src/server/game.cpp.'>process_change_turns_wml</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>);
-<a id='L181' name='L181'></a> 181 
-<a id='L182' name='L182'></a> 182         <em class='comment'>/**</em>
-<a id='L183' name='L183'></a> 183 <em class='comment'>         * Set the description to the number of available slots.</em>
-<a id='L184' name='L184'></a> 184 <em class='comment'>         *</em>
-<a id='L185' name='L185'></a> 185 <em class='comment'>         * @returns                   True iff the number of slots has changed.</em>
-<a id='L186' name='L186'></a> 186 <em class='comment'>         */</em>
-<a id='L187' name='L187'></a> 187         <strong class='reserved'>bool</strong> <a href='../S/145.html#L604' title='Defined at 604 in src/server/game.cpp.'>describe_slots</a>();
-<a id='L188' name='L188'></a> 188 
-<a id='L189' name='L189'></a> 189         <strong class='reserved'>void</strong> <a href='../D/13375.html' title='Multiple defined in 3 places.'>send_server_message_to_all</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>, <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>()) <strong class='reserved'>const</strong>;
-<a id='L190' name='L190'></a> 190         <strong class='reserved'>void</strong> <a href='../R/12249.html' title='Multiple referred from 7 places.'>send_server_message_to_all</a>(<strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>, <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>()) <strong class='reserved'>const</strong>
-<a id='L191' name='L191'></a> 191         <em class='brace'>{</em>
-<a id='L192' name='L192'></a> 192                 <a href='../D/13375.html' title='Multiple defined in 3 places.'>send_server_message_to_all</a>(<a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>.<a href='../D/3849.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>);
-<a id='L193' name='L193'></a> 193         <em class='brace'>}</em>
-<a id='L194' name='L194'></a> 194 
-<a id='L195' name='L195'></a> 195         <strong class='reserved'>void</strong> <a href='../D/13374.html' title='Multiple defined in 3 places.'>send_server_message</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>, <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>(), <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>* <a href='../Y/8826.html' title='Multiple used in 150 places.'>doc</a>=<a href='../Y/15116.html' title='Multiple used in 1946 places.'>nullptr</a>) <strong class='reserved'>const</strong>;
-<a id='L196' name='L196'></a> 196         <strong class='reserved'>void</strong> <a href='../R/12248.html' title='Multiple referred from 65 places.'>send_server_message</a>(<strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>, <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>(), <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>* <a href='../Y/8826.html' title='Multiple used in 150 places.'>doc</a>=<a href='../Y/15116.html' title='Multiple used in 1946 places.'>nullptr</a>) <strong class='reserved'>const</strong>
-<a id='L197' name='L197'></a> 197         <em class='brace'>{</em>
-<a id='L198' name='L198'></a> 198                 <a href='../D/13374.html' title='Multiple defined in 3 places.'>send_server_message</a>(<a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>.<a href='../D/3849.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>, <a href='../Y/8826.html' title='Multiple used in 150 places.'>doc</a>);
-<a id='L199' name='L199'></a> 199         <em class='brace'>}</em>
-<a id='L200' name='L200'></a> 200 
-<a id='L201' name='L201'></a> 201         <em class='comment'>/** Send data to all players in this game except 'exclude'. */</em>
-<a id='L202' name='L202'></a> 202         <strong class='reserved'>void</strong> <a href='../D/13352.html' title='Multiple defined in 2 places.'>send_and_record_server_message</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>());
-<a id='L203' name='L203'></a> 203         <strong class='reserved'>void</strong> <a href='../R/12226.html' title='Multiple referred from 27 places.'>send_and_record_server_message</a>(<strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>())
-<a id='L204' name='L204'></a> 204         <em class='brace'>{</em>
-<a id='L205' name='L205'></a> 205                 <a href='../D/13352.html' title='Multiple defined in 2 places.'>send_and_record_server_message</a>(<a href='../D/10869.html' title='Multiple defined in 7 places.'>message</a>.<a href='../D/3849.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>);
-<a id='L206' name='L206'></a> 206         <em class='brace'>}</em>
-<a id='L207' name='L207'></a> 207 
-<a id='L208' name='L208'></a> 208         <strong class='reserved'>void</strong> <a href='../D/13356.html' title='Multiple defined in 4 places.'>send_data</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>(), <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/15816.html' title='Multiple used in 4 places.'>packet_type</a> = "") <strong class='reserved'>const</strong>;
-<a id='L209' name='L209'></a> 209 
-<a id='L210' name='L210'></a> 210         <strong class='reserved'>void</strong> <a href='../D/4464.html' title='Multiple defined in 2 places.'>clear_history</a>();
-<a id='L211' name='L211'></a> 211         <strong class='reserved'>void</strong> <a href='../S/145.html#L1559' title='Defined at 1559 in src/server/game.cpp.'>record_data</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>* <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>);
-<a id='L212' name='L212'></a> 212         <strong class='reserved'>void</strong> <a href='../D/13148.html' title='Multiple defined in 4 places.'>save_replay</a>();
-<a id='L213' name='L213'></a> 213 
-<a id='L214' name='L214'></a> 214         <em class='comment'>/** The full scenario data. */</em>
-<a id='L215' name='L215'></a> 215         <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../R/8781.html' title='Multiple referred from 981 places.'>level</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/9695.html' title='Multiple defined in 2 places.'>level_</a>; <em class='brace'>}</em>
-<a id='L216' name='L216'></a> 216 
-<a id='L217' name='L217'></a> 217         <em class='comment'>/**</em>
-<a id='L218' name='L218'></a> 218 <em class='comment'>         * Functions to set/get the address of the game's summary description as</em>
-<a id='L219' name='L219'></a> 219 <em class='comment'>         * sent to players in the lobby.</em>
-<a id='L220' name='L220'></a> 220 <em class='comment'>         */</em>
-<a id='L221' name='L221'></a> 221         <strong class='reserved'>void</strong> <a href='../S/145.html#L1569' title='Defined at 1569 in src/server/game.cpp.'>set_description</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../D/5342.html' title='Multiple defined in 2 places.'>desc</a>);
-<a id='L222' name='L222'></a> 222         <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../R/4695.html' title='Multiple referred from 3325 places.'>description</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../S/535.html#L153' title='Defined at 153 in src/gui/core/window_builder.hpp.'>description_</a>; <em class='brace'>}</em>
-<a id='L223' name='L223'></a> 223 
-<a id='L224' name='L224'></a> 224         <strong class='reserved'>void</strong> <a href='../R/12729.html' title='Multiple referred from 7 places.'>set_password</a>(<strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/16012.html' title='Multiple used in 14 places.'>passwd</a>) <em class='brace'>{</em> <a href='../Y/16013.html' title='Multiple used in 5 places.'>password_</a> = <a href='../Y/16012.html' title='Multiple used in 14 places.'>passwd</a>; <em class='brace'>}</em>
-<a id='L225' name='L225'></a> 225         <strong class='reserved'>bool</strong> <a href='../S/157.html#L1210' title='Referred from 1210 in src/server/server.cpp.'>password_matches</a>(<strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/16012.html' title='Multiple used in 14 places.'>passwd</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em>
-<a id='L226' name='L226'></a> 226                 <strong class='reserved'>return</strong> <a href='../Y/16013.html' title='Multiple used in 5 places.'>password_</a>.<a href='../D/5807.html' title='Multiple defined in 31 places.'>empty</a>() || <a href='../Y/16012.html' title='Multiple used in 14 places.'>passwd</a> == <a href='../Y/16013.html' title='Multiple used in 5 places.'>password_</a>;
-<a id='L227' name='L227'></a> 227         <em class='brace'>}</em>
-<a id='L228' name='L228'></a> 228 
-<a id='L229' name='L229'></a> 229         <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../R/13711.html' title='Multiple referred from 2 places.'>termination_reason</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em>
-<a id='L230' name='L230'></a> 230                 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/5032.html' title='Multiple used in 2 places.'>aborted</a> = "aborted";
-<a id='L231' name='L231'></a> 231                 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/15052.html' title='Multiple used in 2 places.'>not_started</a> = "not started";
-<a id='L232' name='L232'></a> 232                 <strong class='reserved'>return</strong> <a href='../S/208.html#L116' title='Defined at 116 in src/scripting/application_lua_kernel.cpp.'>started_</a> ? (<a href='../Y/19570.html' title='Multiple used in 4 places.'>termination_</a>.<a href='../D/5807.html' title='Multiple defined in 31 places.'>empty</a>() ? <a href='../Y/5032.html' title='Multiple used in 2 places.'>aborted</a> : <a href='../Y/19570.html' title='Multiple used in 4 places.'>termination_</a>) : <a href='../Y/15052.html' title='Multiple used in 2 places.'>not_started</a>;
-<a id='L233' name='L233'></a> 233         <em class='brace'>}</em>
-<a id='L234' name='L234'></a> 234 
-<a id='L235' name='L235'></a> 235         <strong class='reserved'>void</strong> <a href='../S/145.html#L1576' title='Defined at 1576 in src/server/game.cpp.'>set_termination_reason</a>(<strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/382.html#L42' title='Defined at 42 in src/gui/dialogs/multiplayer/mp_cmd_wrapper.hpp.'>reason</a>);
-<a id='L236' name='L236'></a> 236 
-<a id='L237' name='L237'></a> 237         <strong class='reserved'>void</strong> <a href='../S/145.html#L1060' title='Defined at 1060 in src/server/game.cpp.'>handle_choice</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>);
-<a id='L238' name='L238'></a> 238 
-<a id='L239' name='L239'></a> 239         <strong class='reserved'>void</strong> <a href='../S/145.html#L994' title='Defined at 994 in src/server/game.cpp.'>handle_random_choice</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>);
-<a id='L240' name='L240'></a> 240 
-<a id='L241' name='L241'></a> 241         <strong class='reserved'>void</strong> <a href='../S/145.html#L1012' title='Defined at 1012 in src/server/game.cpp.'>handle_controller_choice</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>);
-<a id='L242' name='L242'></a> 242 
-<a id='L243' name='L243'></a> 243         <strong class='reserved'>void</strong> <a href='../S/157.html#L1358' title='Referred from 1358 in src/server/server.cpp.'>reset_last_synced_context_id</a>() <em class='brace'>{</em> <a href='../S/145.html#L105' title='Defined at 105 in src/server/game.cpp.'>last_choice_request_id_</a> = -1; <em class='brace'>}</em>
-<a id='L244' name='L244'></a> 244         <em class='comment'>/**</em>
-<a id='L245' name='L245'></a> 245 <em class='comment'>         * Function which returns true iff 'player' controls any of the sides spcified in 'sides'.</em>
-<a id='L246' name='L246'></a> 246 <em class='comment'>         */</em>
-<a id='L247' name='L247'></a> 247         <strong class='reserved'>bool</strong> <a href='../S/145.html#L1421' title='Defined at 1421 in src/server/game.cpp.'>controls_side</a>(<strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<strong class='reserved'>int</strong>&gt;&amp; <a href='../Y/18446.html' title='Multiple used in 165 places.'>sides</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong>;
-<a id='L248' name='L248'></a> 248 <strong class='reserved'>private</strong>:
-<a id='L249' name='L249'></a> 249         <em class='comment'>//forbidden operations</em>
-<a id='L250' name='L250'></a> 250         <a href='../D/6545.html' title='Multiple defined in 6 places.'>game</a>(<strong class='reserved'>const</strong> <a href='../D/6545.html' title='Multiple defined in 6 places.'>game</a>&amp;);
-<a id='L251' name='L251'></a> 251         <strong class='reserved'>void</strong> <strong class='reserved'>operator</strong>=(<strong class='reserved'>const</strong> <a href='../D/6545.html' title='Multiple defined in 6 places.'>game</a>&amp;);
-<a id='L252' name='L252'></a> 252 
-<a id='L253' name='L253'></a> 253         <a href='../Y/18543.html' title='Multiple used in 1735 places.'>size_t</a> <a href='../R/4491.html' title='Multiple referred from 88 places.'>current_side</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> (<a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a> ? <a href='../Y/9202.html' title='Multiple used in 47 places.'>end_turn_</a> % <a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a> : 0); <em class='brace'>}</em>
-<a id='L254' name='L254'></a> 254         <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../R/4489.html' title='Multiple referred from 31 places.'>current_player</a>() <strong class='reserved'>const</strong>
-<a id='L255' name='L255'></a> 255         <em class='brace'>{</em> <strong class='reserved'>return</strong> (<a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a> ? <a href='../S/145.html#L1398' title='Defined at 1398 in src/server/game.cpp.'>sides_</a>[<a href='../D/5138.html' title='Multiple defined in 2 places.'>current_side</a>()] : <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>()); <em class='brace'>}</em>
-<a id='L256' name='L256'></a> 256         <strong class='reserved'>bool</strong> <a href='../R/8345.html' title='Multiple referred from 2 places.'>is_current_player</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong>
-<a id='L257' name='L257'></a> 257         <em class='brace'>{</em> <strong class='reserved'>return</strong> (<a href='../D/5136.html' title='Multiple defined in 2 places.'>current_player</a>() == <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>); <em class='brace'>}</em>
-<a id='L258' name='L258'></a> 258         <strong class='reserved'>bool</strong> <a href='../S/145.html#L156' title='Defined at 156 in src/server/game.cpp.'>is_muted_observer</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <strong class='reserved'>const</strong>;
-<a id='L259' name='L259'></a> 259         <strong class='reserved'>bool</strong> all_observers_muted() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/5407.html' title='Multiple used in 7 places.'>all_observers_muted_</a>; <em class='brace'>}</em>
-<a id='L260' name='L260'></a> 260         <strong class='reserved'>void</strong> <a href='../S/145.html#L646' title='Defined at 646 in src/server/game.cpp.'>send_muted_observers</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>) <strong class='reserved'>const</strong>;
-<a id='L261' name='L261'></a> 261 
-<a id='L262' name='L262'></a> 262         <strong class='reserved'>bool</strong> <a href='../S/145.html#L347' title='Defined at 347 in src/server/game.cpp.'>send_taken_side</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/4151.html' title='Multiple defined in 5 places.'>cfg</a>, <strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>::<a href='../D/4378.html' title='Multiple defined in 4 places.'>child_list</a>::<a href='../D/4807.html' title='Multiple defined in 12 places.'>const_iterator</a> <a href='../D/14339.html' title='Multiple defined in 3 places.'>side</a>) <strong class='reserved'>const</strong>;
-<a id='L263' name='L263'></a> 263         <em class='comment'>/**</em>
-<a id='L264' name='L264'></a> 264 <em class='comment'>         * Figures out which side to take and tells that side to the game owner.</em>
-<a id='L265' name='L265'></a> 265 <em class='comment'>         *</em>
-<a id='L266' name='L266'></a> 266 <em class='comment'>         * The owner then should send a [scenario_diff] that implements the side</em>
-<a id='L267' name='L267'></a> 267 <em class='comment'>         * change and a subsequent update_side_data() call makes it actually</em>
-<a id='L268' name='L268'></a> 268 <em class='comment'>         * happen.</em>
-<a id='L269' name='L269'></a> 269 <em class='comment'>         * First we look for a side where save_id= or current_player= matches the</em>
-<a id='L270' name='L270'></a> 270 <em class='comment'>         * new user's name then we search for the first controller="network" side.</em>
-<a id='L271' name='L271'></a> 271 <em class='comment'>         */</em>
-<a id='L272' name='L272'></a> 272         <strong class='reserved'>bool</strong> <a href='../S/145.html#L361' title='Defined at 361 in src/server/game.cpp.'>take_side</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>);
-<a id='L273' name='L273'></a> 273 
-<a id='L274' name='L274'></a> 274         <em class='comment'>/**</em>
-<a id='L275' name='L275'></a> 275 <em class='comment'>         * Send [change_controller] message to tell all clients the new controller's name</em>
-<a id='L276' name='L276'></a> 276 <em class='comment'>         * or controller type (human or ai).</em>
-<a id='L277' name='L277'></a> 277 <em class='comment'>         */</em>
-<a id='L278' name='L278'></a> 278         <strong class='reserved'>void</strong> <a href='../D/4213.html' title='Multiple defined in 3 places.'>change_controller</a>(<strong class='reserved'>const</strong> <a href='../Y/18543.html' title='Multiple used in 1735 places.'>size_t</a> <a href='../Y/18428.html' title='Multiple used in 182 places.'>side_num</a>,
-<a id='L279' name='L279'></a> 279                         <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>,
-<a id='L280' name='L280'></a> 280                         <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/16177.html' title='Multiple used in 6 places.'>player_name</a>,
-<a id='L281' name='L281'></a> 281                         <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/16174.html' title='Multiple used in 4 places.'>player_left</a> = <strong class='reserved'>true</strong>);
-<a id='L282' name='L282'></a> 282         <strong class='reserved'>void</strong> transfer_ai_sides(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/167.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>);
-<a id='L283' name='L283'></a> 283         <strong class='reserved'>void</strong> <a href='../S/145.html#L731' title='Defined at 731 in src/server/game.cpp.'>send_leave_game</a>(<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>) <strong class='reserved'>const</strong>;
-<a id='L284' name='L284'></a> 284         <em class='comment'>/**</em>
-<a id='L285' name='L285'></a> 285 <em class='comment'>                @param sides: a comma sperated list of side numbers to which the package should be sent,</em>
-<a id='L286' name='L286'></a> 286 <em class='comment'>        */</em>
-<a id='L287' name='L287'></a> 287         <strong class='reserved'>void</strong> <a href='../S/145.html#L1409' title='Defined at 1409 in src/server/game.cpp.'>send_data_sides</a>(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../S/151.html#L33' title='Defined at 33 in src/server/simple_wml.hpp.'>string_span</a>&amp; <a href='../Y/18446.html' title='Multiple used in 165 places.'>sides</a>,
-<a id='L288' name='L288'></a> 288                         <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>(), <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/15816.html' title='Multiple used in 4 places.'>packet_type</a> = "") <strong class='reserved'>const</strong>;
-<a id='L289' name='L289'></a> 289         <strong class='reserved'>void</strong> send_data_observers(<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5180.html' title='Multiple defined in 15 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>(), <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/15816.html' title='Multiple used in 4 places.'>packet_type</a> = "") <strong class='reserved'>const</strong>;
-<a id='L290' name='L290'></a> 290 
-<a id='L291' name='L291'></a> 291         <em class='comment'>/**</em>
-<a id='L292' name='L292'></a> 292 <em class='comment'>         * Send [observer] tags of all the observers in the game to the user or</em>
-<a id='L293' name='L293'></a> 293 <em class='comment'>         * everyone if none given.</em>
-<a id='L294' name='L294'></a> 294 <em class='comment'>         */</em>
-<a id='L295' name='L295'></a> 295         <strong class='reserved'>void</strong> <a href='../S/145.html#L1448' title='Defined at 1448 in src/server/game.cpp.'>send_observerjoins</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>()) <strong class='reserved'>const</strong>;
-<a id='L296' name='L296'></a> 296         <strong class='reserved'>void</strong> <a href='../S/145.html#L1464' title='Defined at 1464 in src/server/game.cpp.'>send_observerquit</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/318.html#L33' title='Defined at 33 in src/generic_event.hpp.'>observer</a>) <strong class='reserved'>const</strong>;
-<a id='L297' name='L297'></a> 297         <strong class='reserved'>void</strong> <a href='../S/145.html#L1473' title='Defined at 1473 in src/server/game.cpp.'>send_history</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>) <strong class='reserved'>const</strong>;
-<a id='L298' name='L298'></a> 298 
-<a id='L299' name='L299'></a> 299         <em class='comment'>/** In case of a host transfer, notify the new host about its status. */</em>
-<a id='L300' name='L300'></a> 300         <strong class='reserved'>void</strong> <a href='../S/145.html#L594' title='Defined at 594 in src/server/game.cpp.'>notify_new_host</a>();
-<a id='L301' name='L301'></a> 301 
-<a id='L302' name='L302'></a> 302         <em class='comment'>/** Shortcut to a convenience function for finding a user by name. */</em>
-<a id='L303' name='L303'></a> 303         <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/145.html#L1643' title='Defined at 1643 in src/server/game.cpp.'>find_user</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../S/151.html#L33' title='Defined at 33 in src/server/simple_wml.hpp.'>string_span</a>&amp; <a href='../D/11204.html' title='Multiple defined in 26 places.'>name</a>);
-<a id='L304' name='L304'></a> 304 
-<a id='L305' name='L305'></a> 305         <strong class='reserved'>bool</strong> observers_can_label() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>; <em class='brace'>}</em>
-<a id='L306' name='L306'></a> 306         <strong class='reserved'>bool</strong> observers_can_chat() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>; <em class='brace'>}</em>
-<a id='L307' name='L307'></a> 307         <strong class='reserved'>bool</strong> <a href='../S/145.html#L846' title='Defined at 846 in src/server/game.cpp.'>is_legal_command</a>(<strong class='reserved'>const</strong> <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>&amp; <a href='../D/4593.html' title='Multiple defined in 2 places.'>command</a>, <strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>);
-<a id='L308' name='L308'></a> 308 
-<a id='L309' name='L309'></a> 309         <em class='comment'>/**</em>
-<a id='L310' name='L310'></a> 310 <em class='comment'>         * Checks whether a user has the same IP as members of this game.</em>
-<a id='L311' name='L311'></a> 311 <em class='comment'>         * If observer is true it only checks against players.</em>
-<a id='L312' name='L312'></a> 312 <em class='comment'>         * @return  A comma separated string of members with matching IPs.</em>
-<a id='L313' name='L313'></a> 313 <em class='comment'>         */</em>
-<a id='L314' name='L314'></a> 314         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/145.html#L1433' title='Defined at 1433 in src/server/game.cpp.'>has_same_ip</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../S/166.html#L50' title='Defined at 50 in src/server/sample_user_handler.hpp.'>user</a>, <strong class='reserved'>bool</strong> <a href='../S/318.html#L33' title='Defined at 33 in src/generic_event.hpp.'>observer</a>) <strong class='reserved'>const</strong>;
-<a id='L315' name='L315'></a> 315 
-<a id='L316' name='L316'></a> 316         <em class='comment'>/**</em>
-<a id='L317' name='L317'></a> 317 <em class='comment'>         * Function which should be called every time a player ends their turn</em>
-<a id='L318' name='L318'></a> 318 <em class='comment'>         * (i.e. [end_turn] received). This will update the 'turn' attribute for</em>
-<a id='L319' name='L319'></a> 319 <em class='comment'>         * the game's description when appropriate. Will return true iff there has</em>
-<a id='L320' name='L320'></a> 320 <em class='comment'>         * been a change.</em>
-<a id='L321' name='L321'></a> 321 <em class='comment'>         */</em>
-<a id='L322' name='L322'></a> 322         <strong class='reserved'>bool</strong> <a href='../D/5851.html' title='Multiple defined in 8 places.'>end_turn</a>();
-<a id='L323' name='L323'></a> 323 
-<a id='L324' name='L324'></a> 324         <em class='comment'>/**</em>
-<a id='L325' name='L325'></a> 325 <em class='comment'>         * Function to send a list of users to all clients.</em>
-<a id='L326' name='L326'></a> 326 <em class='comment'>         *</em>
-<a id='L327' name='L327'></a> 327 <em class='comment'>         * Only sends data if the game is initialized but not yet started.</em>
-<a id='L328' name='L328'></a> 328 <em class='comment'>         */</em>
-<a id='L329' name='L329'></a> 329         <strong class='reserved'>void</strong> <a href='../S/145.html#L1320' title='Defined at 1320 in src/server/game.cpp.'>send_user_list</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9511.html' title='Multiple used in 58 places.'>exclude</a>=<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>()) <strong class='reserved'>const</strong>;
-<a id='L330' name='L330'></a> 330 
-<a id='L331' name='L331'></a> 331         <em class='comment'>/** Returns the name of the user or "(unfound)". */</em>
-<a id='L332' name='L332'></a> 332         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/145.html#L187' title='Defined at 187 in src/server/game.cpp.'>username</a>(<strong class='reserved'>const</strong> <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/16136.html' title='Multiple used in 19 places.'>pl</a>) <strong class='reserved'>const</strong>;
-<a id='L333' name='L333'></a> 333 
-<a id='L334' name='L334'></a> 334         <em class='comment'>/** Returns a comma separated list of user names. */</em>
-<a id='L335' name='L335'></a> 335         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/145.html#L197' title='Defined at 197 in src/server/game.cpp.'>list_users</a>(<a href='../S/148.html#L33' title='Defined at 33 in src/server/game.hpp.'>user_vector</a> <a href='../D/15748.html' title='Multiple defined in 2 places.'>users</a>, <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/10368.html' title='Multiple used in 172 places.'>func</a>) <strong class='reserved'>const</strong>;
-<a id='L336' name='L336'></a> 336 
-<a id='L337' name='L337'></a> 337         <em class='comment'>/** Function to log when we don't find a connection in player_info_. */</em>
-<a id='L338' name='L338'></a> 338         <strong class='reserved'>void</strong> <a href='../S/145.html#L73' title='Defined at 73 in src/server/game.cpp.'>missing_user</a>(<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../D/14483.html' title='Multiple defined in 3 places.'>socket</a>, <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/10368.html' title='Multiple used in 172 places.'>func</a>) <strong class='reserved'>const</strong>;
-<a id='L339' name='L339'></a> 339 
-<a id='L340' name='L340'></a> 340         <em class='comment'>/** calculates the initial value for sides_, side_controllerds_, nsides_*/</em>
-<a id='L341' name='L341'></a> 341         <strong class='reserved'>void</strong> <a href='../S/145.html#L391' title='Defined at 391 in src/server/game.cpp.'>reset_sides</a>();
-<a id='L342' name='L342'></a> 342         <em class='comment'>/** Helps debugging player and observer lists. */</em>
-<a id='L343' name='L343'></a> 343         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/145.html#L1596' title='Defined at 1596 in src/server/game.cpp.'>debug_player_info</a>() <strong class='reserved'>const</strong>;
-<a id='L344' name='L344'></a> 344         <em class='comment'>/** Helps debugging controller tweaks. */</em>
-<a id='L345' name='L345'></a> 345         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/145.html#L1627' title='Defined at 1627 in src/server/game.cpp.'>debug_sides_info</a>() <strong class='reserved'>const</strong>;
-<a id='L346' name='L346'></a> 346 
-<a id='L347' name='L347'></a> 347         <a href='../S/147.html#L72' title='Defined at 72 in src/server/player_connection.hpp.'>player_connections</a>&amp; <a href='../Y/16169.html' title='Multiple used in 122 places.'>player_connections_</a>;
-<a id='L348' name='L348'></a> 348 
-<a id='L349' name='L349'></a> 349         <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../Y/11623.html' title='Multiple used in 3 places.'>id_num</a>;
-<a id='L350' name='L350'></a> 350         <strong class='reserved'>int</strong> <a href='../D/8583.html' title='Multiple defined in 8 places.'>id_</a>;
-<a id='L351' name='L351'></a> 351 
-<a id='L352' name='L352'></a> 352         <em class='comment'>/** The name of the game. */</em>
-<a id='L353' name='L353'></a> 353         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/11205.html' title='Multiple defined in 4 places.'>name_</a>;
-<a id='L354' name='L354'></a> 354         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/16013.html' title='Multiple used in 5 places.'>password_</a>;
-<a id='L355' name='L355'></a> 355 
-<a id='L356' name='L356'></a> 356         <em class='comment'>/** The game host or later owner (if the host left). */</em>
-<a id='L357' name='L357'></a> 357         <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/15775.html' title='Multiple used in 80 places.'>owner_</a>;
-<a id='L358' name='L358'></a> 358 
-<a id='L359' name='L359'></a> 359         <em class='comment'>/** A vector of players (members owning a side). */</em>
-<a id='L360' name='L360'></a> 360         <a href='../S/148.html#L33' title='Defined at 33 in src/server/game.hpp.'>user_vector</a> <a href='../Y/16184.html' title='Multiple used in 24 places.'>players_</a>;
-<a id='L361' name='L361'></a> 361 
-<a id='L362' name='L362'></a> 362         <em class='comment'>/** A vector of observers (members not owning a side). */</em>
-<a id='L363' name='L363'></a> 363         <a href='../S/148.html#L33' title='Defined at 33 in src/server/game.hpp.'>user_vector</a> <a href='../Y/15229.html' title='Multiple used in 32 places.'>observers_</a>;
-<a id='L364' name='L364'></a> 364         <a href='../S/148.html#L33' title='Defined at 33 in src/server/game.hpp.'>user_vector</a> <a href='../Y/14415.html' title='Multiple used in 9 places.'>muted_observers_</a>;
-<a id='L365' name='L365'></a> 365 
-<a id='L366' name='L366'></a> 366         <em class='comment'>/** A vector of side owners. */</em>
-<a id='L367' name='L367'></a> 367         <a href='../S/148.html#L34' title='Defined at 34 in src/server/game.hpp.'>side_vector</a> <a href='../S/145.html#L1398' title='Defined at 1398 in src/server/game.cpp.'>sides_</a>;
-<a id='L368' name='L368'></a> 368 
-<a id='L369' name='L369'></a> 369         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<a href='../Y/431.html' title='Multiple used in 42 places.'>CONTROLLER</a>&gt; <a href='../Y/18416.html' title='Multiple used in 15 places.'>side_controllers_</a>;
-<a id='L370' name='L370'></a> 370 
-<a id='L371' name='L371'></a> 371         <em class='comment'>/** Number of sides in the current scenario. */</em>
-<a id='L372' name='L372'></a> 372         <strong class='reserved'>int</strong> <a href='../Y/15091.html' title='Multiple used in 14 places.'>nsides_</a>;
-<a id='L373' name='L373'></a> 373         <strong class='reserved'>bool</strong> <a href='../S/208.html#L116' title='Defined at 116 in src/scripting/application_lua_kernel.cpp.'>started_</a>;
-<a id='L374' name='L374'></a> 374 
-<a id='L375' name='L375'></a> 375         <em class='comment'>/**</em>
-<a id='L376' name='L376'></a> 376 <em class='comment'>                The current scenario data.´</em>
-<a id='L377' name='L377'></a> 377 <em class='comment'>                WRONG! This contains the initial state or the state from which</em>
-<a id='L378' name='L378'></a> 378 <em class='comment'>                the game was loaded from.</em>
-<a id='L379' name='L379'></a> 379 <em class='comment'>                Using this to make assumptions about the current gamestate is</em>
-<a id='L380' name='L380'></a> 380 <em class='comment'>                extremely dangerous and should especially not be done for anything</em>
-<a id='L381' name='L381'></a> 381 <em class='comment'>                that can be nodified by wml (especially by [modify_side]),</em>
-<a id='L382' name='L382'></a> 382 <em class='comment'>                like team_name, controller ... in [side].</em>
-<a id='L383' name='L383'></a> 383 <em class='comment'>                FIXME: move every code here that uses this object to query those</em>
-<a id='L384' name='L384'></a> 384 <em class='comment'>                information to the clients. But note that there are some checks</em>
-<a id='L385' name='L385'></a> 385 <em class='comment'>                (like controller == null) that are definitely needed by the server and</em>
-<a id='L386' name='L386'></a> 386 <em class='comment'>                in this case we should try to modify the client to inform the server if</em>
-<a id='L387' name='L387'></a> 387 <em class='comment'>                a change of those properties occur. Ofc we shouldn't update level_</em>
-<a id='L388' name='L388'></a> 388 <em class='comment'>                then, but rather store that information in a seperate object</em>
-<a id='L389' name='L389'></a> 389 <em class='comment'>                (like in side_controllers_).</em>
-<a id='L390' name='L390'></a> 390 <em class='comment'>        */</em>
-<a id='L391' name='L391'></a> 391         <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a> <a href='../D/9695.html' title='Multiple defined in 2 places.'>level_</a>;
-<a id='L392' name='L392'></a> 392 
-<a id='L393' name='L393'></a> 393         <em class='comment'>/** Replay data. */</em>
-<a id='L394' name='L394'></a> 394         <strong class='reserved'>typedef</strong> <a href='../D/3701.html' title='Multiple defined in 3 places.'>boost</a>::<a href='../D/12130.html' title='Multiple defined in 2 places.'>ptr_vector</a>&lt;<a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5606.html' title='Multiple defined in 2 places.'>document</a>&gt; <a href='../R/7655.html' title='Multiple referred from 24 places.'>history</a>;
-<a id='L395' name='L395'></a> 395         <strong class='reserved'>mutable</strong> <a href='../D/8512.html' title='Multiple defined in 2 places.'>history</a> <a href='../S/556.html#L126' title='Defined at 126 in src/gui/widgets/password_box.cpp.'>history_</a>;
-<a id='L396' name='L396'></a> 396 
-<a id='L397' name='L397'></a> 397         <em class='comment'>/** Pointer to the game's description in the games_and_users_list_. */</em>
-<a id='L398' name='L398'></a> 398         <a href='../D/14420.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/11322.html' title='Multiple defined in 4 places.'>node</a>* <a href='../S/535.html#L153' title='Defined at 153 in src/gui/core/window_builder.hpp.'>description_</a>;
-<a id='L399' name='L399'></a> 399 
-<a id='L400' name='L400'></a> 400         <strong class='reserved'>int</strong> <a href='../Y/9202.html' title='Multiple used in 47 places.'>end_turn_</a>;
-<a id='L401' name='L401'></a> 401         <strong class='reserved'>int</strong> <a href='../Y/15159.html' title='Multiple used in 16 places.'>num_turns_</a>;
-<a id='L402' name='L402'></a> 402         <strong class='reserved'>bool</strong> <a href='../Y/5407.html' title='Multiple used in 7 places.'>all_observers_muted_</a>;
-<a id='L403' name='L403'></a> 403 
-<a id='L404' name='L404'></a> 404         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../Y/6119.html' title='Multiple used in 25 places.'>bans_</a>;
-<a id='L405' name='L405'></a> 405 
-<a id='L406' name='L406'></a> 406         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/19570.html' title='Multiple used in 4 places.'>termination_</a>;
-<a id='L407' name='L407'></a> 407 
-<a id='L408' name='L408'></a> 408         <strong class='reserved'>bool</strong> <a href='../Y/17685.html' title='Multiple used in 7 places.'>save_replays_</a>;
-<a id='L409' name='L409'></a> 409         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/17231.html' title='Multiple used in 7 places.'>replay_save_path_</a>;
-<a id='L410' name='L410'></a> 410 
-<a id='L411' name='L411'></a> 411         <em class='comment'>/** A wrapper for mersenne twister rng which generates randomness for this game */</em>
-<a id='L412' name='L412'></a> 412         <a href='../D/12260.html' title='Multiple defined in 11 places.'>randomness</a>::<a href='../S/1246.html#L29' title='Defined at 29 in src/mt_rng.hpp.'>mt_rng</a> <a href='../D/12898.html' title='Multiple defined in 2 places.'>rng_</a>;
-<a id='L413' name='L413'></a> 413         <strong class='reserved'>int</strong> <a href='../S/145.html#L105' title='Defined at 105 in src/server/game.cpp.'>last_choice_request_id_</a>;
-<a id='L414' name='L414'></a> 414 <em class='brace'>}</em>;
-<a id='L415' name='L415'></a> 415 
-<a id='L416' name='L416'></a> 416 <strong class='reserved'>struct</strong> game_is_member <em class='brace'>{</em>
-<a id='L417' name='L417'></a> 417         game_is_member(<a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>) : <a href='../Y/18636.html' title='Multiple used in 3 places.'>sock_</a>(<a href='../Y/18635.html' title='Multiple used in 183 places.'>sock</a>) <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L418' name='L418'></a> 418         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>()(<strong class='reserved'>const</strong> <a href='../D/6545.html' title='Multiple defined in 6 places.'>game</a>&amp; <a href='../D/6541.html' title='Multiple defined in 2 places.'>g</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/6541.html' title='Multiple defined in 2 places.'>g</a>.<a href='../S/148.html#L53' title='Defined at 53 in src/server/game.hpp.'>is_owner</a>(<a href='../Y/18636.html' title='Multiple used in 3 places.'>sock_</a>) || <a href='../D/6541.html' title='Multiple defined in 2 places.'>g</a>.<a href='../D/9305.html' title='Multiple defined in 2 places.'>is_member</a>(<a href='../Y/18636.html' title='Multiple used in 3 places.'>sock_</a>); <em class='brace'>}</em>
-<a id='L419' name='L419'></a> 419 
-<a id='L420' name='L420'></a> 420 <strong class='reserved'>private</strong>:
-<a id='L421' name='L421'></a> 421         <a href='../S/150.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/18636.html' title='Multiple used in 3 places.'>sock_</a>;
-<a id='L422' name='L422'></a> 422 <em class='brace'>}</em>;
-<a id='L423' name='L423'></a> 423 
-<a id='L424' name='L424'></a> 424 <strong class='reserved'>struct</strong> game_id_matches <em class='brace'>{</em>
-<a id='L425' name='L425'></a> 425         game_id_matches(<strong class='reserved'>int</strong> <a href='../D/8581.html' title='Multiple defined in 22 places.'>id</a>) : <a href='../D/8583.html' title='Multiple defined in 8 places.'>id_</a>(<a href='../D/8581.html' title='Multiple defined in 22 places.'>id</a>) <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L426' name='L426'></a> 426         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>()(<strong class='reserved'>const</strong> <a href='../D/6545.html' title='Multiple defined in 6 places.'>game</a>&amp; <a href='../D/6541.html' title='Multiple defined in 2 places.'>g</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/6541.html' title='Multiple defined in 2 places.'>g</a>.<a href='../D/8581.html' title='Multiple defined in 22 places.'>id</a>() == <a href='../D/8583.html' title='Multiple defined in 8 places.'>id_</a>; <em class='brace'>}</em>
-<a id='L427' name='L427'></a> 427 
-<a id='L428' name='L428'></a> 428 <strong class='reserved'>private</strong>:
-<a id='L429' name='L429'></a> 429         <strong class='reserved'>int</strong> <a href='../D/8583.html' title='Multiple defined in 8 places.'>id_</a>;
-<a id='L430' name='L430'></a> 430 <em class='brace'>}</em>;
-<a id='L431' name='L431'></a> 431 <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53         <a href='../S/148.html#L36' title='Defined at 36 in src/server/player_connection.hpp.'>player_record</a>(<strong class='reserved'>const</strong> <a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../D/14527.html' title='Multiple defined in 3 places.'>socket</a>, <strong class='reserved'>const</strong> <a href='../S/168.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>&amp; <a href='../S/168.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) : <a href='../Y/18732.html' title='Multiple used in 23 places.'>socket_</a>(<a href='../D/14527.html' title='Multiple defined in 3 places.'>socket</a>), <a href='../R/10821.html' title='Multiple referred from 9 places.'>player_</a>(<a href='../S/168.html#L26' title='Defined at 26 in src/server/player.hpp.'>player</a>) <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L54' name='L54'></a>  54 <em class='brace'>}</em>;
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56 <strong class='reserved'>struct</strong> <a href='../S/148.html#L66' title='Referred from 66 in src/server/player_connection.hpp.'>socket_t</a><em class='brace'>{</em><em class='brace'>}</em>;
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>struct</strong> <a href='../R/10200.html' title='Multiple referred from 9 places.'>name_t</a><em class='brace'>{</em><em class='brace'>}</em>;
+<a id='L58' name='L58'></a>  58 <strong class='reserved'>struct</strong> <a href='../R/5880.html' title='Multiple referred from 11 places.'>game_t</a><em class='brace'>{</em><em class='brace'>}</em>;
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 <strong class='reserved'>using</strong> <strong class='reserved'>namespace</strong> <a href='../D/3709.html' title='Multiple defined in 4 places.'>boost</a>::<a href='../Y/14426.html' title='Multiple used in 15 places.'>multi_index</a>;
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62 <strong class='reserved'>typedef</strong> <a href='../Y/14427.html' title='Multiple used in 3 places.'>multi_index_container</a>&lt;
+<a id='L63' name='L63'></a>  63     <a href='../S/148.html#L36' title='Defined at 36 in src/server/player_connection.hpp.'>player_record</a>,
+<a id='L64' name='L64'></a>  64         <a href='../Y/11932.html' title='Multiple used in 4 places.'>indexed_by</a>&lt;
+<a id='L65' name='L65'></a>  65                 ordered_unique&lt;
+<a id='L66' name='L66'></a>  66             <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>&lt;<a href='../S/148.html#L56' title='Defined at 56 in src/server/player_connection.hpp.'>socket_t</a>&gt;, <a href='../Y/315.html' title='Multiple used in 3 places.'>BOOST_MULTI_INDEX_CONST_MEM_FUN</a>(<a href='../S/148.html#L36' title='Defined at 36 in src/server/player_connection.hpp.'>player_record</a>,<strong class='reserved'>const</strong> <a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>,<a href='../D/14527.html' title='Multiple defined in 3 places.'>socket</a>)&gt;,
+<a id='L67' name='L67'></a>  67                 <a href='../Y/11271.html' title='Multiple used in 4 places.'>hashed_unique</a>&lt;
+<a id='L68' name='L68'></a>  68             <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>&lt;<a href='../S/148.html#L57' title='Defined at 57 in src/server/player_connection.hpp.'>name_t</a>&gt;, <a href='../Y/315.html' title='Multiple used in 3 places.'>BOOST_MULTI_INDEX_CONST_MEM_FUN</a>(<a href='../S/148.html#L36' title='Defined at 36 in src/server/player_connection.hpp.'>player_record</a>,<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp;,<a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a>)&gt;,
+<a id='L69' name='L69'></a>  69                 ordered_non_unique&lt;
+<a id='L70' name='L70'></a>  70             <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>&lt;<a href='../S/148.html#L58' title='Defined at 58 in src/server/player_connection.hpp.'>game_t</a>&gt;, <a href='../Y/315.html' title='Multiple used in 3 places.'>BOOST_MULTI_INDEX_CONST_MEM_FUN</a>(<a href='../S/148.html#L36' title='Defined at 36 in src/server/player_connection.hpp.'>player_record</a>,<strong class='reserved'>int</strong>,<a href='../S/144.html#L31' title='Defined at 31 in src/server/player_connection.cpp.'>game_id</a>)&gt;
+<a id='L71' name='L71'></a>  71         &gt;
+<a id='L72' name='L72'></a>  72 &gt; <a href='../R/10823.html' title='Multiple referred from 10 places.'>player_connections</a>;
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74 <strong class='reserved'>void</strong> <a href='../S/158.html#L1575' title='Defined at 1575 in src/server/server.cpp.'>send_to_player</a>(<a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../D/14527.html' title='Multiple defined in 3 places.'>socket</a>, <a href='../D/14464.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5618.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../Y/8874.html' title='Multiple used in 150 places.'>doc</a>);
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76 <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../Y/525.html' title='Multiple used in 16 places.'>Container</a>&gt;
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>void</strong> <a href='../R/12288.html' title='Multiple referred from 3 places.'>send_to_players</a>(<a href='../D/14464.html' title='Multiple defined in 2 places.'>simple_wml</a>::<a href='../D/5618.html' title='Multiple defined in 2 places.'>document</a>&amp; <a href='../D/5192.html' title='Multiple defined in 16 places.'>data</a>, <strong class='reserved'>const</strong> <a href='../Y/525.html' title='Multiple used in 16 places.'>Container</a>&amp; <a href='../Y/16260.html' title='Multiple used in 14 places.'>players</a>, <a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../Y/9562.html' title='Multiple used in 58 places.'>exclude</a> = <a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a>())
+<a id='L78' name='L78'></a>  78 <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79         <strong class='reserved'>typename</strong> <a href='../Y/525.html' title='Multiple used in 16 places.'>Container</a>::<a href='../D/4817.html' title='Multiple defined in 13 places.'>const_iterator</a> <a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a> = <a href='../Y/16260.html' title='Multiple used in 14 places.'>players</a>.<a href='../D/3589.html' title='Multiple defined in 28 places.'>begin</a>(), <a href='../Y/12418.html' title='Multiple used in 2 places.'>iter_end</a> = <a href='../Y/16260.html' title='Multiple used in 14 places.'>players</a>.<a href='../D/5853.html' title='Multiple defined in 28 places.'>end</a>();
+<a id='L80' name='L80'></a>  80         <strong class='reserved'>for</strong>(;<a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a> != <a href='../Y/12418.html' title='Multiple used in 2 places.'>iter_end</a>; ++<a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a>)
+<a id='L81' name='L81'></a>  81                 <strong class='reserved'>if</strong>(*<a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a> != <a href='../Y/9562.html' title='Multiple used in 58 places.'>exclude</a>)
+<a id='L82' name='L82'></a>  82                         <a href='../S/158.html#L1575' title='Defined at 1575 in src/server/server.cpp.'>send_to_player</a>(*<a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a>, <a href='../D/5192.html' title='Multiple defined in 16 places.'>data</a>);
+<a id='L83' name='L83'></a>  83 <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>void</strong> <a href='../D/13411.html' title='Multiple defined in 3 places.'>send_server_message</a>(<a href='../S/151.html#L33' title='Defined at 33 in src/server/server_base.hpp.'>socket_ptr</a> <a href='../D/14527.html' title='Multiple defined in 3 places.'>socket</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/10900.html' title='Multiple defined in 7 places.'>message</a>);
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87 <em class='brace'>}</em> <em class='comment'>// namespace wesnothd</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L50'>[^]</a><a href='#L306'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L45'>[^]</a><a href='#L77'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

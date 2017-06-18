@@ -1,28 +1,51 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/display_context.hpp</title>
+<title>src/gettext_boost.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5819.html'>src</a>/display_context.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L62'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
-<hr />
-<h2 class='header'><a href='../J/1783.html' title='Multiple included from 16 places.'>INCLUDED FROM</a></h2>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5820.html'>src</a>/gettext_boost.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L57'>[^]</a><a href='#L435'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L43' title='Defined at 43.'>teamname</a></li>
-<li><a href='#L62' title='Defined at 62.'>has_team</a></li>
+<li><a href='#L57' title='Defined at 57.'>name</a></li>
+<li><a href='#L152' title='Defined at 152.'>throw_po_error</a></li>
+<li><a href='#L160' title='Defined at 160.'>get</a></li>
+<li><a href='#L179' title='Defined at 179.'>get</a></li>
+<li><a href='#L198' title='Defined at 198.'>domain</a></li>
+<li><a href='#L204' title='Defined at 204.'>convert</a></li>
+<li><a href='#L210' title='Defined at 210.'>get_base</a></li>
+<li><a href='#L226' title='Defined at 226.'>is_dirty_</a></li>
+<li><a href='#L243' title='Defined at 243.'>add_messages_domain</a></li>
+<li><a href='#L265' title='Defined at 265.'>add_messages_path</a></li>
+<li><a href='#L275' title='Defined at 275.'>set_default_messages_domain</a></li>
+<li><a href='#L281' title='Defined at 281.'>set_language</a></li>
+<li><a href='#L299' title='Defined at 299.'>update_locale</a></li>
+<li><a href='#L304' title='Defined at 304.'>update_locale_internal</a></li>
+<li><a href='#L334' title='Defined at 334.'>get_locale</a></li>
+<li><a href='#L352' title='Defined at 352.'>get_manager</a></li>
+<li><a href='#L363' title='Defined at 363.'>dgettext</a></li>
+<li><a href='#L367' title='Defined at 367.'>egettext</a></li>
+<li><a href='#L372' title='Defined at 372.'>dsgettext</a></li>
+<li><a href='#L385' title='Defined at 385.'>dsngettext</a></li>
+<li><a href='#L398' title='Defined at 398.'>bind_textdomain</a></li>
+<li><a href='#L406' title='Defined at 406.'>set_default_textdomain</a></li>
+<li><a href='#L413' title='Defined at 413.'>set_language</a></li>
+<li><a href='#L421' title='Defined at 421.'>compare</a></li>
+<li><a href='#L426' title='Defined at 426.'>icompare</a></li>
+<li><a href='#L431' title='Defined at 431.'>init</a></li>
+<li><a href='#L435' title='Defined at 435.'>strftime</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by Chris Beck &lt;render787@gmail.com&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
@@ -34,108 +57,445 @@ This source file includes following definitions.
 <a id='L11' name='L11'></a>  11 <em class='comment'></em>
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
-<a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
-<a id='L16' name='L16'></a>  16 <em class='comment'> *</em>
-<a id='L17' name='L17'></a>  17 <em class='comment'> * This class is an abstract base class designed to simplify the use</em>
-<a id='L18' name='L18'></a>  18 <em class='comment'> * of the display object.</em>
-<a id='L19' name='L19'></a>  19 <em class='comment'> *</em>
-<a id='L20' name='L20'></a>  20 <em class='comment'> **/</em>
-<a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <em class='sharp'>#pragma</em> once
-<a id='L23' name='L23'></a>  23 
-<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> &lt;string&gt;
-<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L26' name='L26'></a>  26 
-<a id='L27' name='L27'></a>  27 <strong class='reserved'>class</strong> <a href='../D/14867.html' title='Multiple defined in 3 places.'>team</a>;
-<a id='L28' name='L28'></a>  28 <strong class='reserved'>class</strong> <a href='../D/6592.html' title='Multiple defined in 2 places.'>gamemap</a>;
-<a id='L29' name='L29'></a>  29 <strong class='reserved'>class</strong> <a href='../D/15485.html' title='Multiple defined in 2 places.'>unit_map</a>;
-<a id='L30' name='L30'></a>  30 
-<a id='L31' name='L31'></a>  31 <strong class='reserved'>class</strong> <a href='../D/15427.html' title='Multiple defined in 4 places.'>unit</a>;
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>struct</strong> <a href='../S/1089.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>;
-<a id='L33' name='L33'></a>  33 
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>struct</strong> <a href='../R/13676.html' title='Multiple referred from 11 places.'>team_data</a>
-<a id='L35' name='L35'></a>  35 <em class='brace'>{</em>
-<a id='L36' name='L36'></a>  36         <a href='../S/846.html#L34' title='Defined at 34 in src/display_context.hpp.'>team_data</a>() :
-<a id='L37' name='L37'></a>  37                 <a href='../D/15529.html' title='Multiple defined in 8 places.'>units</a>(0),
-<a id='L38' name='L38'></a>  38                 <a href='../S/1007.html#L1517' title='Defined at 1517 in src/units/unit.cpp.'>upkeep</a>(0),
-<a id='L39' name='L39'></a>  39                 <a href='../D/15922.html' title='Multiple defined in 2 places.'>villages</a>(0),
-<a id='L40' name='L40'></a>  40                 <a href='../Y/9592.html' title='Multiple used in 9 places.'>expenses</a>(0),
-<a id='L41' name='L41'></a>  41                 <a href='../Y/14593.html' title='Multiple used in 13 places.'>net_income</a>(0),
-<a id='L42' name='L42'></a>  42                 <a href='../D/8184.html' title='Multiple defined in 3 places.'>gold</a>(0),
-<a id='L43' name='L43'></a>  43                 <a href='../R/13688.html' title='Multiple referred from 6 places.'>teamname</a>()
-<a id='L44' name='L44'></a>  44         <em class='brace'>{</em>
-<a id='L45' name='L45'></a>  45         <em class='brace'>}</em>
-<a id='L46' name='L46'></a>  46 
-<a id='L47' name='L47'></a>  47         <strong class='reserved'>int</strong> <a href='../D/15529.html' title='Multiple defined in 8 places.'>units</a>, <a href='../S/1007.html#L1517' title='Defined at 1517 in src/units/unit.cpp.'>upkeep</a>, <a href='../D/15922.html' title='Multiple defined in 2 places.'>villages</a>, <a href='../Y/9592.html' title='Multiple used in 9 places.'>expenses</a>, <a href='../Y/14593.html' title='Multiple used in 13 places.'>net_income</a>, <a href='../D/8184.html' title='Multiple defined in 3 places.'>gold</a>;
-<a id='L48' name='L48'></a>  48         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/846.html#L43' title='Defined at 43 in src/display_context.hpp.'>teamname</a>;
-<a id='L49' name='L49'></a>  49 <em class='brace'>}</em>;
+<a id='L14' name='L14'></a>  14 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/4734.html' title='Multiple used in 94 places.'>_MSC_VER</a>)
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> warning(disable: 4714)
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#endif</em>
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='1157.html'>global.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='93.html'>gettext.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='../I/2023.html'>log.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='1248.html'>filesystem.hpp</a>"
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> &lt;iomanip&gt;
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> &lt;iostream&gt;
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;fstream&gt;
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> &lt;locale&gt;
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;boost/locale.hpp&gt;
+<a id='L28' name='L28'></a>  28 <em class='comment'>// including boost/thread fixes linking of boost locale for msvc on boost 1.60</em>
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;boost/thread.hpp&gt;
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> &lt;set&gt;
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/4764.html' title='Multiple used in 30 places.'>__GNUC__</a>)
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#pragma</em> GCC diagnostic push
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#pragma</em> GCC diagnostic ignored "-Wmissing-field-initializers"
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#elif</em> <strong class='reserved'>defined</strong>(<a href='../Y/4734.html' title='Multiple used in 94 places.'>_MSC_VER</a>)
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#pragma</em> warning(push)
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#pragma</em> warning(disable: 4459)
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#endif</em>
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#include</em> "<a href='324.html'>spirit_po.hpp</a>"
+<a id='L40' name='L40'></a>  40 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/4764.html' title='Multiple used in 30 places.'>__GNUC__</a>)
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#pragma</em> GCC diagnostic pop
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#elif</em> <strong class='reserved'>defined</strong>(<a href='../Y/4734.html' title='Multiple used in 94 places.'>_MSC_VER</a>)
+<a id='L43' name='L43'></a>  43 <em class='sharp'>#pragma</em> warning(pop)
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#endif</em>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#define</em> <a href='../R/250.html' title='Multiple referred from 18 places.'>DBG_G</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/5221.html' title='Multiple defined in 16 places.'>debug</a>, <a href='../D/9741.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/844.html#L104' title='Defined at 104 in src/log.cpp.'>general</a>())
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#define</em> <a href='../R/971.html' title='Multiple referred from 21 places.'>LOG_G</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>, <a href='../D/9741.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/844.html#L104' title='Defined at 104 in src/log.cpp.'>general</a>())
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#define</em> <a href='../R/2317.html' title='Multiple referred from 3 places.'>WRN_G</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/844.html#L84' title='Defined at 84 in src/log.cpp.'>warn</a>, <a href='../D/9741.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/844.html#L104' title='Defined at 104 in src/log.cpp.'>general</a>())
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#define</em> <a href='../R/396.html' title='Multiple referred from 15 places.'>ERR_G</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/844.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>, <a href='../D/9741.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/844.html#L104' title='Defined at 104 in src/log.cpp.'>general</a>())
 <a id='L50' name='L50'></a>  50 
-<a id='L51' name='L51'></a>  51 <strong class='reserved'>class</strong> <a href='../R/4769.html' title='Multiple referred from 68 places.'>display_context</a> <em class='brace'>{</em>
-<a id='L52' name='L52'></a>  52 <strong class='reserved'>public</strong>:
-<a id='L53' name='L53'></a>  53         <strong class='reserved'>virtual</strong> <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<a href='../D/14867.html' title='Multiple defined in 3 places.'>team</a>&gt; &amp; <a href='../D/14885.html' title='Multiple defined in 8 places.'>teams</a>() <strong class='reserved'>const</strong> = 0;
-<a id='L54' name='L54'></a>  54         <strong class='reserved'>virtual</strong> <strong class='reserved'>const</strong> <a href='../D/6592.html' title='Multiple defined in 2 places.'>gamemap</a> &amp; <a href='../D/10670.html' title='Multiple defined in 18 places.'>map</a>() <strong class='reserved'>const</strong> = 0;
-<a id='L55' name='L55'></a>  55         <strong class='reserved'>virtual</strong> <strong class='reserved'>const</strong> <a href='../D/15485.html' title='Multiple defined in 2 places.'>unit_map</a> &amp; <a href='../D/15529.html' title='Multiple defined in 8 places.'>units</a>() <strong class='reserved'>const</strong> = 0;
-<a id='L56' name='L56'></a>  56         <strong class='reserved'>virtual</strong> <strong class='reserved'>const</strong> <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&gt; &amp; <a href='../D/8488.html' title='Multiple defined in 4 places.'>hidden_label_categories</a>() <strong class='reserved'>const</strong> = 0;
-<a id='L57' name='L57'></a>  57         <a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21257.html' title='Multiple used in 2736 places.'>vector</a>&lt;<a href='../D/14634.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14695.html' title='Multiple defined in 3 places.'>string</a>&gt; &amp; <a href='../S/930.html#L23' title='Defined at 23 in src/display_context.cpp.'>hidden_label_categories_ref</a>();
-<a id='L58' name='L58'></a>  58         <strong class='reserved'>const</strong> <a href='../D/14867.html' title='Multiple defined in 3 places.'>team</a>&amp; <a href='../D/7964.html' title='Multiple defined in 3 places.'>get_team</a>(<strong class='reserved'>int</strong> <a href='../D/14339.html' title='Multiple defined in 3 places.'>side</a>) <strong class='reserved'>const</strong>;
-<a id='L59' name='L59'></a>  59 
-<a id='L60' name='L60'></a>  60         <em class='comment'>// this one is only a template function to prevent compilation erros when class team is an incomplete type.</em>
-<a id='L61' name='L61'></a>  61         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../D/2061.html' title='Multiple defined in 2 places.'>T</a> = <strong class='reserved'>void</strong>&gt;
-<a id='L62' name='L62'></a>  62         <strong class='reserved'>bool</strong> <a href='../R/7557.html' title='Multiple referred from 6 places.'>has_team</a>(<strong class='reserved'>int</strong> <a href='../D/14339.html' title='Multiple defined in 3 places.'>side</a>) <strong class='reserved'>const</strong>
-<a id='L63' name='L63'></a>  63         <em class='brace'>{</em>
-<a id='L64' name='L64'></a>  64                 <strong class='reserved'>return</strong> <a href='../D/14339.html' title='Multiple defined in 3 places.'>side</a> &gt; 0 &amp;&amp; <a href='../D/14339.html' title='Multiple defined in 3 places.'>side</a> &lt;= <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../D/14885.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/14440.html' title='Multiple defined in 17 places.'>size</a>());
-<a id='L65' name='L65'></a>  65         <em class='brace'>}</em>
-<a id='L66' name='L66'></a>  66 
-<a id='L67' name='L67'></a>  67         <em class='comment'>// Helper for is_visible_to_team</em>
-<a id='L68' name='L68'></a>  68 
-<a id='L69' name='L69'></a>  69         <em class='comment'>/**</em>
-<a id='L70' name='L70'></a>  70 <em class='comment'>         * Given a location and a side number, indicates whether an invisible unit of that side at that</em>
-<a id='L71' name='L71'></a>  71 <em class='comment'>         * location would be revealed (perhaps ambushed), based on what team side_num can see.</em>
-<a id='L72' name='L72'></a>  72 <em class='comment'>         * If see_all is true then the calculation ignores fog, and enemy ambushers.</em>
-<a id='L73' name='L73'></a>  73 <em class='comment'>         */</em>
-<a id='L74' name='L74'></a>  74         <strong class='reserved'>bool</strong> <a href='../S/930.html#L31' title='Defined at 31 in src/display_context.cpp.'>would_be_discovered</a>(<strong class='reserved'>const</strong> <a href='../S/1089.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp; <a href='../D/9875.html' title='Multiple defined in 6 places.'>loc</a>, <strong class='reserved'>int</strong> <a href='../Y/18428.html' title='Multiple used in 182 places.'>side_num</a>, <strong class='reserved'>bool</strong> <a href='../Y/17937.html' title='Multiple used in 68 places.'>see_all</a> = <strong class='reserved'>true</strong>);
-<a id='L75' name='L75'></a>  75 
-<a id='L76' name='L76'></a>  76         <em class='comment'>// Needed for reports</em>
-<a id='L77' name='L77'></a>  77 
-<a id='L78' name='L78'></a>  78         <strong class='reserved'>const</strong> <a href='../D/15427.html' title='Multiple defined in 4 places.'>unit</a> * <a href='../D/8099.html' title='Multiple defined in 3 places.'>get_visible_unit</a>(<strong class='reserved'>const</strong> <a href='../S/1089.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../D/9875.html' title='Multiple defined in 6 places.'>loc</a>, <strong class='reserved'>const</strong> <a href='../D/14867.html' title='Multiple defined in 3 places.'>team</a> &amp;<a href='../D/5143.html' title='Multiple defined in 5 places.'>current_team</a>, <strong class='reserved'>bool</strong> <a href='../Y/17937.html' title='Multiple used in 68 places.'>see_all</a> = <strong class='reserved'>false</strong>) <strong class='reserved'>const</strong>;
-<a id='L79' name='L79'></a>  79 
-<a id='L80' name='L80'></a>  80         <em class='comment'>// From actions:: namespace</em>
-<a id='L81' name='L81'></a>  81 
-<a id='L82' name='L82'></a>  82         <strong class='reserved'>bool</strong> <a href='../S/930.html#L72' title='Defined at 72 in src/display_context.cpp.'>unit_can_move</a>(<strong class='reserved'>const</strong> <a href='../D/15427.html' title='Multiple defined in 4 places.'>unit</a> &amp; <a href='../Y/20597.html' title='Multiple used in 1983 places.'>u</a>) <strong class='reserved'>const</strong>;
-<a id='L83' name='L83'></a>  83 
-<a id='L84' name='L84'></a>  84         <em class='comment'>// From class team</em>
-<a id='L85' name='L85'></a>  85 
-<a id='L86' name='L86'></a>  86         <em class='comment'>/**</em>
-<a id='L87' name='L87'></a>  87 <em class='comment'>         * Given the location of a village, will return the 0-based index</em>
-<a id='L88' name='L88'></a>  88 <em class='comment'>         * of the team that currently owns it, and -1 if it is unowned.</em>
-<a id='L89' name='L89'></a>  89 <em class='comment'>         */</em>
-<a id='L90' name='L90'></a>  90         <strong class='reserved'>int</strong> <a href='../S/930.html#L109' title='Defined at 109 in src/display_context.cpp.'>village_owner</a>(<strong class='reserved'>const</strong> <a href='../S/1089.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp; <a href='../D/9875.html' title='Multiple defined in 6 places.'>loc</a>) <strong class='reserved'>const</strong>;
-<a id='L91' name='L91'></a>  91 
-<a id='L92' name='L92'></a>  92         <em class='comment'>// Accessors from unit.cpp</em>
-<a id='L93' name='L93'></a>  93 
-<a id='L94' name='L94'></a>  94         <em class='comment'>/** Returns the number of units of the side @a side_num. */</em>
-<a id='L95' name='L95'></a>  95         <strong class='reserved'>int</strong> <a href='../S/930.html#L134' title='Defined at 134 in src/display_context.cpp.'>side_units</a>(<strong class='reserved'>int</strong> <a href='../Y/18428.html' title='Multiple used in 182 places.'>side_num</a>) <strong class='reserved'>const</strong>;
-<a id='L96' name='L96'></a>  96 
-<a id='L97' name='L97'></a>  97         <em class='comment'>/** Returns the total cost of units of side @a side_num. */</em>
-<a id='L98' name='L98'></a>  98         <strong class='reserved'>int</strong> <a href='../S/930.html#L143' title='Defined at 143 in src/display_context.cpp.'>side_units_cost</a>(<strong class='reserved'>int</strong> <a href='../Y/18428.html' title='Multiple used in 182 places.'>side_num</a>) <strong class='reserved'>const</strong> ;
-<a id='L99' name='L99'></a>  99 
-<a id='L100' name='L100'></a> 100         <strong class='reserved'>int</strong> <a href='../S/930.html#L152' title='Defined at 152 in src/display_context.cpp.'>side_upkeep</a>(<strong class='reserved'>int</strong> <a href='../Y/18428.html' title='Multiple used in 182 places.'>side_num</a>) <strong class='reserved'>const</strong> ;
-<a id='L101' name='L101'></a> 101 
-<a id='L102' name='L102'></a> 102         <a href='../S/846.html#L34' title='Defined at 34 in src/display_context.hpp.'>team_data</a> <a href='../S/930.html#L161' title='Defined at 161 in src/display_context.cpp.'>calculate_team_data</a>(<strong class='reserved'>const</strong> <strong class='reserved'>class</strong> <a href='../D/14867.html' title='Multiple defined in 3 places.'>team</a>&amp; <a href='../Y/20039.html' title='Multiple used in 149 places.'>tm</a>) <strong class='reserved'>const</strong>;
-<a id='L103' name='L103'></a> 103 
-<a id='L104' name='L104'></a> 104         <em class='comment'>// Accessor from team.cpp</em>
-<a id='L105' name='L105'></a> 105 
-<a id='L106' name='L106'></a> 106         <em class='comment'>/// Check if we are an observer in this game</em>
-<a id='L107' name='L107'></a> 107         <strong class='reserved'>bool</strong> <a href='../D/9326.html' title='Multiple defined in 4 places.'>is_observer</a>() <strong class='reserved'>const</strong>;
-<a id='L108' name='L108'></a> 108 
-<a id='L109' name='L109'></a> 109         <em class='comment'>// Dtor</em>
-<a id='L110' name='L110'></a> 110 
-<a id='L111' name='L111'></a> 111         <strong class='reserved'>virtual</strong> ~display_context() <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L112' name='L112'></a> 112 <em class='brace'>}</em>;
+<a id='L51' name='L51'></a>  51 <strong class='reserved'>namespace</strong> <a href='../R/3242.html' title='Multiple referred from 87 places.'>bl</a> = <a href='../D/3709.html' title='Multiple defined in 4 places.'>boost</a>::<a href='../Y/13223.html' title='Multiple used in 101 places.'>locale</a>;
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>namespace</strong>
+<a id='L53' name='L53'></a>  53 <em class='brace'>{</em>
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>class</strong> <a href='../R/4634.html' title='Multiple referred from 3 places.'>default_utf8_locale_name</a>
+<a id='L55' name='L55'></a>  55         <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56         <strong class='reserved'>public</strong>:
+<a id='L57' name='L57'></a>  57                 <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../R/10194.html' title='Multiple referred from 16090 places.'>name</a>()
+<a id='L58' name='L58'></a>  58                 <em class='brace'>{</em>
+<a id='L59' name='L59'></a>  59                         <em class='comment'>//Use pointers becasue we don't want it to be destructed at programm end.</em>
+<a id='L60' name='L60'></a>  60                         <strong class='reserved'>static</strong> <a href='../S/846.html#L54' title='Defined at 54 in src/gettext_boost.cpp.'>default_utf8_locale_name</a>* <a href='../Y/13141.html' title='Multiple used in 2 places.'>lname</a> = <strong class='reserved'>new</strong> <a href='../S/846.html#L54' title='Defined at 54 in src/gettext_boost.cpp.'>default_utf8_locale_name</a>();
+<a id='L61' name='L61'></a>  61                         <strong class='reserved'>return</strong> <a href='../Y/13141.html' title='Multiple used in 2 places.'>lname</a>-&gt;<a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a>;
+<a id='L62' name='L62'></a>  62                 <em class='brace'>}</em>
+<a id='L63' name='L63'></a>  63         <strong class='reserved'>private</strong>:
+<a id='L64' name='L64'></a>  64                 default_utf8_locale_name()
+<a id='L65' name='L65'></a>  65                         : <a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a>()
+<a id='L66' name='L66'></a>  66                 <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67                         <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "Generating default locale\n";
+<a id='L68' name='L68'></a>  68                         <strong class='reserved'>try</strong>
+<a id='L69' name='L69'></a>  69                         <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70                                 <em class='comment'>//NOTE: the default_locale objects needs to live as least as long as the locale_info object. Otherwise the programm will segfault.</em>
+<a id='L71' name='L71'></a>  71                                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13223.html' title='Multiple used in 101 places.'>locale</a> <a href='../Y/8416.html' title='Multiple used in 2 places.'>default_locale</a> = <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/6692.html' title='Multiple defined in 5 places.'>generator</a>().<a href='../D/6644.html' title='Multiple defined in 13 places.'>generate</a>("");
+<a id='L72' name='L72'></a>  72                                 <strong class='reserved'>const</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&amp; <a href='../Y/13225.html' title='Multiple used in 6 places.'>locale_info</a> = <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21108.html' title='Multiple used in 7 places.'>use_facet</a>&lt;<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&gt;(<a href='../Y/8416.html' title='Multiple used in 2 places.'>default_locale</a>);
+<a id='L73' name='L73'></a>  73                                 <a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a> += <a href='../Y/13225.html' title='Multiple used in 6 places.'>locale_info</a>.<a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>();
+<a id='L74' name='L74'></a>  74                                 <strong class='reserved'>if</strong>(!<a href='../Y/13225.html' title='Multiple used in 6 places.'>locale_info</a>.<a href='../Y/7878.html' title='Multiple used in 6 places.'>country</a>().<a href='../D/5819.html' title='Multiple defined in 32 places.'>empty</a>())
+<a id='L75' name='L75'></a>  75                                         <a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a> += "_" + <a href='../Y/13225.html' title='Multiple used in 6 places.'>locale_info</a>.<a href='../Y/7878.html' title='Multiple used in 6 places.'>country</a>();
+<a id='L76' name='L76'></a>  76                                 <a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a> += ".UTF-8";
+<a id='L77' name='L77'></a>  77                                 <strong class='reserved'>if</strong>(!<a href='../Y/13225.html' title='Multiple used in 6 places.'>locale_info</a>.<a href='../D/15895.html' title='Multiple defined in 8 places.'>variant</a>().<a href='../D/5819.html' title='Multiple defined in 32 places.'>empty</a>())
+<a id='L78' name='L78'></a>  78                                         <a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a> += "@" + <a href='../Y/13225.html' title='Multiple used in 6 places.'>locale_info</a>.<a href='../D/15895.html' title='Multiple defined in 8 places.'>variant</a>();
+<a id='L79' name='L79'></a>  79                         <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80                         <strong class='reserved'>catch</strong>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/5975.html' title='Multiple defined in 3 places.'>exception</a>&amp; <a href='../D/5729.html' title='Multiple defined in 3 places.'>e</a>)
+<a id='L81' name='L81'></a>  81                         <em class='brace'>{</em>
+<a id='L82' name='L82'></a>  82                                 <a href='../D/460.html' title='Multiple defined in 8 places.'>ERR_G</a> &lt;&lt; "Failed to generate default locale string. message:" &lt;&lt; <a href='../D/5729.html' title='Multiple defined in 3 places.'>e</a>.<a href='../D/16240.html' title='Multiple defined in 8 places.'>what</a>() &lt;&lt; <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/9265.html' title='Multiple used in 927 places.'>endl</a>;
+<a id='L83' name='L83'></a>  83                         <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84                         <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "Finished generating default locale, default is now '" &lt;&lt; <a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a> &lt;&lt; "'\n";
+<a id='L85' name='L85'></a>  85                 <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/11237.html' title='Multiple defined in 4 places.'>name_</a>;
+<a id='L88' name='L88'></a>  88         <em class='brace'>}</em>;
+<a id='L89' name='L89'></a>  89         <strong class='reserved'>class</strong> <a href='../S/846.html#L310' title='Referred from 310 in src/gettext_boost.cpp.'>wesnoth_message_format</a> : <strong class='reserved'>public</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../Y/13983.html' title='Multiple used in 3 places.'>message_format</a>&lt;<strong class='reserved'>char</strong>&gt;
+<a id='L90' name='L90'></a>  90         <em class='brace'>{</em>
+<a id='L91' name='L91'></a>  91                 <strong class='reserved'>using</strong> <a href='../R/10866.html' title='Multiple referred from 2 places.'>po_catalog</a> = <a href='../D/14583.html' title='Multiple defined in 8 places.'>spirit_po</a>::<a href='../S/842.html#L36' title='Defined at 36 in src/spirit_po/catalog.hpp.'>catalog</a>&lt;&gt;;
+<a id='L92' name='L92'></a>  92         <strong class='reserved'>public</strong>:
+<a id='L93' name='L93'></a>  93                 wesnoth_message_format(<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13223.html' title='Multiple used in 101 places.'>locale</a> <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13442.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&gt;&amp; <a href='../Y/8910.html' title='Multiple used in 14 places.'>domains</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13442.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&gt;&amp; <a href='../D/11775.html' title='Multiple defined in 3 places.'>paths</a>)
+<a id='L94' name='L94'></a>  94                         : <a href='../Y/6189.html' title='Multiple used in 3 places.'>base_loc_</a>(<a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a>)
+<a id='L95' name='L95'></a>  95                 <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96                         <strong class='reserved'>const</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&amp; <a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a> = <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21108.html' title='Multiple used in 7 places.'>use_facet</a>&lt;<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&gt;(<a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a>);
+<a id='L97' name='L97'></a>  97                         <strong class='reserved'>if</strong>(<a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a>.<a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>() == "c") <em class='brace'>{</em>
+<a id='L98' name='L98'></a>  98                                 <strong class='reserved'>return</strong>;
+<a id='L99' name='L99'></a>  99                         <em class='brace'>}</em>
+<a id='L100' name='L100'></a> 100                         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/12691.html' title='Multiple used in 5 places.'>lang_name_short</a> = <a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a>.<a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>();
+<a id='L101' name='L101'></a> 101                         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a> = <a href='../Y/12691.html' title='Multiple used in 5 places.'>lang_name_short</a>;
+<a id='L102' name='L102'></a> 102                         <strong class='reserved'>if</strong>(!<a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a>.<a href='../Y/7878.html' title='Multiple used in 6 places.'>country</a>().<a href='../D/5819.html' title='Multiple defined in 32 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L103' name='L103'></a> 103                                 <a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a> += '_';
+<a id='L104' name='L104'></a> 104                                 <a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a> += <a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a>.<a href='../Y/7878.html' title='Multiple used in 6 places.'>country</a>();
+<a id='L105' name='L105'></a> 105                         <em class='brace'>}</em>
+<a id='L106' name='L106'></a> 106                         <strong class='reserved'>if</strong>(!<a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a>.<a href='../D/15895.html' title='Multiple defined in 8 places.'>variant</a>().<a href='../D/5819.html' title='Multiple defined in 32 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L107' name='L107'></a> 107                                 <a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a> += '@';
+<a id='L108' name='L108'></a> 108                                 <a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a> += <a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a>.<a href='../D/15895.html' title='Multiple defined in 8 places.'>variant</a>();
+<a id='L109' name='L109'></a> 109                                 <a href='../Y/12691.html' title='Multiple used in 5 places.'>lang_name_short</a> += '@';
+<a id='L110' name='L110'></a> 110                                 <a href='../Y/12691.html' title='Multiple used in 5 places.'>lang_name_short</a> += <a href='../Y/11936.html' title='Multiple used in 8 places.'>inf</a>.<a href='../D/15895.html' title='Multiple defined in 8 places.'>variant</a>();
+<a id='L111' name='L111'></a> 111                         <em class='brace'>}</em>
+<a id='L112' name='L112'></a> 112                         <a href='../D/286.html' title='Multiple defined in 8 places.'>DBG_G</a> &lt;&lt; "Loading po files for language " &lt;&lt; <a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a> &lt;&lt; '\n';
+<a id='L113' name='L113'></a> 113                         <strong class='reserved'>for</strong>(<strong class='reserved'>auto</strong>&amp; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a> : <a href='../Y/8910.html' title='Multiple used in 14 places.'>domains</a>) <em class='brace'>{</em>
+<a id='L114' name='L114'></a> 114                                 <a href='../D/286.html' title='Multiple defined in 8 places.'>DBG_G</a> &lt;&lt; "Searching for po files for domain " &lt;&lt; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a> &lt;&lt; '\n';
+<a id='L115' name='L115'></a> 115                                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>;
+<a id='L116' name='L116'></a> 116                                 <strong class='reserved'>for</strong>(<strong class='reserved'>auto</strong> <a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a> : <a href='../D/11775.html' title='Multiple defined in 3 places.'>paths</a>) <em class='brace'>{</em>
+<a id='L117' name='L117'></a> 117                                         <a href='../D/286.html' title='Multiple defined in 8 places.'>DBG_G</a> &lt;&lt; "Searching in dir " &lt;&lt; <a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a> &lt;&lt; '\n';
+<a id='L118' name='L118'></a> 118                                         <strong class='reserved'>if</strong>(<a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a>[<a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a>.<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>()-1] != '/') <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119                                                 <a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a> += '/';
+<a id='L120' name='L120'></a> 120                                         <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121                                         <a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a> += <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>;
+<a id='L122' name='L122'></a> 122                                         <a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a> += '/';
+<a id='L123' name='L123'></a> 123                                         <a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a> = <a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a> + <a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a> + ".po";
+<a id='L124' name='L124'></a> 124                                         <a href='../D/286.html' title='Multiple defined in 8 places.'>DBG_G</a> &lt;&lt; "  Trying path " &lt;&lt; <a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a> &lt;&lt; '\n';
+<a id='L125' name='L125'></a> 125                                         <strong class='reserved'>if</strong>(<a href='../D/6180.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6158.html' title='Multiple defined in 3 places.'>file_exists</a>(<a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>)) <em class='brace'>{</em>
+<a id='L126' name='L126'></a> 126                                                 <strong class='reserved'>break</strong>;
+<a id='L127' name='L127'></a> 127                                         <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128                                         <a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a> = <a href='../Y/6193.html' title='Multiple used in 14 places.'>base_path</a> + <a href='../Y/12691.html' title='Multiple used in 5 places.'>lang_name_short</a> + ".po";
+<a id='L129' name='L129'></a> 129                                         <a href='../D/286.html' title='Multiple defined in 8 places.'>DBG_G</a> &lt;&lt; "  Trying path " &lt;&lt; <a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a> &lt;&lt; '\n';
+<a id='L130' name='L130'></a> 130                                         <strong class='reserved'>if</strong>(<a href='../D/6180.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6158.html' title='Multiple defined in 3 places.'>file_exists</a>(<a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>)) <em class='brace'>{</em>
+<a id='L131' name='L131'></a> 131                                                 <strong class='reserved'>break</strong>;
+<a id='L132' name='L132'></a> 132                                         <em class='brace'>}</em>
+<a id='L133' name='L133'></a> 133                                 <em class='brace'>}</em>
+<a id='L134' name='L134'></a> 134                                 <strong class='reserved'>if</strong>(!<a href='../D/6180.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6158.html' title='Multiple defined in 3 places.'>file_exists</a>(<a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>)) <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                                         <strong class='reserved'>continue</strong>;
+<a id='L136' name='L136'></a> 136                                 <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137                                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/11708.html' title='Multiple used in 5 places.'>ifstream</a> <a href='../Y/16316.html' title='Multiple used in 4 places.'>po_file</a>;
+<a id='L138' name='L138'></a> 138                                 <a href='../Y/16316.html' title='Multiple used in 4 places.'>po_file</a>.<a href='../Y/9560.html' title='Multiple used in 8 places.'>exceptions</a>(<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/12149.html' title='Multiple used in 7 places.'>ios</a>::<a href='../Y/6137.html' title='Multiple used in 3 places.'>badbit</a>);
+<a id='L139' name='L139'></a> 139                                 <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "Loading language file from " &lt;&lt; <a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a> &lt;&lt; '\n';
+<a id='L140' name='L140'></a> 140                                 <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L141' name='L141'></a> 141                                         <a href='../Y/16316.html' title='Multiple used in 4 places.'>po_file</a>.<a href='../D/11529.html' title='Multiple defined in 3 places.'>open</a>(<a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>);
+<a id='L142' name='L142'></a> 142                                         <strong class='reserved'>const</strong> <a href='../S/846.html#L91' title='Defined at 91 in src/gettext_boost.cpp.'>po_catalog</a>&amp; <a href='../Y/7032.html' title='Multiple used in 12 places.'>cat</a> = <a href='../S/846.html#L91' title='Defined at 91 in src/gettext_boost.cpp.'>po_catalog</a>::<a href='../S/842.html#L258' title='Defined at 258 in src/spirit_po/catalog.hpp.'>from_istream</a>(<a href='../Y/16316.html' title='Multiple used in 4 places.'>po_file</a>);
+<a id='L143' name='L143'></a> 143                                         <a href='../Y/9680.html' title='Multiple used in 6 places.'>extra_messages_</a>.<a href='../Y/9179.html' title='Multiple used in 323 places.'>emplace</a>(<a href='../S/846.html#L210' title='Defined at 210 in src/gettext_boost.cpp.'>get_base</a>().<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>), <a href='../Y/7032.html' title='Multiple used in 12 places.'>cat</a>);
+<a id='L144' name='L144'></a> 144                                 <em class='brace'>}</em> <strong class='reserved'>catch</strong>(<a href='../D/14583.html' title='Multiple defined in 8 places.'>spirit_po</a>::<a href='../S/841.html#L65' title='Defined at 65 in src/spirit_po/exceptions.hpp.'>catalog_exception</a>&amp; <a href='../D/5729.html' title='Multiple defined in 3 places.'>e</a>) <em class='brace'>{</em>
+<a id='L145' name='L145'></a> 145                                         <a href='../S/846.html#L152' title='Defined at 152 in src/gettext_boost.cpp.'>throw_po_error</a>(<a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a>, <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <a href='../D/5729.html' title='Multiple defined in 3 places.'>e</a>.<a href='../D/16240.html' title='Multiple defined in 8 places.'>what</a>());
+<a id='L146' name='L146'></a> 146                                 <em class='brace'>}</em> <strong class='reserved'>catch</strong>(<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/12149.html' title='Multiple used in 7 places.'>ios</a>::<a href='../Y/9763.html' title='Multiple used in 4 places.'>failure</a>&amp;) <em class='brace'>{</em>
+<a id='L147' name='L147'></a> 147                                         <a href='../S/846.html#L152' title='Defined at 152 in src/gettext_boost.cpp.'>throw_po_error</a>(<a href='../Y/12690.html' title='Multiple used in 9 places.'>lang_name_long</a>, <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <a href='../Y/19152.html' title='Multiple used in 12 places.'>strerror</a>(<a href='../Y/9469.html' title='Multiple used in 16 places.'>errno</a>));
+<a id='L148' name='L148'></a> 148                                 <em class='brace'>}</em>
+<a id='L149' name='L149'></a> 149                         <em class='brace'>}</em>
+<a id='L150' name='L150'></a> 150                 <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152                 <a href='../D/1540.html' title='Multiple defined in 4 places.'>NORETURN</a> <strong class='reserved'>static</strong> <strong class='reserved'>void</strong> <a href='../R/13866.html' title='Multiple referred from 2 places.'>throw_po_error</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/1780.html#L227' title='Defined at 227 in doc/design/umcd/communication_protocol.tex.'>lang</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/8900.html' title='Multiple used in 4 places.'>dom</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/5381.html' title='Multiple defined in 6 places.'>detail</a>) <em class='brace'>{</em>
+<a id='L153' name='L153'></a> 153                         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/15719.html' title='Multiple used in 227 places.'>ostringstream</a> <a href='../S/844.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>;
+<a id='L154' name='L154'></a> 154                         <a href='../S/844.html#L78' title='Defined at 78 in src/log.cpp.'>err</a> &lt;&lt; "Error opening language file for " &lt;&lt; <a href='../S/1780.html#L227' title='Defined at 227 in doc/design/umcd/communication_protocol.tex.'>lang</a> &lt;&lt; ", textdomain " &lt;&lt; <a href='../Y/8900.html' title='Multiple used in 4 places.'>dom</a>
+<a id='L155' name='L155'></a> 155                                 &lt;&lt; ":\n  " &lt;&lt; <a href='../D/5381.html' title='Multiple defined in 6 places.'>detail</a> &lt;&lt; '\n';
+<a id='L156' name='L156'></a> 156                         <a href='../D/460.html' title='Multiple defined in 8 places.'>ERR_G</a> &lt;&lt; <a href='../S/844.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>.<a href='../Y/16918.html' title='Multiple used in 15 places.'>rdbuf</a>() &lt;&lt; <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/6377.html' title='Multiple defined in 2 places.'>flush</a>;
+<a id='L157' name='L157'></a> 157                         <strong class='reserved'>throw</strong> <a href='../D/6564.html' title='Multiple defined in 6 places.'>game</a>::<a href='../D/5933.html' title='Multiple defined in 22 places.'>error</a>(<a href='../S/844.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>.<a href='../D/14708.html' title='Multiple defined in 25 places.'>str</a>());
+<a id='L158' name='L158'></a> 158                 <em class='brace'>}</em>
+<a id='L159' name='L159'></a> 159 
+<a id='L160' name='L160'></a> 160                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/5982.html' title='Multiple referred from 1327 places.'>get</a>(<strong class='reserved'>int</strong> <a href='../Y/8905.html' title='Multiple used in 6 places.'>domain_id</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/14399.html' title='Multiple used in 4 places.'>msg_id</a>) <strong class='reserved'>const</strong> <a href='../D/11617.html' title='Multiple defined in 2 places.'>override</a>
+<a id='L161' name='L161'></a> 161                 <em class='brace'>{</em>
+<a id='L162' name='L162'></a> 162                         <strong class='reserved'>auto</strong>&amp; <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a> = <a href='../S/846.html#L210' title='Defined at 210 in src/gettext_boost.cpp.'>get_base</a>();
+<a id='L163' name='L163'></a> 163                         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a>.<a href='../D/6722.html' title='Multiple defined in 42 places.'>get</a>(<a href='../Y/8905.html' title='Multiple used in 6 places.'>domain_id</a>, <a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a>, <a href='../Y/14399.html' title='Multiple used in 4 places.'>msg_id</a>);
+<a id='L164' name='L164'></a> 164                         <strong class='reserved'>if</strong>(<a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> == <a href='../Y/15185.html' title='Multiple used in 1952 places.'>nullptr</a>) <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165                                 <strong class='reserved'>auto</strong> <a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a> = <a href='../Y/9680.html' title='Multiple used in 6 places.'>extra_messages_</a>.<a href='../D/6230.html' title='Multiple defined in 37 places.'>find</a>(<a href='../Y/8905.html' title='Multiple used in 6 places.'>domain_id</a>);
+<a id='L166' name='L166'></a> 166                                 <strong class='reserved'>if</strong>(<a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a> == <a href='../Y/9680.html' title='Multiple used in 6 places.'>extra_messages_</a>.<a href='../D/5853.html' title='Multiple defined in 28 places.'>end</a>()) <em class='brace'>{</em>
+<a id='L167' name='L167'></a> 167                                         <strong class='reserved'>return</strong> <a href='../Y/15185.html' title='Multiple used in 1952 places.'>nullptr</a>;
+<a id='L168' name='L168'></a> 168                                 <em class='brace'>}</em>
+<a id='L169' name='L169'></a> 169                                 <strong class='reserved'>auto</strong>&amp; <a href='../S/842.html#L36' title='Defined at 36 in src/spirit_po/catalog.hpp.'>catalog</a> = <a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a>-&gt;<a href='../Y/17993.html' title='Multiple used in 1311 places.'>second</a>;
+<a id='L170' name='L170'></a> 170                                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/13394.html' title='Multiple used in 31 places.'>lookup</a> = <a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a> ? <a href='../S/842.html#L36' title='Defined at 36 in src/spirit_po/catalog.hpp.'>catalog</a>.<a href='../S/842.html#L298' title='Defined at 298 in src/spirit_po/catalog.hpp.'>pgettext</a>(<a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a>, <a href='../Y/14399.html' title='Multiple used in 4 places.'>msg_id</a>) : <a href='../S/842.html#L36' title='Defined at 36 in src/spirit_po/catalog.hpp.'>catalog</a>.<a href='../D/8173.html' title='Multiple defined in 3 places.'>gettext</a>(<a href='../Y/14399.html' title='Multiple used in 4 places.'>msg_id</a>);
+<a id='L171' name='L171'></a> 171                                 <strong class='reserved'>if</strong>(<a href='../Y/13394.html' title='Multiple used in 31 places.'>lookup</a> != <a href='../Y/14399.html' title='Multiple used in 4 places.'>msg_id</a>) <em class='brace'>{</em>
+<a id='L172' name='L172'></a> 172                                         <em class='comment'>// (p)gettext returns the input pointer if the string was not found</em>
+<a id='L173' name='L173'></a> 173                                         <a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../Y/13394.html' title='Multiple used in 31 places.'>lookup</a>;
+<a id='L174' name='L174'></a> 174                                 <em class='brace'>}</em>
+<a id='L175' name='L175'></a> 175                         <em class='brace'>}</em>
+<a id='L176' name='L176'></a> 176                         <strong class='reserved'>return</strong> <a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>;
+<a id='L177' name='L177'></a> 177                 <em class='brace'>}</em>
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/5982.html' title='Multiple referred from 1327 places.'>get</a>(<strong class='reserved'>int</strong> <a href='../Y/8905.html' title='Multiple used in 6 places.'>domain_id</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/18494.html' title='Multiple used in 4 places.'>sid</a>, <strong class='reserved'>int</strong> <a href='../Y/14532.html' title='Multiple used in 1573 places.'>n</a>) <strong class='reserved'>const</strong> <a href='../D/11617.html' title='Multiple defined in 2 places.'>override</a>
+<a id='L180' name='L180'></a> 180                 <em class='brace'>{</em>
+<a id='L181' name='L181'></a> 181                         <strong class='reserved'>auto</strong>&amp; <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a> = <a href='../S/846.html#L210' title='Defined at 210 in src/gettext_boost.cpp.'>get_base</a>();
+<a id='L182' name='L182'></a> 182                         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a>.<a href='../D/6722.html' title='Multiple defined in 42 places.'>get</a>(<a href='../Y/8905.html' title='Multiple used in 6 places.'>domain_id</a>, <a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a>, <a href='../Y/18494.html' title='Multiple used in 4 places.'>sid</a>, <a href='../Y/14532.html' title='Multiple used in 1573 places.'>n</a>);
+<a id='L183' name='L183'></a> 183                         <strong class='reserved'>if</strong>(<a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> == <a href='../Y/15185.html' title='Multiple used in 1952 places.'>nullptr</a>) <em class='brace'>{</em>
+<a id='L184' name='L184'></a> 184                                 <strong class='reserved'>auto</strong> <a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a> = <a href='../Y/9680.html' title='Multiple used in 6 places.'>extra_messages_</a>.<a href='../D/6230.html' title='Multiple defined in 37 places.'>find</a>(<a href='../Y/8905.html' title='Multiple used in 6 places.'>domain_id</a>);
+<a id='L185' name='L185'></a> 185                                 <strong class='reserved'>if</strong>(<a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a> == <a href='../Y/9680.html' title='Multiple used in 6 places.'>extra_messages_</a>.<a href='../D/5853.html' title='Multiple defined in 28 places.'>end</a>()) <em class='brace'>{</em>
+<a id='L186' name='L186'></a> 186                                         <strong class='reserved'>return</strong> <a href='../Y/15185.html' title='Multiple used in 1952 places.'>nullptr</a>;
+<a id='L187' name='L187'></a> 187                                 <em class='brace'>}</em>
+<a id='L188' name='L188'></a> 188                                 <strong class='reserved'>auto</strong>&amp; <a href='../S/842.html#L36' title='Defined at 36 in src/spirit_po/catalog.hpp.'>catalog</a> = <a href='../Y/12417.html' title='Multiple used in 302 places.'>iter</a>-&gt;<a href='../Y/17993.html' title='Multiple used in 1311 places.'>second</a>;
+<a id='L189' name='L189'></a> 189                                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/13394.html' title='Multiple used in 31 places.'>lookup</a> = <a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a> ? <a href='../S/842.html#L36' title='Defined at 36 in src/spirit_po/catalog.hpp.'>catalog</a>.<a href='../S/842.html#L307' title='Defined at 307 in src/spirit_po/catalog.hpp.'>npgettext</a>(<a href='../Y/7969.html' title='Multiple used in 82 places.'>ctx</a>, <a href='../Y/18494.html' title='Multiple used in 4 places.'>sid</a>, <a href='../Y/18494.html' title='Multiple used in 4 places.'>sid</a>, <a href='../Y/14532.html' title='Multiple used in 1573 places.'>n</a>) : <a href='../S/842.html#L36' title='Defined at 36 in src/spirit_po/catalog.hpp.'>catalog</a>.<a href='../S/842.html#L289' title='Defined at 289 in src/spirit_po/catalog.hpp.'>ngettext</a>(<a href='../Y/18494.html' title='Multiple used in 4 places.'>sid</a>, <a href='../Y/18494.html' title='Multiple used in 4 places.'>sid</a>, <a href='../Y/14532.html' title='Multiple used in 1573 places.'>n</a>);
+<a id='L190' name='L190'></a> 190                                 <strong class='reserved'>if</strong>(<a href='../Y/13394.html' title='Multiple used in 31 places.'>lookup</a> != <a href='../Y/18494.html' title='Multiple used in 4 places.'>sid</a>) <em class='brace'>{</em>
+<a id='L191' name='L191'></a> 191                                         <em class='comment'>// n(p)gettext returns one of the input pointers if the string was not found</em>
+<a id='L192' name='L192'></a> 192                                         <a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../Y/13394.html' title='Multiple used in 31 places.'>lookup</a>;
+<a id='L193' name='L193'></a> 193                                 <em class='brace'>}</em>
+<a id='L194' name='L194'></a> 194                         <em class='brace'>}</em>
+<a id='L195' name='L195'></a> 195                         <strong class='reserved'>return</strong> <a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>;
+<a id='L196' name='L196'></a> 196                 <em class='brace'>}</em>
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198                 <strong class='reserved'>int</strong> <a href='../R/4947.html' title='Multiple referred from 79 places.'>domain</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>) <strong class='reserved'>const</strong> <a href='../D/11617.html' title='Multiple defined in 2 places.'>override</a>
+<a id='L199' name='L199'></a> 199                 <em class='brace'>{</em>
+<a id='L200' name='L200'></a> 200                         <strong class='reserved'>auto</strong>&amp; <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a> = <a href='../S/846.html#L210' title='Defined at 210 in src/gettext_boost.cpp.'>get_base</a>();
+<a id='L201' name='L201'></a> 201                         <strong class='reserved'>return</strong> <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a>.<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>);
+<a id='L202' name='L202'></a> 202                 <em class='brace'>}</em>
+<a id='L203' name='L203'></a> 203 
+<a id='L204' name='L204'></a> 204                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/4252.html' title='Multiple referred from 8 places.'>convert</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>, <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/6580.html' title='Multiple used in 88 places.'>buffer</a>) <strong class='reserved'>const</strong> <a href='../D/11617.html' title='Multiple defined in 2 places.'>override</a>
+<a id='L205' name='L205'></a> 205                 <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206                         <strong class='reserved'>auto</strong>&amp; <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a> = <a href='../S/846.html#L210' title='Defined at 210 in src/gettext_boost.cpp.'>get_base</a>();
+<a id='L207' name='L207'></a> 207                         <strong class='reserved'>return</strong> <a href='../D/3547.html' title='Multiple defined in 2 places.'>base</a>.<a href='../D/4880.html' title='Multiple defined in 8 places.'>convert</a>(<a href='../S/783.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>, <a href='../Y/6580.html' title='Multiple used in 88 places.'>buffer</a>);
+<a id='L208' name='L208'></a> 208                 <em class='brace'>}</em>
+<a id='L209' name='L209'></a> 209         <strong class='reserved'>private</strong>:
+<a id='L210' name='L210'></a> 210                 <strong class='reserved'>const</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../Y/13983.html' title='Multiple used in 3 places.'>message_format</a>&lt;<strong class='reserved'>char</strong>&gt;&amp; <a href='../R/6500.html' title='Multiple referred from 5 places.'>get_base</a>() <strong class='reserved'>const</strong>
+<a id='L211' name='L211'></a> 211                 <em class='brace'>{</em>
+<a id='L212' name='L212'></a> 212                         <strong class='reserved'>return</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21108.html' title='Multiple used in 7 places.'>use_facet</a>&lt;<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../Y/13983.html' title='Multiple used in 3 places.'>message_format</a>&lt;<strong class='reserved'>char</strong>&gt;&gt;(<a href='../Y/6189.html' title='Multiple used in 3 places.'>base_loc_</a>);
+<a id='L213' name='L213'></a> 213                 <em class='brace'>}</em>
+<a id='L214' name='L214'></a> 214 
+<a id='L215' name='L215'></a> 215                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13223.html' title='Multiple used in 101 places.'>locale</a> <a href='../Y/6189.html' title='Multiple used in 3 places.'>base_loc_</a>;
+<a id='L216' name='L216'></a> 216                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10701.html' title='Multiple defined in 18 places.'>map</a>&lt;<strong class='reserved'>int</strong>, <a href='../S/846.html#L91' title='Defined at 91 in src/gettext_boost.cpp.'>po_catalog</a>&gt; <a href='../Y/9680.html' title='Multiple used in 6 places.'>extra_messages_</a>;
+<a id='L217' name='L217'></a> 217         <em class='brace'>}</em>;
+<a id='L218' name='L218'></a> 218         <strong class='reserved'>struct</strong> <a href='../R/14043.html' title='Multiple referred from 3 places.'>translation_manager</a>
+<a id='L219' name='L219'></a> 219         <em class='brace'>{</em>
+<a id='L220' name='L220'></a> 220                 <a href='../S/846.html#L218' title='Defined at 218 in src/gettext_boost.cpp.'>translation_manager</a>()
+<a id='L221' name='L221'></a> 221                         : <a href='../Y/13157.html' title='Multiple used in 5 places.'>loaded_paths_</a>()
+<a id='L222' name='L222'></a> 222                         , <a href='../Y/13155.html' title='Multiple used in 5 places.'>loaded_domains_</a>()
+<a id='L223' name='L223'></a> 223                         , <a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a>(<a href='../S/846.html#L54' title='Defined at 54 in src/gettext_boost.cpp.'>default_utf8_locale_name</a>::<a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a>())
+<a id='L224' name='L224'></a> 224                         , <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>()
+<a id='L225' name='L225'></a> 225                         , <a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>()
+<a id='L226' name='L226'></a> 226                         , <a href='../R/8379.html' title='Multiple referred from 15 places.'>is_dirty_</a>(<strong class='reserved'>true</strong>)
+<a id='L227' name='L227'></a> 227                 <em class='brace'>{</em>
+<a id='L228' name='L228'></a> 228                         <strong class='reserved'>const</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::localization_backend_manager&amp; <a href='../Y/10456.html' title='Multiple used in 2 places.'>g_mgr</a> = <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::localization_backend_manager::<a href='../Y/10934.html' title='Multiple used in 48 places.'>global</a>();
+<a id='L229' name='L229'></a> 229                         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a> : <a href='../Y/10456.html' title='Multiple used in 2 places.'>g_mgr</a>.get_all_backends())
+<a id='L230' name='L230'></a> 230                         <em class='brace'>{</em>
+<a id='L231' name='L231'></a> 231                                 <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "Found boost locale backend: '" &lt;&lt; <a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a> &lt;&lt; "'\n";
+<a id='L232' name='L232'></a> 232                         <em class='brace'>}</em>
+<a id='L233' name='L233'></a> 233 
+<a id='L234' name='L234'></a> 234                         <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>.use_ansi_encoding(<strong class='reserved'>false</strong>);
+<a id='L235' name='L235'></a> 235                         <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>.<a href='../Y/7036.html' title='Multiple used in 10 places.'>categories</a>(<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::message_facet | <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::information_facet | <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::collation_facet | <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::formatting_facet);
+<a id='L236' name='L236'></a> 236                         <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>.<a href='../Y/7175.html' title='Multiple used in 2 places.'>characters</a>(<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::char_facet);
+<a id='L237' name='L237'></a> 237                         <em class='comment'>// We cannot have current_locale_ be a non boost-generated locale since it might not supply</em>
+<a id='L238' name='L238'></a> 238                         <em class='comment'>// the bl::info facet. As soon as we add message paths, update_locale_internal might fail,</em>
+<a id='L239' name='L239'></a> 239                         <em class='comment'>// for example because of invalid .mo files. So make sure we call it at least once before adding paths/domains</em>
+<a id='L240' name='L240'></a> 240                         <a href='../S/846.html#L304' title='Defined at 304 in src/gettext_boost.cpp.'>update_locale_internal</a>();
+<a id='L241' name='L241'></a> 241                 <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243                 <strong class='reserved'>void</strong> <a href='../R/2648.html' title='Multiple referred from 2 places.'>add_messages_domain</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)
+<a id='L244' name='L244'></a> 244                 <em class='brace'>{</em>
+<a id='L245' name='L245'></a> 245                         <strong class='reserved'>if</strong>(<a href='../Y/13155.html' title='Multiple used in 5 places.'>loaded_domains_</a>.<a href='../D/6230.html' title='Multiple defined in 37 places.'>find</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>) != <a href='../Y/13155.html' title='Multiple used in 5 places.'>loaded_domains_</a>.<a href='../D/5853.html' title='Multiple defined in 28 places.'>end</a>())
+<a id='L246' name='L246'></a> 246                         <em class='brace'>{</em>
+<a id='L247' name='L247'></a> 247                                 <strong class='reserved'>return</strong>;
+<a id='L248' name='L248'></a> 248                         <em class='brace'>}</em>
+<a id='L249' name='L249'></a> 249 
+<a id='L250' name='L250'></a> 250                         <strong class='reserved'>if</strong>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>.<a href='../D/6230.html' title='Multiple defined in 37 places.'>find</a>('/') != <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>::<a href='../Y/15148.html' title='Multiple used in 158 places.'>npos</a>)
+<a id='L251' name='L251'></a> 251                         <em class='brace'>{</em>
+<a id='L252' name='L252'></a> 252                                 <em class='comment'>// Forward slash has a specific meaning in Boost.Locale domain</em>
+<a id='L253' name='L253'></a> 253                                 <em class='comment'>// names, specifying the encoding. We use UTF-8 for everything</em>
+<a id='L254' name='L254'></a> 254                                 <em class='comment'>// so we can't possibly support that, and odds are it's a user</em>
+<a id='L255' name='L255'></a> 255                                 <em class='comment'>// mistake (as in bug #23839).</em>
+<a id='L256' name='L256'></a> 256                                 <a href='../D/460.html' title='Multiple defined in 8 places.'>ERR_G</a> &lt;&lt; "illegal textdomain name '" &lt;&lt; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>
+<a id='L257' name='L257'></a> 257                                           &lt;&lt; "', skipping textdomain\n";
+<a id='L258' name='L258'></a> 258                                 <strong class='reserved'>return</strong>;
+<a id='L259' name='L259'></a> 259                         <em class='brace'>}</em>
+<a id='L260' name='L260'></a> 260 
+<a id='L261' name='L261'></a> 261                         <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>.<a href='../S/846.html#L243' title='Defined at 243 in src/gettext_boost.cpp.'>add_messages_domain</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>);
+<a id='L262' name='L262'></a> 262                         <a href='../Y/13155.html' title='Multiple used in 5 places.'>loaded_domains_</a>.<a href='../D/8894.html' title='Multiple defined in 13 places.'>insert</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>);
+<a id='L263' name='L263'></a> 263                 <em class='brace'>}</em>
+<a id='L264' name='L264'></a> 264 
+<a id='L265' name='L265'></a> 265                 <strong class='reserved'>void</strong> <a href='../R/2649.html' title='Multiple referred from 2 places.'>add_messages_path</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>)
+<a id='L266' name='L266'></a> 266                 <em class='brace'>{</em>
+<a id='L267' name='L267'></a> 267                         <strong class='reserved'>if</strong>(<a href='../Y/13157.html' title='Multiple used in 5 places.'>loaded_paths_</a>.<a href='../D/6230.html' title='Multiple defined in 37 places.'>find</a>(<a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>) != <a href='../Y/13157.html' title='Multiple used in 5 places.'>loaded_paths_</a>.<a href='../D/5853.html' title='Multiple defined in 28 places.'>end</a>())
+<a id='L268' name='L268'></a> 268                         <em class='brace'>{</em>
+<a id='L269' name='L269'></a> 269                                 <strong class='reserved'>return</strong>;
+<a id='L270' name='L270'></a> 270                         <em class='brace'>}</em>
+<a id='L271' name='L271'></a> 271                         <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>.<a href='../S/846.html#L265' title='Defined at 265 in src/gettext_boost.cpp.'>add_messages_path</a>(<a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>);
+<a id='L272' name='L272'></a> 272                         <a href='../Y/13157.html' title='Multiple used in 5 places.'>loaded_paths_</a>.<a href='../D/8894.html' title='Multiple defined in 13 places.'>insert</a>(<a href='../D/11763.html' title='Multiple defined in 6 places.'>path</a>);
+<a id='L273' name='L273'></a> 273                 <em class='brace'>}</em>
+<a id='L274' name='L274'></a> 274 
+<a id='L275' name='L275'></a> 275                 <strong class='reserved'>void</strong> <a href='../R/12492.html' title='Multiple referred from 2 places.'>set_default_messages_domain</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)
+<a id='L276' name='L276'></a> 276                 <em class='brace'>{</em>
+<a id='L277' name='L277'></a> 277                         <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>.<a href='../S/846.html#L275' title='Defined at 275 in src/gettext_boost.cpp.'>set_default_messages_domain</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>);
+<a id='L278' name='L278'></a> 278                         <a href='../S/846.html#L299' title='Defined at 299 in src/gettext_boost.cpp.'>update_locale</a>();
+<a id='L279' name='L279'></a> 279                 <em class='brace'>}</em>
+<a id='L280' name='L280'></a> 280 
+<a id='L281' name='L281'></a> 281                 <strong class='reserved'>void</strong> <a href='../R/12654.html' title='Multiple referred from 11 places.'>set_language</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>)
+<a id='L282' name='L282'></a> 282                 <em class='brace'>{</em>
+<a id='L283' name='L283'></a> 283                         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>::<a href='../D/14495.html' title='Multiple defined in 3 places.'>size_type</a> <a href='../Y/5800.html' title='Multiple used in 3 places.'>at_pos</a> = <a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>.<a href='../D/12918.html' title='Multiple defined in 4 places.'>rfind</a>('@');
+<a id='L284' name='L284'></a> 284                         <strong class='reserved'>if</strong>(<a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>.<a href='../D/5819.html' title='Multiple defined in 32 places.'>empty</a>())
+<a id='L285' name='L285'></a> 285                         <em class='brace'>{</em>
+<a id='L286' name='L286'></a> 286                                 <a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a> = <a href='../S/846.html#L54' title='Defined at 54 in src/gettext_boost.cpp.'>default_utf8_locale_name</a>::<a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a>();
+<a id='L287' name='L287'></a> 287                         <em class='brace'>}</em>
+<a id='L288' name='L288'></a> 288                         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<a href='../Y/5800.html' title='Multiple used in 3 places.'>at_pos</a>  != <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>::<a href='../Y/15148.html' title='Multiple used in 158 places.'>npos</a>)
+<a id='L289' name='L289'></a> 289                         <em class='brace'>{</em>
+<a id='L290' name='L290'></a> 290                                 <a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a> = <a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>.<a href='../D/14791.html' title='Multiple defined in 2 places.'>substr</a>(0, <a href='../Y/5800.html' title='Multiple used in 3 places.'>at_pos</a>) + ".UTF-8" + <a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>.<a href='../D/14791.html' title='Multiple defined in 2 places.'>substr</a>(<a href='../Y/5800.html' title='Multiple used in 3 places.'>at_pos</a>);
+<a id='L291' name='L291'></a> 291                         <em class='brace'>}</em>
+<a id='L292' name='L292'></a> 292                         <strong class='reserved'>else</strong>
+<a id='L293' name='L293'></a> 293                         <em class='brace'>{</em>
+<a id='L294' name='L294'></a> 294                                 <a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a> = <a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a> + ".UTF-8";
+<a id='L295' name='L295'></a> 295                         <em class='brace'>}</em>
+<a id='L296' name='L296'></a> 296                         <a href='../S/846.html#L299' title='Defined at 299 in src/gettext_boost.cpp.'>update_locale</a>();
+<a id='L297' name='L297'></a> 297                 <em class='brace'>}</em>
+<a id='L298' name='L298'></a> 298 
+<a id='L299' name='L299'></a> 299                 <strong class='reserved'>void</strong> <a href='../R/14419.html' title='Multiple referred from 3 places.'>update_locale</a>()
+<a id='L300' name='L300'></a> 300                 <em class='brace'>{</em>
+<a id='L301' name='L301'></a> 301                         <a href='../D/9267.html' title='Multiple defined in 2 places.'>is_dirty_</a> = <strong class='reserved'>true</strong>;
+<a id='L302' name='L302'></a> 302                 <em class='brace'>}</em>
+<a id='L303' name='L303'></a> 303 
+<a id='L304' name='L304'></a> 304                 <strong class='reserved'>void</strong> <a href='../R/14420.html' title='Multiple referred from 2 places.'>update_locale_internal</a>()
+<a id='L305' name='L305'></a> 305                 <em class='brace'>{</em>
+<a id='L306' name='L306'></a> 306                         <strong class='reserved'>try</strong>
+<a id='L307' name='L307'></a> 307                         <em class='brace'>{</em>
+<a id='L308' name='L308'></a> 308                                 <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "attempting to generate locale by name '" &lt;&lt; <a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a> &lt;&lt; "'\n";
+<a id='L309' name='L309'></a> 309                                 <a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a> = <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>.<a href='../D/6644.html' title='Multiple defined in 13 places.'>generate</a>(<a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a>);
+<a id='L310' name='L310'></a> 310                                 <a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a> = <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13223.html' title='Multiple used in 101 places.'>locale</a>(<a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>, <strong class='reserved'>new</strong> <a href='../S/846.html#L89' title='Defined at 89 in src/gettext_boost.cpp.'>wesnoth_message_format</a>(<a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>, <a href='../Y/13155.html' title='Multiple used in 5 places.'>loaded_domains_</a>, <a href='../Y/13157.html' title='Multiple used in 5 places.'>loaded_paths_</a>));
+<a id='L311' name='L311'></a> 311                                 <strong class='reserved'>const</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&amp; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a> = <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21108.html' title='Multiple used in 7 places.'>use_facet</a>&lt;<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&gt;(<a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>);
+<a id='L312' name='L312'></a> 312                                 <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "updated locale to '" &lt;&lt; <a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a> &lt;&lt; "' locale is now '" &lt;&lt; <a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>.<a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a>() &lt;&lt; "' ( "
+<a id='L313' name='L313'></a> 313                                       &lt;&lt; "name='" &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a>()
+<a id='L314' name='L314'></a> 314                                       &lt;&lt; "' country='"  &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7878.html' title='Multiple used in 6 places.'>country</a>()
+<a id='L315' name='L315'></a> 315                                       &lt;&lt; "' language='"  &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>()
+<a id='L316' name='L316'></a> 316                                       &lt;&lt; "' encoding='"  &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/9213.html' title='Multiple used in 17 places.'>encoding</a>()
+<a id='L317' name='L317'></a> 317                                       &lt;&lt; "' variant='"  &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/15895.html' title='Multiple defined in 8 places.'>variant</a>() &lt;&lt; "')\n";
+<a id='L318' name='L318'></a> 318                         <em class='brace'>}</em>
+<a id='L319' name='L319'></a> 319                         <strong class='reserved'>catch</strong>(<strong class='reserved'>const</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../Y/7804.html' title='Multiple used in 11 places.'>conv</a>::conversion_error&amp;)
+<a id='L320' name='L320'></a> 320                         <em class='brace'>{</em>
+<a id='L321' name='L321'></a> 321                                 <a href='../Y/5773.html' title='Multiple used in 1192 places.'>assert</a>(<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::has_facet&lt;<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&gt;(<a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>));
+<a id='L322' name='L322'></a> 322                                 <strong class='reserved'>const</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&amp; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a> = <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21108.html' title='Multiple used in 7 places.'>use_facet</a>&lt;<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>&gt;(<a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>);
+<a id='L323' name='L323'></a> 323                                 <a href='../D/460.html' title='Multiple defined in 8 places.'>ERR_G</a> &lt;&lt; "Failed to update locale due to conversion error, locale is now: "
+<a id='L324' name='L324'></a> 324                                       &lt;&lt; "name='" &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/11236.html' title='Multiple defined in 26 places.'>name</a>()
+<a id='L325' name='L325'></a> 325                                       &lt;&lt; "' country='" &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7878.html' title='Multiple used in 6 places.'>country</a>()
+<a id='L326' name='L326'></a> 326                                       &lt;&lt; "' language='" &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>()
+<a id='L327' name='L327'></a> 327                                       &lt;&lt; "' encoding='" &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/9213.html' title='Multiple used in 17 places.'>encoding</a>()
+<a id='L328' name='L328'></a> 328                                       &lt;&lt; "' variant='" &lt;&lt; <a href='../D/8797.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/15895.html' title='Multiple defined in 8 places.'>variant</a>()
+<a id='L329' name='L329'></a> 329                                       &lt;&lt; "'" &lt;&lt; <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/9265.html' title='Multiple used in 927 places.'>endl</a>;
+<a id='L330' name='L330'></a> 330                         <em class='brace'>}</em>
+<a id='L331' name='L331'></a> 331                         <a href='../D/9267.html' title='Multiple defined in 2 places.'>is_dirty_</a> = <strong class='reserved'>false</strong>;
+<a id='L332' name='L332'></a> 332                 <em class='brace'>}</em>
+<a id='L333' name='L333'></a> 333 
+<a id='L334' name='L334'></a> 334                 <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13223.html' title='Multiple used in 101 places.'>locale</a>&amp; <a href='../R/6841.html' title='Multiple referred from 8 places.'>get_locale</a>()
+<a id='L335' name='L335'></a> 335                 <em class='brace'>{</em>
+<a id='L336' name='L336'></a> 336                         <strong class='reserved'>if</strong>(<a href='../D/9267.html' title='Multiple defined in 2 places.'>is_dirty_</a>)
+<a id='L337' name='L337'></a> 337                         <em class='brace'>{</em>
+<a id='L338' name='L338'></a> 338                                 <a href='../S/846.html#L304' title='Defined at 304 in src/gettext_boost.cpp.'>update_locale_internal</a>();
+<a id='L339' name='L339'></a> 339                         <em class='brace'>}</em>
+<a id='L340' name='L340'></a> 340                         <strong class='reserved'>return</strong> <a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>;
+<a id='L341' name='L341'></a> 341                 <em class='brace'>}</em>
+<a id='L342' name='L342'></a> 342 
+<a id='L343' name='L343'></a> 343         <strong class='reserved'>private</strong>:
+<a id='L344' name='L344'></a> 344                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13442.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../Y/13157.html' title='Multiple used in 5 places.'>loaded_paths_</a>;
+<a id='L345' name='L345'></a> 345                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13442.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../Y/13155.html' title='Multiple used in 5 places.'>loaded_domains_</a>;
+<a id='L346' name='L346'></a> 346                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/8075.html' title='Multiple used in 8 places.'>current_language_</a>;
+<a id='L347' name='L347'></a> 347                 <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/6692.html' title='Multiple defined in 5 places.'>generator</a> <a href='../D/6693.html' title='Multiple defined in 4 places.'>generator_</a>;
+<a id='L348' name='L348'></a> 348                 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13223.html' title='Multiple used in 101 places.'>locale</a> <a href='../Y/8083.html' title='Multiple used in 9 places.'>current_locale_</a>;
+<a id='L349' name='L349'></a> 349                 <strong class='reserved'>bool</strong> <a href='../D/9267.html' title='Multiple defined in 2 places.'>is_dirty_</a>;
+<a id='L350' name='L350'></a> 350         <em class='brace'>}</em>;
+<a id='L351' name='L351'></a> 351 
+<a id='L352' name='L352'></a> 352         <a href='../S/846.html#L218' title='Defined at 218 in src/gettext_boost.cpp.'>translation_manager</a>&amp; <a href='../R/6857.html' title='Multiple referred from 13 places.'>get_manager</a>()
+<a id='L353' name='L353'></a> 353         <em class='brace'>{</em>
+<a id='L354' name='L354'></a> 354                 <strong class='reserved'>static</strong> <a href='../S/846.html#L218' title='Defined at 218 in src/gettext_boost.cpp.'>translation_manager</a>* <a href='../Y/14166.html' title='Multiple used in 2 places.'>mng</a> = <strong class='reserved'>new</strong> <a href='../S/846.html#L218' title='Defined at 218 in src/gettext_boost.cpp.'>translation_manager</a>();
+<a id='L355' name='L355'></a> 355                 <strong class='reserved'>return</strong> *<a href='../Y/14166.html' title='Multiple used in 2 places.'>mng</a>;
+<a id='L356' name='L356'></a> 356         <em class='brace'>}</em>
+<a id='L357' name='L357'></a> 357 
+<a id='L358' name='L358'></a> 358 <em class='brace'>}</em>
+<a id='L359' name='L359'></a> 359 
+<a id='L360' name='L360'></a> 360 <strong class='reserved'>namespace</strong> <a href='../R/14042.html' title='Multiple referred from 79 places.'>translation</a>
+<a id='L361' name='L361'></a> 361 <em class='brace'>{</em>
+<a id='L362' name='L362'></a> 362 
+<a id='L363' name='L363'></a> 363 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/4723.html' title='Multiple referred from 4 places.'>dgettext</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>)
+<a id='L364' name='L364'></a> 364 <em class='brace'>{</em>
+<a id='L365' name='L365'></a> 365         <strong class='reserved'>return</strong> <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../S/846.html#L363' title='Defined at 363 in src/gettext_boost.cpp.'>dgettext</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>, <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../D/7649.html' title='Multiple defined in 2 places.'>get_locale</a>());
+<a id='L366' name='L366'></a> 366 <em class='brace'>}</em>
+<a id='L367' name='L367'></a> 367 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/5124.html' title='Multiple referred from 2 places.'>egettext</a>(<strong class='reserved'>char</strong> <strong class='reserved'>const</strong> *<a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>)
+<a id='L368' name='L368'></a> 368 <em class='brace'>{</em>
+<a id='L369' name='L369'></a> 369         <strong class='reserved'>return</strong> <a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>[0] == '\0' ? <a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a> : <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../D/8173.html' title='Multiple defined in 3 places.'>gettext</a>(<a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>, <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../D/7649.html' title='Multiple defined in 2 places.'>get_locale</a>());
+<a id='L370' name='L370'></a> 370 <em class='brace'>}</em>
+<a id='L371' name='L371'></a> 371 
+<a id='L372' name='L372'></a> 372 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/5029.html' title='Multiple referred from 5 places.'>dsgettext</a> (<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../Y/8909.html' title='Multiple used in 6 places.'>domainname</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>)
+<a id='L373' name='L373'></a> 373 <em class='brace'>{</em>
+<a id='L374' name='L374'></a> 374         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> = <a href='../S/846.html#L363' title='Defined at 363 in src/gettext_boost.cpp.'>dgettext</a> (<a href='../Y/8909.html' title='Multiple used in 6 places.'>domainname</a>, <a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>);
+<a id='L375' name='L375'></a> 375         <strong class='reserved'>if</strong> (<a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> == <a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>) <em class='brace'>{</em>
+<a id='L376' name='L376'></a> 376                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/10083.html' title='Multiple used in 6 places.'>firsthat</a> = <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19207.html' title='Multiple used in 4 places.'>strrchr</a> (<a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>, '^');
+<a id='L377' name='L377'></a> 377                 <strong class='reserved'>if</strong> (<a href='../Y/10083.html' title='Multiple used in 6 places.'>firsthat</a> == <a href='../Y/15185.html' title='Multiple used in 1952 places.'>nullptr</a>)
+<a id='L378' name='L378'></a> 378                         <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> = <a href='../Y/14405.html' title='Multiple used in 55 places.'>msgid</a>;
+<a id='L379' name='L379'></a> 379                 <strong class='reserved'>else</strong>
+<a id='L380' name='L380'></a> 380                         <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> = <a href='../Y/10083.html' title='Multiple used in 6 places.'>firsthat</a> + 1;
+<a id='L381' name='L381'></a> 381         <em class='brace'>}</em>
+<a id='L382' name='L382'></a> 382         <strong class='reserved'>return</strong> <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a>;
+<a id='L383' name='L383'></a> 383 <em class='brace'>}</em>
+<a id='L384' name='L384'></a> 384 
+<a id='L385' name='L385'></a> 385 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/5030.html' title='Multiple referred from 5 places.'>dsngettext</a> (<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> * <a href='../Y/8909.html' title='Multiple used in 6 places.'>domainname</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/18617.html' title='Multiple used in 6 places.'>singular</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../Y/16280.html' title='Multiple used in 108 places.'>plural</a>, <strong class='reserved'>int</strong> <a href='../Y/14532.html' title='Multiple used in 1573 places.'>n</a>)
+<a id='L386' name='L386'></a> 386 <em class='brace'>{</em>
+<a id='L387' name='L387'></a> 387         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> = <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::dngettext(<a href='../Y/8909.html' title='Multiple used in 6 places.'>domainname</a>, <a href='../Y/18617.html' title='Multiple used in 6 places.'>singular</a>, <a href='../Y/16280.html' title='Multiple used in 108 places.'>plural</a>, <a href='../Y/14532.html' title='Multiple used in 1573 places.'>n</a>, <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../D/7649.html' title='Multiple defined in 2 places.'>get_locale</a>());
+<a id='L388' name='L388'></a> 388         <strong class='reserved'>if</strong> (<a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> == <a href='../Y/18617.html' title='Multiple used in 6 places.'>singular</a>) <em class='brace'>{</em>
+<a id='L389' name='L389'></a> 389                 <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/10083.html' title='Multiple used in 6 places.'>firsthat</a> = <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19207.html' title='Multiple used in 4 places.'>strrchr</a> (<a href='../Y/18617.html' title='Multiple used in 6 places.'>singular</a>, '^');
+<a id='L390' name='L390'></a> 390                 <strong class='reserved'>if</strong> (<a href='../Y/10083.html' title='Multiple used in 6 places.'>firsthat</a> == <a href='../Y/15185.html' title='Multiple used in 1952 places.'>nullptr</a>)
+<a id='L391' name='L391'></a> 391                         <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> = <a href='../Y/18617.html' title='Multiple used in 6 places.'>singular</a>;
+<a id='L392' name='L392'></a> 392                 <strong class='reserved'>else</strong>
+<a id='L393' name='L393'></a> 393                         <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a> = <a href='../Y/10083.html' title='Multiple used in 6 places.'>firsthat</a> + 1;
+<a id='L394' name='L394'></a> 394         <em class='brace'>}</em>
+<a id='L395' name='L395'></a> 395         <strong class='reserved'>return</strong> <a href='../Y/14410.html' title='Multiple used in 10 places.'>msgval</a>;
+<a id='L396' name='L396'></a> 396 <em class='brace'>}</em>
+<a id='L397' name='L397'></a> 397 
+<a id='L398' name='L398'></a> 398 <strong class='reserved'>void</strong> <a href='../R/3235.html' title='Multiple referred from 6 places.'>bind_textdomain</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/8739.html' title='Multiple used in 41 places.'>directory</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <em class='comment'>/*encoding*/</em>)
+<a id='L399' name='L399'></a> 399 <em class='brace'>{</em>
+<a id='L400' name='L400'></a> 400         <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "adding textdomain '" &lt;&lt; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a> &lt;&lt; "' in directory '" &lt;&lt; <a href='../Y/8739.html' title='Multiple used in 41 places.'>directory</a> &lt;&lt; "'\n";
+<a id='L401' name='L401'></a> 401         <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../S/846.html#L243' title='Defined at 243 in src/gettext_boost.cpp.'>add_messages_domain</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>);
+<a id='L402' name='L402'></a> 402         <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../S/846.html#L265' title='Defined at 265 in src/gettext_boost.cpp.'>add_messages_path</a>(<a href='../Y/8739.html' title='Multiple used in 41 places.'>directory</a>);
+<a id='L403' name='L403'></a> 403         <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../S/846.html#L299' title='Defined at 299 in src/gettext_boost.cpp.'>update_locale</a>();
+<a id='L404' name='L404'></a> 404 <em class='brace'>}</em>
+<a id='L405' name='L405'></a> 405 
+<a id='L406' name='L406'></a> 406 <strong class='reserved'>void</strong> <a href='../R/12493.html' title='Multiple referred from 3 places.'>set_default_textdomain</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)
+<a id='L407' name='L407'></a> 407 <em class='brace'>{</em>
+<a id='L408' name='L408'></a> 408         <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "set_default_textdomain: '" &lt;&lt; <a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a> &lt;&lt; "'\n";
+<a id='L409' name='L409'></a> 409         <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../S/846.html#L275' title='Defined at 275 in src/gettext_boost.cpp.'>set_default_messages_domain</a>(<a href='../S/846.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>);
+<a id='L410' name='L410'></a> 410 <em class='brace'>}</em>
+<a id='L411' name='L411'></a> 411 
+<a id='L412' name='L412'></a> 412 
+<a id='L413' name='L413'></a> 413 <strong class='reserved'>void</strong> <a href='../R/12654.html' title='Multiple referred from 11 places.'>set_language</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21360.html' title='Multiple used in 2717 places.'>vector</a>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&gt;* <em class='comment'>/*alternates*/</em>)
+<a id='L414' name='L414'></a> 414 <em class='brace'>{</em>
+<a id='L415' name='L415'></a> 415         <em class='comment'>// why shoudl we need alternates? which languages we support shoudl only be related</em>
+<a id='L416' name='L416'></a> 416         <em class='comment'>// to which languages we ship with and not which the os supports</em>
+<a id='L417' name='L417'></a> 417         <a href='../D/1084.html' title='Multiple defined in 8 places.'>LOG_G</a> &lt;&lt; "setting language to  '" &lt;&lt; <a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a> &lt;&lt; "' \n";
+<a id='L418' name='L418'></a> 418         <a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../D/13810.html' title='Multiple defined in 4 places.'>set_language</a>(<a href='../S/799.html#L474' title='Defined at 474 in src/preferences/general.cpp.'>language</a>);
+<a id='L419' name='L419'></a> 419 <em class='brace'>}</em>
+<a id='L420' name='L420'></a> 420 
+<a id='L421' name='L421'></a> 421 <strong class='reserved'>int</strong> <a href='../R/4075.html' title='Multiple referred from 54 places.'>compare</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/17703.html' title='Multiple used in 28 places.'>s1</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/17704.html' title='Multiple used in 22 places.'>s2</a>)
+<a id='L422' name='L422'></a> 422 <em class='brace'>{</em>
+<a id='L423' name='L423'></a> 423         <strong class='reserved'>return</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21108.html' title='Multiple used in 7 places.'>use_facet</a>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::collate&lt;<strong class='reserved'>char</strong>&gt; &gt;(<a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../D/7649.html' title='Multiple defined in 2 places.'>get_locale</a>()).<a href='../D/4627.html' title='Multiple defined in 14 places.'>compare</a>(<a href='../Y/17703.html' title='Multiple used in 28 places.'>s1</a>.<a href='../D/3857.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../Y/17703.html' title='Multiple used in 28 places.'>s1</a>.<a href='../D/3857.html' title='Multiple defined in 2 places.'>c_str</a>() + <a href='../Y/17703.html' title='Multiple used in 28 places.'>s1</a>.<a href='../D/14484.html' title='Multiple defined in 18 places.'>size</a>(), <a href='../Y/17704.html' title='Multiple used in 22 places.'>s2</a>.<a href='../D/3857.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../Y/17704.html' title='Multiple used in 22 places.'>s2</a>.<a href='../D/3857.html' title='Multiple defined in 2 places.'>c_str</a>() + <a href='../Y/17704.html' title='Multiple used in 22 places.'>s2</a>.<a href='../D/14484.html' title='Multiple defined in 18 places.'>size</a>());
+<a id='L424' name='L424'></a> 424 <em class='brace'>}</em>
+<a id='L425' name='L425'></a> 425 
+<a id='L426' name='L426'></a> 426 <strong class='reserved'>int</strong> <a href='../R/7736.html' title='Multiple referred from 2 places.'>icompare</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/17703.html' title='Multiple used in 28 places.'>s1</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/17704.html' title='Multiple used in 22 places.'>s2</a>)
+<a id='L427' name='L427'></a> 427 <em class='brace'>{</em>
+<a id='L428' name='L428'></a> 428         <strong class='reserved'>return</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21108.html' title='Multiple used in 7 places.'>use_facet</a>&lt;<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../Y/7538.html' title='Multiple used in 3 places.'>collator</a>&lt;<strong class='reserved'>char</strong>&gt; &gt;(<a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../D/7649.html' title='Multiple defined in 2 places.'>get_locale</a>()).<a href='../D/4627.html' title='Multiple defined in 14 places.'>compare</a>(<a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::collator_base::<a href='../Y/18015.html' title='Multiple used in 20 places.'>secondary</a>, <a href='../Y/17703.html' title='Multiple used in 28 places.'>s1</a>, <a href='../Y/17704.html' title='Multiple used in 22 places.'>s2</a>);
+<a id='L429' name='L429'></a> 429 <em class='brace'>}</em>
+<a id='L430' name='L430'></a> 430 
+<a id='L431' name='L431'></a> 431 <strong class='reserved'>void</strong> <a href='../R/7932.html' title='Multiple referred from 127 places.'>init</a>()
+<a id='L432' name='L432'></a> 432 <em class='brace'>{</em>
+<a id='L433' name='L433'></a> 433 <em class='brace'>}</em>
+<a id='L434' name='L434'></a> 434 
+<a id='L435' name='L435'></a> 435 <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/13548.html' title='Multiple referred from 8 places.'>strftime</a>(<strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14741.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6426.html' title='Multiple defined in 2 places.'>format</a>, <strong class='reserved'>const</strong> <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/20140.html' title='Multiple used in 149 places.'>tm</a>* <a href='../D/15132.html' title='Multiple defined in 4 places.'>time</a>)
+<a id='L436' name='L436'></a> 436 <em class='brace'>{</em>
+<a id='L437' name='L437'></a> 437         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::basic_ostringstream&lt;<strong class='reserved'>char</strong>&gt; <a href='../Y/9016.html' title='Multiple used in 80 places.'>dummy</a>;
+<a id='L438' name='L438'></a> 438         <a href='../Y/9016.html' title='Multiple used in 80 places.'>dummy</a>.<a href='../Y/11797.html' title='Multiple used in 2 places.'>imbue</a>(<a href='../D/7666.html' title='Multiple defined in 2 places.'>get_manager</a>().<a href='../D/7649.html' title='Multiple defined in 2 places.'>get_locale</a>());
+<a id='L439' name='L439'></a> 439         <em class='comment'>// See utils/io.hpp for explanation of this check</em>
+<a id='L440' name='L440'></a> 440 <em class='sharp'>#if</em> <a href='../D/690.html' title='Multiple defined in 4 places.'>HAVE_PUT_TIME</a>
+<a id='L441' name='L441'></a> 441         <a href='../Y/9016.html' title='Multiple used in 80 places.'>dummy</a> &lt;&lt; <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/868.html#L27' title='Defined at 27 in src/utils/io.hpp.'>put_time</a>(<a href='../D/15132.html' title='Multiple defined in 4 places.'>time</a>, <a href='../D/6426.html' title='Multiple defined in 2 places.'>format</a>.<a href='../D/3857.html' title='Multiple defined in 2 places.'>c_str</a>());
+<a id='L442' name='L442'></a> 442 <em class='sharp'>#else</em>
+<a id='L443' name='L443'></a> 443         <a href='../Y/9016.html' title='Multiple used in 80 places.'>dummy</a> &lt;&lt; <a href='../S/846.html#L51' title='Defined at 51 in src/gettext_boost.cpp.'>bl</a>::<a href='../Y/5743.html' title='Multiple used in 55 places.'>as</a>::ftime(<a href='../D/6426.html' title='Multiple defined in 2 places.'>format</a>) &lt;&lt; <a href='../Y/14161.html' title='Multiple used in 3 places.'>mktime</a>(<strong class='reserved'>const_cast</strong>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/20140.html' title='Multiple used in 149 places.'>tm</a>*&gt;(<a href='../D/15132.html' title='Multiple defined in 4 places.'>time</a>));
+<a id='L444' name='L444'></a> 444 <em class='sharp'>#endif</em>
+<a id='L445' name='L445'></a> 445 
+<a id='L446' name='L446'></a> 446         <strong class='reserved'>return</strong> <a href='../Y/9016.html' title='Multiple used in 80 places.'>dummy</a>.<a href='../D/14708.html' title='Multiple defined in 25 places.'>str</a>();
+<a id='L447' name='L447'></a> 447 <em class='brace'>}</em>
+<a id='L448' name='L448'></a> 448 
+<a id='L449' name='L449'></a> 449 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L43'>[^]</a><a href='#L62'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L57'>[^]</a><a href='#L435'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>
