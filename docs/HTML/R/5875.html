@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>game_save_message</title>
+<title>game_lua_kernel</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
@@ -9,15 +9,280 @@
 </head>
 <body>
 <pre>
-<span class='curline'><a href='../S/351.html#L62'>game_save_message</a>   62 src/gui/dialogs/game_save.cpp REGISTER_DIALOG(game_save_message)</span>
-<span class='curline'><a href='../S/351.html#L64'>game_save_message</a>   64 src/gui/dialogs/game_save.cpp game_save_message::game_save_message(std::string&amp; filename,</span>
-<span class='curline'><a href='../S/473.html#L43'>game_save_message</a>   43 src/gui/dialogs/game_save.hpp 	game_save_message(std::string&amp; filename,</span>
-<span class='curline'><a href='../S/473.html#L52'>game_save_message</a>   52 src/gui/dialogs/game_save.hpp 		return game_save_message(filename, title, message).show(video);</span>
-<span class='curline'><a href='../S/927.html#L382'>game_save_message</a>  382 src/savegame.cpp 		gui2::dialogs::game_save_message dlg(filename_, title_, message);</span>
-<span class='curline'><a href='../S/705.html#L419'>game_save_message</a>  419 src/tests/gui/test_gui2.cpp 	test&lt;game_save_message&gt;();</span>
-<span class='curline'><a href='../S/705.html#L733'>game_save_message</a>  733 src/tests/gui/test_gui2.cpp struct dialog_tester&lt;game_save_message&gt;</span>
-<span class='curline'><a href='../S/705.html#L738'>game_save_message</a>  738 src/tests/gui/test_gui2.cpp 	game_save_message* create()</span>
-<span class='curline'><a href='../S/705.html#L740'>game_save_message</a>  740 src/tests/gui/test_gui2.cpp 		return new game_save_message(title, filename, message);</span>
+<span class='curline'><a href='../S/297.html#L21'>game_lua_kernel</a>    21 src/ai/lua/core.hpp class game_lua_kernel;</span>
+<span class='curline'><a href='../S/297.html#L52'>game_lua_kernel</a>    52 src/ai/lua/core.hpp 	friend class ::game_lua_kernel;</span>
+<span class='curline'><a href='../S/297.html#L82'>game_lua_kernel</a>    82 src/ai/lua/core.hpp 	friend class ::game_lua_kernel;</span>
+<span class='curline'><a href='../S/961.html#L166'>game_lua_kernel</a>   166 src/display.hpp 	virtual game_lua_kernel * get_lua_kernel() const { return nullptr; } //!&lt; TODO: display should not work as a filter context, this was only done for expedience so that the unit animation code can have a convenient and correct filter context readily available. a more correct solution is most likely to pass it a filter context from unit_animator when it needs to be matched. (it's not possible to store filter contexts with animations, because animations are cached across scenarios.) Note that after these lines which return nullptr, unit filters used in animations will not be able to make use of wml variables or lua scripting (but the latter was a bad idea anyways because it would be slow to constantly recompile the script.)</span>
+<span class='curline'><a href='../S/1052.html#L31'>game_lua_kernel</a>    31 src/filter_context.hpp class game_lua_kernel;</span>
+<span class='curline'><a href='../S/1052.html#L40'>game_lua_kernel</a>    40 src/filter_context.hpp 	virtual game_lua_kernel * get_lua_kernel() const = 0;</span>
+<span class='curline'><a href='../S/140.html#L65'>game_lua_kernel</a>    65 src/game_board.hpp 	friend class game_lua_kernel;</span>
+<span class='curline'><a href='../S/831.html#L288'>game_lua_kernel</a>   288 src/game_config_manager.cpp 		game_lua_kernel::extract_preload_scripts(game_config_);</span>
+<span class='curline'><a href='../S/1058.html#L111'>game_lua_kernel</a>   111 src/game_events/handlers.cpp void event_handler::handle_event(const queued_event&amp; event_info, handler_ptr&amp; handler_p, game_lua_kernel&amp; lk)</span>
+<span class='curline'><a href='../S/1068.html#L34'>game_lua_kernel</a>    34 src/game_events/handlers.hpp class game_lua_kernel;</span>
+<span class='curline'><a href='../S/1068.html#L68'>game_lua_kernel</a>    68 src/game_events/handlers.hpp 	void handle_event(const queued_event&amp; event_info, handler_ptr&amp; handler_p, game_lua_kernel&amp;);</span>
+<span class='curline'><a href='../S/1073.html#L24'>game_lua_kernel</a>    24 src/game_events/manager.hpp class game_lua_kernel;</span>
+<span class='curline'><a href='../S/86.html#L51'>game_lua_kernel</a>    51 src/game_state.cpp 	lua_kernel_(new game_lua_kernel(*this, pc, *reports_)),</span>
+<span class='curline'><a href='../S/86.html#L77'>game_lua_kernel</a>    77 src/game_state.cpp 	lua_kernel_(new game_lua_kernel(*this, pc, *reports_)),</span>
+<span class='curline'><a href='../S/1162.html#L27'>game_lua_kernel</a>    27 src/game_state.hpp class game_lua_kernel;</span>
+<span class='curline'><a href='../S/1162.html#L49'>game_lua_kernel</a>    49 src/game_state.hpp 	std::unique_ptr&lt;game_lua_kernel&gt; lua_kernel_;</span>
+<span class='curline'><a href='../S/1162.html#L87'>game_lua_kernel</a>    87 src/game_state.hpp 	virtual game_lua_kernel * get_lua_kernel() const { return lua_kernel_.get(); }</span>
+<span class='curline'><a href='../S/957.html#L118'>game_lua_kernel</a>   118 src/mouse_events.cpp 		if(game_lua_kernel* lk = pc_.gamestate().lua_kernel_.get()) {</span>
+<span class='curline'><a href='../S/957.html#L512'>game_lua_kernel</a>   512 src/mouse_events.cpp 	if(game_lua_kernel* lk = pc_.gamestate().lua_kernel_.get()) {</span>
+<span class='curline'><a href='../S/957.html#L681'>game_lua_kernel</a>   681 src/mouse_events.cpp 	if(game_lua_kernel* lk = pc_.gamestate().lua_kernel_.get()) {</span>
+<span class='curline'><a href='../S/853.html#L98'>game_lua_kernel</a>    98 src/pathfind/teleport.cpp 	game_lua_kernel * get_lua_kernel() const { return lk_; }</span>
+<span class='curline'><a href='../S/853.html#L104'>game_lua_kernel</a>   104 src/pathfind/teleport.cpp 	game_lua_kernel * lk_;</span>
+<span class='curline'><a href='../S/696.html#L25'>game_lua_kernel</a>    25 src/resources.cpp 	game_lua_kernel            *lua_kernel = nullptr;</span>
+<span class='curline'><a href='../S/678.html#L26'>game_lua_kernel</a>    26 src/resources.hpp class game_lua_kernel;</span>
+<span class='curline'><a href='../S/678.html#L53'>game_lua_kernel</a>    53 src/resources.hpp 	extern game_lua_kernel              *lua_kernel;     // Set by game_events::manager.</span>
+<span class='curline'><a href='../S/185.html#L144'>game_lua_kernel</a>   144 src/scripting/game_lua_kernel.cpp std::vector&lt;config&gt; game_lua_kernel::preload_scripts;</span>
+<span class='curline'><a href='../S/185.html#L145'>game_lua_kernel</a>   145 src/scripting/game_lua_kernel.cpp config game_lua_kernel::preload_config;</span>
+<span class='curline'><a href='../S/185.html#L148'>game_lua_kernel</a>   148 src/scripting/game_lua_kernel.cpp typedef int (game_lua_kernel::*member_callback)(lua_State *);</span>
+<span class='curline'><a href='../S/185.html#L152'>game_lua_kernel</a>   152 src/scripting/game_lua_kernel.cpp 	return ((lua_kernel_base::get_lua_kernel&lt;game_lua_kernel&gt;(L)).*method)(L);</span>
+<span class='curline'><a href='../S/185.html#L156'>game_lua_kernel</a>   156 src/scripting/game_lua_kernel.cpp typedef int (game_lua_kernel::*member_callback2)(lua_State *, bool);</span>
+<span class='curline'><a href='../S/185.html#L160'>game_lua_kernel</a>   160 src/scripting/game_lua_kernel.cpp 	return ((lua_kernel_base::get_lua_kernel&lt;game_lua_kernel&gt;(L)).*method)(L, b);</span>
+<span class='curline'><a href='../S/185.html#L165'>game_lua_kernel</a>   165 src/scripting/game_lua_kernel.cpp 	map_locker(game_lua_kernel* kernel) : kernel_(kernel)</span>
+<span class='curline'><a href='../S/185.html#L173'>game_lua_kernel</a>   173 src/scripting/game_lua_kernel.cpp 	game_lua_kernel* kernel_;</span>
+<span class='curline'><a href='../S/185.html#L177'>game_lua_kernel</a>   177 src/scripting/game_lua_kernel.cpp void game_lua_kernel::extract_preload_scripts(config const &amp;game_config)</span>
+<span class='curline'><a href='../S/185.html#L179'>game_lua_kernel</a>   179 src/scripting/game_lua_kernel.cpp 	game_lua_kernel::preload_scripts.clear();</span>
+<span class='curline'><a href='../S/185.html#L181'>game_lua_kernel</a>   181 src/scripting/game_lua_kernel.cpp 		game_lua_kernel::preload_scripts.push_back(cfg);</span>
+<span class='curline'><a href='../S/185.html#L183'>game_lua_kernel</a>   183 src/scripting/game_lua_kernel.cpp 	game_lua_kernel::preload_config = game_config.child("game_config");</span>
+<span class='curline'><a href='../S/185.html#L186'>game_lua_kernel</a>   186 src/scripting/game_lua_kernel.cpp void game_lua_kernel::log_error(char const * msg, char const * context)</span>
+<span class='curline'><a href='../S/185.html#L192'>game_lua_kernel</a>   192 src/scripting/game_lua_kernel.cpp void game_lua_kernel::lua_chat(const std::string&amp; caption, const std::string&amp; msg)</span>
+<span class='curline'><a href='../S/185.html#L204'>game_lua_kernel</a>   204 src/scripting/game_lua_kernel.cpp std::vector&lt;int&gt; game_lua_kernel::get_sides_vector(const vconfig&amp; cfg)</span>
+<span class='curline'><a href='../S/185.html#L223'>game_lua_kernel</a>   223 src/scripting/game_lua_kernel.cpp 	lua_pushnumber(L, lua_kernel_base::get_lua_kernel&lt;game_lua_kernel&gt;(L).map().special_locations().size());</span>
+<span class='curline'><a href='../S/185.html#L229'>game_lua_kernel</a>   229 src/scripting/game_lua_kernel.cpp 	const t_translation::starting_positions::left_map&amp; left = lua_kernel_base::get_lua_kernel&lt;game_lua_kernel&gt;(L).map().special_locations().left;</span>
+<span class='curline'><a href='../S/185.html#L260'>game_lua_kernel</a>   260 src/scripting/game_lua_kernel.cpp 	const t_translation::starting_positions::left_map&amp; left = lua_kernel_base::get_lua_kernel&lt;game_lua_kernel&gt;(L).map().special_locations().left;</span>
+<span class='curline'><a href='../S/185.html#L486'>game_lua_kernel</a>   486 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_gamestate_inspector(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L502'>game_lua_kernel</a>   502 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L531'>game_lua_kernel</a>   531 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_displayed_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L555'>game_lua_kernel</a>   555 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_units(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L601'>game_lua_kernel</a>   601 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_match_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L649'>game_lua_kernel</a>   649 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_recall_units(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L688'>game_lua_kernel</a>   688 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_fire_event(lua_State *L, const bool by_id)</span>
+<span class='curline'><a href='../S/185.html#L736'>game_lua_kernel</a>   736 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_fire_wml_menu_item(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L753'>game_lua_kernel</a>   753 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_variable(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L766'>game_lua_kernel</a>   766 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_side_variable(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L784'>game_lua_kernel</a>   784 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_side_variable(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L809'>game_lua_kernel</a>   809 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_variable(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L822'>game_lua_kernel</a>   822 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_menu_item(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L828'>game_lua_kernel</a>   828 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_clear_menu_item(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L841'>game_lua_kernel</a>   841 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_end_campaign_credits(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L848'>game_lua_kernel</a>   848 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_end_campaign_text(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L859'>game_lua_kernel</a>   859 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_next_scenario(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L866'>game_lua_kernel</a>   866 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_shroud_op(lua_State *L, bool place_shroud)</span>
+<span class='curline'><a href='../S/185.html#L916'>game_lua_kernel</a>   916 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_highlight_hex(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L935'>game_lua_kernel</a>   935 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_is_enemy(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L948'>game_lua_kernel</a>   948 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_view_locked(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L962'>game_lua_kernel</a>   962 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_lock_view(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L976'>game_lua_kernel</a>   976 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_terrain(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L993'>game_lua_kernel</a>   993 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_terrain(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1024'>game_lua_kernel</a>  1024 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_terrain_info(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1065'>game_lua_kernel</a>  1065 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_time_of_day(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1126'>game_lua_kernel</a>  1126 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_village_owner(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1143'>game_lua_kernel</a>  1143 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_village_owner(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1173'>game_lua_kernel</a>  1173 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_map_size(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1187'>game_lua_kernel</a>  1187 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_mouseover_tile(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1205'>game_lua_kernel</a>  1205 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_selected_tile(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1223'>game_lua_kernel</a>  1223 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_starting_location(lua_State* L)</span>
+<span class='curline'><a href='../S/185.html#L1254'>game_lua_kernel</a>  1254 src/scripting/game_lua_kernel.cpp int game_lua_kernel::impl_game_config_get(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1294'>game_lua_kernel</a>  1294 src/scripting/game_lua_kernel.cpp int game_lua_kernel::impl_game_config_set(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1322'>game_lua_kernel</a>  1322 src/scripting/game_lua_kernel.cpp std::string game_lua_kernel::synced_state()</span>
+<span class='curline'><a href='../S/185.html#L1349'>game_lua_kernel</a>  1349 src/scripting/game_lua_kernel.cpp int game_lua_kernel::impl_current_get(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1393'>game_lua_kernel</a>  1393 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_message(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1407'>game_lua_kernel</a>  1407 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_open_help(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1415'>game_lua_kernel</a>  1415 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_zoom(lua_State* L)</span>
+<span class='curline'><a href='../S/185.html#L1448'>game_lua_kernel</a>  1448 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_clear_messages(lua_State*)</span>
+<span class='curline'><a href='../S/185.html#L1487'>game_lua_kernel</a>  1487 src/scripting/game_lua_kernel.cpp int game_lua_kernel::impl_end_level_data_set(lua_State* L)</span>
+<span class='curline'><a href='../S/185.html#L1510'>game_lua_kernel</a>  1510 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_end_level_data(lua_State* L)</span>
+<span class='curline'><a href='../S/185.html#L1520'>game_lua_kernel</a>  1520 src/scripting/game_lua_kernel.cpp 			{ "__newindex",     &amp;dispatch&lt;&amp;game_lua_kernel::impl_end_level_data_set&gt;},</span>
+<span class='curline'><a href='../S/185.html#L1530'>game_lua_kernel</a>  1530 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_end_level(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1546'>game_lua_kernel</a>  1546 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_end_turn(lua_State*)</span>
+<span class='curline'><a href='../S/185.html#L1575'>game_lua_kernel</a>  1575 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_find_path(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1685'>game_lua_kernel</a>  1685 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_find_reach(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1816'>game_lua_kernel</a>  1816 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_find_cost_map(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L1981'>game_lua_kernel</a>  1981 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_print(lua_State *L) {</span>
+<span class='curline'><a href='../S/185.html#L2019'>game_lua_kernel</a>  2019 src/scripting/game_lua_kernel.cpp void game_lua_kernel::put_unit_helper(const map_location&amp; loc)</span>
+<span class='curline'><a href='../S/185.html#L2037'>game_lua_kernel</a>  2037 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_put_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2107'>game_lua_kernel</a>  2107 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_erase_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2152'>game_lua_kernel</a>  2152 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_put_recall_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2198'>game_lua_kernel</a>  2198 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_extract_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2230'>game_lua_kernel</a>  2230 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_find_vacant_tile(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2259'>game_lua_kernel</a>  2259 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_float_label(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2390'>game_lua_kernel</a>  2390 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_unit_ability(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2502'>game_lua_kernel</a>  2502 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_simulate_combat(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2556'>game_lua_kernel</a>  2556 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_play_sound(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2592'>game_lua_kernel</a>  2592 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_scroll_to_tile(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2610'>game_lua_kernel</a>  2610 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_select_hex(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2633'>game_lua_kernel</a>  2633 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_select_unit(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2654'>game_lua_kernel</a>  2654 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_deselect_hex(lua_State*)</span>
+<span class='curline'><a href='../S/185.html#L2666'>game_lua_kernel</a>  2666 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_is_skipping_messages(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2680'>game_lua_kernel</a>  2680 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_skip_messages(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2709'>game_lua_kernel</a>  2709 src/scripting/game_lua_kernel.cpp 			bool is_local_ai = lua_kernel_base::get_lua_kernel&lt;game_lua_kernel&gt;(L).board().get_team(side).is_local_ai();</span>
+<span class='curline'><a href='../S/185.html#L2736'>game_lua_kernel</a>  2736 src/scripting/game_lua_kernel.cpp 					lua_kernel_base::get_lua_kernel&lt;game_lua_kernel&gt;(L).log_error("function returned to wesnoth.synchronize_choice a table which was partially invalid");</span>
+<span class='curline'><a href='../S/185.html#L2837'>game_lua_kernel</a>  2837 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_locations(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2870'>game_lua_kernel</a>  2870 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_villages(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2901'>game_lua_kernel</a>  2901 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_match_location(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2929'>game_lua_kernel</a>  2929 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_match_side(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L2951'>game_lua_kernel</a>  2951 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_side_id(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3044'>game_lua_kernel</a>  3044 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_sides(lua_State* L)</span>
+<span class='curline'><a href='../S/185.html#L3193'>game_lua_kernel</a>  3193 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_add_tile_overlay(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3210'>game_lua_kernel</a>  3210 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_remove_tile_overlay(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3227'>game_lua_kernel</a>  3227 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_log_replay(lua_State* L) {</span>
+<span class='curline'><a href='../S/185.html#L3248'>game_lua_kernel</a>  3248 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_add_event(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3261'>game_lua_kernel</a>  3261 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_remove_event(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3267'>game_lua_kernel</a>  3267 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_color_adjust(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3284'>game_lua_kernel</a>  3284 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_delay(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3302'>game_lua_kernel</a>  3302 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_label(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3317'>game_lua_kernel</a>  3317 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_redraw(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3521'>game_lua_kernel</a>  3521 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_allow_end_turn(lua_State * L)</span>
+<span class='curline'><a href='../S/185.html#L3528'>game_lua_kernel</a>  3528 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_allow_undo(lua_State * L)</span>
+<span class='curline'><a href='../S/185.html#L3540'>game_lua_kernel</a>  3540 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_add_time_area(lua_State * L)</span>
+<span class='curline'><a href='../S/185.html#L3557'>game_lua_kernel</a>  3557 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_remove_time_area(lua_State * L)</span>
+<span class='curline'><a href='../S/185.html#L3569'>game_lua_kernel</a>  3569 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_replace_schedule(lua_State * L)</span>
+<span class='curline'><a href='../S/185.html#L3585'>game_lua_kernel</a>  3585 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_set_time_of_day(lua_State * L)</span>
+<span class='curline'><a href='../S/185.html#L3631'>game_lua_kernel</a>  3631 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_scroll(lua_State * L)</span>
+<span class='curline'><a href='../S/185.html#L3669'>game_lua_kernel</a>  3669 src/scripting/game_lua_kernel.cpp int game_lua_kernel::impl_theme_item(lua_State *L, std::string m)</span>
+<span class='curline'><a href='../S/185.html#L3679'>game_lua_kernel</a>  3679 src/scripting/game_lua_kernel.cpp int game_lua_kernel::impl_theme_items_get(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3682'>game_lua_kernel</a>  3682 src/scripting/game_lua_kernel.cpp 	lua_cpp::push_closure(L, std::bind(&amp;game_lua_kernel::impl_theme_item, this, _1, std::string(m)), 0);</span>
+<span class='curline'><a href='../S/185.html#L3693'>game_lua_kernel</a>  3693 src/scripting/game_lua_kernel.cpp int game_lua_kernel::impl_theme_items_set(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3707'>game_lua_kernel</a>  3707 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_all_vars(lua_State *L) {</span>
+<span class='curline'><a href='../S/185.html#L3720'>game_lua_kernel</a>  3720 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_teleport(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3775'>game_lua_kernel</a>  3775 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_remove_sound_source(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3787'>game_lua_kernel</a>  3787 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_add_sound_source(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3810'>game_lua_kernel</a>  3810 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_sound_source(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3831'>game_lua_kernel</a>  3831 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_log(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L3845'>game_lua_kernel</a>  3845 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_get_fog_or_shroud(lua_State *L, bool fog)</span>
+<span class='curline'><a href='../S/185.html#L3871'>game_lua_kernel</a>  3871 src/scripting/game_lua_kernel.cpp int game_lua_kernel::intf_toggle_fog(lua_State *L, const bool clear)</span>
+<span class='curline'><a href='../S/185.html#L3921'>game_lua_kernel</a>  3921 src/scripting/game_lua_kernel.cpp game_board &amp; game_lua_kernel::board() {</span>
+<span class='curline'><a href='../S/185.html#L3925'>game_lua_kernel</a>  3925 src/scripting/game_lua_kernel.cpp unit_map &amp; game_lua_kernel::units() {</span>
+<span class='curline'><a href='../S/185.html#L3929'>game_lua_kernel</a>  3929 src/scripting/game_lua_kernel.cpp std::vector&lt;team&gt; &amp; game_lua_kernel::teams() {</span>
+<span class='curline'><a href='../S/185.html#L3933'>game_lua_kernel</a>  3933 src/scripting/game_lua_kernel.cpp const gamemap &amp; game_lua_kernel::map() const {</span>
+<span class='curline'><a href='../S/185.html#L3937'>game_lua_kernel</a>  3937 src/scripting/game_lua_kernel.cpp game_data &amp; game_lua_kernel::gamedata() {</span>
+<span class='curline'><a href='../S/185.html#L3941'>game_lua_kernel</a>  3941 src/scripting/game_lua_kernel.cpp tod_manager &amp; game_lua_kernel::tod_man() {</span>
+<span class='curline'><a href='../S/185.html#L3945'>game_lua_kernel</a>  3945 src/scripting/game_lua_kernel.cpp const game_events::queued_event &amp; game_lua_kernel::get_event_info() {</span>
+<span class='curline'><a href='../S/185.html#L3950'>game_lua_kernel</a>  3950 src/scripting/game_lua_kernel.cpp game_lua_kernel::game_lua_kernel(game_state &amp; gs, play_controller &amp; pc, reports &amp; reports_object)</span>
+<span class='curline'><a href='../S/185.html#L3992'>game_lua_kernel</a>  3992 src/scripting/game_lua_kernel.cpp 		{ "add_event_handler",         &amp;dispatch&lt;&amp;game_lua_kernel::intf_add_event                  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L3993'>game_lua_kernel</a>  3993 src/scripting/game_lua_kernel.cpp 		{ "add_fog",                   &amp;dispatch2&lt;&amp;game_lua_kernel::intf_toggle_fog, false         &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L3994'>game_lua_kernel</a>  3994 src/scripting/game_lua_kernel.cpp 		{ "add_tile_overlay",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_add_tile_overlay           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L3995'>game_lua_kernel</a>  3995 src/scripting/game_lua_kernel.cpp 		{ "add_time_area",             &amp;dispatch&lt;&amp;game_lua_kernel::intf_add_time_area              &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L3996'>game_lua_kernel</a>  3996 src/scripting/game_lua_kernel.cpp 		{ "add_sound_source",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_add_sound_source           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L3997'>game_lua_kernel</a>  3997 src/scripting/game_lua_kernel.cpp 		{ "allow_end_turn",            &amp;dispatch&lt;&amp;game_lua_kernel::intf_allow_end_turn             &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L3998'>game_lua_kernel</a>  3998 src/scripting/game_lua_kernel.cpp 		{ "allow_undo",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_allow_undo                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4000'>game_lua_kernel</a>  4000 src/scripting/game_lua_kernel.cpp 		{ "clear_menu_item",           &amp;dispatch&lt;&amp;game_lua_kernel::intf_clear_menu_item            &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4001'>game_lua_kernel</a>  4001 src/scripting/game_lua_kernel.cpp 		{ "clear_messages",            &amp;dispatch&lt;&amp;game_lua_kernel::intf_clear_messages             &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4002'>game_lua_kernel</a>  4002 src/scripting/game_lua_kernel.cpp 		{ "color_adjust",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_color_adjust               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4003'>game_lua_kernel</a>  4003 src/scripting/game_lua_kernel.cpp 		{ "delay",                     &amp;dispatch&lt;&amp;game_lua_kernel::intf_delay                      &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4004'>game_lua_kernel</a>  4004 src/scripting/game_lua_kernel.cpp 		{ "end_turn",                  &amp;dispatch&lt;&amp;game_lua_kernel::intf_end_turn                   &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4005'>game_lua_kernel</a>  4005 src/scripting/game_lua_kernel.cpp 		{ "end_level",                 &amp;dispatch&lt;&amp;game_lua_kernel::intf_end_level                  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4006'>game_lua_kernel</a>  4006 src/scripting/game_lua_kernel.cpp 		{ "erase_unit",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_erase_unit                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4007'>game_lua_kernel</a>  4007 src/scripting/game_lua_kernel.cpp 		{ "extract_unit",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_extract_unit               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4008'>game_lua_kernel</a>  4008 src/scripting/game_lua_kernel.cpp 		{ "find_cost_map",             &amp;dispatch&lt;&amp;game_lua_kernel::intf_find_cost_map              &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4009'>game_lua_kernel</a>  4009 src/scripting/game_lua_kernel.cpp 		{ "find_path",                 &amp;dispatch&lt;&amp;game_lua_kernel::intf_find_path                  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4010'>game_lua_kernel</a>  4010 src/scripting/game_lua_kernel.cpp 		{ "find_reach",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_find_reach                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4011'>game_lua_kernel</a>  4011 src/scripting/game_lua_kernel.cpp 		{ "find_vacant_tile",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_find_vacant_tile           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4012'>game_lua_kernel</a>  4012 src/scripting/game_lua_kernel.cpp 		{ "fire_event",                &amp;dispatch2&lt;&amp;game_lua_kernel::intf_fire_event, false         &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4013'>game_lua_kernel</a>  4013 src/scripting/game_lua_kernel.cpp 		{ "fire_event_by_id",          &amp;dispatch2&lt;&amp;game_lua_kernel::intf_fire_event, true          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4014'>game_lua_kernel</a>  4014 src/scripting/game_lua_kernel.cpp 		{ "float_label",               &amp;dispatch&lt;&amp;game_lua_kernel::intf_float_label                &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4015'>game_lua_kernel</a>  4015 src/scripting/game_lua_kernel.cpp 		{ "gamestate_inspector",       &amp;dispatch&lt;&amp;game_lua_kernel::intf_gamestate_inspector        &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4016'>game_lua_kernel</a>  4016 src/scripting/game_lua_kernel.cpp 		{ "get_all_vars",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_all_vars               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4017'>game_lua_kernel</a>  4017 src/scripting/game_lua_kernel.cpp 		{ "get_end_level_data",        &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_end_level_data         &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4018'>game_lua_kernel</a>  4018 src/scripting/game_lua_kernel.cpp 		{ "get_locations",             &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_locations              &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4019'>game_lua_kernel</a>  4019 src/scripting/game_lua_kernel.cpp 		{ "get_map_size",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_map_size               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4020'>game_lua_kernel</a>  4020 src/scripting/game_lua_kernel.cpp 		{ "get_mouseover_tile",        &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_mouseover_tile         &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4021'>game_lua_kernel</a>  4021 src/scripting/game_lua_kernel.cpp 		{ "get_recall_units",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_recall_units           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4022'>game_lua_kernel</a>  4022 src/scripting/game_lua_kernel.cpp 		{ "get_selected_tile",         &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_selected_tile          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4023'>game_lua_kernel</a>  4023 src/scripting/game_lua_kernel.cpp 		{ "get_sides",                 &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_sides                  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4024'>game_lua_kernel</a>  4024 src/scripting/game_lua_kernel.cpp 		{ "get_sound_source",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_sound_source           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4025'>game_lua_kernel</a>  4025 src/scripting/game_lua_kernel.cpp 		{ "get_starting_location",     &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_starting_location      &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4026'>game_lua_kernel</a>  4026 src/scripting/game_lua_kernel.cpp 		{ "get_terrain",               &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_terrain                &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4027'>game_lua_kernel</a>  4027 src/scripting/game_lua_kernel.cpp 		{ "get_terrain_info",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_terrain_info           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4028'>game_lua_kernel</a>  4028 src/scripting/game_lua_kernel.cpp 		{ "get_time_of_day",           &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_time_of_day            &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4029'>game_lua_kernel</a>  4029 src/scripting/game_lua_kernel.cpp 		{ "get_unit",                  &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_unit                   &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4030'>game_lua_kernel</a>  4030 src/scripting/game_lua_kernel.cpp 		{ "get_units",                 &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_units                  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4031'>game_lua_kernel</a>  4031 src/scripting/game_lua_kernel.cpp 		{ "get_variable",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_variable               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4032'>game_lua_kernel</a>  4032 src/scripting/game_lua_kernel.cpp 		{ "get_side_variable",         &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_side_variable          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4033'>game_lua_kernel</a>  4033 src/scripting/game_lua_kernel.cpp 		{ "get_villages",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_villages               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4034'>game_lua_kernel</a>  4034 src/scripting/game_lua_kernel.cpp 		{ "get_village_owner",         &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_village_owner          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4035'>game_lua_kernel</a>  4035 src/scripting/game_lua_kernel.cpp 		{ "get_displayed_unit",        &amp;dispatch&lt;&amp;game_lua_kernel::intf_get_displayed_unit         &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4036'>game_lua_kernel</a>  4036 src/scripting/game_lua_kernel.cpp 		{ "highlight_hex",             &amp;dispatch&lt;&amp;game_lua_kernel::intf_highlight_hex              &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4037'>game_lua_kernel</a>  4037 src/scripting/game_lua_kernel.cpp 		{ "is_enemy",                  &amp;dispatch&lt;&amp;game_lua_kernel::intf_is_enemy                   &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4038'>game_lua_kernel</a>  4038 src/scripting/game_lua_kernel.cpp 		{ "label",                     &amp;dispatch&lt;&amp;game_lua_kernel::intf_label                      &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4039'>game_lua_kernel</a>  4039 src/scripting/game_lua_kernel.cpp 		{ "lock_view",                 &amp;dispatch&lt;&amp;game_lua_kernel::intf_lock_view                  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4040'>game_lua_kernel</a>  4040 src/scripting/game_lua_kernel.cpp 		{ "log_replay",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_log_replay                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4041'>game_lua_kernel</a>  4041 src/scripting/game_lua_kernel.cpp 		{ "log",                       &amp;dispatch&lt;&amp;game_lua_kernel::intf_log                        &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4042'>game_lua_kernel</a>  4042 src/scripting/game_lua_kernel.cpp 		{ "match_location",            &amp;dispatch&lt;&amp;game_lua_kernel::intf_match_location             &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4043'>game_lua_kernel</a>  4043 src/scripting/game_lua_kernel.cpp 		{ "match_side",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_match_side                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4044'>game_lua_kernel</a>  4044 src/scripting/game_lua_kernel.cpp 		{ "match_unit",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_match_unit                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4045'>game_lua_kernel</a>  4045 src/scripting/game_lua_kernel.cpp 		{ "message",                   &amp;dispatch&lt;&amp;game_lua_kernel::intf_message                    &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4046'>game_lua_kernel</a>  4046 src/scripting/game_lua_kernel.cpp 		{ "open_help",                 &amp;dispatch&lt;&amp;game_lua_kernel::intf_open_help                  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4047'>game_lua_kernel</a>  4047 src/scripting/game_lua_kernel.cpp 		{ "play_sound",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_play_sound                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4048'>game_lua_kernel</a>  4048 src/scripting/game_lua_kernel.cpp 		{ "print",                     &amp;dispatch&lt;&amp;game_lua_kernel::intf_print                      &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4049'>game_lua_kernel</a>  4049 src/scripting/game_lua_kernel.cpp 		{ "put_recall_unit",           &amp;dispatch&lt;&amp;game_lua_kernel::intf_put_recall_unit            &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4050'>game_lua_kernel</a>  4050 src/scripting/game_lua_kernel.cpp 		{ "put_unit",                  &amp;dispatch&lt;&amp;game_lua_kernel::intf_put_unit                   &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4051'>game_lua_kernel</a>  4051 src/scripting/game_lua_kernel.cpp 		{ "redraw",                    &amp;dispatch&lt;&amp;game_lua_kernel::intf_redraw                     &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4052'>game_lua_kernel</a>  4052 src/scripting/game_lua_kernel.cpp 		{ "remove_event_handler",      &amp;dispatch&lt;&amp;game_lua_kernel::intf_remove_event               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4053'>game_lua_kernel</a>  4053 src/scripting/game_lua_kernel.cpp 		{ "remove_fog",                &amp;dispatch2&lt;&amp;game_lua_kernel::intf_toggle_fog, true          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4054'>game_lua_kernel</a>  4054 src/scripting/game_lua_kernel.cpp 		{ "remove_tile_overlay",       &amp;dispatch&lt;&amp;game_lua_kernel::intf_remove_tile_overlay        &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4055'>game_lua_kernel</a>  4055 src/scripting/game_lua_kernel.cpp 		{ "remove_time_area",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_remove_time_area           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4056'>game_lua_kernel</a>  4056 src/scripting/game_lua_kernel.cpp 		{ "remove_sound_source",       &amp;dispatch&lt;&amp;game_lua_kernel::intf_remove_sound_source        &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4057'>game_lua_kernel</a>  4057 src/scripting/game_lua_kernel.cpp 		{ "replace_schedule",          &amp;dispatch&lt;&amp;game_lua_kernel::intf_replace_schedule           &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4058'>game_lua_kernel</a>  4058 src/scripting/game_lua_kernel.cpp 		{ "scroll",                    &amp;dispatch&lt;&amp;game_lua_kernel::intf_scroll                     &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4059'>game_lua_kernel</a>  4059 src/scripting/game_lua_kernel.cpp 		{ "scroll_to_tile",            &amp;dispatch&lt;&amp;game_lua_kernel::intf_scroll_to_tile             &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4060'>game_lua_kernel</a>  4060 src/scripting/game_lua_kernel.cpp 		{ "select_hex",                &amp;dispatch&lt;&amp;game_lua_kernel::intf_select_hex                 &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4061'>game_lua_kernel</a>  4061 src/scripting/game_lua_kernel.cpp 		{ "set_time_of_day",           &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_time_of_day            &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4062'>game_lua_kernel</a>  4062 src/scripting/game_lua_kernel.cpp 		{ "deselect_hex",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_deselect_hex               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4063'>game_lua_kernel</a>  4063 src/scripting/game_lua_kernel.cpp 		{ "select_unit",               &amp;dispatch&lt;&amp;game_lua_kernel::intf_select_unit                &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4064'>game_lua_kernel</a>  4064 src/scripting/game_lua_kernel.cpp 		{ "skip_messages",             &amp;dispatch&lt;&amp;game_lua_kernel::intf_skip_messages              &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4065'>game_lua_kernel</a>  4065 src/scripting/game_lua_kernel.cpp 		{ "is_fogged",                 &amp;dispatch2&lt;&amp;game_lua_kernel::intf_get_fog_or_shroud, true   &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4066'>game_lua_kernel</a>  4066 src/scripting/game_lua_kernel.cpp 		{ "is_shrouded",               &amp;dispatch2&lt;&amp;game_lua_kernel::intf_get_fog_or_shroud, false  &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4067'>game_lua_kernel</a>  4067 src/scripting/game_lua_kernel.cpp 		{ "is_skipping_messages",      &amp;dispatch&lt;&amp;game_lua_kernel::intf_is_skipping_messages       &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4068'>game_lua_kernel</a>  4068 src/scripting/game_lua_kernel.cpp 		{ "set_end_campaign_credits",  &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_end_campaign_credits   &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4069'>game_lua_kernel</a>  4069 src/scripting/game_lua_kernel.cpp 		{ "set_end_campaign_text",     &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_end_campaign_text      &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4070'>game_lua_kernel</a>  4070 src/scripting/game_lua_kernel.cpp 		{ "set_menu_item",             &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_menu_item              &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4071'>game_lua_kernel</a>  4071 src/scripting/game_lua_kernel.cpp 		{ "set_next_scenario",         &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_next_scenario          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4072'>game_lua_kernel</a>  4072 src/scripting/game_lua_kernel.cpp 		{ "set_side_id",               &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_side_id                &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4073'>game_lua_kernel</a>  4073 src/scripting/game_lua_kernel.cpp 		{ "set_terrain",               &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_terrain                &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4074'>game_lua_kernel</a>  4074 src/scripting/game_lua_kernel.cpp 		{ "set_variable",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_variable               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4075'>game_lua_kernel</a>  4075 src/scripting/game_lua_kernel.cpp 		{ "set_side_variable",         &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_side_variable          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4076'>game_lua_kernel</a>  4076 src/scripting/game_lua_kernel.cpp 		{ "set_village_owner",         &amp;dispatch&lt;&amp;game_lua_kernel::intf_set_village_owner          &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4077'>game_lua_kernel</a>  4077 src/scripting/game_lua_kernel.cpp 		{ "simulate_combat",           &amp;dispatch&lt;&amp;game_lua_kernel::intf_simulate_combat            &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4081'>game_lua_kernel</a>  4081 src/scripting/game_lua_kernel.cpp 		{ "zoom",                      &amp;dispatch&lt;&amp;game_lua_kernel::intf_zoom                       &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4082'>game_lua_kernel</a>  4082 src/scripting/game_lua_kernel.cpp 		{ "teleport",                  &amp;dispatch&lt;&amp;game_lua_kernel::intf_teleport                   &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4083'>game_lua_kernel</a>  4083 src/scripting/game_lua_kernel.cpp 		{ "unit_ability",              &amp;dispatch&lt;&amp;game_lua_kernel::intf_unit_ability               &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4084'>game_lua_kernel</a>  4084 src/scripting/game_lua_kernel.cpp 		{ "view_locked",               &amp;dispatch&lt;&amp;game_lua_kernel::intf_view_locked                &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4085'>game_lua_kernel</a>  4085 src/scripting/game_lua_kernel.cpp 		{ "place_shroud",              &amp;dispatch2&lt;&amp;game_lua_kernel::intf_shroud_op, true  &gt;                 },</span>
+<span class='curline'><a href='../S/185.html#L4086'>game_lua_kernel</a>  4086 src/scripting/game_lua_kernel.cpp 		{ "remove_shroud",             &amp;dispatch2&lt;&amp;game_lua_kernel::intf_shroud_op, false &gt;                 },</span>
+<span class='curline'><a href='../S/185.html#L4104'>game_lua_kernel</a>  4104 src/scripting/game_lua_kernel.cpp 			{ "fire_wml_menu_item",        &amp;dispatch&lt;&amp;game_lua_kernel::intf_fire_wml_menu_item         &gt;        },</span>
+<span class='curline'><a href='../S/185.html#L4142'>game_lua_kernel</a>  4142 src/scripting/game_lua_kernel.cpp 	lua_pushcfunction(L, &amp;dispatch&lt;&amp;game_lua_kernel::impl_current_get&gt;);</span>
+<span class='curline'><a href='../S/185.html#L4196'>game_lua_kernel</a>  4196 src/scripting/game_lua_kernel.cpp 	lua_pushcfunction(L, &amp;dispatch&lt;&amp;game_lua_kernel::impl_theme_items_get&gt;);</span>
+<span class='curline'><a href='../S/185.html#L4198'>game_lua_kernel</a>  4198 src/scripting/game_lua_kernel.cpp 	lua_pushcfunction(L, &amp;dispatch&lt;&amp;game_lua_kernel::impl_theme_items_set&gt;);</span>
+<span class='curline'><a href='../S/185.html#L4219'>game_lua_kernel</a>  4219 src/scripting/game_lua_kernel.cpp void game_lua_kernel::initialize(const config&amp; level)</span>
+<span class='curline'><a href='../S/185.html#L4254'>game_lua_kernel</a>  4254 src/scripting/game_lua_kernel.cpp 	game_config::load_config(game_lua_kernel::preload_config);</span>
+<span class='curline'><a href='../S/185.html#L4255'>game_lua_kernel</a>  4255 src/scripting/game_lua_kernel.cpp 	for (const config &amp;cfg : game_lua_kernel::preload_scripts) {</span>
+<span class='curline'><a href='../S/185.html#L4263'>game_lua_kernel</a>  4263 src/scripting/game_lua_kernel.cpp void game_lua_kernel::set_game_display(game_display * gd) {</span>
+<span class='curline'><a href='../S/185.html#L4290'>game_lua_kernel</a>  4290 src/scripting/game_lua_kernel.cpp void game_lua_kernel::load_game(const config&amp; level)</span>
+<span class='curline'><a href='../S/185.html#L4317'>game_lua_kernel</a>  4317 src/scripting/game_lua_kernel.cpp void game_lua_kernel::save_game(config &amp;cfg)</span>
+<span class='curline'><a href='../S/185.html#L4355'>game_lua_kernel</a>  4355 src/scripting/game_lua_kernel.cpp bool game_lua_kernel::run_event(game_events::queued_event const &amp;ev)</span>
+<span class='curline'><a href='../S/185.html#L4375'>game_lua_kernel</a>  4375 src/scripting/game_lua_kernel.cpp int game_lua_kernel::cfun_builtin_effect(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L4400'>game_lua_kernel</a>  4400 src/scripting/game_lua_kernel.cpp void game_lua_kernel::push_builtin_effect()</span>
+<span class='curline'><a href='../S/185.html#L4411'>game_lua_kernel</a>  4411 src/scripting/game_lua_kernel.cpp 	lua_pushcclosure(L, &amp;dispatch&lt;&amp;game_lua_kernel::cfun_builtin_effect&gt;, 2);</span>
+<span class='curline'><a href='../S/185.html#L4416'>game_lua_kernel</a>  4416 src/scripting/game_lua_kernel.cpp 	lua_pushcclosure(L, &amp;dispatch&lt;&amp;game_lua_kernel::cfun_builtin_effect&gt;, 2);</span>
+<span class='curline'><a href='../S/185.html#L4425'>game_lua_kernel</a>  4425 src/scripting/game_lua_kernel.cpp int game_lua_kernel::cfun_wml_action(lua_State *L)</span>
+<span class='curline'><a href='../S/185.html#L4438'>game_lua_kernel</a>  4438 src/scripting/game_lua_kernel.cpp void game_lua_kernel::set_wml_action(const std::string&amp; cmd, game_events::wml_action::handler h)</span>
+<span class='curline'><a href='../S/185.html#L4447'>game_lua_kernel</a>  4447 src/scripting/game_lua_kernel.cpp 	lua_pushcclosure(L, &amp;dispatch&lt;&amp;game_lua_kernel::cfun_wml_action&gt;, 1);</span>
+<span class='curline'><a href='../S/185.html#L4470'>game_lua_kernel</a>  4470 src/scripting/game_lua_kernel.cpp void game_lua_kernel::set_wml_condition(const std::string&amp; cmd, wml_conditional_handler h)</span>
+<span class='curline'><a href='../S/185.html#L4490'>game_lua_kernel</a>  4490 src/scripting/game_lua_kernel.cpp bool game_lua_kernel::run_wml_action(const std::string&amp; cmd, vconfig const &amp;cfg,</span>
+<span class='curline'><a href='../S/185.html#L4512'>game_lua_kernel</a>  4512 src/scripting/game_lua_kernel.cpp bool game_lua_kernel::run_wml_conditional(const std::string&amp; cmd, vconfig const &amp;cfg)</span>
+<span class='curline'><a href='../S/185.html#L4535'>game_lua_kernel</a>  4535 src/scripting/game_lua_kernel.cpp bool game_lua_kernel::run_filter(char const *name, const map_location&amp; l)</span>
+<span class='curline'><a href='../S/185.html#L4545'>game_lua_kernel</a>  4545 src/scripting/game_lua_kernel.cpp bool game_lua_kernel::run_filter(char const *name, unit const &amp;u)</span>
+<span class='curline'><a href='../S/185.html#L4559'>game_lua_kernel</a>  4559 src/scripting/game_lua_kernel.cpp bool game_lua_kernel::run_filter(char const *name, int nArgs)</span>
+<span class='curline'><a href='../S/185.html#L4581'>game_lua_kernel</a>  4581 src/scripting/game_lua_kernel.cpp std::string game_lua_kernel::apply_effect(const std::string&amp; name, unit&amp; u, const config&amp; cfg, bool need_apply)</span>
+<span class='curline'><a href='../S/185.html#L4647'>game_lua_kernel</a>  4647 src/scripting/game_lua_kernel.cpp ai::lua_ai_context* game_lua_kernel::create_lua_ai_context(char const *code, ai::engine_lua *engine)</span>
+<span class='curline'><a href='../S/185.html#L4652'>game_lua_kernel</a>  4652 src/scripting/game_lua_kernel.cpp ai::lua_ai_action_handler* game_lua_kernel::create_lua_ai_action_handler(char const *code, ai::lua_ai_context &amp;context)</span>
+<span class='curline'><a href='../S/185.html#L4657'>game_lua_kernel</a>  4657 src/scripting/game_lua_kernel.cpp void game_lua_kernel::mouse_over_hex_callback(const map_location&amp; loc)</span>
+<span class='curline'><a href='../S/185.html#L4670'>game_lua_kernel</a>  4670 src/scripting/game_lua_kernel.cpp void game_lua_kernel::select_hex_callback(const map_location&amp; loc)</span>
+<span class='curline'><a href='../S/187.html#L192'>game_lua_kernel</a>   192 src/scripting/game_lua_kernel.hpp 	game_lua_kernel(game_state &amp;, play_controller &amp;, reports &amp;);</span>
+<span class='curline'><a href='../S/1013.html#L716'>game_lua_kernel</a>   716 src/units/filter.cpp 		if (game_lua_kernel * lk = fc_.get_lua_kernel()) {</span>
 </pre>
 </body>
 </html>

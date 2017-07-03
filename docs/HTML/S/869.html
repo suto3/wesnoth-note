@@ -1,32 +1,30 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/utils/reference_counter.hpp</title>
+<title>src/utils/name_generator.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5820.html'>src</a>/<a href='../files/5879.html'>utils</a>/reference_counter.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L46'>[^]</a><a href='#L56'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/<a href='../files/5882.html'>utils</a>/name_generator.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L26'>[^]</a><a href='#L46'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='998.html#L20' title='Included from 20 in src/units/map.hpp.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='../J/2773.html' title='Multiple included from 8 places.'>INCLUDED FROM</a></h2>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L46' title='Defined at 46.'>set</a></li>
-<li><a href='#L47' title='Defined at 47.'>inc</a></li>
-<li><a href='#L50' title='Defined at 50.'>dec</a></li>
-<li><a href='#L53' title='Defined at 53.'>enable_count</a></li>
-<li><a href='#L56' title='Defined at 56.'>disable_count</a></li>
+<li><a href='#L26' title='Defined at 26.'>what</a></li>
+<li><a href='#L37' title='Defined at 37.'>generate</a></li>
+<li><a href='#L46' title='Defined at 46.'>generate</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2004 - 2017 by Philippe Plantier &lt;ayin@anathas.org&gt;</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
 <a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
@@ -40,60 +38,40 @@ This source file includes following definitions.
 <a id='L14' name='L14'></a>  14 
 <a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
 <a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='comment'>/**</em>
-<a id='L18' name='L18'></a>  18 <em class='comment'> * @file</em>
-<a id='L19' name='L19'></a>  19 <em class='comment'> */</em>
-<a id='L20' name='L20'></a>  20 
-<a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;limits&gt;
-<a id='L23' name='L23'></a>  23 
-<a id='L24' name='L24'></a>  24 <strong class='reserved'>namespace</strong> <a href='../S/998.html#L101' title='Referred from 101 in src/units/map.hpp.'>n_ref_counter</a> <em class='brace'>{</em>
-<a id='L25' name='L25'></a>  25 
-<a id='L26' name='L26'></a>  26 
-<a id='L27' name='L27'></a>  27 <em class='comment'>/**</em>
-<a id='L28' name='L28'></a>  28 <em class='comment'>   @class ref_counter</em>
-<a id='L29' name='L29'></a>  29 <em class='comment'>   @brief ref_counter is a reference counter.  If the counter overflows it stops counting.</em>
-<a id='L30' name='L30'></a>  30 <em class='comment'>   So any negative count disables reference counting.</em>
-<a id='L31' name='L31'></a>  31 <em class='comment'>**/</em>
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>typename</strong> <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a>&gt; <strong class='reserved'>class</strong> <a href='../R/11407.html' title='Multiple referred from 3 places.'>ref_counter</a> <em class='brace'>{</em>
-<a id='L33' name='L33'></a>  33         <a href='../Y/19032.html' title='Multiple used in 14 places.'>static_assert</a>(<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/15248.html' title='Multiple used in 15 places.'>numeric_limits</a>&lt;<a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a>&gt;::<a href='../Y/12282.html' title='Multiple used in 3 places.'>is_signed</a>, "Reference counter must be a signed integer");
-<a id='L34' name='L34'></a>  34 
-<a id='L35' name='L35'></a>  35         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>;
-<a id='L36' name='L36'></a>  36 
-<a id='L37' name='L37'></a>  37 <strong class='reserved'>public</strong>:
-<a id='L38' name='L38'></a>  38         <strong class='reserved'>enum</strong> <em class='brace'>{</em><a href='../R/1390.html' title='Multiple referred from 12 places.'>NEW</a>=0, <a href='../S/869.html#L57' title='Referred from 57 in src/utils/reference_counter.hpp.'>NOT_COUNTED</a> = -1<em class='brace'>}</em>;
-<a id='L39' name='L39'></a>  39 
-<a id='L40' name='L40'></a>  40         <strong class='reserved'>explicit</strong> ref_counter(<a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <a href='../D/16517.html' title='Multiple defined in 2 places.'>x</a> = 0) : <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>(<a href='../D/16517.html' title='Multiple defined in 2 places.'>x</a>) <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L41' name='L41'></a>  41         <a href='../S/869.html#L32' title='Defined at 32 in src/utils/reference_counter.hpp.'>ref_counter</a>(ref_counter <strong class='reserved'>const</strong> &amp;<a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>) : <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>(<a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>) <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L42' name='L42'></a>  42         <a href='../S/869.html#L32' title='Defined at 32 in src/utils/reference_counter.hpp.'>ref_counter</a> &amp; <strong class='reserved'>operator</strong>=(<a href='../S/869.html#L32' title='Defined at 32 in src/utils/reference_counter.hpp.'>ref_counter</a> <strong class='reserved'>const</strong> &amp;<a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>)<em class='brace'>{</em><a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a> = <a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>; <strong class='reserved'>return</strong> *<strong class='reserved'>this</strong>;<em class='brace'>}</em>
-<a id='L43' name='L43'></a>  43 
-<a id='L44' name='L44'></a>  44         <strong class='reserved'>operator</strong> <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> () <strong class='reserved'>const</strong> <em class='brace'>{</em><strong class='reserved'>return</strong> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>;<em class='brace'>}</em>
-<a id='L45' name='L45'></a>  45 
-<a id='L46' name='L46'></a>  46         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <a href='../R/12312.html' title='Multiple referred from 769 places.'>set</a>(<a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>) <em class='brace'>{</em> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>=<a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>; <strong class='reserved'>return</strong> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>; <em class='brace'>}</em>
-<a id='L47' name='L47'></a>  47         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <a href='../R/7902.html' title='Multiple referred from 12 places.'>inc</a>()<em class='brace'>{</em>
-<a id='L48' name='L48'></a>  48                 <strong class='reserved'>if</strong> (<a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a> &gt;= 0) <em class='brace'>{</em> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>  += 1; <em class='brace'>}</em>
-<a id='L49' name='L49'></a>  49                 <strong class='reserved'>return</strong> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>; <em class='brace'>}</em>
-<a id='L50' name='L50'></a>  50         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <a href='../R/4594.html' title='Multiple referred from 14 places.'>dec</a>()<em class='brace'>{</em>
-<a id='L51' name='L51'></a>  51                 <strong class='reserved'>if</strong>( <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a> &gt; 0) <em class='brace'>{</em> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>  -= 1; <em class='brace'>}</em>
-<a id='L52' name='L52'></a>  52                 <strong class='reserved'>return</strong> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>; <em class='brace'>}</em>
-<a id='L53' name='L53'></a>  53         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> enable_count()<em class='brace'>{</em>
-<a id='L54' name='L54'></a>  54                 <strong class='reserved'>if</strong> (<a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a> &lt; 0) <em class='brace'>{</em><a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a> = 0;<em class='brace'>}</em>
-<a id='L55' name='L55'></a>  55                 <strong class='reserved'>return</strong> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>; <em class='brace'>}</em>
-<a id='L56' name='L56'></a>  56         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> disable_count()<em class='brace'>{</em>
-<a id='L57' name='L57'></a>  57                 <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>= <a href='../S/869.html#L38' title='Defined at 38 in src/utils/reference_counter.hpp.'>NOT_COUNTED</a>;
-<a id='L58' name='L58'></a>  58                 <strong class='reserved'>return</strong> <a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>; <em class='brace'>}</em>
-<a id='L59' name='L59'></a>  59 
-<a id='L60' name='L60'></a>  60         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <strong class='reserved'>operator</strong>++()<em class='brace'>{</em><strong class='reserved'>return</strong> <a href='../D/8773.html' title='Multiple defined in 4 places.'>inc</a>();<em class='brace'>}</em>
-<a id='L61' name='L61'></a>  61         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <strong class='reserved'>operator</strong>++(<strong class='reserved'>int</strong>)<em class='brace'>{</em><a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <a href='../S/4075.html#L1' title='Defined at 1 in data/tools/addon_manager/jquery.js.'>ret</a>(<a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>); <a href='../D/8773.html' title='Multiple defined in 4 places.'>inc</a>(); <strong class='reserved'>return</strong> <a href='../S/4075.html#L1' title='Defined at 1 in data/tools/addon_manager/jquery.js.'>ret</a>;<em class='brace'>}</em>
-<a id='L62' name='L62'></a>  62         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <strong class='reserved'>operator</strong>--()<em class='brace'>{</em><strong class='reserved'>return</strong> <a href='../D/5247.html' title='Multiple defined in 3 places.'>dec</a>();<em class='brace'>}</em>
-<a id='L63' name='L63'></a>  63         <a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <strong class='reserved'>const</strong> <strong class='reserved'>operator</strong>--(<strong class='reserved'>int</strong>)<em class='brace'>{</em><a href='../Y/2907.html' title='Multiple used in 14 places.'>T_integral</a> <a href='../S/4075.html#L1' title='Defined at 1 in data/tools/addon_manager/jquery.js.'>ret</a>(<a href='../Y/7869.html' title='Multiple used in 24 places.'>count_</a>); <a href='../D/5247.html' title='Multiple defined in 3 places.'>dec</a>(); <strong class='reserved'>return</strong> <a href='../S/4075.html#L1' title='Defined at 1 in data/tools/addon_manager/jquery.js.'>ret</a>;<em class='brace'>}</em>
-<a id='L64' name='L64'></a>  64 <em class='brace'>}</em>;
-<a id='L65' name='L65'></a>  65 
-<a id='L66' name='L66'></a>  66 
-<a id='L67' name='L67'></a>  67 <em class='brace'>}</em><em class='comment'>//end namepace</em>
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1159.html'>global.hpp</a>"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;string&gt;
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;map&gt;
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;exception&gt;
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23 <strong class='reserved'>class</strong> <a href='../R/10212.html' title='Multiple referred from 9 places.'>name_generator_invalid_exception</a> : <strong class='reserved'>public</strong> <a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/5983.html' title='Multiple defined in 3 places.'>exception</a> <em class='brace'>{</em>
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>public</strong>:
+<a id='L25' name='L25'></a>  25         name_generator_invalid_exception(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* errMessage):<a href='../Y/9464.html' title='Multiple used in 3 places.'>errMessage_</a>(errMessage) <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L26' name='L26'></a>  26         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../R/14888.html' title='Multiple referred from 137 places.'>what</a>() <strong class='reserved'>const</strong> <a href='../D/1535.html' title='Multiple defined in 5 places.'>NOEXCEPT</a> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/9464.html' title='Multiple used in 3 places.'>errMessage_</a>; <em class='brace'>}</em>
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <strong class='reserved'>private</strong>:
+<a id='L29' name='L29'></a>  29         <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../Y/9464.html' title='Multiple used in 3 places.'>errMessage_</a>;
+<a id='L30' name='L30'></a>  30 <em class='brace'>}</em>;
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>class</strong> <a href='../R/10210.html' title='Multiple referred from 33 places.'>name_generator</a> <em class='brace'>{</em>
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>public</strong>:
+<a id='L35' name='L35'></a>  35         <em class='comment'>// Defined in name_generator_factory.cpp</em>
+<a id='L36' name='L36'></a>  36         <a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14762.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/6655.html' title='Multiple defined in 13 places.'>generate</a>(<strong class='reserved'>const</strong> <a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10716.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14762.html' title='Multiple defined in 3 places.'>string</a>,<a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14762.html' title='Multiple defined in 3 places.'>string</a>&gt;&amp; <a href='../D/15912.html' title='Multiple defined in 4 places.'>variables</a>) <strong class='reserved'>const</strong>;
+<a id='L37' name='L37'></a>  37         <strong class='reserved'>virtual</strong> <a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14762.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/5929.html' title='Multiple referred from 30 places.'>generate</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> ""; <em class='brace'>}</em>
+<a id='L38' name='L38'></a>  38         name_generator() <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>virtual</strong> ~name_generator() <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L40' name='L40'></a>  40 <em class='brace'>}</em>;
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 <strong class='reserved'>class</strong> <a href='../R/11082.html' title='Multiple referred from 2 places.'>proxy_name_generator</a> : <strong class='reserved'>public</strong> <a href='../S/869.html#L33' title='Defined at 33 in src/utils/name_generator.hpp.'>name_generator</a> <em class='brace'>{</em>
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>const</strong> <a href='../S/869.html#L33' title='Defined at 33 in src/utils/name_generator.hpp.'>name_generator</a>&amp; <a href='../D/3550.html' title='Multiple defined in 2 places.'>base</a>;
+<a id='L44' name='L44'></a>  44 <strong class='reserved'>public</strong>:
+<a id='L45' name='L45'></a>  45         proxy_name_generator(<strong class='reserved'>const</strong> <a href='../S/869.html#L33' title='Defined at 33 in src/utils/name_generator.hpp.'>name_generator</a>&amp; <a href='../D/3500.html' title='Multiple defined in 3 places.'>b</a>) : <a href='../D/3550.html' title='Multiple defined in 2 places.'>base</a>(<a href='../D/3500.html' title='Multiple defined in 3 places.'>b</a>) <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46         <a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14762.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/5929.html' title='Multiple referred from 30 places.'>generate</a>() <strong class='reserved'>const</strong> <a href='../D/11633.html' title='Multiple defined in 2 places.'>override</a> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/3550.html' title='Multiple defined in 2 places.'>base</a>.<a href='../D/6655.html' title='Multiple defined in 13 places.'>generate</a>(); <em class='brace'>}</em>
+<a id='L47' name='L47'></a>  47 <em class='brace'>}</em>;
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L46'>[^]</a><a href='#L56'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L26'>[^]</a><a href='#L46'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

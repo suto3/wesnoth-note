@@ -1,21 +1,28 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/attack_prediction.hpp</title>
+<title>src/sdl/rect.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5820.html'>src</a>/attack_prediction.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/<a href='../files/5872.html'>sdl</a>/rect.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L117'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/1724.html' title='Multiple included from 11 places.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='../J/2568.html' title='Multiple included from 32 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L42' title='Defined at 42.'>create_rect</a></li>
+<li><a href='#L117' title='Defined at 117.'>fill_surface_rect</a></li>
+</ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2007 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
@@ -28,65 +35,122 @@
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='comment'>/** @file */</em>
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
 <a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#pragma</em> once
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;array&gt;
-<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;cstring&gt;
-<a id='L22' name='L22'></a>  22 
-<a id='L23' name='L23'></a>  23 <strong class='reserved'>struct</strong> <a href='../S/899.html#L48' title='Defined at 48 in src/actions/attack.hpp.'>battle_context_unit_stats</a>;
+<a id='L17' name='L17'></a>  17 <em class='comment'>/**</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * @file</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * Contains the SDL_Rect helper code.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> */</em>
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='1159.html'>global.hpp</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='976.html'>utils.hpp</a>"
 <a id='L24' name='L24'></a>  24 
-<a id='L25' name='L25'></a>  25 <em class='comment'>// This encapsulates all we need to know for this combat.</em>
-<a id='L26' name='L26'></a>  26 <em class='comment'>/** All combat-related info. */</em>
-<a id='L27' name='L27'></a>  27 <strong class='reserved'>struct</strong> <a href='../R/4049.html' title='Multiple referred from 61 places.'>combatant</a>
-<a id='L28' name='L28'></a>  28 <em class='brace'>{</em>
-<a id='L29' name='L29'></a>  29         <em class='comment'>/** Construct a combatant. */</em>
-<a id='L30' name='L30'></a>  30         <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a>(<strong class='reserved'>const</strong> <a href='../S/899.html#L48' title='Defined at 48 in src/actions/attack.hpp.'>battle_context_unit_stats</a> &amp;<a href='../Y/20697.html' title='Multiple used in 1985 places.'>u</a>, <strong class='reserved'>const</strong> <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a> *<a href='../D/12055.html' title='Multiple defined in 3 places.'>prev</a> = <a href='../Y/15185.html' title='Multiple used in 1952 places.'>nullptr</a>);
-<a id='L31' name='L31'></a>  31 
-<a id='L32' name='L32'></a>  32         <em class='comment'>/** Copy constructor */</em>
-<a id='L33' name='L33'></a>  33         <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a>(<strong class='reserved'>const</strong> <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a> &amp;<a href='../Y/19925.html' title='Multiple used in 98 places.'>that</a>, <strong class='reserved'>const</strong> <a href='../S/899.html#L48' title='Defined at 48 in src/actions/attack.hpp.'>battle_context_unit_stats</a> &amp;<a href='../Y/20697.html' title='Multiple used in 1985 places.'>u</a>);
-<a id='L34' name='L34'></a>  34 
-<a id='L35' name='L35'></a>  35         <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a>(<strong class='reserved'>const</strong> <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a> &amp;<a href='../Y/19925.html' title='Multiple used in 98 places.'>that</a>) = <strong class='reserved'>delete</strong>;
-<a id='L36' name='L36'></a>  36         <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a>&amp; <strong class='reserved'>operator</strong>=(<strong class='reserved'>const</strong> <a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a> &amp;) = <strong class='reserved'>delete</strong>;
-<a id='L37' name='L37'></a>  37 
-<a id='L38' name='L38'></a>  38         <em class='comment'>/** Simulate a fight!  Can be called multiple times for cumulative calculations. */</em>
-<a id='L39' name='L39'></a>  39         <strong class='reserved'>void</strong> <a href='../S/1221.html#L2195' title='Defined at 2195 in src/attack_prediction.cpp.'>fight</a>(<a href='../S/983.html#L27' title='Defined at 27 in src/attack_prediction.hpp.'>combatant</a> &amp;<a href='../Y/15606.html' title='Multiple used in 43 places.'>opponent</a>, <strong class='reserved'>bool</strong> <a href='../Y/13008.html' title='Multiple used in 17 places.'>levelup_considered</a>=<strong class='reserved'>true</strong>);
-<a id='L40' name='L40'></a>  40 
-<a id='L41' name='L41'></a>  41         <em class='comment'>/** Resulting probability distribution (might be not as large as max_hp) */</em>
-<a id='L42' name='L42'></a>  42         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21360.html' title='Multiple used in 2717 places.'>vector</a>&lt;<strong class='reserved'>double</strong>&gt; <a href='../Y/11580.html' title='Multiple used in 93 places.'>hp_dist</a>;
-<a id='L43' name='L43'></a>  43 
-<a id='L44' name='L44'></a>  44         <em class='comment'>/** Resulting chance we were not hit by this opponent (important if it poisons) */</em>
-<a id='L45' name='L45'></a>  45         <strong class='reserved'>double</strong> <a href='../Y/21019.html' title='Multiple used in 13 places.'>untouched</a>;
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;SDL_rect.h&gt;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>namespace</strong> <a href='../R/7418.html' title='Multiple referred from 722 places.'>gui2</a> <em class='brace'>{</em>
+<a id='L28' name='L28'></a>  28         <strong class='reserved'>struct</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>;
+<a id='L29' name='L29'></a>  29 <em class='brace'>}</em>
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>namespace</strong> <a href='../R/12187.html' title='Multiple referred from 97 places.'>sdl</a>
+<a id='L32' name='L32'></a>  32 <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <a href='../D/202.html' title='Multiple defined in 5 places.'>CONSTEXPR</a> <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> <a href='../Y/9202.html' title='Multiple used in 16 places.'>empty_rect</a> <em class='brace'>{</em> 0, 0, 0, 0 <em class='brace'>}</em>;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='comment'>/**</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * Creates an SDL_Rect with the given dimensions.</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> *</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> * This is a simple wrapper in order to avoid the narrowing conversion warnings</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * that occur when using aggregate initialization and non-int values.</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> */</em>
+<a id='L42' name='L42'></a>  42 <strong class='reserved'>inline</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> <a href='../R/4444.html' title='Multiple referred from 15 places.'>create_rect</a>(<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a>, <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a>, <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/16031.html' title='Multiple defined in 6 places.'>w</a>, <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8267.html' title='Multiple defined in 8 places.'>h</a>)
+<a id='L43' name='L43'></a>  43 <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>return</strong> <em class='brace'>{</em><a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a>, <a href='../D/16031.html' title='Multiple defined in 6 places.'>w</a>, <a href='../D/8267.html' title='Multiple defined in 8 places.'>h</a><em class='brace'>}</em>;
+<a id='L45' name='L45'></a>  45 <em class='brace'>}</em>
 <a id='L46' name='L46'></a>  46 
-<a id='L47' name='L47'></a>  47         <em class='comment'>/** Resulting chance we are poisoned. */</em>
-<a id='L48' name='L48'></a>  48         <strong class='reserved'>double</strong> <a href='../S/989.html#L744' title='Defined at 744 in src/units/unit.hpp.'>poisoned</a>;
-<a id='L49' name='L49'></a>  49 
-<a id='L50' name='L50'></a>  50         <em class='comment'>/** Resulting chance we are slowed. */</em>
-<a id='L51' name='L51'></a>  51         <strong class='reserved'>double</strong> <a href='../S/989.html#L762' title='Defined at 762 in src/units/unit.hpp.'>slowed</a>;
-<a id='L52' name='L52'></a>  52 
-<a id='L53' name='L53'></a>  53         <em class='comment'>/** What's the average hp (weighted average of hp_dist). */</em>
-<a id='L54' name='L54'></a>  54         <strong class='reserved'>double</strong> <a href='../S/1221.html#L2360' title='Defined at 2360 in src/attack_prediction.cpp.'>average_hp</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/11355.html' title='Multiple used in 34 places.'>healing</a> = 0) <strong class='reserved'>const</strong>;
-<a id='L55' name='L55'></a>  55 
-<a id='L56' name='L56'></a>  56 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/282.html' title='Multiple used in 5 places.'>BENCHMARK</a>) || <strong class='reserved'>defined</strong>(<a href='../Y/419.html' title='Multiple used in 17 places.'>CHECK</a>)
-<a id='L57' name='L57'></a>  57         <em class='comment'>// Functions used in the stand-alone version of attack_prediction.cpp</em>
-<a id='L58' name='L58'></a>  58         <strong class='reserved'>void</strong> <a href='../D/12064.html' title='Multiple defined in 16 places.'>print</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> <a href='../D/9631.html' title='Multiple defined in 5 places.'>label</a>[], <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/6224.html' title='Multiple used in 26 places.'>battle</a>, <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/9859.html' title='Multiple used in 5 places.'>fighter</a>) <strong class='reserved'>const</strong>;
-<a id='L59' name='L59'></a>  59         <strong class='reserved'>void</strong> <a href='../D/12780.html' title='Multiple defined in 13 places.'>reset</a>();
-<a id='L60' name='L60'></a>  60 <em class='sharp'>#endif</em>
-<a id='L61' name='L61'></a>  61 
-<a id='L62' name='L62'></a>  62 <strong class='reserved'>private</strong>:
-<a id='L63' name='L63'></a>  63         <strong class='reserved'>static</strong> <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/1883.html' title='Multiple used in 2 places.'>MONTE_CARLO_SIMULATION_THRESHOLD</a> = 50000u;
-<a id='L64' name='L64'></a>  64 
-<a id='L65' name='L65'></a>  65         <strong class='reserved'>const</strong> <a href='../S/899.html#L48' title='Defined at 48 in src/actions/attack.hpp.'>battle_context_unit_stats</a> &amp;<a href='../D/15416.html' title='Multiple defined in 6 places.'>u_</a>;
-<a id='L66' name='L66'></a>  66 
-<a id='L67' name='L67'></a>  67         <em class='comment'>/** Summary of matrix used to calculate last battle (unslowed &amp; slowed).</em>
-<a id='L68' name='L68'></a>  68 <em class='comment'>         *  Invariant: summary[1].size() == summary[0].size() or summary[1].empty() */</em>
-<a id='L69' name='L69'></a>  69         <a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/5724.html' title='Multiple used in 178 places.'>array</a>&lt;<a href='../D/14680.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21360.html' title='Multiple used in 2717 places.'>vector</a>&lt;<strong class='reserved'>double</strong>&gt;, 2&gt; <a href='../S/929.html#L188' title='Defined at 188 in src/save_index.cpp.'>summary</a>;
-<a id='L70' name='L70'></a>  70 <em class='brace'>}</em>;
+<a id='L47' name='L47'></a>  47 <em class='comment'>/**</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> * Tests whether a point is inside a rectangle.</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> *</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * @param x                       The x coordinate of the point.</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> * @param y                       The y coordinate of the point.</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'> * @param rect                    The rectangle.</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'> *</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'> * @return                        True if point (x;y) is inside or on the border</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'> *                                of rect, false otherwise</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'> */</em>
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>bool</strong> <a href='../D/11966.html' title='Multiple defined in 2 places.'>point_in_rect</a>(<strong class='reserved'>int</strong> <a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a>, <strong class='reserved'>int</strong> <a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a>, <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../Y/17100.html' title='Multiple used in 903 places.'>rect</a>);
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59 <strong class='reserved'>bool</strong> <a href='../D/11966.html' title='Multiple defined in 2 places.'>point_in_rect</a>(<strong class='reserved'>const</strong> <a href='../D/8260.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>, <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../Y/17100.html' title='Multiple used in 903 places.'>rect</a>);
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 <em class='comment'>/**</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'> * Tests whether two rectangles overlap.</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'> *</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'> * @param rect1                   One rectangle.</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'> * @param rect2                   Another rectangle.</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'> *</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'> * @return                        True if rect1 and rect2 intersect, false if</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'> *                                not. Touching borders don't overlap.</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'> */</em>
+<a id='L70' name='L70'></a>  70 <strong class='reserved'>bool</strong> <a href='../S/979.html#L36' title='Defined at 36 in src/sdl/rect.cpp.'>rects_overlap</a>(<strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../Y/17101.html' title='Multiple used in 10 places.'>rect1</a>, <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../Y/17102.html' title='Multiple used in 14 places.'>rect2</a>);
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72 <em class='comment'>/**</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'> * Calculates the intersection of two rectangles.</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'> *</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'> * @param rect1                   One rectangle.</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'> * @param rect2                   Another rectangle</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'> * @return                        The intersection of rect1 and rect2, or</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'> *                                empty_rect if they don't overlap.</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'> */</em>
+<a id='L80' name='L80'></a>  80 <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> <a href='../S/979.html#L42' title='Defined at 42 in src/sdl/rect.cpp.'>intersect_rects</a>(<a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> <strong class='reserved'>const</strong> &amp;<a href='../Y/17101.html' title='Multiple used in 10 places.'>rect1</a>, <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> <strong class='reserved'>const</strong> &amp;<a href='../Y/17102.html' title='Multiple used in 14 places.'>rect2</a>);
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82 <em class='comment'>/**</em>
+<a id='L83' name='L83'></a>  83 <em class='comment'> * Calculates the union of two rectangles. Note: "union" here doesn't mean the</em>
+<a id='L84' name='L84'></a>  84 <em class='comment'> * union of the sets of points of the two polygons, but rather the minimal</em>
+<a id='L85' name='L85'></a>  85 <em class='comment'> * rectangle that supersets both rectangles.</em>
+<a id='L86' name='L86'></a>  86 <em class='comment'> *</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'> * @param rect1                   One rectangle.</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'> * @param rect2                   Another rectangle.</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'> *</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'> * @return                        The union of rect1 and rect2.</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'> */</em>
+<a id='L92' name='L92'></a>  92 <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> <a href='../S/979.html#L52' title='Defined at 52 in src/sdl/rect.cpp.'>union_rects</a>(<strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> &amp;<a href='../Y/17101.html' title='Multiple used in 10 places.'>rect1</a>, <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a> &amp;<a href='../Y/17102.html' title='Multiple used in 14 places.'>rect2</a>);
+<a id='L93' name='L93'></a>  93 
+<a id='L94' name='L94'></a>  94 <em class='comment'>/**</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'> * Draw a rectangle outline.</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'> *</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'> * @param rect                    The dimensions of the rectangle.</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'> * @param color                   The color of the rectangle.</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'> */</em>
+<a id='L100' name='L100'></a> 100 <strong class='reserved'>void</strong> <a href='../S/979.html#L60' title='Defined at 60 in src/sdl/rect.cpp.'>draw_rectangle</a>(<strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../Y/17100.html' title='Multiple used in 903 places.'>rect</a>, <strong class='reserved'>const</strong> <a href='../S/971.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a>&amp; <a href='../D/4580.html' title='Multiple defined in 5 places.'>color</a>);
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102 <em class='comment'>/**</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'> * Draws a filled rectangle.</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'> *</em>
+<a id='L105' name='L105'></a> 105 <em class='comment'> * @param rect                    The dimensions of the rectangle.</em>
+<a id='L106' name='L106'></a> 106 <em class='comment'> * @param color                   The color of the rectangle.</em>
+<a id='L107' name='L107'></a> 107 <em class='comment'> */</em>
+<a id='L108' name='L108'></a> 108 <strong class='reserved'>void</strong> <a href='../S/979.html#L68' title='Defined at 68 in src/sdl/rect.cpp.'>fill_rectangle</a>(<strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../Y/17100.html' title='Multiple used in 903 places.'>rect</a>, <strong class='reserved'>const</strong> <a href='../S/971.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a>&amp; <a href='../D/4580.html' title='Multiple defined in 5 places.'>color</a>);
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110 <em class='comment'>/**</em>
+<a id='L111' name='L111'></a> 111 <em class='comment'> * Fill a rectangle on a given surface. Alias for SDL_FillRect.</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'> *</em>
+<a id='L113' name='L113'></a> 113 <em class='comment'> * @param dst                     The surface to operate on.</em>
+<a id='L114' name='L114'></a> 114 <em class='comment'> * @param dst_rect                The rectangle to fill.</em>
+<a id='L115' name='L115'></a> 115 <em class='comment'> * @param color                   Color of the rectangle.</em>
+<a id='L116' name='L116'></a> 116 <em class='comment'> */</em>
+<a id='L117' name='L117'></a> 117 <strong class='reserved'>inline</strong> <strong class='reserved'>void</strong> <a href='../R/5502.html' title='Multiple referred from 9 places.'>fill_surface_rect</a>(<a href='../S/980.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&amp; <a href='../D/5716.html' title='Multiple defined in 3 places.'>dst</a>, <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>* <a href='../Y/9007.html' title='Multiple used in 28 places.'>dst_rect</a>, <strong class='reserved'>const</strong> <a href='../Y/2975.html' title='Multiple used in 163 places.'>Uint32</a> <a href='../D/4580.html' title='Multiple defined in 5 places.'>color</a>)
+<a id='L118' name='L118'></a> 118 <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119         <a href='../Y/2479.html' title='Multiple used in 3 places.'>SDL_FillRect</a>(<a href='../D/5716.html' title='Multiple defined in 3 places.'>dst</a>, <a href='../Y/9007.html' title='Multiple used in 28 places.'>dst_rect</a>, <a href='../D/4580.html' title='Multiple defined in 5 places.'>color</a>);
+<a id='L120' name='L120'></a> 120 <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122 <em class='brace'>}</em> <em class='comment'>// namespace sdl</em>
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124 <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>==(<strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>, <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../D/3500.html' title='Multiple defined in 3 places.'>b</a>);
+<a id='L125' name='L125'></a> 125 <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>!=(<strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>, <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../D/3500.html' title='Multiple defined in 3 places.'>b</a>);
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127 <a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/15724.html' title='Multiple used in 159 places.'>ostream</a>&amp; <strong class='reserved'>operator</strong>&lt;&lt;(<a href='../D/14701.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/15724.html' title='Multiple used in 159 places.'>ostream</a>&amp; <a href='../Y/17715.html' title='Multiple used in 1744 places.'>s</a>, <strong class='reserved'>const</strong> <a href='../Y/2579.html' title='Multiple used in 517 places.'>SDL_Rect</a>&amp; <a href='../Y/17100.html' title='Multiple used in 903 places.'>rect</a>);
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L117'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

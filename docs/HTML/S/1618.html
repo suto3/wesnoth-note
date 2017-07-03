@@ -1,35 +1,22 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java</title>
+<title>utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5883.html'>utils</a>/<a href='../files/5893.html'>umc_dev</a>/<a href='../files/5903.html'>org.wesnoth.ui</a>/<a href='../files/5912.html'>src</a>/<a href='../files/5913.html'>org</a>/<a href='../files/5914.html'>wesnoth</a>/<a href='../files/5915.html'>ui</a>/<a href='../files/5917.html'>contentassist</a>/WMLProposalProvider.java</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L81'>[^]</a><a href='#L465'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5886.html'>utils</a>/<a href='../files/5896.html'>umc_dev</a>/<a href='../files/5906.html'>org.wesnoth.ui</a>/<a href='../files/5915.html'>src</a>/<a href='../files/5916.html'>org</a>/<a href='../files/5917.html'>wesnoth</a>/<a href='../files/5918.html'>ui</a>/<a href='../files/5929.html'>syntax</a>/WMLSemanticHighlightingCalculator.java</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L176'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L81' title='Defined at 81.'>initImages</a></li>
-<li><a href='#L98' title='Defined at 98.'>initProposalProvider</a></li>
-<li><a href='#L117' title='Defined at 117.'>createProposals</a></li>
-<li><a href='#L126' title='Defined at 126.'>completeWMLKey_Name</a></li>
-<li><a href='#L137' title='Defined at 137.'>complete_WMLKeyValue</a></li>
-<li><a href='#L148' title='Defined at 148.'>complete_WMLTag</a></li>
-<li><a href='#L159' title='Defined at 159.'>completeWMLTag_Name</a></li>
-<li><a href='#L170' title='Defined at 170.'>completeWMLMacroCall_Name</a></li>
-<li><a href='#L182' title='Defined at 182.'>complete_WMLMacroCall</a></li>
-<li><a href='#L192' title='Defined at 192.'>addMacroCallProposals</a></li>
-<li><a href='#L222' title='Defined at 222.'>addKeyValueProposals</a></li>
-<li><a href='#L311' title='Defined at 311.'>addKeyNameProposals</a></li>
-<li><a href='#L354' title='Defined at 354.'>addTagProposals</a></li>
-<li><a href='#L433' title='Defined at 433.'>createTagProposal</a></li>
-<li><a href='#L458' title='Defined at 458.'>createCompletionProposal</a></li>
-<li><a href='#L465' title='Defined at 465.'>createCompletionProposal</a></li>
+<li><a href='#L42' title='Defined at 42.'>provideHighlightingFor</a></li>
+<li><a href='#L147' title='Defined at 147.'>highlightNode</a></li>
+<li><a href='#L176' title='Defined at 176.'>getFirstFeatureNode</a></li>
 </ol>
 <hr />
 <pre>
@@ -41,474 +28,190 @@ This source file includes following definitions.
 <a id='L6' name='L6'></a>   6 <em class='comment'> * which accompanies this distribution, and is available at</em>
 <a id='L7' name='L7'></a>   7 <em class='comment'> * http://www.eclipse.org/legal/epl-v10.html</em>
 <a id='L8' name='L8'></a>   8 <em class='comment'> *******************************************************************************/</em>
-<a id='L9' name='L9'></a>   9 <strong class='reserved'>package</strong> <a href='../Y/15671.html' title='Multiple used in 1970 places.'>org</a>.<a href='../Y/21675.html' title='Multiple used in 2586 places.'>wesnoth</a>.<a href='../Y/20759.html' title='Multiple used in 382 places.'>ui</a>.<a href='../Y/7776.html' title='Multiple used in 38 places.'>contentassist</a>;
+<a id='L9' name='L9'></a>   9 <strong class='reserved'>package</strong> <a href='../Y/15679.html' title='Multiple used in 1970 places.'>org</a>.<a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/20772.html' title='Multiple used in 382 places.'>ui</a>.<a href='../Y/19387.html' title='Multiple used in 13 places.'>syntax</a>;
 <a id='L10' name='L10'></a>  10 
-<a id='L11' name='L11'></a>  11 <strong class='reserved'>import</strong> com.google.common.base.Function;
-<a id='L12' name='L12'></a>  12 <strong class='reserved'>import</strong> com.google.common.base.Predicates;
-<a id='L13' name='L13'></a>  13 <strong class='reserved'>import</strong> com.google.common.collect.Collections2;
+<a id='L11' name='L11'></a>  11 <strong class='reserved'>import</strong> java.util.ArrayList;
+<a id='L12' name='L12'></a>  12 <strong class='reserved'>import</strong> java.util.Iterator;
+<a id='L13' name='L13'></a>  13 <strong class='reserved'>import</strong> java.util.List;
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <strong class='reserved'>import</strong> java.util.ArrayList;
-<a id='L16' name='L16'></a>  16 <strong class='reserved'>import</strong> java.util.Collection;
-<a id='L17' name='L17'></a>  17 <strong class='reserved'>import</strong> java.util.List;
-<a id='L18' name='L18'></a>  18 <strong class='reserved'>import</strong> java.util.Map.Entry;
-<a id='L19' name='L19'></a>  19 
-<a id='L20' name='L20'></a>  20 <strong class='reserved'>import</strong> org.eclipse.core.resources.IFile;
-<a id='L21' name='L21'></a>  21 <strong class='reserved'>import</strong> org.eclipse.emf.ecore.EObject;
-<a id='L22' name='L22'></a>  22 <strong class='reserved'>import</strong> org.eclipse.jface.text.contentassist.ICompletionProposal;
-<a id='L23' name='L23'></a>  23 <strong class='reserved'>import</strong> org.eclipse.jface.viewers.ILabelProvider;
-<a id='L24' name='L24'></a>  24 <strong class='reserved'>import</strong> org.eclipse.jface.viewers.StyledString;
-<a id='L25' name='L25'></a>  25 <strong class='reserved'>import</strong> org.eclipse.swt.graphics.Image;
-<a id='L26' name='L26'></a>  26 <strong class='reserved'>import</strong> org.eclipse.xtext.Assignment;
-<a id='L27' name='L27'></a>  27 <strong class='reserved'>import</strong> org.eclipse.xtext.RuleCall;
-<a id='L28' name='L28'></a>  28 <strong class='reserved'>import</strong> org.eclipse.xtext.nodemodel.ILeafNode;
-<a id='L29' name='L29'></a>  29 <strong class='reserved'>import</strong> org.eclipse.xtext.nodemodel.INode;
-<a id='L30' name='L30'></a>  30 <strong class='reserved'>import</strong> org.eclipse.xtext.nodemodel.util.NodeModelUtils;
-<a id='L31' name='L31'></a>  31 <strong class='reserved'>import</strong> org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>import</strong> org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
-<a id='L33' name='L33'></a>  33 
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>import</strong> org.wesnoth.installs.WesnothInstallsUtils;
-<a id='L35' name='L35'></a>  35 <strong class='reserved'>import</strong> org.wesnoth.preprocessor.Define;
-<a id='L36' name='L36'></a>  36 <strong class='reserved'>import</strong> org.wesnoth.projects.ProjectCache;
-<a id='L37' name='L37'></a>  37 <strong class='reserved'>import</strong> org.wesnoth.projects.ProjectUtils;
-<a id='L38' name='L38'></a>  38 <strong class='reserved'>import</strong> org.wesnoth.schema.SchemaParser;
-<a id='L39' name='L39'></a>  39 <strong class='reserved'>import</strong> org.wesnoth.templates.TemplateProvider;
-<a id='L40' name='L40'></a>  40 <strong class='reserved'>import</strong> org.wesnoth.ui.editor.WMLEditor;
-<a id='L41' name='L41'></a>  41 <strong class='reserved'>import</strong> org.wesnoth.utils.ResourceUtils;
-<a id='L42' name='L42'></a>  42 <strong class='reserved'>import</strong> org.wesnoth.utils.StringUtils;
-<a id='L43' name='L43'></a>  43 <strong class='reserved'>import</strong> org.wesnoth.utils.WMLUtils;
-<a id='L44' name='L44'></a>  44 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLConfig;
-<a id='L45' name='L45'></a>  45 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLKey;
-<a id='L46' name='L46'></a>  46 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLKeyValue;
-<a id='L47' name='L47'></a>  47 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLTag;
-<a id='L48' name='L48'></a>  48 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLVariable;
-<a id='L49' name='L49'></a>  49 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLVariable.Scope;
-<a id='L50' name='L50'></a>  50 
-<a id='L51' name='L51'></a>  51 <em class='comment'>/**</em>
-<a id='L52' name='L52'></a>  52 <em class='comment'> * Proposal provider for WML content assist</em>
-<a id='L53' name='L53'></a>  53 <em class='comment'> */</em>
-<a id='L54' name='L54'></a>  54 <strong class='reserved'>public</strong> <strong class='reserved'>class</strong> <a href='../S/1645.html#L98' title='Referred from 98 in utils/umc_dev/org.wesnoth.ui/src-gen/org/wesnoth/ui/AbstractWMLUiModule.java.'>WMLProposalProvider</a> <strong class='reserved'>extends</strong> <a href='../S/1644.html#L18' title='Defined at 18 in utils/umc_dev/org.wesnoth.ui/src-gen/org/wesnoth/ui/contentassist/AbstractWMLProposalProvider.java.'>AbstractWMLProposalProvider</a>
-<a id='L55' name='L55'></a>  55 <em class='brace'>{</em>
-<a id='L56' name='L56'></a>  56     <strong class='reserved'>protected</strong> <a href='../S/1407.html#L33' title='Defined at 33 in utils/umc_dev/org.wesnoth/src/org/wesnoth/schema/SchemaParser.java.'>SchemaParser</a>     <a href='../Y/17847.html' title='Multiple used in 6 places.'>schemaParser_</a>;
-<a id='L57' name='L57'></a>  57     <strong class='reserved'>protected</strong> <a href='../S/1493.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a>     <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a>;
-<a id='L58' name='L58'></a>  58     <strong class='reserved'>protected</strong> <strong class='reserved'>int</strong>              <a href='../Y/8594.html' title='Multiple used in 9 places.'>dependencyIndex_</a>;
-<a id='L59' name='L59'></a>  59 
-<a id='L60' name='L60'></a>  60     <strong class='reserved'>protected</strong> <strong class='reserved'>static</strong> <strong class='reserved'>final</strong> <strong class='reserved'>int</strong> <a href='../Y/1660.html' title='Multiple used in 3 places.'>KEY_VALUE_PRIORITY</a>   = 1700;
-<a id='L61' name='L61'></a>  61     <strong class='reserved'>protected</strong> <strong class='reserved'>static</strong> <strong class='reserved'>final</strong> <strong class='reserved'>int</strong> <a href='../Y/1659.html' title='Multiple used in 2 places.'>KEY_NAME_PRIORITY</a>    = 1500;
-<a id='L62' name='L62'></a>  62     <strong class='reserved'>protected</strong> <strong class='reserved'>static</strong> <strong class='reserved'>final</strong> <strong class='reserved'>int</strong> <a href='../Y/2832.html' title='Multiple used in 2 places.'>TAG_PRIORITY</a>         = 1000;
-<a id='L63' name='L63'></a>  63     <strong class='reserved'>protected</strong> <strong class='reserved'>static</strong> <strong class='reserved'>final</strong> <strong class='reserved'>int</strong> <a href='../Y/1831.html' title='Multiple used in 2 places.'>MACRO_CALL_PRIORITY</a>  = 100;
-<a id='L64' name='L64'></a>  64 
-<a id='L65' name='L65'></a>  65     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <strong class='reserved'>boolean</strong>     <a href='../Y/1430.html' title='Multiple used in 2 places.'>IMAGES_INITED</a>        = <strong class='reserved'>false</strong>;
-<a id='L66' name='L66'></a>  66     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <a href='../S/4054.html#L20' title='Defined at 20 in data/tools/unit_tree/helpers.py.'>Image</a>       <a href='../Y/1830.html' title='Multiple used in 3 places.'>MACRO_CALL_IMAGE</a>     = <strong class='reserved'>null</strong>;
-<a id='L67' name='L67'></a>  67     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <a href='../S/4054.html#L20' title='Defined at 20 in data/tools/unit_tree/helpers.py.'>Image</a>       <a href='../Y/2369.html' title='Multiple used in 3 places.'>SCENARIO_VALUE_IMAGE</a> = <strong class='reserved'>null</strong>;
-<a id='L68' name='L68'></a>  68     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <a href='../S/4054.html#L20' title='Defined at 20 in data/tools/unit_tree/helpers.py.'>Image</a>       <a href='../Y/3103.html' title='Multiple used in 3 places.'>WML_KEY_IMAGE</a>        = <strong class='reserved'>null</strong>;
-<a id='L69' name='L69'></a>  69     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <a href='../S/4054.html#L20' title='Defined at 20 in data/tools/unit_tree/helpers.py.'>Image</a>       <a href='../Y/3166.html' title='Multiple used in 3 places.'>WML_TAG_IMAGE</a>        = <strong class='reserved'>null</strong>;
-<a id='L70' name='L70'></a>  70 
-<a id='L71' name='L71'></a>  71     <em class='comment'>/**</em>
-<a id='L72' name='L72'></a>  72 <em class='comment'>     * For priorities, see: {@link #KEY_NAME_PRIORITY}</em>
-<a id='L73' name='L73'></a>  73 <em class='comment'>     * {@link #KEY_VALUE_PRIORITY} {@link #TAG_PRIORITY}</em>
-<a id='L74' name='L74'></a>  74 <em class='comment'>     * {@link #MACRO_CALL_PRIORITY}</em>
-<a id='L75' name='L75'></a>  75 <em class='comment'>     */</em>
-<a id='L76' name='L76'></a>  76     <strong class='reserved'>public</strong> WMLProposalProvider( )
-<a id='L77' name='L77'></a>  77     <em class='brace'>{</em>
-<a id='L78' name='L78'></a>  78         <strong class='reserved'>super</strong>( );
-<a id='L79' name='L79'></a>  79     <em class='brace'>}</em>
-<a id='L80' name='L80'></a>  80 
-<a id='L81' name='L81'></a>  81     <strong class='reserved'>private</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L113' title='Referred from 113 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>initImages</a>( )
-<a id='L82' name='L82'></a>  82     <em class='brace'>{</em>
-<a id='L83' name='L83'></a>  83         <strong class='reserved'>if</strong>( <a href='../Y/1430.html' title='Multiple used in 2 places.'>IMAGES_INITED</a> ) <em class='brace'>{</em>
-<a id='L84' name='L84'></a>  84             <strong class='reserved'>return</strong>;
-<a id='L85' name='L85'></a>  85         <em class='brace'>}</em>
-<a id='L86' name='L86'></a>  86 
-<a id='L87' name='L87'></a>  87         <a href='../Y/1426.html' title='Multiple used in 6 places.'>ILabelProvider</a> <a href='../Y/12638.html' title='Multiple used in 5 places.'>labelProvider</a> = getLabelProvider( );
-<a id='L88' name='L88'></a>  88 
-<a id='L89' name='L89'></a>  89         <a href='../Y/1830.html' title='Multiple used in 3 places.'>MACRO_CALL_IMAGE</a> = <a href='../Y/12638.html' title='Multiple used in 5 places.'>labelProvider</a>.<a href='../S/1474.html#L27' title='Defined at 27 in utils/umc_dev/org.wesnoth/src/org/wesnoth/views/WesnothProjectsExplorerLabelProvider.java.'>getImage</a>( "macrocall.png" );
-<a id='L90' name='L90'></a>  90         <a href='../Y/2369.html' title='Multiple used in 3 places.'>SCENARIO_VALUE_IMAGE</a> = <a href='../Y/12638.html' title='Multiple used in 5 places.'>labelProvider</a>.<a href='../S/1474.html#L27' title='Defined at 27 in utils/umc_dev/org.wesnoth/src/org/wesnoth/views/WesnothProjectsExplorerLabelProvider.java.'>getImage</a>( "scenario.png" );
-<a id='L91' name='L91'></a>  91         <a href='../Y/3103.html' title='Multiple used in 3 places.'>WML_KEY_IMAGE</a> = <a href='../Y/12638.html' title='Multiple used in 5 places.'>labelProvider</a>.<a href='../S/1474.html#L27' title='Defined at 27 in utils/umc_dev/org.wesnoth/src/org/wesnoth/views/WesnothProjectsExplorerLabelProvider.java.'>getImage</a>( "wmlkey.png" );
-<a id='L92' name='L92'></a>  92         <a href='../Y/3166.html' title='Multiple used in 3 places.'>WML_TAG_IMAGE</a> = <a href='../Y/12638.html' title='Multiple used in 5 places.'>labelProvider</a>.<a href='../S/1474.html#L27' title='Defined at 27 in utils/umc_dev/org.wesnoth/src/org/wesnoth/views/WesnothProjectsExplorerLabelProvider.java.'>getImage</a>( "wmltag.png" );
-<a id='L93' name='L93'></a>  93     <em class='brace'>}</em>
+<a id='L15' name='L15'></a>  15 <strong class='reserved'>import</strong> org.eclipse.emf.common.notify.Adapter;
+<a id='L16' name='L16'></a>  16 <strong class='reserved'>import</strong> org.eclipse.emf.ecore.EObject;
+<a id='L17' name='L17'></a>  17 <strong class='reserved'>import</strong> org.eclipse.emf.ecore.EStructuralFeature;
+<a id='L18' name='L18'></a>  18 <strong class='reserved'>import</strong> org.eclipse.emf.ecore.util.EcoreUtil;
+<a id='L19' name='L19'></a>  19 <strong class='reserved'>import</strong> org.eclipse.xtext.nodemodel.ILeafNode;
+<a id='L20' name='L20'></a>  20 <strong class='reserved'>import</strong> org.eclipse.xtext.nodemodel.INode;
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>import</strong> org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+<a id='L22' name='L22'></a>  22 <strong class='reserved'>import</strong> org.eclipse.xtext.resource.XtextResource;
+<a id='L23' name='L23'></a>  23 <strong class='reserved'>import</strong> org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightedPositionAcceptor;
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>import</strong> org.eclipse.xtext.ui.editor.syntaxcoloring.ISemanticHighlightingCalculator;
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <strong class='reserved'>import</strong> org.wesnoth.utils.Pair;
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLKey;
+<a id='L28' name='L28'></a>  28 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLMacroCall;
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLMacroDefine;
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLPreprocIF;
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLTag;
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>import</strong> org.wesnoth.wml.WMLTextdomain;
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>import</strong> org.wesnoth.wml.WmlPackage;
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 <em class='comment'>/**</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * Highlights the WML code semantically</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> */</em>
+<a id='L38' name='L38'></a>  38 <strong class='reserved'>public</strong> <strong class='reserved'>class</strong> <a href='../R/2268.html' title='Multiple referred from 2 places.'>WMLSemanticHighlightingCalculator</a> <strong class='reserved'>implements</strong>
+<a id='L39' name='L39'></a>  39     <a href='../Y/1573.html' title='Multiple used in 4 places.'>ISemanticHighlightingCalculator</a>
+<a id='L40' name='L40'></a>  40 <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41     @<a href='../Y/2096.html' title='Multiple used in 646 places.'>Override</a>
+<a id='L42' name='L42'></a>  42     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> provideHighlightingFor( <a href='../Y/3366.html' title='Multiple used in 16 places.'>XtextResource</a> <a href='../Y/17451.html' title='Multiple used in 138 places.'>resource</a>,
+<a id='L43' name='L43'></a>  43         <a href='../Y/1419.html' title='Multiple used in 3 places.'>IHighlightedPositionAcceptor</a> <a href='../Y/5088.html' title='Multiple used in 151 places.'>acceptor</a> )
+<a id='L44' name='L44'></a>  44     <em class='brace'>{</em>
+<a id='L45' name='L45'></a>  45         <strong class='reserved'>if</strong>( <a href='../Y/17451.html' title='Multiple used in 138 places.'>resource</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L46' name='L46'></a>  46             <strong class='reserved'>return</strong>;
+<a id='L47' name='L47'></a>  47         <em class='brace'>}</em>
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49         <a href='../Y/1652.html' title='Multiple used in 83 places.'>Iterator</a>&lt; <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> &gt; <a href='../Y/12427.html' title='Multiple used in 302 places.'>iter</a> = <a href='../Y/709.html' title='Multiple used in 4 places.'>EcoreUtil</a>.getAllContents( <a href='../Y/17451.html' title='Multiple used in 138 places.'>resource</a>, <strong class='reserved'>true</strong> );
+<a id='L50' name='L50'></a>  50         <strong class='reserved'>while</strong>( <a href='../Y/12427.html' title='Multiple used in 302 places.'>iter</a>.<a href='../D/8392.html' title='Multiple defined in 2 places.'>hasNext</a>( ) ) <em class='brace'>{</em>
+<a id='L51' name='L51'></a>  51             <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> = <a href='../Y/12427.html' title='Multiple used in 302 places.'>iter</a>.<a href='../D/11323.html' title='Multiple defined in 14 places.'>next</a>( );
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53             <a href='../Y/1817.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>&lt; <a href='../Y/1516.html' title='Multiple used in 15 places.'>INode</a>, <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> &gt; &gt; <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a> = <strong class='reserved'>new</strong> <a href='../Y/250.html' title='Multiple used in 85 places.'>ArrayList</a>&lt; <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>&lt; <a href='../Y/1516.html' title='Multiple used in 15 places.'>INode</a>, <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> &gt; &gt;( );
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55             <strong class='reserved'>if</strong>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> <strong class='reserved'>instanceof</strong> <a href='../S/1586.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L57' name='L57'></a>  57                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L58' name='L58'></a>  58                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3103.html' title='Multiple used in 22 places.'>WML_EXPRESSION__NAME</a> ),
+<a id='L59' name='L59'></a>  59                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2313.html' title='Multiple used in 5 places.'>RULE_WML_TAG</a> ) );
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L62' name='L62'></a>  62                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L63' name='L63'></a>  63                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3176.html' title='Multiple used in 10 places.'>WML_TAG__END_NAME</a> ),
+<a id='L64' name='L64'></a>  64                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2313.html' title='Multiple used in 5 places.'>RULE_WML_TAG</a> ) );
+<a id='L65' name='L65'></a>  65             <em class='brace'>}</em>
+<a id='L66' name='L66'></a>  66             <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> <strong class='reserved'>instanceof</strong> <a href='../S/1552.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKey.java.'>WMLKey</a> ) <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L68' name='L68'></a>  68                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L69' name='L69'></a>  69                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3103.html' title='Multiple used in 22 places.'>WML_EXPRESSION__NAME</a> ),
+<a id='L70' name='L70'></a>  70                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2310.html' title='Multiple used in 3 places.'>RULE_WML_KEY</a> ) );
+<a id='L71' name='L71'></a>  71             <em class='brace'>}</em>
+<a id='L72' name='L72'></a>  72             <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> <strong class='reserved'>instanceof</strong> <a href='../S/1591.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLMacroCall.java.'>WMLMacroCall</a> ) <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L74' name='L74'></a>  74                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L75' name='L75'></a>  75                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3103.html' title='Multiple used in 22 places.'>WML_EXPRESSION__NAME</a> ),
+<a id='L76' name='L76'></a>  76                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2311.html' title='Multiple used in 4 places.'>RULE_WML_MACRO_CALL</a> ) );
+<a id='L77' name='L77'></a>  77             <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78             <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> <strong class='reserved'>instanceof</strong> <a href='../S/1584.html#L20' title='Defined at 20 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTextdomain.java.'>WMLTextdomain</a> ) <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L80' name='L80'></a>  80                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L81' name='L81'></a>  81                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3103.html' title='Multiple used in 22 places.'>WML_EXPRESSION__NAME</a> ),
+<a id='L82' name='L82'></a>  82                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2314.html' title='Multiple used in 3 places.'>RULE_WML_TEXTDOMAIN</a> ) );
+<a id='L83' name='L83'></a>  83             <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84             <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> <strong class='reserved'>instanceof</strong> <a href='../S/1561.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLPreprocIF.java.'>WMLPreprocIF</a> ) <em class='brace'>{</em>
+<a id='L85' name='L85'></a>  85                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L86' name='L86'></a>  86                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L87' name='L87'></a>  87                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3103.html' title='Multiple used in 22 places.'>WML_EXPRESSION__NAME</a> ),
+<a id='L88' name='L88'></a>  88                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2309.html' title='Multiple used in 5 places.'>RULE_WML_IF</a> ) );
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L91' name='L91'></a>  91                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L92' name='L92'></a>  92                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3153.html' title='Multiple used in 9 places.'>WML_PREPROC_IF__ELSES</a> ),
+<a id='L93' name='L93'></a>  93                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2309.html' title='Multiple used in 5 places.'>RULE_WML_IF</a> ) );
 <a id='L94' name='L94'></a>  94 
-<a id='L95' name='L95'></a>  95     <em class='comment'>/**</em>
-<a id='L96' name='L96'></a>  96 <em class='comment'>     * Initializes the proposal provider with all needed values</em>
-<a id='L97' name='L97'></a>  97 <em class='comment'>     */</em>
-<a id='L98' name='L98'></a>  98     <strong class='reserved'>private</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L120' title='Referred from 120 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>initProposalProvider</a>( )
-<a id='L99' name='L99'></a>  99     <em class='brace'>{</em>
-<a id='L100' name='L100'></a> 100         <strong class='reserved'>if</strong>( <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L101' name='L101'></a> 101             <strong class='reserved'>return</strong>;
-<a id='L102' name='L102'></a> 102         <em class='brace'>}</em>
-<a id='L103' name='L103'></a> 103 
-<a id='L104' name='L104'></a> 104         <a href='../Y/1408.html' title='Multiple used in 112 places.'>IFile</a> <a href='../D/6156.html' title='Multiple defined in 3 places.'>file</a> = <a href='../S/1606.html#L60' title='Defined at 60 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/editor/WMLEditor.java.'>WMLEditor</a>.<a href='../S/1606.html#L116' title='Defined at 116 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/editor/WMLEditor.java.'>getActiveEditorFile</a>( );
-<a id='L105' name='L105'></a> 105         <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a> = <a href='../S/1494.html#L42' title='Defined at 42 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectUtils.java.'>ProjectUtils</a>.<a href='../S/1494.html#L81' title='Defined at 81 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectUtils.java.'>getCacheForProject</a>( <a href='../D/6156.html' title='Multiple defined in 3 places.'>file</a>.<a href='../D/6957.html' title='Multiple defined in 3 places.'>getProject</a>( ) );
-<a id='L106' name='L106'></a> 106 
-<a id='L107' name='L107'></a> 107         <em class='comment'>// load the schema so we know what to suggest for autocomplete</em>
-<a id='L108' name='L108'></a> 108         <a href='../Y/17847.html' title='Multiple used in 6 places.'>schemaParser_</a> = <a href='../S/1407.html#L33' title='Defined at 33 in utils/umc_dev/org.wesnoth/src/org/wesnoth/schema/SchemaParser.java.'>SchemaParser</a>.<a href='../D/6876.html' title='Multiple defined in 6 places.'>getInstance</a>( <a href='../S/1495.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src/org/wesnoth/installs/WesnothInstallsUtils.java.'>WesnothInstallsUtils</a>
-<a id='L109' name='L109'></a> 109             .<a href='../D/6873.html' title='Multiple defined in 2 places.'>getInstallNameForResource</a>( <a href='../D/6156.html' title='Multiple defined in 3 places.'>file</a> ) );
-<a id='L110' name='L110'></a> 110 
-<a id='L111' name='L111'></a> 111         <a href='../Y/8594.html' title='Multiple used in 9 places.'>dependencyIndex_</a> = <a href='../S/1434.html#L59' title='Defined at 59 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>ResourceUtils</a>.<a href='../S/1434.html#L711' title='Defined at 711 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>getDependencyIndex</a>( <a href='../D/6156.html' title='Multiple defined in 3 places.'>file</a> );
-<a id='L112' name='L112'></a> 112 
-<a id='L113' name='L113'></a> 113         <a href='../S/1618.html#L81' title='Defined at 81 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>initImages</a>( );
-<a id='L114' name='L114'></a> 114     <em class='brace'>}</em>
-<a id='L115' name='L115'></a> 115 
-<a id='L116' name='L116'></a> 116     @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L117' name='L117'></a> 117     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L122' title='Referred from 122 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>createProposals</a>( <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>,
-<a id='L118' name='L118'></a> 118         <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L119' name='L119'></a> 119     <em class='brace'>{</em>
-<a id='L120' name='L120'></a> 120         <a href='../S/1618.html#L98' title='Defined at 98 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>initProposalProvider</a>( );
-<a id='L121' name='L121'></a> 121 
-<a id='L122' name='L122'></a> 122         <strong class='reserved'>super</strong>.<a href='../S/1618.html#L117' title='Defined at 117 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>createProposals</a>( <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L123' name='L123'></a> 123     <em class='brace'>}</em>
-<a id='L124' name='L124'></a> 124 
-<a id='L125' name='L125'></a> 125     @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L126' name='L126'></a> 126     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L129' title='Referred from 129 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>completeWMLKey_Name</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/252.html' title='Multiple used in 107 places.'>Assignment</a> <a href='../S/1217.html#L1148' title='Defined at 1148 in src/lua/lparser.cpp.'>assignment</a>,
-<a id='L127' name='L127'></a> 127         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L128' name='L128'></a> 128     <em class='brace'>{</em>
-<a id='L129' name='L129'></a> 129         <strong class='reserved'>super</strong>.<a href='../D/4639.html' title='Multiple defined in 2 places.'>completeWMLKey_Name</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../S/1217.html#L1148' title='Defined at 1148 in src/lua/lparser.cpp.'>assignment</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L130' name='L130'></a> 130 
-<a id='L131' name='L131'></a> 131         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L132' name='L132'></a> 132             <a href='../S/1618.html#L311' title='Defined at 311 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addKeyNameProposals</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
+<a id='L95' name='L95'></a>  95                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L96' name='L96'></a>  96                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L97' name='L97'></a>  97                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3155.html' title='Multiple used in 9 places.'>WML_PREPROC_IF__END_NAME</a> ),
+<a id='L98' name='L98'></a>  98                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2309.html' title='Multiple used in 5 places.'>RULE_WML_IF</a> ) );
+<a id='L99' name='L99'></a>  99             <em class='brace'>}</em>
+<a id='L100' name='L100'></a> 100             <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> <strong class='reserved'>instanceof</strong> <a href='../S/1583.html#L28' title='Defined at 28 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLMacroDefine.java.'>WMLMacroDefine</a> ) <em class='brace'>{</em>
+<a id='L101' name='L101'></a> 101                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L102' name='L102'></a> 102                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L103' name='L103'></a> 103                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3103.html' title='Multiple used in 22 places.'>WML_EXPRESSION__NAME</a> ),
+<a id='L104' name='L104'></a> 104                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2312.html' title='Multiple used in 4 places.'>RULE_WML_MACRO_DEFINE</a> ) );
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106                 <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a>.<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>.<a href='../D/4955.html' title='Multiple defined in 58 places.'>create</a>(
+<a id='L107' name='L107'></a> 107                     <a href='../S/1618.html#L176' title='Defined at 176 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>getFirstFeatureNode</a>( <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>,
+<a id='L108' name='L108'></a> 108                         <a href='../S/1592.html#L29' title='Defined at 29 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>WmlPackage</a>.<a href='../S/1592.html#L1550' title='Defined at 1550 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WmlPackage.java.'>Literals</a>.<a href='../Y/3141.html' title='Multiple used in 9 places.'>WML_MACRO_DEFINE__END_NAME</a> ),
+<a id='L109' name='L109'></a> 109                     <a href='../S/1615.html#L22' title='Defined at 22 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLHighlightingConfiguration.java.'>WMLHighlightingConfiguration</a>.<a href='../Y/2312.html' title='Multiple used in 4 places.'>RULE_WML_MACRO_DEFINE</a> ) );
+<a id='L110' name='L110'></a> 110             <em class='brace'>}</em>
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112             <em class='comment'>// check if we have any information specific information for</em>
+<a id='L113' name='L113'></a> 113             <em class='comment'>// highlighting</em>
+<a id='L114' name='L114'></a> 114             <strong class='reserved'>for</strong>( <a href='../Y/212.html' title='Multiple used in 49 places.'>Adapter</a> <a href='../Y/5174.html' title='Multiple used in 10 places.'>adapter</a>: <a href='../Y/17451.html' title='Multiple used in 138 places.'>resource</a>.<a href='../Y/9073.html' title='Multiple used in 4 places.'>eAdapters</a>( ) ) <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 <strong class='reserved'>if</strong>( <a href='../Y/5174.html' title='Multiple used in 10 places.'>adapter</a> <strong class='reserved'>instanceof</strong> <a href='../S/1614.html#L17' title='Defined at 17 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSyntaxColoringAdapter.java.'>WMLSyntaxColoringAdapter</a> ) <em class='brace'>{</em>
+<a id='L116' name='L116'></a> 116                     <a href='../S/1614.html#L17' title='Defined at 17 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSyntaxColoringAdapter.java.'>WMLSyntaxColoringAdapter</a> <a href='../Y/21831.html' title='Multiple used in 3 places.'>wmlAdapter</a> = ( <a href='../S/1614.html#L17' title='Defined at 17 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSyntaxColoringAdapter.java.'>WMLSyntaxColoringAdapter</a> ) <a href='../Y/5174.html' title='Multiple used in 10 places.'>adapter</a>;
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118                     <strong class='reserved'>if</strong>( <a href='../Y/21831.html' title='Multiple used in 3 places.'>wmlAdapter</a>.<a href='../Y/2917.html' title='Multiple used in 4 places.'>TargetEObject</a> == <a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a> ) <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119 
+<a id='L120' name='L120'></a> 120                         <strong class='reserved'>for</strong>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>&lt; <a href='../Y/1516.html' title='Multiple used in 15 places.'>INode</a>, <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../Y/15925.html' title='Multiple used in 436 places.'>pair</a>: <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a> ) <em class='brace'>{</em>
+<a id='L121' name='L121'></a> 121                             <a href='../Y/15925.html' title='Multiple used in 436 places.'>pair</a>.<a href='../Y/2780.html' title='Multiple used in 9 places.'>Second</a> = <a href='../Y/21831.html' title='Multiple used in 3 places.'>wmlAdapter</a>.<a href='../Y/512.html' title='Multiple used in 3 places.'>ColorId</a>;
+<a id='L122' name='L122'></a> 122                         <em class='brace'>}</em>
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124                     <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126                     <strong class='reserved'>break</strong>;
+<a id='L127' name='L127'></a> 127                 <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128             <em class='brace'>}</em>
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130             <strong class='reserved'>for</strong>( <a href='../S/1445.html#L19' title='Defined at 19 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/Pair.java.'>Pair</a>&lt; <a href='../Y/1516.html' title='Multiple used in 15 places.'>INode</a>, <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../Y/15925.html' title='Multiple used in 436 places.'>pair</a>: <a href='../Y/20228.html' title='Multiple used in 13 places.'>toColor</a> ) <em class='brace'>{</em>
+<a id='L131' name='L131'></a> 131                 <a href='../S/1618.html#L147' title='Defined at 147 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>highlightNode</a>( <a href='../Y/15925.html' title='Multiple used in 436 places.'>pair</a>.<a href='../Y/1193.html' title='Multiple used in 6 places.'>First</a>, <a href='../Y/15925.html' title='Multiple used in 436 places.'>pair</a>.<a href='../Y/2780.html' title='Multiple used in 9 places.'>Second</a>, <a href='../Y/5088.html' title='Multiple used in 151 places.'>acceptor</a> );
+<a id='L132' name='L132'></a> 132             <em class='brace'>}</em>
 <a id='L133' name='L133'></a> 133         <em class='brace'>}</em>
 <a id='L134' name='L134'></a> 134     <em class='brace'>}</em>
 <a id='L135' name='L135'></a> 135 
-<a id='L136' name='L136'></a> 136     @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L137' name='L137'></a> 137     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L140' title='Referred from 140 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>complete_WMLKeyValue</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/2352.html' title='Multiple used in 196 places.'>RuleCall</a> <a href='../Y/17676.html' title='Multiple used in 42 places.'>ruleCall</a>,
-<a id='L138' name='L138'></a> 138         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L139' name='L139'></a> 139     <em class='brace'>{</em>
-<a id='L140' name='L140'></a> 140         <strong class='reserved'>super</strong>.<a href='../D/4683.html' title='Multiple defined in 2 places.'>complete_WMLKeyValue</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/17676.html' title='Multiple used in 42 places.'>ruleCall</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L141' name='L141'></a> 141 
-<a id='L142' name='L142'></a> 142         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L143' name='L143'></a> 143             <a href='../S/1618.html#L222' title='Defined at 222 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addKeyValueProposals</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L144' name='L144'></a> 144         <em class='brace'>}</em>
-<a id='L145' name='L145'></a> 145     <em class='brace'>}</em>
-<a id='L146' name='L146'></a> 146 
-<a id='L147' name='L147'></a> 147     @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L148' name='L148'></a> 148     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L151' title='Referred from 151 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>complete_WMLTag</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/2352.html' title='Multiple used in 196 places.'>RuleCall</a> <a href='../Y/17676.html' title='Multiple used in 42 places.'>ruleCall</a>,
-<a id='L149' name='L149'></a> 149         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L150' name='L150'></a> 150     <em class='brace'>{</em>
-<a id='L151' name='L151'></a> 151         <strong class='reserved'>super</strong>.<a href='../D/4692.html' title='Multiple defined in 2 places.'>complete_WMLTag</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/17676.html' title='Multiple used in 42 places.'>ruleCall</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L152' name='L152'></a> 152 
-<a id='L153' name='L153'></a> 153         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L154' name='L154'></a> 154             <a href='../S/1618.html#L354' title='Defined at 354 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addTagProposals</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <strong class='reserved'>true</strong>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
+<a id='L136' name='L136'></a> 136     <em class='comment'>/**</em>
+<a id='L137' name='L137'></a> 137 <em class='comment'>     * Copied from org.eclipse.xtext.xtext.ui.editor.syntaxcoloring.</em>
+<a id='L138' name='L138'></a> 138 <em class='comment'>     * SemanticHighlightingCalculator</em>
+<a id='L139' name='L139'></a> 139 <em class='comment'>     * </em>
+<a id='L140' name='L140'></a> 140 <em class='comment'>     * @param node</em>
+<a id='L141' name='L141'></a> 141 <em class='comment'>     *        The node to highlight</em>
+<a id='L142' name='L142'></a> 142 <em class='comment'>     * @param id</em>
+<a id='L143' name='L143'></a> 143 <em class='comment'>     *        The id of the coloring</em>
+<a id='L144' name='L144'></a> 144 <em class='comment'>     * @param acceptor</em>
+<a id='L145' name='L145'></a> 145 <em class='comment'>     *        The acceptor to add the node to</em>
+<a id='L146' name='L146'></a> 146 <em class='comment'>     */</em>
+<a id='L147' name='L147'></a> 147     <strong class='reserved'>private</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L131' title='Referred from 131 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/syntax/WMLSemanticHighlightingCalculator.java.'>highlightNode</a>( <a href='../Y/1516.html' title='Multiple used in 15 places.'>INode</a> <a href='../D/11370.html' title='Multiple defined in 4 places.'>node</a>, <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/8621.html' title='Multiple defined in 22 places.'>id</a>,
+<a id='L148' name='L148'></a> 148         <a href='../Y/1419.html' title='Multiple used in 3 places.'>IHighlightedPositionAcceptor</a> <a href='../Y/5088.html' title='Multiple used in 151 places.'>acceptor</a> )
+<a id='L149' name='L149'></a> 149     <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150         <strong class='reserved'>if</strong>( <a href='../D/11370.html' title='Multiple defined in 4 places.'>node</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L151' name='L151'></a> 151             <strong class='reserved'>return</strong>;
+<a id='L152' name='L152'></a> 152         <em class='brace'>}</em>
+<a id='L153' name='L153'></a> 153         <strong class='reserved'>if</strong>( <a href='../D/11370.html' title='Multiple defined in 4 places.'>node</a> <strong class='reserved'>instanceof</strong> <a href='../Y/1428.html' title='Multiple used in 9 places.'>ILeafNode</a> ) <em class='brace'>{</em>
+<a id='L154' name='L154'></a> 154             <a href='../Y/5088.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../Y/5194.html' title='Multiple used in 2 places.'>addPosition</a>( <a href='../D/11370.html' title='Multiple defined in 4 places.'>node</a>.<a href='../Y/10722.html' title='Multiple used in 10 places.'>getOffset</a>( ), <a href='../D/11370.html' title='Multiple defined in 4 places.'>node</a>.<a href='../Y/10710.html' title='Multiple used in 8 places.'>getLength</a>( ), <a href='../D/8621.html' title='Multiple defined in 22 places.'>id</a> );
 <a id='L155' name='L155'></a> 155         <em class='brace'>}</em>
-<a id='L156' name='L156'></a> 156     <em class='brace'>}</em>
-<a id='L157' name='L157'></a> 157 
-<a id='L158' name='L158'></a> 158     @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L159' name='L159'></a> 159     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L162' title='Referred from 162 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>completeWMLTag_Name</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/252.html' title='Multiple used in 107 places.'>Assignment</a> <a href='../S/1217.html#L1148' title='Defined at 1148 in src/lua/lparser.cpp.'>assignment</a>,
-<a id='L160' name='L160'></a> 160         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L161' name='L161'></a> 161     <em class='brace'>{</em>
-<a id='L162' name='L162'></a> 162         <strong class='reserved'>super</strong>.<a href='../D/4657.html' title='Multiple defined in 2 places.'>completeWMLTag_Name</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../S/1217.html#L1148' title='Defined at 1148 in src/lua/lparser.cpp.'>assignment</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L163' name='L163'></a> 163 
-<a id='L164' name='L164'></a> 164         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L165' name='L165'></a> 165             <a href='../S/1618.html#L354' title='Defined at 354 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addTagProposals</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <strong class='reserved'>false</strong>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L166' name='L166'></a> 166         <em class='brace'>}</em>
-<a id='L167' name='L167'></a> 167     <em class='brace'>}</em>
-<a id='L168' name='L168'></a> 168 
-<a id='L169' name='L169'></a> 169     @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L170' name='L170'></a> 170     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L174' title='Referred from 174 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>completeWMLMacroCall_Name</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>,
-<a id='L171' name='L171'></a> 171         <a href='../Y/252.html' title='Multiple used in 107 places.'>Assignment</a> <a href='../S/1217.html#L1148' title='Defined at 1148 in src/lua/lparser.cpp.'>assignment</a>, <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>,
-<a id='L172' name='L172'></a> 172         <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L173' name='L173'></a> 173     <em class='brace'>{</em>
-<a id='L174' name='L174'></a> 174         <strong class='reserved'>super</strong>.<a href='../D/4642.html' title='Multiple defined in 2 places.'>completeWMLMacroCall_Name</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../S/1217.html#L1148' title='Defined at 1148 in src/lua/lparser.cpp.'>assignment</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L175' name='L175'></a> 175 
-<a id='L176' name='L176'></a> 176         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L177' name='L177'></a> 177             <a href='../S/1618.html#L192' title='Defined at 192 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addMacroCallProposals</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <strong class='reserved'>false</strong>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L178' name='L178'></a> 178         <em class='brace'>}</em>
-<a id='L179' name='L179'></a> 179     <em class='brace'>}</em>
-<a id='L180' name='L180'></a> 180 
-<a id='L181' name='L181'></a> 181     @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L182' name='L182'></a> 182     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L185' title='Referred from 185 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>complete_WMLMacroCall</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/2352.html' title='Multiple used in 196 places.'>RuleCall</a> <a href='../Y/17676.html' title='Multiple used in 42 places.'>ruleCall</a>,
-<a id='L183' name='L183'></a> 183         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L184' name='L184'></a> 184     <em class='brace'>{</em>
-<a id='L185' name='L185'></a> 185         <strong class='reserved'>super</strong>.<a href='../D/4685.html' title='Multiple defined in 2 places.'>complete_WMLMacroCall</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <a href='../Y/17676.html' title='Multiple used in 42 places.'>ruleCall</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L186' name='L186'></a> 186 
-<a id='L187' name='L187'></a> 187         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L188' name='L188'></a> 188             <a href='../S/1618.html#L192' title='Defined at 192 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addMacroCallProposals</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <strong class='reserved'>true</strong>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> );
-<a id='L189' name='L189'></a> 189         <em class='brace'>}</em>
-<a id='L190' name='L190'></a> 190     <em class='brace'>}</em>
-<a id='L191' name='L191'></a> 191 
-<a id='L192' name='L192'></a> 192     <strong class='reserved'>private</strong> <strong class='reserved'>void</strong> <a href='../R/2537.html' title='Multiple referred from 2 places.'>addMacroCallProposals</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <strong class='reserved'>boolean</strong> <a href='../Y/17677.html' title='Multiple used in 7 places.'>ruleProposal</a>,
-<a id='L193' name='L193'></a> 193         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L194' name='L194'></a> 194     <em class='brace'>{</em>
-<a id='L195' name='L195'></a> 195         <a href='../Y/1515.html' title='Multiple used in 15 places.'>INode</a> <a href='../Y/8017.html' title='Multiple used in 9 places.'>currentNode</a> = <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>.<a href='../Y/10641.html' title='Multiple used in 2 places.'>getCurrentNode</a>( );
-<a id='L196' name='L196'></a> 196 
-<a id='L197' name='L197'></a> 197         <strong class='reserved'>boolean</strong> <a href='../Y/5658.html' title='Multiple used in 2 places.'>appendEndBrace</a> = <a href='../Y/8017.html' title='Multiple used in 9 places.'>currentNode</a> != <strong class='reserved'>null</strong> &amp;&amp; ! <a href='../Y/8017.html' title='Multiple used in 9 places.'>currentNode</a>.<a href='../D/7026.html' title='Multiple defined in 2 places.'>getText</a>( ).<a href='../D/5920.html' title='Multiple defined in 10 places.'>equals</a>( "}" );
-<a id='L198' name='L198'></a> 198 
-<a id='L199' name='L199'></a> 199 
-<a id='L200' name='L200'></a> 200         <strong class='reserved'>for</strong>( <a href='../S/4052.html#L398' title='Defined at 398 in data/tools/unit_tree/html_output.py.'>Entry</a>&lt; <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a>, <a href='../S/1378.html#L34' title='Defined at 34 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preprocessor/Define.java.'>Define</a> &gt; <a href='../D/5308.html' title='Multiple defined in 2 places.'>define</a>: <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../D/6773.html' title='Multiple defined in 2 places.'>getDefines</a>( )
-<a id='L201' name='L201'></a> 201             .<a href='../Y/9387.html' title='Multiple used in 9 places.'>entrySet</a>( ) ) <em class='brace'>{</em>
-<a id='L202' name='L202'></a> 202             <a href='../Y/2818.html' title='Multiple used in 32 places.'>StringBuilder</a> <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a> = <strong class='reserved'>new</strong> <a href='../Y/2818.html' title='Multiple used in 32 places.'>StringBuilder</a>( 10 );
-<a id='L203' name='L203'></a> 203             <strong class='reserved'>if</strong>( <a href='../Y/17677.html' title='Multiple used in 7 places.'>ruleProposal</a> == <strong class='reserved'>true</strong> ) <em class='brace'>{</em>
-<a id='L204' name='L204'></a> 204                 <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( "{" ); <em class='comment'>//$NON-NLS-1$</em>
-<a id='L205' name='L205'></a> 205             <em class='brace'>}</em>
-<a id='L206' name='L206'></a> 206             <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( <a href='../D/5308.html' title='Multiple defined in 2 places.'>define</a>.<a href='../Y/10694.html' title='Multiple used in 14 places.'>getKey</a>( ) );
-<a id='L207' name='L207'></a> 207 
-<a id='L208' name='L208'></a> 208             <strong class='reserved'>for</strong>( <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/3345.html' title='Multiple defined in 4 places.'>arg</a>: <a href='../D/5308.html' title='Multiple defined in 2 places.'>define</a>.<a href='../D/7042.html' title='Multiple defined in 10 places.'>getValue</a>( ).<a href='../S/1378.html#L130' title='Defined at 130 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preprocessor/Define.java.'>getArguments</a>( ) ) <em class='brace'>{</em>
-<a id='L209' name='L209'></a> 209                 <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( " " + <a href='../D/3345.html' title='Multiple defined in 4 places.'>arg</a> ); <em class='comment'>//$NON-NLS-1$</em>
-<a id='L210' name='L210'></a> 210             <em class='brace'>}</em>
-<a id='L211' name='L211'></a> 211 
-<a id='L212' name='L212'></a> 212             <strong class='reserved'>if</strong>( <a href='../Y/5658.html' title='Multiple used in 2 places.'>appendEndBrace</a> ) <em class='brace'>{</em>
-<a id='L213' name='L213'></a> 213                 <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( "}" ); <em class='comment'>//$NON-NLS-1$</em>
-<a id='L214' name='L214'></a> 214             <em class='brace'>}</em>
-<a id='L215' name='L215'></a> 215 
-<a id='L216' name='L216'></a> 216             <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>( <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/15163.html' title='Multiple defined in 18 places.'>toString</a>( ),
-<a id='L217' name='L217'></a> 217                 <a href='../D/5308.html' title='Multiple defined in 2 places.'>define</a>.<a href='../Y/10694.html' title='Multiple used in 14 places.'>getKey</a>( ), <a href='../Y/1830.html' title='Multiple used in 3 places.'>MACRO_CALL_IMAGE</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>,
-<a id='L218' name='L218'></a> 218                 <a href='../Y/1831.html' title='Multiple used in 2 places.'>MACRO_CALL_PRIORITY</a> ) );
-<a id='L219' name='L219'></a> 219         <em class='brace'>}</em>
-<a id='L220' name='L220'></a> 220     <em class='brace'>}</em>
-<a id='L221' name='L221'></a> 221 
-<a id='L222' name='L222'></a> 222     <strong class='reserved'>private</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L143' title='Referred from 143 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addKeyValueProposals</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>,
-<a id='L223' name='L223'></a> 223         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L224' name='L224'></a> 224     <em class='brace'>{</em>
-<a id='L225' name='L225'></a> 225         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> == <strong class='reserved'>null</strong> || ! ( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> <strong class='reserved'>instanceof</strong> <a href='../S/1550.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKey.java.'>WMLKey</a> ) ) <em class='brace'>{</em>
-<a id='L226' name='L226'></a> 226             <strong class='reserved'>return</strong>;
-<a id='L227' name='L227'></a> 227         <em class='brace'>}</em>
-<a id='L228' name='L228'></a> 228         <a href='../S/1550.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKey.java.'>WMLKey</a> <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a> = ( <a href='../S/1550.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKey.java.'>WMLKey</a> ) <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>;
-<a id='L229' name='L229'></a> 229         <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/12562.html' title='Multiple used in 14 places.'>keyName</a> = <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( );
-<a id='L230' name='L230'></a> 230 
-<a id='L231' name='L231'></a> 231         <em class='comment'>// handle the next_scenario and first_scenario</em>
-<a id='L232' name='L232'></a> 232         <strong class='reserved'>if</strong>( <a href='../Y/12562.html' title='Multiple used in 14 places.'>keyName</a>.<a href='../D/5920.html' title='Multiple defined in 10 places.'>equals</a>( "next_scenario" ) || <em class='comment'>//$NON-NLS-1$</em>
-<a id='L233' name='L233'></a> 233             <a href='../Y/12562.html' title='Multiple used in 14 places.'>keyName</a>.<a href='../D/5920.html' title='Multiple defined in 10 places.'>equals</a>( "first_scenario" ) ) <em class='comment'>//$NON-NLS-1$</em>
-<a id='L234' name='L234'></a> 234         <em class='brace'>{</em>
-<a id='L235' name='L235'></a> 235             <strong class='reserved'>for</strong>( <a href='../S/1421.html#L21' title='Defined at 21 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLConfig.java.'>WMLConfig</a> <a href='../D/4730.html' title='Multiple defined in 5 places.'>config</a>: <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../S/1493.html#L113' title='Defined at 113 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>getWMLConfigs</a>( ).<a href='../Y/21291.html' title='Multiple used in 172 places.'>values</a>( ) ) <em class='brace'>{</em>
-<a id='L236' name='L236'></a> 236                 <strong class='reserved'>if</strong>( <a href='../S/1441.html#L23' title='Defined at 23 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>StringUtils</a>.<a href='../S/1441.html#L279' title='Defined at 279 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>isNullOrEmpty</a>( <a href='../D/4730.html' title='Multiple defined in 5 places.'>config</a>.<a href='../Y/2743.html' title='Multiple used in 11 places.'>ScenarioId</a> ) ) <em class='brace'>{</em>
-<a id='L237' name='L237'></a> 237                     <strong class='reserved'>continue</strong>;
-<a id='L238' name='L238'></a> 238                 <em class='brace'>}</em>
-<a id='L239' name='L239'></a> 239                 <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>( <a href='../D/4730.html' title='Multiple defined in 5 places.'>config</a>.<a href='../Y/2743.html' title='Multiple used in 11 places.'>ScenarioId</a>,
-<a id='L240' name='L240'></a> 240                     <a href='../D/4730.html' title='Multiple defined in 5 places.'>config</a>.<a href='../Y/2743.html' title='Multiple used in 11 places.'>ScenarioId</a>, <a href='../Y/2369.html' title='Multiple used in 3 places.'>SCENARIO_VALUE_IMAGE</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>,
-<a id='L241' name='L241'></a> 241                     <a href='../Y/1660.html' title='Multiple used in 3 places.'>KEY_VALUE_PRIORITY</a> ) );
-<a id='L242' name='L242'></a> 242             <em class='brace'>}</em>
-<a id='L243' name='L243'></a> 243         <em class='brace'>}</em>
-<a id='L244' name='L244'></a> 244         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>.<a href='../Y/9067.html' title='Multiple used in 9 places.'>eContainer</a>( ) != <strong class='reserved'>null</strong>
-<a id='L245' name='L245'></a> 245             &amp;&amp; <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>.<a href='../Y/9067.html' title='Multiple used in 9 places.'>eContainer</a>( ) <strong class='reserved'>instanceof</strong> <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <em class='brace'>{</em>
-<a id='L246' name='L246'></a> 246             <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../D/11654.html' title='Multiple defined in 5 places.'>parent</a> = ( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>.<a href='../Y/9067.html' title='Multiple used in 9 places.'>eContainer</a>( );
-<a id='L247' name='L247'></a> 247             <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/19460.html' title='Multiple used in 34 places.'>tagName</a> = <a href='../D/11654.html' title='Multiple defined in 5 places.'>parent</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( );
-<a id='L248' name='L248'></a> 248             <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a> = <a href='../Y/17847.html' title='Multiple used in 6 places.'>schemaParser_</a>.<a href='../D/7021.html' title='Multiple defined in 2 places.'>getTags</a>( ).<a href='../D/6722.html' title='Multiple defined in 42 places.'>get</a>( <a href='../Y/19460.html' title='Multiple used in 34 places.'>tagName</a> );
-<a id='L249' name='L249'></a> 249             <strong class='reserved'>if</strong>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L250' name='L250'></a> 250                 <a href='../S/1550.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKey.java.'>WMLKey</a> <a href='../Y/19459.html' title='Multiple used in 3 places.'>tagKey</a> = <a href='../S/1439.html#L34' title='Defined at 34 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WMLUtils.java.'>WMLUtils</a>.<a href='../S/1439.html#L97' title='Defined at 97 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WMLUtils.java.'>getKeyByName</a>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>, <a href='../Y/12562.html' title='Multiple used in 14 places.'>keyName</a> );
-<a id='L251' name='L251'></a> 251                 <strong class='reserved'>if</strong>( <a href='../Y/19459.html' title='Multiple used in 3 places.'>tagKey</a> != <strong class='reserved'>null</strong> &amp;&amp; <a href='../Y/19459.html' title='Multiple used in 3 places.'>tagKey</a>.<a href='../D/9217.html' title='Multiple defined in 2 places.'>is_Enum</a>( ) ) <em class='brace'>{</em>
-<a id='L252' name='L252'></a> 252                     <strong class='reserved'>for</strong>( <a href='../S/1549.html#L20' title='Defined at 20 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKeyValue.java.'>WMLKeyValue</a> <a href='../D/15836.html' title='Multiple defined in 2 places.'>val</a>: <a href='../Y/19459.html' title='Multiple used in 3 places.'>tagKey</a>.<a href='../D/7065.html' title='Multiple defined in 2 places.'>getValues</a>( ) ) <em class='brace'>{</em>
-<a id='L253' name='L253'></a> 253                         <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>(
-<a id='L254' name='L254'></a> 254                             <a href='../D/15836.html' title='Multiple defined in 2 places.'>val</a>.<a href='../D/15163.html' title='Multiple defined in 18 places.'>toString</a>( ), <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1660.html' title='Multiple used in 3 places.'>KEY_VALUE_PRIORITY</a> ) );
-<a id='L255' name='L255'></a> 255                     <em class='brace'>}</em>
-<a id='L256' name='L256'></a> 256                 <em class='brace'>}</em>
-<a id='L257' name='L257'></a> 257             <em class='brace'>}</em>
-<a id='L258' name='L258'></a> 258 
-<a id='L259' name='L259'></a> 259             <strong class='reserved'>if</strong>( ( <a href='../Y/19460.html' title='Multiple used in 34 places.'>tagName</a>.<a href='../D/5920.html' title='Multiple defined in 10 places.'>equals</a>( "event" ) || <a href='../Y/19460.html' title='Multiple used in 34 places.'>tagName</a>.<a href='../D/5920.html' title='Multiple defined in 10 places.'>equals</a>( "fire_event" ) )
-<a id='L260' name='L260'></a> 260                 &amp;&amp; <a href='../Y/12562.html' title='Multiple used in 14 places.'>keyName</a>.<a href='../D/5920.html' title='Multiple defined in 10 places.'>equals</a>( "name" ) ) <em class='brace'>{</em>
-<a id='L261' name='L261'></a> 261                 <em class='comment'>// add events</em>
-<a id='L262' name='L262'></a> 262                 <a href='../Y/1816.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../D/5970.html' title='Multiple defined in 26 places.'>events</a> = <strong class='reserved'>new</strong> <a href='../Y/250.html' title='Multiple used in 85 places.'>ArrayList</a>&lt; <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> &gt;( );
-<a id='L263' name='L263'></a> 263                 <a href='../D/5970.html' title='Multiple defined in 26 places.'>events</a>.<a href='../Y/5172.html' title='Multiple used in 20 places.'>addAll</a>( <a href='../S/1452.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/TemplateProvider.java.'>TemplateProvider</a>.<a href='../D/6876.html' title='Multiple defined in 6 places.'>getInstance</a>( )
-<a id='L264' name='L264'></a> 264                     .<a href='../S/1452.html#L222' title='Defined at 222 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/TemplateProvider.java.'>getCAC</a>( "events" ) );
-<a id='L265' name='L265'></a> 265                 <a href='../D/5970.html' title='Multiple defined in 26 places.'>events</a>.<a href='../Y/5172.html' title='Multiple used in 20 places.'>addAll</a>( <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../D/6816.html' title='Multiple defined in 2 places.'>getEvents</a>( ) );
-<a id='L266' name='L266'></a> 266 
-<a id='L267' name='L267'></a> 267                 <strong class='reserved'>for</strong>( <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/5957.html' title='Multiple defined in 11 places.'>event</a>: <a href='../D/5970.html' title='Multiple defined in 26 places.'>events</a> ) <em class='brace'>{</em>
-<a id='L268' name='L268'></a> 268                     <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>
-<a id='L269' name='L269'></a> 269                         .<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>( <a href='../D/5957.html' title='Multiple defined in 11 places.'>event</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a> ) );
-<a id='L270' name='L270'></a> 270                 <em class='brace'>}</em>
-<a id='L271' name='L271'></a> 271             <em class='brace'>}</em>
-<a id='L272' name='L272'></a> 272             <strong class='reserved'>else</strong> <em class='brace'>{</em>
-<a id='L273' name='L273'></a> 273                 <strong class='reserved'>final</strong> <strong class='reserved'>int</strong> <a href='../Y/15038.html' title='Multiple used in 8 places.'>nodeOffset</a> = <a href='../Y/2051.html' title='Multiple used in 22 places.'>NodeModelUtils</a>.<a href='../D/6925.html' title='Multiple defined in 2 places.'>getNode</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> )
-<a id='L274' name='L274'></a> 274                     .<a href='../Y/10772.html' title='Multiple used in 4 places.'>getTotalOffset</a>( );
-<a id='L275' name='L275'></a> 275                 <a href='../Y/1816.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../D/15893.html' title='Multiple defined in 4 places.'>variables</a> = <strong class='reserved'>new</strong> <a href='../Y/250.html' title='Multiple used in 85 places.'>ArrayList</a>&lt; <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> &gt;( );
-<a id='L276' name='L276'></a> 276 
-<a id='L277' name='L277'></a> 277                 <em class='comment'>// add CAC variables</em>
-<a id='L278' name='L278'></a> 278                 <a href='../D/15893.html' title='Multiple defined in 4 places.'>variables</a>.<a href='../Y/5172.html' title='Multiple used in 20 places.'>addAll</a>( <a href='../S/1452.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/TemplateProvider.java.'>TemplateProvider</a>.<a href='../D/6876.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1452.html#L222' title='Defined at 222 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/TemplateProvider.java.'>getCAC</a>(
-<a id='L279' name='L279'></a> 279                     "variables" ) );
-<a id='L280' name='L280'></a> 280 
-<a id='L281' name='L281'></a> 281                 <em class='comment'>// filter variables by index</em>
-<a id='L282' name='L282'></a> 282                 <a href='../Y/509.html' title='Multiple used in 26 places.'>Collection</a>&lt; <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../Y/16666.html' title='Multiple used in 2 places.'>projectVariables</a> = <a href='../Y/511.html' title='Multiple used in 3 places.'>Collections2</a>.<a href='../Y/20474.html' title='Multiple used in 31 places.'>transform</a>(
-<a id='L283' name='L283'></a> 283                     <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../S/1493.html#L142' title='Defined at 142 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>getVariables</a>( ).<a href='../Y/21291.html' title='Multiple used in 172 places.'>values</a>( ),
-<a id='L284' name='L284'></a> 284                     <strong class='reserved'>new</strong> <a href='../Y/1210.html' title='Multiple used in 3 places.'>Function</a>&lt; <a href='../S/1419.html#L18' title='Defined at 18 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>WMLVariable</a>, <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> &gt;( ) <em class='brace'>{</em>
-<a id='L285' name='L285'></a> 285 
-<a id='L286' name='L286'></a> 286                         @<a href='../Y/2095.html' title='Multiple used in 646 places.'>Override</a>
-<a id='L287' name='L287'></a> 287                         <strong class='reserved'>public</strong> <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../S/873.html#L36' title='Defined at 36 in src/utils/functional.hpp.'>apply</a>( <a href='../S/1419.html#L18' title='Defined at 18 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>WMLVariable</a> <a href='../Y/10359.html' title='Multiple used in 190 places.'>from</a> )
-<a id='L288' name='L288'></a> 288                         <em class='brace'>{</em>
-<a id='L289' name='L289'></a> 289                             <strong class='reserved'>for</strong>( <a href='../S/1419.html#L94' title='Defined at 94 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>Scope</a> <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a>: <a href='../Y/10359.html' title='Multiple used in 190 places.'>from</a>.<a href='../S/1419.html#L69' title='Defined at 69 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>getScopes</a>( ) ) <em class='brace'>{</em>
-<a id='L290' name='L290'></a> 290                                 <strong class='reserved'>if</strong>( <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a>.<a href='../D/4837.html' title='Multiple defined in 6 places.'>contains</a>( <a href='../Y/8594.html' title='Multiple used in 9 places.'>dependencyIndex_</a>,
-<a id='L291' name='L291'></a> 291                                     <a href='../Y/15038.html' title='Multiple used in 8 places.'>nodeOffset</a> ) ) <em class='brace'>{</em>
-<a id='L292' name='L292'></a> 292                                     <strong class='reserved'>return</strong> <a href='../Y/10359.html' title='Multiple used in 190 places.'>from</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( );
-<a id='L293' name='L293'></a> 293                                 <em class='brace'>}</em>
-<a id='L294' name='L294'></a> 294                             <em class='brace'>}</em>
-<a id='L295' name='L295'></a> 295 
-<a id='L296' name='L296'></a> 296                             <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
-<a id='L297' name='L297'></a> 297                         <em class='brace'>}</em>
-<a id='L298' name='L298'></a> 298                     <em class='brace'>}</em> );
-<a id='L299' name='L299'></a> 299 
-<a id='L300' name='L300'></a> 300                 <a href='../D/15893.html' title='Multiple defined in 4 places.'>variables</a>.<a href='../Y/5172.html' title='Multiple used in 20 places.'>addAll</a>( <a href='../Y/511.html' title='Multiple used in 3 places.'>Collections2</a>.<a href='../D/6202.html' title='Multiple defined in 4 places.'>filter</a>( <a href='../Y/16666.html' title='Multiple used in 2 places.'>projectVariables</a>,
-<a id='L301' name='L301'></a> 301                     <a href='../Y/2216.html' title='Multiple used in 2 places.'>Predicates</a>.notNull( ) ) );
-<a id='L302' name='L302'></a> 302 
-<a id='L303' name='L303'></a> 303                 <strong class='reserved'>for</strong>( <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/21325.html' title='Multiple used in 986 places.'>variable</a>: <a href='../D/15893.html' title='Multiple defined in 4 places.'>variables</a> ) <em class='brace'>{</em>
-<a id='L304' name='L304'></a> 304                     <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>( "$" + <a href='../Y/21325.html' title='Multiple used in 986 places.'>variable</a>,
-<a id='L305' name='L305'></a> 305                         <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a> ) );
-<a id='L306' name='L306'></a> 306                 <em class='brace'>}</em>
-<a id='L307' name='L307'></a> 307             <em class='brace'>}</em>
-<a id='L308' name='L308'></a> 308         <em class='brace'>}</em>
-<a id='L309' name='L309'></a> 309     <em class='brace'>}</em>
-<a id='L310' name='L310'></a> 310 
-<a id='L311' name='L311'></a> 311     <strong class='reserved'>private</strong> <strong class='reserved'>void</strong> <a href='../S/1618.html#L132' title='Referred from 132 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>addKeyNameProposals</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>,
-<a id='L312' name='L312'></a> 312         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L313' name='L313'></a> 313     <em class='brace'>{</em>
-<a id='L314' name='L314'></a> 314         <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a> = <strong class='reserved'>null</strong>;
-<a id='L315' name='L315'></a> 315         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> <strong class='reserved'>instanceof</strong> <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <em class='brace'>{</em>
-<a id='L316' name='L316'></a> 316             <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a> = ( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>;
-<a id='L317' name='L317'></a> 317         <em class='brace'>}</em>
-<a id='L318' name='L318'></a> 318         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>.<a href='../Y/9067.html' title='Multiple used in 9 places.'>eContainer</a>( ) <strong class='reserved'>instanceof</strong> <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <em class='brace'>{</em>
-<a id='L319' name='L319'></a> 319             <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a> = ( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>.<a href='../Y/9067.html' title='Multiple used in 9 places.'>eContainer</a>( );
-<a id='L320' name='L320'></a> 320         <em class='brace'>}</em>
-<a id='L321' name='L321'></a> 321 
-<a id='L322' name='L322'></a> 322         <strong class='reserved'>if</strong>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L323' name='L323'></a> 323             <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/17849.html' title='Multiple used in 12 places.'>schemaTag</a> = <a href='../Y/17847.html' title='Multiple used in 6 places.'>schemaParser_</a>.<a href='../D/7021.html' title='Multiple defined in 2 places.'>getTags</a>( ).<a href='../D/6722.html' title='Multiple defined in 42 places.'>get</a>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) );
-<a id='L324' name='L324'></a> 324             <em class='comment'>// try getting the custom ones</em>
-<a id='L325' name='L325'></a> 325             <strong class='reserved'>if</strong>( <a href='../Y/17849.html' title='Multiple used in 12 places.'>schemaTag</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L326' name='L326'></a> 326                 <a href='../Y/17849.html' title='Multiple used in 12 places.'>schemaTag</a> = <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../D/7161.html' title='Multiple defined in 4 places.'>getWMLTags</a>( ).<a href='../D/6722.html' title='Multiple defined in 42 places.'>get</a>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) );
-<a id='L327' name='L327'></a> 327             <em class='brace'>}</em>
-<a id='L328' name='L328'></a> 328 
-<a id='L329' name='L329'></a> 329             <strong class='reserved'>if</strong>( <a href='../Y/17849.html' title='Multiple used in 12 places.'>schemaTag</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L330' name='L330'></a> 330                 <strong class='reserved'>for</strong>( <a href='../S/1550.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKey.java.'>WMLKey</a> <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>: <a href='../Y/17849.html' title='Multiple used in 12 places.'>schemaTag</a>.<a href='../D/7106.html' title='Multiple defined in 2 places.'>getWMLKeys</a>( ) ) <em class='brace'>{</em>
-<a id='L331' name='L331'></a> 331                     <em class='comment'>// skip forbidden keys</em>
-<a id='L332' name='L332'></a> 332                     <strong class='reserved'>if</strong>( <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/9218.html' title='Multiple defined in 3 places.'>is_Forbidden</a>( ) ) <em class='brace'>{</em>
-<a id='L333' name='L333'></a> 333                         <strong class='reserved'>continue</strong>;
-<a id='L334' name='L334'></a> 334                     <em class='brace'>}</em>
-<a id='L335' name='L335'></a> 335 
-<a id='L336' name='L336'></a> 336                     <strong class='reserved'>boolean</strong> <a href='../Y/20212.html' title='Multiple used in 3 places.'>toAdd</a> = <strong class='reserved'>true</strong>;
-<a id='L337' name='L337'></a> 337                     <em class='comment'>// check only non-repeatable keys</em>
-<a id='L338' name='L338'></a> 338                     <strong class='reserved'>if</strong>( ! <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/9222.html' title='Multiple defined in 3 places.'>is_Repeatable</a>( ) ) <em class='brace'>{</em>
-<a id='L339' name='L339'></a> 339                         <em class='comment'>// don't suggest already completed keys</em>
-<a id='L340' name='L340'></a> 340                         <a href='../Y/20212.html' title='Multiple used in 3 places.'>toAdd</a> = ( <a href='../S/1439.html#L34' title='Defined at 34 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WMLUtils.java.'>WMLUtils</a>.<a href='../S/1439.html#L97' title='Defined at 97 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WMLUtils.java.'>getKeyByName</a>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>, <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) ) != <strong class='reserved'>null</strong> );
-<a id='L341' name='L341'></a> 341                     <em class='brace'>}</em>
-<a id='L342' name='L342'></a> 342 
-<a id='L343' name='L343'></a> 343                     <strong class='reserved'>if</strong>( <a href='../Y/20212.html' title='Multiple used in 3 places.'>toAdd</a> ) <em class='brace'>{</em>
-<a id='L344' name='L344'></a> 344                         <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>(
-<a id='L345' name='L345'></a> 345                             <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) + "=", <em class='comment'>//$NON-NLS-1$</em>
-<a id='L346' name='L346'></a> 346                             <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ), <a href='../Y/3103.html' title='Multiple used in 3 places.'>WML_KEY_IMAGE</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>,
-<a id='L347' name='L347'></a> 347                             <a href='../Y/1659.html' title='Multiple used in 2 places.'>KEY_NAME_PRIORITY</a> ) );
-<a id='L348' name='L348'></a> 348                     <em class='brace'>}</em>
-<a id='L349' name='L349'></a> 349                 <em class='brace'>}</em>
-<a id='L350' name='L350'></a> 350             <em class='brace'>}</em>
-<a id='L351' name='L351'></a> 351         <em class='brace'>}</em>
-<a id='L352' name='L352'></a> 352     <em class='brace'>}</em>
-<a id='L353' name='L353'></a> 353 
-<a id='L354' name='L354'></a> 354     <strong class='reserved'>private</strong> <strong class='reserved'>void</strong> <a href='../R/2551.html' title='Multiple referred from 2 places.'>addTagProposals</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>, <strong class='reserved'>boolean</strong> <a href='../Y/17677.html' title='Multiple used in 7 places.'>ruleProposal</a>,
-<a id='L355' name='L355'></a> 355         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/1363.html' title='Multiple used in 74 places.'>ICompletionProposalAcceptor</a> <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a> )
-<a id='L356' name='L356'></a> 356     <em class='brace'>{</em>
-<a id='L357' name='L357'></a> 357         <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/16008.html' title='Multiple used in 10 places.'>parentTag</a> = <strong class='reserved'>null</strong>;
-<a id='L358' name='L358'></a> 358         <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> <strong class='reserved'>instanceof</strong> <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <em class='brace'>{</em>
-<a id='L359' name='L359'></a> 359             <a href='../Y/16008.html' title='Multiple used in 10 places.'>parentTag</a> = ( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>;
-<a id='L360' name='L360'></a> 360         <em class='brace'>}</em>
-<a id='L361' name='L361'></a> 361         <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>.<a href='../Y/9067.html' title='Multiple used in 9 places.'>eContainer</a>( ) <strong class='reserved'>instanceof</strong> <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <em class='brace'>{</em>
-<a id='L362' name='L362'></a> 362             <a href='../Y/16008.html' title='Multiple used in 10 places.'>parentTag</a> = ( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> ) <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a>.<a href='../Y/9067.html' title='Multiple used in 9 places.'>eContainer</a>( );
-<a id='L363' name='L363'></a> 363         <em class='brace'>}</em>
-<a id='L364' name='L364'></a> 364         <a href='../Y/1515.html' title='Multiple used in 15 places.'>INode</a> <a href='../Y/8017.html' title='Multiple used in 9 places.'>currentNode</a> = <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>.<a href='../Y/10641.html' title='Multiple used in 2 places.'>getCurrentNode</a>( );
-<a id='L365' name='L365'></a> 365 
-<a id='L366' name='L366'></a> 366         <strong class='reserved'>if</strong>( <a href='../Y/8017.html' title='Multiple used in 9 places.'>currentNode</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L367' name='L367'></a> 367             <strong class='reserved'>return</strong>;
-<a id='L368' name='L368'></a> 368         <em class='brace'>}</em>
-<a id='L369' name='L369'></a> 369 
-<a id='L370' name='L370'></a> 370         <strong class='reserved'>boolean</strong> <a href='../Y/5660.html' title='Multiple used in 3 places.'>appendEndBracket</a> = ! <a href='../Y/8017.html' title='Multiple used in 9 places.'>currentNode</a>.<a href='../D/7026.html' title='Multiple defined in 2 places.'>getText</a>( ).<a href='../D/5920.html' title='Multiple defined in 10 places.'>equals</a>( "]" );
-<a id='L371' name='L371'></a> 371 
-<a id='L372' name='L372'></a> 372         <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/18789.html' title='Multiple used in 5 places.'>sourceTag</a> = <strong class='reserved'>null</strong>;
-<a id='L373' name='L373'></a> 373         <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a> = "";
-<a id='L374' name='L374'></a> 374         <em class='comment'>// find the just previous leaf node (which contains the indent)</em>
-<a id='L375' name='L375'></a> 375         <a href='../Y/1427.html' title='Multiple used in 9 places.'>ILeafNode</a> <a href='../Y/12963.html' title='Multiple used in 3 places.'>leafNode</a> = <a href='../Y/2051.html' title='Multiple used in 22 places.'>NodeModelUtils</a>.<a href='../Y/9995.html' title='Multiple used in 3 places.'>findLeafNodeAtOffset</a>(
-<a id='L376' name='L376'></a> 376             <a href='../Y/2051.html' title='Multiple used in 22 places.'>NodeModelUtils</a>.<a href='../D/6925.html' title='Multiple defined in 2 places.'>getNode</a>( <a href='../D/11006.html' title='Multiple defined in 2 places.'>model</a> ),
-<a id='L377' name='L377'></a> 377             <a href='../Y/8017.html' title='Multiple used in 9 places.'>currentNode</a>.<a href='../Y/10772.html' title='Multiple used in 4 places.'>getTotalOffset</a>( ) - 1 - <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>.<a href='../Y/10724.html' title='Multiple used in 3 places.'>getPrefix</a>( ).<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>( ) );
-<a id='L378' name='L378'></a> 378 
-<a id='L379' name='L379'></a> 379         <strong class='reserved'>if</strong>( <a href='../Y/12963.html' title='Multiple used in 3 places.'>leafNode</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L380' name='L380'></a> 380             <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a> = <a href='../Y/12963.html' title='Multiple used in 3 places.'>leafNode</a>.<a href='../D/7026.html' title='Multiple defined in 2 places.'>getText</a>( );
-<a id='L381' name='L381'></a> 381         <em class='brace'>}</em>
-<a id='L382' name='L382'></a> 382 
-<a id='L383' name='L383'></a> 383         <strong class='reserved'>if</strong>( <a href='../Y/16008.html' title='Multiple used in 10 places.'>parentTag</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L384' name='L384'></a> 384             <a href='../Y/18789.html' title='Multiple used in 5 places.'>sourceTag</a> = <a href='../Y/17847.html' title='Multiple used in 6 places.'>schemaParser_</a>.<a href='../D/7021.html' title='Multiple defined in 2 places.'>getTags</a>( ).<a href='../D/6722.html' title='Multiple defined in 42 places.'>get</a>( <a href='../Y/16008.html' title='Multiple used in 10 places.'>parentTag</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) );
-<a id='L385' name='L385'></a> 385         <em class='brace'>}</em>
-<a id='L386' name='L386'></a> 386         <strong class='reserved'>else</strong> <em class='comment'>// we are at the root</em>
-<a id='L387' name='L387'></a> 387         <em class='brace'>{</em>
-<a id='L388' name='L388'></a> 388             <a href='../Y/18789.html' title='Multiple used in 5 places.'>sourceTag</a> = <a href='../Y/17847.html' title='Multiple used in 6 places.'>schemaParser_</a>.<a href='../D/7021.html' title='Multiple defined in 2 places.'>getTags</a>( ).<a href='../D/6722.html' title='Multiple defined in 42 places.'>get</a>( "root" ); <em class='comment'>//$NON-NLS-1$</em>
-<a id='L389' name='L389'></a> 389         <em class='brace'>}</em>
-<a id='L390' name='L390'></a> 390 
-<a id='L391' name='L391'></a> 391         <em class='comment'>// remove new lines from the indent</em>
-<a id='L392' name='L392'></a> 392         <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a> = <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a>.<a href='../Y/17301.html' title='Multiple used in 3 places.'>replaceAll</a>( "\\r|\\n", "" ); <em class='comment'>//$NON-NLS-1$ //$NON-NLS-2$ </em>
-<a id='L393' name='L393'></a> 393 
-<a id='L394' name='L394'></a> 394         <strong class='reserved'>if</strong>( <a href='../Y/18789.html' title='Multiple used in 5 places.'>sourceTag</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L395' name='L395'></a> 395             <strong class='reserved'>for</strong>( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>: <a href='../Y/18789.html' title='Multiple used in 5 places.'>sourceTag</a>.<a href='../D/7161.html' title='Multiple defined in 4 places.'>getWMLTags</a>( ) ) <em class='brace'>{</em>
-<a id='L396' name='L396'></a> 396                 <em class='comment'>// skip forbidden tags</em>
-<a id='L397' name='L397'></a> 397                 <strong class='reserved'>if</strong>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/9218.html' title='Multiple defined in 3 places.'>is_Forbidden</a>( ) ) <em class='brace'>{</em>
-<a id='L398' name='L398'></a> 398                     <strong class='reserved'>continue</strong>;
-<a id='L399' name='L399'></a> 399                 <em class='brace'>}</em>
-<a id='L400' name='L400'></a> 400 
-<a id='L401' name='L401'></a> 401                 <em class='comment'>// check that non-repeatable tags aren't suggested again</em>
-<a id='L402' name='L402'></a> 402                 <strong class='reserved'>if</strong>( ! <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/9222.html' title='Multiple defined in 3 places.'>is_Repeatable</a>( ) &amp;&amp; <a href='../Y/16008.html' title='Multiple used in 10 places.'>parentTag</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L403' name='L403'></a> 403                     <strong class='reserved'>if</strong>( <a href='../S/1439.html#L34' title='Defined at 34 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WMLUtils.java.'>WMLUtils</a>.<a href='../S/1439.html#L117' title='Defined at 117 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/WMLUtils.java.'>getTagByName</a>( <a href='../Y/16008.html' title='Multiple used in 10 places.'>parentTag</a>, <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) ) != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L404' name='L404'></a> 404                         <strong class='reserved'>return</strong>;
-<a id='L405' name='L405'></a> 405                     <em class='brace'>}</em>
-<a id='L406' name='L406'></a> 406                 <em class='brace'>}</em>
-<a id='L407' name='L407'></a> 407 
-<a id='L408' name='L408'></a> 408                 <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../S/1618.html#L433' title='Defined at 433 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>createTagProposal</a>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>, <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a>, <a href='../Y/17677.html' title='Multiple used in 7 places.'>ruleProposal</a>,
-<a id='L409' name='L409'></a> 409                     <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/5660.html' title='Multiple used in 3 places.'>appendEndBracket</a> ) );
-<a id='L410' name='L410'></a> 410             <em class='brace'>}</em>
-<a id='L411' name='L411'></a> 411         <em class='brace'>}</em>
-<a id='L412' name='L412'></a> 412 
-<a id='L413' name='L413'></a> 413         <em class='comment'>// parsed custom tags</em>
-<a id='L414' name='L414'></a> 414         <strong class='reserved'>for</strong>( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>: <a href='../Y/16659.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../D/7161.html' title='Multiple defined in 4 places.'>getWMLTags</a>( ).<a href='../Y/21291.html' title='Multiple used in 172 places.'>values</a>( ) ) <em class='brace'>{</em>
-<a id='L415' name='L415'></a> 415             <a href='../Y/5083.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../D/2729.html' title='Multiple defined in 6 places.'>accept</a>( <a href='../S/1618.html#L433' title='Defined at 433 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/contentassist/WMLProposalProvider.java.'>createTagProposal</a>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>, "", <a href='../Y/17677.html' title='Multiple used in 7 places.'>ruleProposal</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <em class='comment'>//$NON-NLS-1$</em>
-<a id='L416' name='L416'></a> 416                 <a href='../Y/5660.html' title='Multiple used in 3 places.'>appendEndBracket</a> ) );
-<a id='L417' name='L417'></a> 417         <em class='brace'>}</em>
-<a id='L418' name='L418'></a> 418     <em class='brace'>}</em>
-<a id='L419' name='L419'></a> 419 
-<a id='L420' name='L420'></a> 420     <em class='comment'>/**</em>
-<a id='L421' name='L421'></a> 421 <em class='comment'>     * Returns the proposal for the specified tag, usign the specified indent</em>
-<a id='L422' name='L422'></a> 422 <em class='comment'>     * </em>
-<a id='L423' name='L423'></a> 423 <em class='comment'>     * @param tag</em>
-<a id='L424' name='L424'></a> 424 <em class='comment'>     *        The tag from which to construct the proposal</em>
-<a id='L425' name='L425'></a> 425 <em class='comment'>     * @param indent</em>
-<a id='L426' name='L426'></a> 426 <em class='comment'>     *        The indent used to indent the tag and subsequent keys</em>
-<a id='L427' name='L427'></a> 427 <em class='comment'>     * @param ruleProposal</em>
-<a id='L428' name='L428'></a> 428 <em class='comment'>     *        Whether this is a proposal for an entire rule or not</em>
-<a id='L429' name='L429'></a> 429 <em class='comment'>     * @param context</em>
-<a id='L430' name='L430'></a> 430 <em class='comment'>     * @param appendEndBracked</em>
-<a id='L431' name='L431'></a> 431 <em class='comment'>     * @return</em>
-<a id='L432' name='L432'></a> 432 <em class='comment'>     */</em>
-<a id='L433' name='L433'></a> 433     <strong class='reserved'>private</strong> <a href='../Y/1362.html' title='Multiple used in 6 places.'>ICompletionProposal</a> <a href='../R/4353.html' title='Multiple referred from 2 places.'>createTagProposal</a>( <a href='../S/1584.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>, <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a>,
-<a id='L434' name='L434'></a> 434         <strong class='reserved'>boolean</strong> <a href='../Y/17677.html' title='Multiple used in 7 places.'>ruleProposal</a>, <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>,
-<a id='L435' name='L435'></a> 435         <strong class='reserved'>boolean</strong> <a href='../Y/5659.html' title='Multiple used in 2 places.'>appendEndBracked</a> )
-<a id='L436' name='L436'></a> 436     <em class='brace'>{</em>
-<a id='L437' name='L437'></a> 437         <a href='../Y/2818.html' title='Multiple used in 32 places.'>StringBuilder</a> <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a> = <strong class='reserved'>new</strong> <a href='../Y/2818.html' title='Multiple used in 32 places.'>StringBuilder</a>( );
-<a id='L438' name='L438'></a> 438         <strong class='reserved'>if</strong>( <a href='../Y/17677.html' title='Multiple used in 7 places.'>ruleProposal</a> ) <em class='brace'>{</em>
-<a id='L439' name='L439'></a> 439             <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( "[" ); <em class='comment'>//$NON-NLS-1$</em>
-<a id='L440' name='L440'></a> 440         <em class='brace'>}</em>
-<a id='L441' name='L441'></a> 441         <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) );
-<a id='L442' name='L442'></a> 442         <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( "]\n" ); <em class='comment'>//$NON-NLS-1$</em>
-<a id='L443' name='L443'></a> 443         <strong class='reserved'>for</strong>( <a href='../S/1550.html#L31' title='Defined at 31 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLKey.java.'>WMLKey</a> <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>: <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/7106.html' title='Multiple defined in 2 places.'>getWMLKeys</a>( ) ) <em class='brace'>{</em>
-<a id='L444' name='L444'></a> 444             <strong class='reserved'>if</strong>( <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/9223.html' title='Multiple defined in 3 places.'>is_Required</a>( ) ) <em class='brace'>{</em>
-<a id='L445' name='L445'></a> 445                 <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a>.<a href='../D/6426.html' title='Multiple defined in 2 places.'>format</a>( "\t%s%s=\n", <em class='comment'>//$NON-NLS-1$</em>
-<a id='L446' name='L446'></a> 446                     <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a>, <a href='../D/9551.html' title='Multiple defined in 4 places.'>key</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ) ) );
-<a id='L447' name='L447'></a> 447             <em class='brace'>}</em>
-<a id='L448' name='L448'></a> 448         <em class='brace'>}</em>
-<a id='L449' name='L449'></a> 449         <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/3293.html' title='Multiple defined in 8 places.'>append</a>( <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a>.<a href='../D/6426.html' title='Multiple defined in 2 places.'>format</a>( "%s[/%s%s",<em class='comment'>//$NON-NLS-1$</em>
-<a id='L450' name='L450'></a> 450             <a href='../D/8788.html' title='Multiple defined in 2 places.'>indent</a>,
-<a id='L451' name='L451'></a> 451             <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ),
-<a id='L452' name='L452'></a> 452             <a href='../Y/5659.html' title='Multiple used in 2 places.'>appendEndBracked</a> ? "]": "" ) );
-<a id='L453' name='L453'></a> 453 
-<a id='L454' name='L454'></a> 454         <strong class='reserved'>return</strong> <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>( <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>.<a href='../D/15163.html' title='Multiple defined in 18 places.'>toString</a>( ), <a href='../Y/19453.html' title='Multiple used in 340 places.'>tag</a>.<a href='../D/6905.html' title='Multiple defined in 6 places.'>getName</a>( ),
-<a id='L455' name='L455'></a> 455             <a href='../Y/3166.html' title='Multiple used in 3 places.'>WML_TAG_IMAGE</a>, <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <a href='../Y/2832.html' title='Multiple used in 2 places.'>TAG_PRIORITY</a> );
-<a id='L456' name='L456'></a> 456     <em class='brace'>}</em>
-<a id='L457' name='L457'></a> 457 
-<a id='L458' name='L458'></a> 458     <strong class='reserved'>private</strong> <a href='../Y/1362.html' title='Multiple used in 6 places.'>ICompletionProposal</a> <a href='../R/4319.html' title='Multiple referred from 9 places.'>createCompletionProposal</a>( <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>,
-<a id='L459' name='L459'></a> 459         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>, <strong class='reserved'>int</strong> <a href='../D/12085.html' title='Multiple defined in 2 places.'>priority</a> )
-<a id='L460' name='L460'></a> 460     <em class='brace'>{</em>
-<a id='L461' name='L461'></a> 461         <strong class='reserved'>return</strong> <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>( <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>, <strong class='reserved'>null</strong>, <strong class='reserved'>null</strong>, <a href='../D/12085.html' title='Multiple defined in 2 places.'>priority</a>,
-<a id='L462' name='L462'></a> 462             <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a>.<a href='../Y/10724.html' title='Multiple used in 3 places.'>getPrefix</a>( ), <a href='../D/4850.html' title='Multiple defined in 4 places.'>context</a> );
-<a id='L463' name='L463'></a> 463     <em class='brace'>}</em>
-<a id='L464' name='L464'></a> 464 
-<a id='L465' name='L465'></a> 465     <strong class='reserved'>private</strong> <a href='../Y/1362.html' title='Multiple used in 6 places.'>ICompletionProposal</a> <a href='../R/4319.html' title='Multiple referred from 9 places.'>createCompletionProposal</a>( <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>,
-<a id='L466' name='L466'></a> 466         <a href='../Y/2816.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/8784.html' title='Multiple used in 2 places.'>displayString</a>, <a href='../S/4054.html#L20' title='Defined at 20 in data/tools/unit_tree/helpers.py.'>Image</a> <a href='../D/8638.html' title='Multiple defined in 19 places.'>image</a>,
-<a id='L467' name='L467'></a> 467         <a href='../Y/527.html' title='Multiple used in 78 places.'>ContentAssistContext</a> <a href='../Y/7765.html' title='Multiple used in 2 places.'>contentAssistContext</a>, <strong class='reserved'>int</strong> <a href='../D/12085.html' title='Multiple defined in 2 places.'>priority</a> )
-<a id='L468' name='L468'></a> 468     <em class='brace'>{</em>
-<a id='L469' name='L469'></a> 469         <strong class='reserved'>return</strong> <a href='../D/4954.html' title='Multiple defined in 2 places.'>createCompletionProposal</a>( <a href='../Y/16688.html' title='Multiple used in 17 places.'>proposal</a>, <strong class='reserved'>new</strong> <a href='../Y/2825.html' title='Multiple used in 2 places.'>StyledString</a>(
-<a id='L470' name='L470'></a> 470             <a href='../Y/8784.html' title='Multiple used in 2 places.'>displayString</a> ), <a href='../D/8638.html' title='Multiple defined in 19 places.'>image</a>, <a href='../D/12085.html' title='Multiple defined in 2 places.'>priority</a>,
-<a id='L471' name='L471'></a> 471             <a href='../Y/7765.html' title='Multiple used in 2 places.'>contentAssistContext</a>.<a href='../Y/10724.html' title='Multiple used in 3 places.'>getPrefix</a>( ), <a href='../Y/7765.html' title='Multiple used in 2 places.'>contentAssistContext</a> );
-<a id='L472' name='L472'></a> 472     <em class='brace'>}</em>
-<a id='L473' name='L473'></a> 473 <em class='brace'>}</em>
+<a id='L156' name='L156'></a> 156         <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L157' name='L157'></a> 157             <strong class='reserved'>for</strong>( <a href='../Y/1428.html' title='Multiple used in 9 places.'>ILeafNode</a> <a href='../Y/12972.html' title='Multiple used in 3 places.'>leaf</a>: <a href='../D/11370.html' title='Multiple defined in 4 places.'>node</a>.getLeafNodes( ) ) <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158                 <strong class='reserved'>if</strong>( ! <a href='../Y/12972.html' title='Multiple used in 3 places.'>leaf</a>.isHidden( ) ) <em class='brace'>{</em>
+<a id='L159' name='L159'></a> 159                     <a href='../Y/5088.html' title='Multiple used in 151 places.'>acceptor</a>.<a href='../Y/5194.html' title='Multiple used in 2 places.'>addPosition</a>( <a href='../Y/12972.html' title='Multiple used in 3 places.'>leaf</a>.<a href='../Y/10722.html' title='Multiple used in 10 places.'>getOffset</a>( ), <a href='../Y/12972.html' title='Multiple used in 3 places.'>leaf</a>.<a href='../Y/10710.html' title='Multiple used in 8 places.'>getLength</a>( ),
+<a id='L160' name='L160'></a> 160                         <a href='../D/8621.html' title='Multiple defined in 22 places.'>id</a> );
+<a id='L161' name='L161'></a> 161                 <em class='brace'>}</em>
+<a id='L162' name='L162'></a> 162             <em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163         <em class='brace'>}</em>
+<a id='L164' name='L164'></a> 164     <em class='brace'>}</em>
+<a id='L165' name='L165'></a> 165 
+<a id='L166' name='L166'></a> 166     <em class='comment'>/**</em>
+<a id='L167' name='L167'></a> 167 <em class='comment'>     * Copied from org.eclipse.xtext.xtext.ui.editor.syntaxcoloring.</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'>     * SemanticHighlightingCalculator</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'>     * </em>
+<a id='L170' name='L170'></a> 170 <em class='comment'>     * @param semantic</em>
+<a id='L171' name='L171'></a> 171 <em class='comment'>     *        The object to search in</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'>     * @param feature</em>
+<a id='L173' name='L173'></a> 173 <em class='comment'>     *        The feature to search for</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'>     * @return Null if there is no feature, or an {@link INode} node</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'>     */</em>
+<a id='L176' name='L176'></a> 176     <strong class='reserved'>public</strong> <a href='../Y/1516.html' title='Multiple used in 15 places.'>INode</a> <a href='../R/6090.html' title='Multiple referred from 10 places.'>getFirstFeatureNode</a>( <a href='../Y/683.html' title='Multiple used in 257 places.'>EObject</a> <a href='../Y/18174.html' title='Multiple used in 3 places.'>semantic</a>,
+<a id='L177' name='L177'></a> 177         <a href='../Y/696.html' title='Multiple used in 2 places.'>EStructuralFeature</a> <a href='../Y/9823.html' title='Multiple used in 29 places.'>feature</a> )
+<a id='L178' name='L178'></a> 178     <em class='brace'>{</em>
+<a id='L179' name='L179'></a> 179         <strong class='reserved'>if</strong>( <a href='../Y/9823.html' title='Multiple used in 29 places.'>feature</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L180' name='L180'></a> 180             <strong class='reserved'>return</strong> <a href='../Y/2052.html' title='Multiple used in 22 places.'>NodeModelUtils</a>.findActualNodeFor( <a href='../Y/18174.html' title='Multiple used in 3 places.'>semantic</a> );
+<a id='L181' name='L181'></a> 181         <em class='brace'>}</em>
+<a id='L182' name='L182'></a> 182         <a href='../Y/1817.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../Y/1516.html' title='Multiple used in 15 places.'>INode</a> &gt; <a href='../D/11381.html' title='Multiple defined in 2 places.'>nodes</a> = <a href='../Y/2052.html' title='Multiple used in 22 places.'>NodeModelUtils</a>.findNodesForFeature( <a href='../Y/18174.html' title='Multiple used in 3 places.'>semantic</a>,
+<a id='L183' name='L183'></a> 183             <a href='../Y/9823.html' title='Multiple used in 29 places.'>feature</a> );
+<a id='L184' name='L184'></a> 184         <strong class='reserved'>if</strong>( ! <a href='../D/11381.html' title='Multiple defined in 2 places.'>nodes</a>.<a href='../Y/12189.html' title='Multiple used in 92 places.'>isEmpty</a>( ) ) <em class='brace'>{</em>
+<a id='L185' name='L185'></a> 185             <strong class='reserved'>return</strong> <a href='../D/11381.html' title='Multiple defined in 2 places.'>nodes</a>.<a href='../D/6733.html' title='Multiple defined in 42 places.'>get</a>( 0 );
+<a id='L186' name='L186'></a> 186         <em class='brace'>}</em>
+<a id='L187' name='L187'></a> 187         <strong class='reserved'>return</strong> <strong class='reserved'>null</strong>;
+<a id='L188' name='L188'></a> 188     <em class='brace'>}</em>
+<a id='L189' name='L189'></a> 189 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L81'>[^]</a><a href='#L465'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L176'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>
