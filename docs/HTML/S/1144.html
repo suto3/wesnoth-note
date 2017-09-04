@@ -1,28 +1,23 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/font/text_surface.cpp</title>
+<title>src/font/font_config.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/<a href='../files/5844.html'>font</a>/text_surface.cpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L41'>[^]</a><a href='#L171'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5847.html'>font</a>/font_config.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L63'>[^]</a><a href='#L168'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L41' title='Defined at 41.'>bidi_cvt</a></li>
-<li><a href='#L85' title='Defined at 85.'>is_rtl_</a></li>
-<li><a href='#L106' title='Defined at 106.'>is_rtl_</a></li>
-<li><a href='#L111' title='Defined at 111.'>set_text</a></li>
-<li><a href='#L123' title='Defined at 123.'>hash</a></li>
-<li><a href='#L132' title='Defined at 132.'>measure</a></li>
-<li><a href='#L151' title='Defined at 151.'>width</a></li>
-<li><a href='#L161' title='Defined at 161.'>height</a></li>
-<li><a href='#L171' title='Defined at 171.'>get_surfaces</a></li>
+<li><a href='#L63' title='Defined at 63.'>check_font_file</a></li>
+<li><a href='#L84' title='Defined at 84.'>add_font_to_fontlist</a></li>
+<li><a href='#L107' title='Defined at 107.'>load_font_config</a></li>
+<li><a href='#L168' title='Defined at 168.'>get_font_families</a></li>
 </ol>
 <hr />
 <pre>
@@ -40,195 +35,242 @@ This source file includes following definitions.
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='1136.html'>font/text_surface.hpp</a>"
-<a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1156.html'>font/sdl_ttf.hpp</a>"
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='980.html'>sdl/surface.hpp</a>"
-<a id='L20' name='L20'></a>  20 
-<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/2026.html'>log.hpp</a>"
-<a id='L22' name='L22'></a>  22 
-<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> &lt;SDL_ttf.h&gt;
-<a id='L24' name='L24'></a>  24 
-<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;string&gt;
-<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L27' name='L27'></a>  27 
-<a id='L28' name='L28'></a>  28 <em class='sharp'>#ifdef</em>  <a href='../Y/1292.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;fribidi.h&gt;
-<a id='L30' name='L30'></a>  30 <em class='sharp'>#endif</em>
-<a id='L31' name='L31'></a>  31 
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>static</strong> <a href='../D/9756.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/9967.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13342.html' title='Multiple used in 20 places.'>log_font</a>("font");
-<a id='L33' name='L33'></a>  33 <em class='sharp'>#define</em> <a href='../R/248.html' title='Multiple referred from 3 places.'>DBG_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/5227.html' title='Multiple defined in 16 places.'>debug</a>, <a href='../Y/13342.html' title='Multiple used in 20 places.'>log_font</a>)
-<a id='L34' name='L34'></a>  34 <em class='sharp'>#define</em> <a href='../R/970.html' title='Multiple referred from 4 places.'>LOG_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8812.html' title='Multiple defined in 2 places.'>info</a>, <a href='../Y/13342.html' title='Multiple used in 20 places.'>log_font</a>)
-<a id='L35' name='L35'></a>  35 <em class='sharp'>#define</em> <a href='../R/2316.html' title='Multiple referred from 3 places.'>WRN_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/846.html#L84' title='Defined at 84 in src/log.cpp.'>warn</a>, <a href='../Y/13342.html' title='Multiple used in 20 places.'>log_font</a>)
-<a id='L36' name='L36'></a>  36 <em class='sharp'>#define</em> <a href='../R/396.html' title='Multiple referred from 13 places.'>ERR_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/846.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>, <a href='../Y/13342.html' title='Multiple used in 20 places.'>log_font</a>)
-<a id='L37' name='L37'></a>  37 
-<a id='L38' name='L38'></a>  38 <strong class='reserved'>namespace</strong> <a href='../R/5696.html' title='Multiple referred from 452 places.'>font</a> <em class='brace'>{</em>
-<a id='L39' name='L39'></a>  39 
-<a id='L40' name='L40'></a>  40 <em class='sharp'>#ifdef</em>  <a href='../Y/1292.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L41' name='L41'></a>  41 <strong class='reserved'>void</strong> <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../R/3230.html' title='Multiple referred from 3 places.'>bidi_cvt</a>()
-<a id='L42' name='L42'></a>  42 <em class='brace'>{</em>
-<a id='L43' name='L43'></a>  43         <strong class='reserved'>char</strong>            *<a href='../D/3861.html' title='Multiple defined in 2 places.'>c_str</a> = <strong class='reserved'>const_cast</strong>&lt;<strong class='reserved'>char</strong> *&gt;(<a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>.<a href='../D/3861.html' title='Multiple defined in 2 places.'>c_str</a>());      <em class='comment'>// fribidi forgot const...</em>
-<a id='L44' name='L44'></a>  44         <a href='../Y/1207.html' title='Multiple used in 2 places.'>FriBidiStrIndex</a> <a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a> = <a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>.<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>();
-<a id='L45' name='L45'></a>  45         <a href='../Y/1205.html' title='Multiple used in 2 places.'>FriBidiChar</a>     *<a href='../Y/6386.html' title='Multiple used in 4 places.'>bidi_logical</a> = <strong class='reserved'>new</strong> <a href='../Y/1205.html' title='Multiple used in 2 places.'>FriBidiChar</a>[<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a> + 2];
-<a id='L46' name='L46'></a>  46         <a href='../Y/1205.html' title='Multiple used in 2 places.'>FriBidiChar</a>     *<a href='../Y/6387.html' title='Multiple used in 4 places.'>bidi_visual</a> = <strong class='reserved'>new</strong> <a href='../Y/1205.html' title='Multiple used in 2 places.'>FriBidiChar</a>[<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a> + 2];
-<a id='L47' name='L47'></a>  47         <strong class='reserved'>char</strong>            *<a href='../Y/21218.html' title='Multiple used in 4 places.'>utf8str</a> = <strong class='reserved'>new</strong> <strong class='reserved'>char</strong>[4*<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a> + 1]; <em class='comment'>//assume worst case here (all 4 Byte characters)</em>
-<a id='L48' name='L48'></a>  48         FriBidiCharType <a href='../Y/6180.html' title='Multiple used in 7 places.'>base_dir</a> = FRIBIDI_TYPE_ON;
-<a id='L49' name='L49'></a>  49         <a href='../Y/1207.html' title='Multiple used in 2 places.'>FriBidiStrIndex</a> <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a>;
-<a id='L50' name='L50'></a>  50 
-<a id='L51' name='L51'></a>  51 
-<a id='L52' name='L52'></a>  52         <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a> = fribidi_charset_to_unicode(<a href='../Y/1128.html' title='Multiple used in 2 places.'>FRIBIDI_CHAR_SET_UTF8</a>, <a href='../D/3861.html' title='Multiple defined in 2 places.'>c_str</a>, <a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a>, <a href='../Y/6386.html' title='Multiple used in 4 places.'>bidi_logical</a>);
-<a id='L53' name='L53'></a>  53 <em class='sharp'>        #ifdef</em> <a href='../Y/4769.html' title='Multiple used in 30 places.'>__GNUC__</a>
-<a id='L54' name='L54'></a>  54 <em class='sharp'>        #pragma</em> GCC diagnostic push
-<a id='L55' name='L55'></a>  55 <em class='sharp'>        #pragma</em> GCC diagnostic ignored "-Wunused-result"
-<a id='L56' name='L56'></a>  56 <em class='sharp'>        #pragma</em> GCC diagnostic ignored "-Wdeprecated-declarations"
-<a id='L57' name='L57'></a>  57 <em class='sharp'>        #endif</em>
-<a id='L58' name='L58'></a>  58         fribidi_log2vis(<a href='../Y/6386.html' title='Multiple used in 4 places.'>bidi_logical</a>, <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a>, &amp;<a href='../Y/6180.html' title='Multiple used in 7 places.'>base_dir</a>, <a href='../Y/6387.html' title='Multiple used in 4 places.'>bidi_visual</a>, <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>);
-<a id='L59' name='L59'></a>  59 <em class='sharp'>        #ifdef</em> <a href='../Y/4769.html' title='Multiple used in 30 places.'>__GNUC__</a>
-<a id='L60' name='L60'></a>  60 <em class='sharp'>        #pragma</em> GCC diagnostic pop
-<a id='L61' name='L61'></a>  61 <em class='sharp'>        #endif</em>
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='1155.html'>font/font_config.hpp</a>"
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> "<a href='1158.html'>font/font_description.hpp</a>"
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1142.html'>font/error.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='1160.html'>font/sdl_ttf.hpp</a>"
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='../I/1752.html'>config.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/2027.html'>log.hpp</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='320.html'>tstring.hpp</a>"
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='1254.html'>filesystem.hpp</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='1109.html'>game_config.hpp</a>"
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='../I/2582.html'>serialization/parser.hpp</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='137.html'>serialization/preprocessor.hpp</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='../I/1907.html'>serialization/string_utils.hpp</a>"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='133.html'>serialization/unicode.hpp</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='../I/2488.html'>preferences/general.hpp</a>"
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> &lt;list&gt;
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> &lt;set&gt;
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> &lt;stack&gt;
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#include</em> &lt;sstream&gt;
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#include</em> &lt;vector&gt;
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 <em class='sharp'>#include</em> &lt;cairo-features.h&gt;
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <em class='sharp'>#ifdef</em> <a href='../Y/405.html' title='Multiple used in 4 places.'>CAIRO_HAS_WIN32_FONT</a>
+<a id='L42' name='L42'></a>  42 <em class='sharp'>#include</em> &lt;windows.h&gt;
+<a id='L43' name='L43'></a>  43 <em class='sharp'>#undef</em> <a href='../R/148.html' title='Multiple referred from 4 places.'>CAIRO_HAS_FT_FONT</a>
+<a id='L44' name='L44'></a>  44 <em class='sharp'>#endif</em>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 <em class='sharp'>#ifdef</em> <a href='../S/1144.html#L43' title='Defined at 43 in src/font/font_config.cpp.'>CAIRO_HAS_FT_FONT</a>
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#include</em> &lt;fontconfig/fontconfig.h&gt;
+<a id='L48' name='L48'></a>  48 <em class='sharp'>#endif</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50 <em class='sharp'>#if</em> !<strong class='reserved'>defined</strong>(<a href='../S/1144.html#L43' title='Defined at 43 in src/font/font_config.cpp.'>CAIRO_HAS_FT_FONT</a>) &amp;&amp; !<strong class='reserved'>defined</strong>(<a href='../Y/405.html' title='Multiple used in 4 places.'>CAIRO_HAS_WIN32_FONT</a>)
+<a id='L51' name='L51'></a>  51 <em class='sharp'>#error</em> unable to find font loading tools.
+<a id='L52' name='L52'></a>  52 <em class='sharp'>#endif</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <strong class='reserved'>static</strong> <a href='../D/9803.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/10014.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13481.html' title='Multiple used in 20 places.'>log_font</a>("font");
+<a id='L55' name='L55'></a>  55 <em class='sharp'>#define</em> <a href='../R/249.html' title='Multiple referred from 3 places.'>DBG_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/5264.html' title='Multiple defined in 16 places.'>debug</a>, <a href='../Y/13481.html' title='Multiple used in 20 places.'>log_font</a>)
+<a id='L56' name='L56'></a>  56 <em class='sharp'>#define</em> <a href='../R/979.html' title='Multiple referred from 4 places.'>LOG_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8855.html' title='Multiple defined in 2 places.'>info</a>, <a href='../Y/13481.html' title='Multiple used in 20 places.'>log_font</a>)
+<a id='L57' name='L57'></a>  57 <em class='sharp'>#define</em> <a href='../R/2337.html' title='Multiple referred from 3 places.'>WRN_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/847.html#L84' title='Defined at 84 in src/log.cpp.'>warn</a>, <a href='../Y/13481.html' title='Multiple used in 20 places.'>log_font</a>)
+<a id='L58' name='L58'></a>  58 <em class='sharp'>#define</em> <a href='../R/398.html' title='Multiple referred from 13 places.'>ERR_FT</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/847.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>, <a href='../Y/13481.html' title='Multiple used in 20 places.'>log_font</a>)
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 <strong class='reserved'>namespace</strong> <a href='../R/5730.html' title='Multiple referred from 455 places.'>font</a> <em class='brace'>{</em>
+<a id='L61' name='L61'></a>  61 
 <a id='L62' name='L62'></a>  62 
-<a id='L63' name='L63'></a>  63         fribidi_unicode_to_charset(<a href='../Y/1128.html' title='Multiple used in 2 places.'>FRIBIDI_CHAR_SET_UTF8</a>, <a href='../Y/6387.html' title='Multiple used in 4 places.'>bidi_visual</a>, <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a>, <a href='../Y/21218.html' title='Multiple used in 4 places.'>utf8str</a>);
-<a id='L64' name='L64'></a>  64         <a href='../D/9395.html' title='Multiple defined in 2 places.'>is_rtl_</a> = <a href='../Y/6180.html' title='Multiple used in 7 places.'>base_dir</a> == FRIBIDI_TYPE_RTL;
-<a id='L65' name='L65'></a>  65         <a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a> = <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a>(<a href='../Y/21218.html' title='Multiple used in 4 places.'>utf8str</a>);
-<a id='L66' name='L66'></a>  66         <strong class='reserved'>delete</strong>[] <a href='../Y/6386.html' title='Multiple used in 4 places.'>bidi_logical</a>;
-<a id='L67' name='L67'></a>  67         <strong class='reserved'>delete</strong>[] <a href='../Y/6387.html' title='Multiple used in 4 places.'>bidi_visual</a>;
-<a id='L68' name='L68'></a>  68         <strong class='reserved'>delete</strong>[] <a href='../Y/21218.html' title='Multiple used in 4 places.'>utf8str</a>;
-<a id='L69' name='L69'></a>  69 <em class='brace'>}</em>
-<a id='L70' name='L70'></a>  70 <em class='sharp'>#endif</em>
-<a id='L71' name='L71'></a>  71 
-<a id='L72' name='L72'></a>  72 <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>(<strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14731.html' title='Multiple defined in 25 places.'>str</a>, <strong class='reserved'>int</strong> <a href='../D/14507.html' title='Multiple defined in 18 places.'>size</a>,
-<a id='L73' name='L73'></a>  73                 <a href='../S/971.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../D/4579.html' title='Multiple defined in 5 places.'>color</a>, <strong class='reserved'>int</strong> <a href='../D/14799.html' title='Multiple defined in 5 places.'>style</a>)
-<a id='L74' name='L74'></a>  74         : <a href='../S/304.html#L404' title='Defined at 404 in src/terrain/builder.hpp.'>hash_</a>(0)
-<a id='L75' name='L75'></a>  75         , <a href='../Y/10211.html' title='Multiple used in 32 places.'>font_size_</a>(<a href='../D/14507.html' title='Multiple defined in 18 places.'>size</a>)
-<a id='L76' name='L76'></a>  76         , <a href='../S/675.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a>(<a href='../D/4579.html' title='Multiple defined in 5 places.'>color</a>)
-<a id='L77' name='L77'></a>  77         , <a href='../Y/19252.html' title='Multiple used in 27 places.'>style_</a>(<a href='../D/14799.html' title='Multiple defined in 5 places.'>style</a>)
-<a id='L78' name='L78'></a>  78         , <a href='../Y/21588.html' title='Multiple used in 51 places.'>w_</a>(-1)
-<a id='L79' name='L79'></a>  79         , <a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a>(-1)
-<a id='L80' name='L80'></a>  80         , <a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>(<a href='../D/14731.html' title='Multiple defined in 25 places.'>str</a>)
-<a id='L81' name='L81'></a>  81         , <a href='../Y/12005.html' title='Multiple used in 21 places.'>initialized_</a>(<strong class='reserved'>false</strong>)
-<a id='L82' name='L82'></a>  82         , <a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a>()
-<a id='L83' name='L83'></a>  83         , <a href='../Y/19344.html' title='Multiple used in 7 places.'>surfs_</a>()
-<a id='L84' name='L84'></a>  84 <em class='sharp'>#ifdef</em>  <a href='../Y/1292.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L85' name='L85'></a>  85         , <a href='../R/8502.html' title='Multiple referred from 3 places.'>is_rtl_</a>(<strong class='reserved'>false</strong>)
-<a id='L86' name='L86'></a>  86 <em class='sharp'>#endif</em>
-<a id='L87' name='L87'></a>  87 <em class='brace'>{</em>
-<a id='L88' name='L88'></a>  88 <em class='sharp'>#ifdef</em>  <a href='../Y/1292.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L89' name='L89'></a>  89         <a href='../S/1144.html#L41' title='Defined at 41 in src/font/text_surface.cpp.'>bidi_cvt</a>();
-<a id='L90' name='L90'></a>  90 <em class='sharp'>#endif</em>
-<a id='L91' name='L91'></a>  91         <a href='../D/8452.html' title='Multiple defined in 5 places.'>hash</a>();
-<a id='L92' name='L92'></a>  92 <em class='brace'>}</em>
-<a id='L93' name='L93'></a>  93 
-<a id='L94' name='L94'></a>  94 <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>(<strong class='reserved'>int</strong> <a href='../D/14507.html' title='Multiple defined in 18 places.'>size</a>, <a href='../S/971.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../D/4579.html' title='Multiple defined in 5 places.'>color</a>, <strong class='reserved'>int</strong> <a href='../D/14799.html' title='Multiple defined in 5 places.'>style</a>) :
-<a id='L95' name='L95'></a>  95         <a href='../S/304.html#L404' title='Defined at 404 in src/terrain/builder.hpp.'>hash_</a>(0),
-<a id='L96' name='L96'></a>  96         <a href='../Y/10211.html' title='Multiple used in 32 places.'>font_size_</a>(<a href='../D/14507.html' title='Multiple defined in 18 places.'>size</a>),
-<a id='L97' name='L97'></a>  97         <a href='../S/675.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a>(<a href='../D/4579.html' title='Multiple defined in 5 places.'>color</a>),
-<a id='L98' name='L98'></a>  98         <a href='../Y/19252.html' title='Multiple used in 27 places.'>style_</a>(<a href='../D/14799.html' title='Multiple defined in 5 places.'>style</a>),
-<a id='L99' name='L99'></a>  99         <a href='../Y/21588.html' title='Multiple used in 51 places.'>w_</a>(-1),
-<a id='L100' name='L100'></a> 100         <a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a>(-1),
-<a id='L101' name='L101'></a> 101         <a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>(),
-<a id='L102' name='L102'></a> 102         <a href='../Y/12005.html' title='Multiple used in 21 places.'>initialized_</a>(<strong class='reserved'>false</strong>),
-<a id='L103' name='L103'></a> 103         <a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a>(),
-<a id='L104' name='L104'></a> 104         <a href='../Y/19344.html' title='Multiple used in 7 places.'>surfs_</a>()
-<a id='L105' name='L105'></a> 105 <em class='sharp'>#ifdef</em>  <a href='../Y/1292.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L106' name='L106'></a> 106         ,<a href='../R/8502.html' title='Multiple referred from 3 places.'>is_rtl_</a>(<strong class='reserved'>false</strong>)
-<a id='L107' name='L107'></a> 107 <em class='sharp'>#endif</em>
+<a id='L63' name='L63'></a>  63 <strong class='reserved'>bool</strong> <a href='../R/3793.html' title='Multiple referred from 4 places.'>check_font_file</a>(<a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>) <em class='brace'>{</em>
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>if</strong>(<a href='../D/6615.html' title='Multiple defined in 7 places.'>game_config</a>::<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/5862.html' title='Multiple defined in 30 places.'>empty</a>() == <strong class='reserved'>false</strong>) <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65                 <strong class='reserved'>if</strong>(!<a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6201.html' title='Multiple defined in 3 places.'>file_exists</a>(<a href='../D/6615.html' title='Multiple defined in 7 places.'>game_config</a>::<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a> + "/fonts/" + <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>)) <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                         <strong class='reserved'>if</strong>(!<a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6201.html' title='Multiple defined in 3 places.'>file_exists</a>("fonts/" + <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>)) <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67                                 <strong class='reserved'>if</strong>(!<a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6201.html' title='Multiple defined in 3 places.'>file_exists</a>(<a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>)) <em class='brace'>{</em>
+<a id='L68' name='L68'></a>  68                                 <a href='../D/2544.html' title='Multiple defined in 4 places.'>WRN_FT</a> &lt;&lt; "Failed opening font file '" &lt;&lt; <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a> &lt;&lt; "': No such file or directory" &lt;&lt; <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/9398.html' title='Multiple used in 927 places.'>endl</a>;
+<a id='L69' name='L69'></a>  69                                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L70' name='L70'></a>  70                                 <em class='brace'>}</em>
+<a id='L71' name='L71'></a>  71                         <em class='brace'>}</em>
+<a id='L72' name='L72'></a>  72                 <em class='brace'>}</em>
+<a id='L73' name='L73'></a>  73         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L74' name='L74'></a>  74                 <strong class='reserved'>if</strong>(!<a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6201.html' title='Multiple defined in 3 places.'>file_exists</a>("fonts/" + <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>)) <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75                         <strong class='reserved'>if</strong>(!<a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/6201.html' title='Multiple defined in 3 places.'>file_exists</a>(<a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>)) <em class='brace'>{</em>
+<a id='L76' name='L76'></a>  76                                 <a href='../D/2544.html' title='Multiple defined in 4 places.'>WRN_FT</a> &lt;&lt; "Failed opening font file '" &lt;&lt; <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a> &lt;&lt; "': No such file or directory" &lt;&lt; <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/9398.html' title='Multiple used in 927 places.'>endl</a>;
+<a id='L77' name='L77'></a>  77                                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L78' name='L78'></a>  78                         <em class='brace'>}</em>
+<a id='L79' name='L79'></a>  79                 <em class='brace'>}</em>
+<a id='L80' name='L80'></a>  80         <em class='brace'>}</em>
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L82' name='L82'></a>  82 <em class='brace'>}</em>
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84 <strong class='reserved'>static</strong> <strong class='reserved'>bool</strong> <a href='../R/2633.html' title='Multiple referred from 2 places.'>add_font_to_fontlist</a>(<strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a> &amp;<a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>,
+<a id='L85' name='L85'></a>  85         <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21571.html' title='Multiple used in 2732 places.'>vector</a>&lt;<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>::<a href='../S/1158.html#L32' title='Defined at 32 in src/font/font_description.hpp.'>subset_descriptor</a>&gt;&amp; <a href='../Y/10349.html' title='Multiple used in 10 places.'>fontlist</a>, <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>)
+<a id='L86' name='L86'></a>  86 <em class='brace'>{</em>
+<a id='L87' name='L87'></a>  87         <strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a> &amp;<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a> = <a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>.<a href='../D/6288.html' title='Multiple defined in 2 places.'>find_child</a>("font", "name", <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>);
+<a id='L88' name='L88'></a>  88         <strong class='reserved'>if</strong> (!<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>) <em class='brace'>{</em>
+<a id='L89' name='L89'></a>  89                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L90' name='L90'></a>  90         <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91         <em class='comment'>//DBG_FT &lt;&lt; "Adding a font record: " &lt;&lt; font.debug() &lt;&lt; std::endl;</em>
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93         <a href='../Y/10349.html' title='Multiple used in 10 places.'>fontlist</a>.<a href='../D/12249.html' title='Multiple defined in 3 places.'>push_back</a>(<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>::<a href='../S/1158.html#L32' title='Defined at 32 in src/font/font_description.hpp.'>subset_descriptor</a>(<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>));
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L96' name='L96'></a>  96 <em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97 
+<a id='L98' name='L98'></a>  98 <em class='comment'>// Current font family for sanserif and monospace fonts in the game</em>
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100 <a href='../D/14951.html' title='Multiple defined in 9 places.'>t_string</a> <a href='../Y/9925.html' title='Multiple used in 4 places.'>family_order_sans</a>;
+<a id='L101' name='L101'></a> 101 <a href='../D/14951.html' title='Multiple defined in 9 places.'>t_string</a> <a href='../Y/9923.html' title='Multiple used in 5 places.'>family_order_mono</a>;
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103 <em class='comment'>/***</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'> * Public interface</em>
+<a id='L105' name='L105'></a> 105 <em class='comment'> */</em>
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107 <strong class='reserved'>bool</strong> <a href='../R/8983.html' title='Multiple referred from 5 places.'>load_font_config</a>()
 <a id='L108' name='L108'></a> 108 <em class='brace'>{</em>
-<a id='L109' name='L109'></a> 109 <em class='brace'>}</em>
-<a id='L110' name='L110'></a> 110 
-<a id='L111' name='L111'></a> 111 <strong class='reserved'>void</strong> <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../R/12931.html' title='Multiple referred from 30 places.'>set_text</a>(<strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14731.html' title='Multiple defined in 25 places.'>str</a>)
-<a id='L112' name='L112'></a> 112 <em class='brace'>{</em>
-<a id='L113' name='L113'></a> 113         <a href='../Y/12005.html' title='Multiple used in 21 places.'>initialized_</a> = <strong class='reserved'>false</strong>;
-<a id='L114' name='L114'></a> 114         <a href='../Y/21588.html' title='Multiple used in 51 places.'>w_</a> = -1;
-<a id='L115' name='L115'></a> 115         <a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a> = -1;
-<a id='L116' name='L116'></a> 116         <a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a> = <a href='../D/14731.html' title='Multiple defined in 25 places.'>str</a>;
-<a id='L117' name='L117'></a> 117 <em class='sharp'>#ifdef</em>  <a href='../Y/1292.html' title='Multiple used in 10 places.'>HAVE_FRIBIDI</a>
-<a id='L118' name='L118'></a> 118         <a href='../S/1144.html#L41' title='Defined at 41 in src/font/text_surface.cpp.'>bidi_cvt</a>();
-<a id='L119' name='L119'></a> 119 <em class='sharp'>#endif</em>
-<a id='L120' name='L120'></a> 120         <a href='../D/8452.html' title='Multiple defined in 5 places.'>hash</a>();
-<a id='L121' name='L121'></a> 121 <em class='brace'>}</em>
-<a id='L122' name='L122'></a> 122 
-<a id='L123' name='L123'></a> 123 <strong class='reserved'>void</strong> <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../R/7608.html' title='Multiple referred from 88 places.'>hash</a>()
-<a id='L124' name='L124'></a> 124 <em class='brace'>{</em>
-<a id='L125' name='L125'></a> 125         <strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a> = 0;
-<a id='L126' name='L126'></a> 126         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> <a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a> : <a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>) <em class='brace'>{</em>
-<a id='L127' name='L127'></a> 127                 <a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a> = ((<a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a> &lt;&lt; 9) | (<a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a> &gt;&gt; (<strong class='reserved'>sizeof</strong>(<strong class='reserved'>int</strong>) * 8 - 9))) ^ (<a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a>);
-<a id='L128' name='L128'></a> 128     <em class='brace'>}</em>
-<a id='L129' name='L129'></a> 129         <a href='../S/304.html#L404' title='Defined at 404 in src/terrain/builder.hpp.'>hash_</a> = <a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a>;
-<a id='L130' name='L130'></a> 130 <em class='brace'>}</em>
-<a id='L131' name='L131'></a> 131 
-<a id='L132' name='L132'></a> 132 <strong class='reserved'>void</strong> <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../R/9892.html' title='Multiple referred from 3 places.'>measure</a>() <strong class='reserved'>const</strong>
-<a id='L133' name='L133'></a> 133 <em class='brace'>{</em>
-<a id='L134' name='L134'></a> 134         <a href='../Y/21588.html' title='Multiple used in 51 places.'>w_</a> = 0;
-<a id='L135' name='L135'></a> 135         <a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a> = 0;
-<a id='L136' name='L136'></a> 136 
-<a id='L137' name='L137'></a> 137         <strong class='reserved'>for</strong>(<a href='../S/1134.html#L56' title='Defined at 56 in src/font/font_id.hpp.'>text_chunk</a> <strong class='reserved'>const</strong> &amp;<a href='../Y/7343.html' title='Multiple used in 21 places.'>chunk</a> : <a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a>)
-<a id='L138' name='L138'></a> 138         <em class='brace'>{</em>
-<a id='L139' name='L139'></a> 139                 <a href='../Y/2871.html' title='Multiple used in 15 places.'>TTF_Font</a>* <a href='../Y/20569.html' title='Multiple used in 5 places.'>ttfont</a> = <a href='../D/13328.html' title='Multiple defined in 3 places.'>sdl_ttf</a>::<a href='../S/1146.html#L207' title='Defined at 207 in src/font/sdl_ttf.cpp.'>get_font</a>(<a href='../S/1134.html#L34' title='Defined at 34 in src/font/font_id.hpp.'>font_id</a>(<a href='../Y/7343.html' title='Multiple used in 21 places.'>chunk</a>.<a href='../Y/19295.html' title='Multiple used in 23 places.'>subset</a>, <a href='../Y/10211.html' title='Multiple used in 32 places.'>font_size_</a>, <a href='../Y/19252.html' title='Multiple used in 27 places.'>style_</a>));
-<a id='L140' name='L140'></a> 140                 <strong class='reserved'>if</strong>(<a href='../Y/20569.html' title='Multiple used in 5 places.'>ttfont</a> == <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>) <em class='brace'>{</em>
-<a id='L141' name='L141'></a> 141                         <strong class='reserved'>continue</strong>;
-<a id='L142' name='L142'></a> 142                 <em class='brace'>}</em>
-<a id='L143' name='L143'></a> 143 
-<a id='L144' name='L144'></a> 144                 <strong class='reserved'>int</strong> <a href='../D/16033.html' title='Multiple defined in 6 places.'>w</a>, <a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a>;
-<a id='L145' name='L145'></a> 145                 TTF_SizeUTF8(<a href='../Y/20569.html' title='Multiple used in 5 places.'>ttfont</a>, <a href='../Y/7343.html' title='Multiple used in 21 places.'>chunk</a>.<a href='../D/15093.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/3861.html' title='Multiple defined in 2 places.'>c_str</a>(), &amp;<a href='../D/16033.html' title='Multiple defined in 6 places.'>w</a>, &amp;<a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a>);
-<a id='L146' name='L146'></a> 146                 <a href='../Y/21588.html' title='Multiple used in 51 places.'>w_</a> += <a href='../D/16033.html' title='Multiple defined in 6 places.'>w</a>;
-<a id='L147' name='L147'></a> 147                 <a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a> = <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10841.html' title='Multiple defined in 3 places.'>max</a>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a>, <a href='../D/8268.html' title='Multiple defined in 8 places.'>h</a>);
+<a id='L109' name='L109'></a> 109         <em class='comment'>//read font config separately, so we do not have to re-read the whole</em>
+<a id='L110' name='L110'></a> 110         <em class='comment'>//config when changing languages</em>
+<a id='L111' name='L111'></a> 111         <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a> <a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>;
+<a id='L112' name='L112'></a> 112         <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L113' name='L113'></a> 113                 <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/7199.html' title='Multiple used in 5 places.'>cfg_path</a> = <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/314.html#L1209' title='Defined at 1209 in src/filesystem_boost.cpp.'>get_wml_location</a>("hardwired/fonts.cfg");
+<a id='L114' name='L114'></a> 114                 <strong class='reserved'>if</strong>(<a href='../Y/7199.html' title='Multiple used in 5 places.'>cfg_path</a>.<a href='../D/5862.html' title='Multiple defined in 30 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                         <a href='../D/463.html' title='Multiple defined in 4 places.'>ERR_FT</a> &lt;&lt; "could not resolve path to fonts.cfg, file not found\n";
+<a id='L116' name='L116'></a> 116                         <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L117' name='L117'></a> 117                 <em class='brace'>}</em>
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119                 <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/1254.html#L37' title='Defined at 37 in src/filesystem.hpp.'>scoped_istream</a> <a href='../S/764.html#L107' title='Defined at 107 in src/buffered_istream.hpp.'>stream</a> = <a href='../S/132.html#L1651' title='Defined at 1651 in src/serialization/preprocessor.cpp.'>preprocess_file</a>(<a href='../Y/7199.html' title='Multiple used in 5 places.'>cfg_path</a>);
+<a id='L120' name='L120'></a> 120                 <a href='../D/12389.html' title='Multiple defined in 23 places.'>read</a>(<a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>, *<a href='../S/764.html#L107' title='Defined at 107 in src/buffered_istream.hpp.'>stream</a>);
+<a id='L121' name='L121'></a> 121         <em class='brace'>}</em> <strong class='reserved'>catch</strong>(<a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>::<a href='../D/5977.html' title='Multiple defined in 22 places.'>error</a> &amp;<a href='../D/5772.html' title='Multiple defined in 3 places.'>e</a>) <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122                 <a href='../D/463.html' title='Multiple defined in 4 places.'>ERR_FT</a> &lt;&lt; "could not read fonts.cfg:\n"
+<a id='L123' name='L123'></a> 123                        &lt;&lt; <a href='../D/5772.html' title='Multiple defined in 3 places.'>e</a>.<a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a> &lt;&lt; '\n';
+<a id='L124' name='L124'></a> 124                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L125' name='L125'></a> 125         <em class='brace'>}</em>
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127         <strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a> &amp;<a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a> = <a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4415.html' title='Multiple defined in 14 places.'>child</a>("fonts");
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>if</strong> (!<a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>)
+<a id='L129' name='L129'></a> 129                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131         <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13516.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../Y/12765.html' title='Multiple used in 6 places.'>known_fonts</a>;
+<a id='L132' name='L132'></a> 132         <strong class='reserved'>for</strong> (<strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a> &amp;<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a> : <a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>.<a href='../D/4429.html' title='Multiple defined in 2 places.'>child_range</a>("font")) <em class='brace'>{</em>
+<a id='L133' name='L133'></a> 133                 <a href='../Y/12765.html' title='Multiple used in 6 places.'>known_fonts</a>.<a href='../D/8950.html' title='Multiple defined in 13 places.'>insert</a>(<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>["name"]);
+<a id='L134' name='L134'></a> 134                 <strong class='reserved'>if</strong> (<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>.<a href='../D/8442.html' title='Multiple defined in 2 places.'>has_attribute</a>("bold_name")) <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                         <a href='../Y/12765.html' title='Multiple used in 6 places.'>known_fonts</a>.<a href='../D/8950.html' title='Multiple defined in 13 places.'>insert</a>(<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>["bold_name"]);
+<a id='L136' name='L136'></a> 136                 <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137                 <strong class='reserved'>if</strong> (<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>.<a href='../D/8442.html' title='Multiple defined in 2 places.'>has_attribute</a>("italic_name")) <em class='brace'>{</em>
+<a id='L138' name='L138'></a> 138                         <a href='../Y/12765.html' title='Multiple used in 6 places.'>known_fonts</a>.<a href='../D/8950.html' title='Multiple defined in 13 places.'>insert</a>(<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>["italic_name"]);
+<a id='L139' name='L139'></a> 139                 <em class='brace'>}</em>
+<a id='L140' name='L140'></a> 140         <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142         <a href='../Y/9925.html' title='Multiple used in 4 places.'>family_order_sans</a> = <a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>["family_order"];
+<a id='L143' name='L143'></a> 143         <a href='../Y/9923.html' title='Multiple used in 5 places.'>family_order_mono</a> = <a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>["family_order_monospace"];
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145         <strong class='reserved'>if</strong>(<a href='../Y/9923.html' title='Multiple used in 5 places.'>family_order_mono</a>.<a href='../D/5862.html' title='Multiple defined in 30 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L146' name='L146'></a> 146                 <a href='../D/463.html' title='Multiple defined in 4 places.'>ERR_FT</a> &lt;&lt; "No monospace font family order defined, falling back to sans serif order\n";
+<a id='L147' name='L147'></a> 147                 <a href='../Y/9923.html' title='Multiple used in 5 places.'>family_order_mono</a> = <a href='../Y/9925.html' title='Multiple used in 4 places.'>family_order_sans</a>;
 <a id='L148' name='L148'></a> 148         <em class='brace'>}</em>
-<a id='L149' name='L149'></a> 149 <em class='brace'>}</em>
-<a id='L150' name='L150'></a> 150 
-<a id='L151' name='L151'></a> 151 <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../R/14923.html' title='Multiple referred from 389 places.'>width</a>() <strong class='reserved'>const</strong>
-<a id='L152' name='L152'></a> 152 <em class='brace'>{</em>
-<a id='L153' name='L153'></a> 153         <strong class='reserved'>if</strong> (<a href='../Y/21588.html' title='Multiple used in 51 places.'>w_</a> == -1) <em class='brace'>{</em>
-<a id='L154' name='L154'></a> 154                 <strong class='reserved'>if</strong>(<a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a>.<a href='../D/5826.html' title='Multiple defined in 32 places.'>empty</a>())
-<a id='L155' name='L155'></a> 155                         <a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a> = <a href='../D/13328.html' title='Multiple defined in 3 places.'>sdl_ttf</a>::<a href='../S/1146.html#L554' title='Defined at 554 in src/font/sdl_ttf.cpp.'>split_text</a>(<a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>);
-<a id='L156' name='L156'></a> 156                 <a href='../S/1144.html#L132' title='Defined at 132 in src/font/text_surface.cpp.'>measure</a>();
-<a id='L157' name='L157'></a> 157         <em class='brace'>}</em>
-<a id='L158' name='L158'></a> 158         <strong class='reserved'>return</strong> <a href='../Y/21588.html' title='Multiple used in 51 places.'>w_</a>;
-<a id='L159' name='L159'></a> 159 <em class='brace'>}</em>
+<a id='L149' name='L149'></a> 149 
+<a id='L150' name='L150'></a> 150         <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21571.html' title='Multiple used in 2732 places.'>vector</a>&lt;<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>::<a href='../S/1158.html#L32' title='Defined at 32 in src/font/font_description.hpp.'>subset_descriptor</a>&gt; <a href='../Y/10349.html' title='Multiple used in 10 places.'>fontlist</a>;
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>for</strong>(<strong class='reserved'>auto</strong> <a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a> : <a href='../D/15903.html' title='Multiple defined in 17 places.'>utils</a>::<a href='../D/14663.html' title='Multiple defined in 2 places.'>split</a>(<a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>["order"])) <em class='brace'>{</em>
+<a id='L153' name='L153'></a> 153                 <a href='../S/1144.html#L84' title='Defined at 84 in src/font/font_config.cpp.'>add_font_to_fontlist</a>(<a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>, <a href='../Y/10349.html' title='Multiple used in 10 places.'>fontlist</a>, <a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>);
+<a id='L154' name='L154'></a> 154                 <a href='../Y/12765.html' title='Multiple used in 6 places.'>known_fonts</a>.<a href='../D/5966.html' title='Multiple defined in 12 places.'>erase</a>(<a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>);
+<a id='L155' name='L155'></a> 155         <em class='brace'>}</em>
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157         <strong class='reserved'>for</strong>(<strong class='reserved'>auto</strong> <a href='../Y/12739.html' title='Multiple used in 2 places.'>kfont</a> : <a href='../Y/12765.html' title='Multiple used in 6 places.'>known_fonts</a>) <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158                 <a href='../S/1144.html#L84' title='Defined at 84 in src/font/font_config.cpp.'>add_font_to_fontlist</a>(<a href='../Y/10350.html' title='Multiple used in 10 places.'>fonts_config</a>, <a href='../Y/10349.html' title='Multiple used in 10 places.'>fontlist</a>, <a href='../Y/12739.html' title='Multiple used in 2 places.'>kfont</a>);
+<a id='L159' name='L159'></a> 159         <em class='brace'>}</em>
 <a id='L160' name='L160'></a> 160 
-<a id='L161' name='L161'></a> 161 <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../R/7641.html' title='Multiple referred from 375 places.'>height</a>() <strong class='reserved'>const</strong>
-<a id='L162' name='L162'></a> 162 <em class='brace'>{</em>
-<a id='L163' name='L163'></a> 163         <strong class='reserved'>if</strong> (<a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a> == -1) <em class='brace'>{</em>
-<a id='L164' name='L164'></a> 164                 <strong class='reserved'>if</strong>(<a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a>.<a href='../D/5826.html' title='Multiple defined in 32 places.'>empty</a>())
-<a id='L165' name='L165'></a> 165                         <a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a> = <a href='../D/13328.html' title='Multiple defined in 3 places.'>sdl_ttf</a>::<a href='../S/1146.html#L554' title='Defined at 554 in src/font/sdl_ttf.cpp.'>split_text</a>(<a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>);
-<a id='L166' name='L166'></a> 166                 <a href='../S/1144.html#L132' title='Defined at 132 in src/font/text_surface.cpp.'>measure</a>();
-<a id='L167' name='L167'></a> 167         <em class='brace'>}</em>
-<a id='L168' name='L168'></a> 168         <strong class='reserved'>return</strong> <a href='../S/1088.html#L111' title='Defined at 111 in src/map/map.cpp.'>h_</a>;
-<a id='L169' name='L169'></a> 169 <em class='brace'>}</em>
-<a id='L170' name='L170'></a> 170 
-<a id='L171' name='L171'></a> 171 <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../S/980.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&gt; <strong class='reserved'>const</strong> &amp;<a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<a href='../R/7165.html' title='Multiple referred from 2 places.'>get_surfaces</a>() <strong class='reserved'>const</strong>
-<a id='L172' name='L172'></a> 172 <em class='brace'>{</em>
-<a id='L173' name='L173'></a> 173         <strong class='reserved'>if</strong>(<a href='../Y/12005.html' title='Multiple used in 21 places.'>initialized_</a>)
-<a id='L174' name='L174'></a> 174                 <strong class='reserved'>return</strong> <a href='../Y/19344.html' title='Multiple used in 7 places.'>surfs_</a>;
-<a id='L175' name='L175'></a> 175 
-<a id='L176' name='L176'></a> 176         <a href='../Y/12005.html' title='Multiple used in 21 places.'>initialized_</a> = <strong class='reserved'>true</strong>;
+<a id='L161' name='L161'></a> 161         <strong class='reserved'>if</strong>(<a href='../Y/10349.html' title='Multiple used in 10 places.'>fontlist</a>.<a href='../D/5862.html' title='Multiple defined in 30 places.'>empty</a>())
+<a id='L162' name='L162'></a> 162                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         <a href='../D/13379.html' title='Multiple defined in 3 places.'>sdl_ttf</a>::<a href='../S/1150.html#L515' title='Defined at 515 in src/font/sdl_ttf.cpp.'>set_font_list</a>(<a href='../Y/10349.html' title='Multiple used in 10 places.'>fontlist</a>);
+<a id='L165' name='L165'></a> 165         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L166' name='L166'></a> 166 <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167 
+<a id='L168' name='L168'></a> 168 <strong class='reserved'>const</strong> <a href='../D/14951.html' title='Multiple defined in 9 places.'>t_string</a>&amp; <a href='../R/6754.html' title='Multiple referred from 2 places.'>get_font_families</a>(<a href='../S/1149.html#L25' title='Defined at 25 in src/font/font_options.hpp.'>family_class</a> <a href='../Y/9941.html' title='Multiple used in 7 places.'>fclass</a>)
+<a id='L169' name='L169'></a> 169 <em class='brace'>{</em>
+<a id='L170' name='L170'></a> 170         <strong class='reserved'>switch</strong>(<a href='../Y/9941.html' title='Multiple used in 7 places.'>fclass</a>) <em class='brace'>{</em>
+<a id='L171' name='L171'></a> 171         <strong class='reserved'>case</strong> <a href='../S/1149.html#L28' title='Defined at 28 in src/font/font_options.hpp.'>FONT_MONOSPACE</a>:
+<a id='L172' name='L172'></a> 172                 <strong class='reserved'>return</strong> <a href='../Y/9923.html' title='Multiple used in 5 places.'>family_order_mono</a>;
+<a id='L173' name='L173'></a> 173         <strong class='reserved'>default</strong>:
+<a id='L174' name='L174'></a> 174                 <strong class='reserved'>return</strong> <a href='../Y/9925.html' title='Multiple used in 4 places.'>family_order_sans</a>;
+<a id='L175' name='L175'></a> 175         <em class='brace'>}</em>
+<a id='L176' name='L176'></a> 176 <em class='brace'>}</em>
 <a id='L177' name='L177'></a> 177 
-<a id='L178' name='L178'></a> 178         <em class='comment'>// Impose a maximal number of characters for a text line. Do now draw</em>
-<a id='L179' name='L179'></a> 179         <em class='comment'>// any text longer that that, to prevent a SDL buffer overflow</em>
-<a id='L180' name='L180'></a> 180         <strong class='reserved'>if</strong>(<a href='../D/16294.html' title='Multiple defined in 2 places.'>width</a>() &gt; <a href='../Y/13885.html' title='Multiple used in 3 places.'>max_text_line_width</a>)
-<a id='L181' name='L181'></a> 181                 <strong class='reserved'>return</strong> <a href='../Y/19344.html' title='Multiple used in 7 places.'>surfs_</a>;
-<a id='L182' name='L182'></a> 182 
-<a id='L183' name='L183'></a> 183         <strong class='reserved'>for</strong>(<a href='../S/1134.html#L56' title='Defined at 56 in src/font/font_id.hpp.'>text_chunk</a> <strong class='reserved'>const</strong> &amp;<a href='../Y/7343.html' title='Multiple used in 21 places.'>chunk</a> : <a href='../Y/7348.html' title='Multiple used in 9 places.'>chunks_</a>)
-<a id='L184' name='L184'></a> 184         <em class='brace'>{</em>
-<a id='L185' name='L185'></a> 185                 <a href='../Y/2871.html' title='Multiple used in 15 places.'>TTF_Font</a>* <a href='../Y/20569.html' title='Multiple used in 5 places.'>ttfont</a> = <a href='../D/13328.html' title='Multiple defined in 3 places.'>sdl_ttf</a>::<a href='../S/1146.html#L207' title='Defined at 207 in src/font/sdl_ttf.cpp.'>get_font</a>(<a href='../S/1134.html#L34' title='Defined at 34 in src/font/font_id.hpp.'>font_id</a>(<a href='../Y/7343.html' title='Multiple used in 21 places.'>chunk</a>.<a href='../Y/19295.html' title='Multiple used in 23 places.'>subset</a>, <a href='../Y/10211.html' title='Multiple used in 32 places.'>font_size_</a>, <a href='../Y/19252.html' title='Multiple used in 27 places.'>style_</a>));
-<a id='L186' name='L186'></a> 186 
-<a id='L187' name='L187'></a> 187                 <a href='../S/980.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../Y/17722.html' title='Multiple used in 1744 places.'>s</a> = <a href='../S/980.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>(TTF_RenderUTF8_Blended(<a href='../Y/20569.html' title='Multiple used in 5 places.'>ttfont</a>, <a href='../Y/7343.html' title='Multiple used in 21 places.'>chunk</a>.<a href='../D/15093.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/3861.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../S/675.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a>.<a href='../S/982.html#L2358' title='Defined at 2358 in src/sdl/utils.cpp.'>to_sdl</a>()));
-<a id='L188' name='L188'></a> 188                 <strong class='reserved'>if</strong>(!<a href='../Y/17722.html' title='Multiple used in 1744 places.'>s</a>.<a href='../D/11417.html' title='Multiple defined in 5 places.'>null</a>())
-<a id='L189' name='L189'></a> 189                         <a href='../Y/19344.html' title='Multiple used in 7 places.'>surfs_</a>.<a href='../D/12199.html' title='Multiple defined in 3 places.'>push_back</a>(<a href='../Y/17722.html' title='Multiple used in 1744 places.'>s</a>);
-<a id='L190' name='L190'></a> 190         <em class='brace'>}</em>
-<a id='L191' name='L191'></a> 191 
-<a id='L192' name='L192'></a> 192         <strong class='reserved'>return</strong> <a href='../Y/19344.html' title='Multiple used in 7 places.'>surfs_</a>;
-<a id='L193' name='L193'></a> 193 <em class='brace'>}</em>
-<a id='L194' name='L194'></a> 194 
-<a id='L195' name='L195'></a> 195 <strong class='reserved'>bool</strong> <a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a>::<strong class='reserved'>operator</strong>==(<a href='../S/1136.html#L32' title='Defined at 32 in src/font/text_surface.hpp.'>text_surface</a> <strong class='reserved'>const</strong> &amp;<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em>
-<a id='L196' name='L196'></a> 196         <strong class='reserved'>return</strong> <a href='../S/304.html#L404' title='Defined at 404 in src/terrain/builder.hpp.'>hash_</a> == <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../S/304.html#L404' title='Defined at 404 in src/terrain/builder.hpp.'>hash_</a> &amp;&amp; <a href='../Y/10211.html' title='Multiple used in 32 places.'>font_size_</a> == <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../Y/10211.html' title='Multiple used in 32 places.'>font_size_</a>
-<a id='L197' name='L197'></a> 197                 &amp;&amp; <a href='../S/675.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a> == <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../S/675.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a> &amp;&amp; <a href='../Y/19252.html' title='Multiple used in 27 places.'>style_</a> == <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../Y/19252.html' title='Multiple used in 27 places.'>style_</a> &amp;&amp; <a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a> == <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../Y/19153.html' title='Multiple used in 51 places.'>str_</a>;
-<a id='L198' name='L198'></a> 198 <em class='brace'>}</em>
-<a id='L199' name='L199'></a> 199 
-<a id='L200' name='L200'></a> 200 <em class='brace'>}</em> <em class='comment'>// end namespace font</em>
+<a id='L178' name='L178'></a> 178 <em class='comment'>/***</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'> * Manager member functions</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'> */</em>
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182 <a href='../R/9785.html' title='Multiple referred from 453 places.'>manager</a>::<a href='../D/10761.html' title='Multiple defined in 32 places.'>manager</a>()
+<a id='L183' name='L183'></a> 183 <em class='brace'>{</em>
+<a id='L184' name='L184'></a> 184 <em class='sharp'>#ifdef</em> <a href='../S/1144.html#L43' title='Defined at 43 in src/font/font_config.cpp.'>CAIRO_HAS_FT_FONT</a>
+<a id='L185' name='L185'></a> 185         <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/10338.html' title='Multiple used in 4 places.'>font_path</a> = <a href='../D/6615.html' title='Multiple defined in 7 places.'>game_config</a>::<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a> + "/fonts";
+<a id='L186' name='L186'></a> 186         <strong class='reserved'>if</strong> (!FcConfigAppFontAddDir(<a href='../Y/1187.html' title='Multiple used in 3 places.'>FcConfigGetCurrent</a>(),
+<a id='L187' name='L187'></a> 187                 <strong class='reserved'>reinterpret_cast</strong>&lt;<strong class='reserved'>const</strong> <a href='../Y/1184.html' title='Multiple used in 2 places.'>FcChar8</a> *&gt;(<a href='../Y/10338.html' title='Multiple used in 4 places.'>font_path</a>.<a href='../D/3890.html' title='Multiple defined in 2 places.'>c_str</a>())))
+<a id='L188' name='L188'></a> 188         <em class='brace'>{</em>
+<a id='L189' name='L189'></a> 189                 <a href='../D/463.html' title='Multiple defined in 4 places.'>ERR_FT</a> &lt;&lt; "Could not load the true type fonts" &lt;&lt; <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/9398.html' title='Multiple used in 927 places.'>endl</a>;
+<a id='L190' name='L190'></a> 190                 <strong class='reserved'>throw</strong> <a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>::<a href='../D/5977.html' title='Multiple defined in 22 places.'>error</a>("font config lib failed to add the font path: '" + <a href='../Y/10338.html' title='Multiple used in 4 places.'>font_path</a> + "'");
+<a id='L191' name='L191'></a> 191         <em class='brace'>}</em>
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193         <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/10336.html' title='Multiple used in 3 places.'>font_file</a> = <a href='../Y/10338.html' title='Multiple used in 4 places.'>font_path</a> + "/fonts.conf";
+<a id='L194' name='L194'></a> 194         <strong class='reserved'>if</strong>(!FcConfigParseAndLoad(<a href='../Y/1187.html' title='Multiple used in 3 places.'>FcConfigGetCurrent</a>(),
+<a id='L195' name='L195'></a> 195                                                          <strong class='reserved'>reinterpret_cast</strong>&lt;<strong class='reserved'>const</strong> <a href='../Y/1184.html' title='Multiple used in 2 places.'>FcChar8</a>*&gt;(<a href='../Y/10336.html' title='Multiple used in 3 places.'>font_file</a>.<a href='../D/3890.html' title='Multiple defined in 2 places.'>c_str</a>()),
+<a id='L196' name='L196'></a> 196                                                          FcFalse))
+<a id='L197' name='L197'></a> 197         <em class='brace'>{</em>
+<a id='L198' name='L198'></a> 198                 <a href='../D/463.html' title='Multiple defined in 4 places.'>ERR_FT</a> &lt;&lt; "Could not load local font configuration\n";
+<a id='L199' name='L199'></a> 199                 <strong class='reserved'>throw</strong> <a href='../D/6441.html' title='Multiple defined in 29 places.'>font</a>::<a href='../D/5977.html' title='Multiple defined in 22 places.'>error</a>("font config lib failed to find font.conf: '" + <a href='../Y/10336.html' title='Multiple used in 3 places.'>font_file</a> + "'");
+<a id='L200' name='L200'></a> 200         <em class='brace'>}</em>
+<a id='L201' name='L201'></a> 201         <strong class='reserved'>else</strong>
+<a id='L202' name='L202'></a> 202         <em class='brace'>{</em>
+<a id='L203' name='L203'></a> 203                 <a href='../D/1093.html' title='Multiple defined in 4 places.'>LOG_FT</a> &lt;&lt; "Local font configuration loaded\n";
+<a id='L204' name='L204'></a> 204         <em class='brace'>}</em>
+<a id='L205' name='L205'></a> 205 <em class='sharp'>#endif</em>
+<a id='L206' name='L206'></a> 206 
+<a id='L207' name='L207'></a> 207 <em class='sharp'>#if</em> <a href='../Y/405.html' title='Multiple used in 4 places.'>CAIRO_HAS_WIN32_FONT</a>
+<a id='L208' name='L208'></a> 208         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a> : <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/314.html#L1120' title='Defined at 1120 in src/filesystem_boost.cpp.'>get_binary_paths</a>("fonts")) <em class='brace'>{</em>
+<a id='L209' name='L209'></a> 209                 <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21571.html' title='Multiple used in 2732 places.'>vector</a>&lt;<a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a>;
+<a id='L210' name='L210'></a> 210                 <strong class='reserved'>if</strong>(<a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/314.html#L848' title='Defined at 848 in src/filesystem_boost.cpp.'>is_directory</a>(<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>)) <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211                         <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/314.html#L301' title='Defined at 301 in src/filesystem_boost.cpp.'>get_files_in_dir</a>(<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>, &amp;<a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a>, <a href='../Y/15352.html' title='Multiple used in 1975 places.'>nullptr</a>, <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/1254.html#L50' title='Defined at 50 in src/filesystem.hpp.'>ENTIRE_FILE_PATH</a>);
+<a id='L212' name='L212'></a> 212                 <em class='brace'>}</em>
+<a id='L213' name='L213'></a> 213                 <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a> : <a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a>) <em class='brace'>{</em>
+<a id='L214' name='L214'></a> 214                         <strong class='reserved'>if</strong>(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../D/14868.html' title='Multiple defined in 2 places.'>substr</a>(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>() - 4) == ".ttf" || <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../D/14868.html' title='Multiple defined in 2 places.'>substr</a>(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>() - 4) == ".ttc")
+<a id='L215' name='L215'></a> 215                         <em class='brace'>{</em>
+<a id='L216' name='L216'></a> 216                                 <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/22188.html' title='Multiple used in 20 places.'>wstring</a> <a href='../Y/21916.html' title='Multiple used in 4 places.'>wfile</a> = <a href='../D/15546.html' title='Multiple defined in 2 places.'>unicode_cast</a>&lt;<a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/22188.html' title='Multiple used in 20 places.'>wstring</a>&gt;(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>);
+<a id='L217' name='L217'></a> 217                                 AddFontResourceExW(<a href='../Y/21916.html' title='Multiple used in 4 places.'>wfile</a>.<a href='../D/3890.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../Y/1146.html' title='Multiple used in 2 places.'>FR_PRIVATE</a>, <a href='../Y/15352.html' title='Multiple used in 1975 places.'>nullptr</a>);
+<a id='L218' name='L218'></a> 218                         <em class='brace'>}</em>
+<a id='L219' name='L219'></a> 219                 <em class='brace'>}</em>
+<a id='L220' name='L220'></a> 220         <em class='brace'>}</em>
+<a id='L221' name='L221'></a> 221 <em class='sharp'>#endif</em>
+<a id='L222' name='L222'></a> 222 <em class='brace'>}</em>
+<a id='L223' name='L223'></a> 223 
+<a id='L224' name='L224'></a> 224 <a href='../R/9785.html' title='Multiple referred from 453 places.'>manager</a>::~<a href='../D/10761.html' title='Multiple defined in 32 places.'>manager</a>()
+<a id='L225' name='L225'></a> 225 <em class='brace'>{</em>
+<a id='L226' name='L226'></a> 226 <em class='sharp'>#ifdef</em> <a href='../S/1144.html#L43' title='Defined at 43 in src/font/font_config.cpp.'>CAIRO_HAS_FT_FONT</a>
+<a id='L227' name='L227'></a> 227         FcConfigAppFontClear(<a href='../Y/1187.html' title='Multiple used in 3 places.'>FcConfigGetCurrent</a>());
+<a id='L228' name='L228'></a> 228 <em class='sharp'>#endif</em>
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230 <em class='sharp'>#if</em> <a href='../Y/405.html' title='Multiple used in 4 places.'>CAIRO_HAS_WIN32_FONT</a>
+<a id='L231' name='L231'></a> 231         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a> : <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/314.html#L1120' title='Defined at 1120 in src/filesystem_boost.cpp.'>get_binary_paths</a>("fonts")) <em class='brace'>{</em>
+<a id='L232' name='L232'></a> 232                 <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21571.html' title='Multiple used in 2732 places.'>vector</a>&lt;<a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a>;
+<a id='L233' name='L233'></a> 233                 <strong class='reserved'>if</strong>(<a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/314.html#L848' title='Defined at 848 in src/filesystem_boost.cpp.'>is_directory</a>(<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>))
+<a id='L234' name='L234'></a> 234                         <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/314.html#L301' title='Defined at 301 in src/filesystem_boost.cpp.'>get_files_in_dir</a>(<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>, &amp;<a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a>, <a href='../Y/15352.html' title='Multiple used in 1975 places.'>nullptr</a>, <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../S/1254.html#L50' title='Defined at 50 in src/filesystem.hpp.'>ENTIRE_FILE_PATH</a>);
+<a id='L235' name='L235'></a> 235                 <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a> : <a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a>) <em class='brace'>{</em>
+<a id='L236' name='L236'></a> 236                         <strong class='reserved'>if</strong>(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../D/14868.html' title='Multiple defined in 2 places.'>substr</a>(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>() - 4) == ".ttf" || <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../D/14868.html' title='Multiple defined in 2 places.'>substr</a>(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>.<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>() - 4) == ".ttc")
+<a id='L237' name='L237'></a> 237                         <em class='brace'>{</em>
+<a id='L238' name='L238'></a> 238                                 <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/22188.html' title='Multiple used in 20 places.'>wstring</a> <a href='../Y/21916.html' title='Multiple used in 4 places.'>wfile</a> = <a href='../D/15546.html' title='Multiple defined in 2 places.'>unicode_cast</a>&lt;<a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/22188.html' title='Multiple used in 20 places.'>wstring</a>&gt;(<a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>);
+<a id='L239' name='L239'></a> 239                                 RemoveFontResourceExW(<a href='../Y/21916.html' title='Multiple used in 4 places.'>wfile</a>.<a href='../D/3890.html' title='Multiple defined in 2 places.'>c_str</a>(), <a href='../Y/1146.html' title='Multiple used in 2 places.'>FR_PRIVATE</a>, <a href='../Y/15352.html' title='Multiple used in 1975 places.'>nullptr</a>);
+<a id='L240' name='L240'></a> 240                         <em class='brace'>}</em>
+<a id='L241' name='L241'></a> 241                 <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242         <em class='brace'>}</em>
+<a id='L243' name='L243'></a> 243 <em class='sharp'>#endif</em>
+<a id='L244' name='L244'></a> 244 <em class='brace'>}</em>
+<a id='L245' name='L245'></a> 245 
+<a id='L246' name='L246'></a> 246 
+<a id='L247' name='L247'></a> 247 <em class='brace'>}</em> <em class='comment'>// end namespace font</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L41'>[^]</a><a href='#L171'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L63'>[^]</a><a href='#L168'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

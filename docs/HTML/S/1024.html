@@ -1,38 +1,21 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/events.hpp</title>
+<title>src/seed_rng.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/events.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L45'>[^]</a><a href='#L139'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/seed_rng.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/1847.html' title='Multiple included from 19 places.'>INCLUDED FROM</a></h2>
-<hr />
-<h2 class='header'>DEFINITIONS</h2>
-This source file includes following definitions.
-<ol>
-<li><a href='#L45' title='Defined at 45.'>staging_handlers</a></li>
-<li><a href='#L77' title='Defined at 77.'>process_event</a></li>
-<li><a href='#L78' title='Defined at 78.'>draw</a></li>
-<li><a href='#L80' title='Defined at 80.'>volatile_draw</a></li>
-<li><a href='#L81' title='Defined at 81.'>volatile_undraw</a></li>
-<li><a href='#L83' title='Defined at 83.'>requires_event_focus</a></li>
-<li><a href='#L85' title='Defined at 85.'>process_help_string</a></li>
-<li><a href='#L86' title='Defined at 86.'>process_tooltip_string</a></li>
-<li><a href='#L96' title='Defined at 96.'>has_joined</a></li>
-<li><a href='#L97' title='Defined at 97.'>has_joined_global</a></li>
-<li><a href='#L101' title='Defined at 101.'>handler_members</a></li>
-<li><a href='#L139' title='Defined at 139.'>ticks_</a></li>
-</ol>
+<h2 class='header'><a href='../J/2577.html' title='Multiple included from 7 places.'>INCLUDED FROM</a></h2>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by Chris Beck &lt;render787@gmail.com&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
@@ -45,171 +28,30 @@ This source file includes following definitions.
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
-<a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> &lt;SDL_events.h&gt;
-<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;list&gt;
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;functional&gt;
-<a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <em class='comment'>//our user-defined double-click event type</em>
-<a id='L23' name='L23'></a>  23 <em class='sharp'>#define</em> <a href='../R/306.html' title='Multiple referred from 7 places.'>DOUBLE_CLICK_EVENT</a> <a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a>
-<a id='L24' name='L24'></a>  24 <em class='sharp'>#define</em> <a href='../R/1909.html' title='Multiple referred from 3 places.'>TIMER_EVENT</a> (<a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a> + 1)
-<a id='L25' name='L25'></a>  25 <em class='sharp'>#define</em> <a href='../R/808.html' title='Multiple referred from 3 places.'>HOVER_REMOVE_POPUP_EVENT</a> (<a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a> + 2)
-<a id='L26' name='L26'></a>  26 <em class='sharp'>#define</em> <a href='../R/313.html' title='Multiple referred from 8 places.'>DRAW_EVENT</a> (<a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a> + 3)
-<a id='L27' name='L27'></a>  27 <em class='sharp'>#define</em> <a href='../R/170.html' title='Multiple referred from 3 places.'>CLOSE_WINDOW_EVENT</a> (<a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a> + 4)
-<a id='L28' name='L28'></a>  28 <em class='sharp'>#define</em> <a href='../R/1776.html' title='Multiple referred from 4 places.'>SHOW_HELPTIP_EVENT</a> (<a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a> + 5)
-<a id='L29' name='L29'></a>  29 <em class='sharp'>#define</em> <a href='../R/312.html' title='Multiple referred from 13 places.'>DRAW_ALL_EVENT</a> (<a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a> + 6)
-<a id='L30' name='L30'></a>  30 <em class='sharp'>#define</em> <a href='../R/834.html' title='Multiple referred from 3 places.'>INVOKE_FUNCTION_EVENT</a> (<a href='../Y/2625.html' title='Multiple used in 8 places.'>SDL_USEREVENT</a> + 7)
+<a id='L15' name='L15'></a>  15 <em class='comment'>/*</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'>   This file provides a name space to store a source for seeds for</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'>   prgs. It should be boost::random_device on platforms that provide</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'>   this with our version of boost random, and otherwise should be the</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'>   system time I suppose.</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'></em>
+<a id='L21' name='L21'></a>  21 <em class='comment'>   The seed_rng::next_seed function provided probably shouldn't be used</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'>   anywhere except for default constructors of prg classes, or similar.</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'>*/</em>
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#pragma</em> once
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> &lt;cstdint&gt;
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> &lt;string&gt;
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>namespace</strong> <a href='../R/12270.html' title='Multiple referred from 6 places.'>seed_rng</a> <em class='brace'>{</em>
 <a id='L31' name='L31'></a>  31 
-<a id='L32' name='L32'></a>  32 <strong class='reserved'>namespace</strong> <a href='../R/5290.html' title='Multiple referred from 337 places.'>events</a>
-<a id='L33' name='L33'></a>  33 <em class='brace'>{</em>
+<a id='L32' name='L32'></a>  32 <a href='../Y/20974.html' title='Multiple used in 254 places.'>uint32_t</a> <a href='../S/857.html#L45' title='Defined at 45 in src/seed_rng.cpp.'>next_seed</a>();
+<a id='L33' name='L33'></a>  33 <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/857.html#L54' title='Defined at 54 in src/seed_rng.cpp.'>next_seed_str</a>();
 <a id='L34' name='L34'></a>  34 
-<a id='L35' name='L35'></a>  35 <strong class='reserved'>class</strong> <a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>;
-<a id='L36' name='L36'></a>  36 
-<a id='L37' name='L37'></a>  37 <strong class='reserved'>typedef</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/9797.html' title='Multiple defined in 2 places.'>list</a>&lt;<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>*&gt; <a href='../R/7542.html' title='Multiple referred from 24 places.'>handler_list</a>;
-<a id='L38' name='L38'></a>  38 
-<a id='L39' name='L39'></a>  39 <strong class='reserved'>class</strong> <a href='../R/4226.html' title='Multiple referred from 734 places.'>context</a>
-<a id='L40' name='L40'></a>  40 <em class='brace'>{</em>
-<a id='L41' name='L41'></a>  41 <strong class='reserved'>public</strong>:
-<a id='L42' name='L42'></a>  42         <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>() :
-<a id='L43' name='L43'></a>  43                 <a href='../S/737.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>(),
-<a id='L44' name='L44'></a>  44                 <a href='../Y/10180.html' title='Multiple used in 12 places.'>focused_handler</a>(<a href='../S/737.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>.<a href='../D/5860.html' title='Multiple defined in 28 places.'>end</a>()),
-<a id='L45' name='L45'></a>  45                 <a href='../R/13446.html' title='Multiple referred from 7 places.'>staging_handlers</a>()
-<a id='L46' name='L46'></a>  46         <em class='brace'>{</em>
-<a id='L47' name='L47'></a>  47         <em class='brace'>}</em>
-<a id='L48' name='L48'></a>  48 
-<a id='L49' name='L49'></a>  49         ~<a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>();
-<a id='L50' name='L50'></a>  50 
-<a id='L51' name='L51'></a>  51         <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>(<strong class='reserved'>const</strong> <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>&amp;) = <strong class='reserved'>delete</strong>;
-<a id='L52' name='L52'></a>  52 
-<a id='L53' name='L53'></a>  53         <strong class='reserved'>void</strong> <a href='../D/2871.html' title='Multiple defined in 2 places.'>add_handler</a>(<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>* <a href='../D/12177.html' title='Multiple defined in 3 places.'>ptr</a>);
-<a id='L54' name='L54'></a>  54         <strong class='reserved'>bool</strong> <a href='../D/12644.html' title='Multiple defined in 2 places.'>remove_handler</a>(<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>* <a href='../D/12177.html' title='Multiple defined in 3 places.'>ptr</a>);
-<a id='L55' name='L55'></a>  55         <strong class='reserved'>void</strong> <a href='../S/830.html#L119' title='Defined at 119 in src/events.cpp.'>cycle_focus</a>();
-<a id='L56' name='L56'></a>  56         <strong class='reserved'>void</strong> <a href='../D/13748.html' title='Multiple defined in 3 places.'>set_focus</a>(<strong class='reserved'>const</strong> <a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>* <a href='../D/12177.html' title='Multiple defined in 3 places.'>ptr</a>);
-<a id='L57' name='L57'></a>  57         <strong class='reserved'>void</strong> <a href='../S/830.html#L160' title='Defined at 160 in src/events.cpp.'>add_staging_handlers</a>();
-<a id='L58' name='L58'></a>  58 
-<a id='L59' name='L59'></a>  59         <a href='../D/8385.html' title='Multiple defined in 3 places.'>handler_list</a> <a href='../S/737.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>;
-<a id='L60' name='L60'></a>  60         <a href='../D/8385.html' title='Multiple defined in 3 places.'>handler_list</a>::<a href='../D/9499.html' title='Multiple defined in 17 places.'>iterator</a> <a href='../Y/10180.html' title='Multiple used in 12 places.'>focused_handler</a>;
-<a id='L61' name='L61'></a>  61         <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>*&gt; <a href='../S/1024.html#L45' title='Defined at 45 in src/events.hpp.'>staging_handlers</a>;
-<a id='L62' name='L62'></a>  62 <em class='brace'>}</em>;
-<a id='L63' name='L63'></a>  63 
-<a id='L64' name='L64'></a>  64 <em class='comment'>//any classes that derive from this class will automatically</em>
-<a id='L65' name='L65'></a>  65 <em class='comment'>//receive sdl events through the handle function for their lifetime,</em>
-<a id='L66' name='L66'></a>  66 <em class='comment'>//while the event context they were created in is active.</em>
-<a id='L67' name='L67'></a>  67 <em class='comment'>//</em>
-<a id='L68' name='L68'></a>  68 <em class='comment'>//NOTE: an event_context object must be initialized before a handler object</em>
-<a id='L69' name='L69'></a>  69 <em class='comment'>//can be initialized, and the event_context must be destroyed after</em>
-<a id='L70' name='L70'></a>  70 <em class='comment'>//the handler is destroyed.</em>
-<a id='L71' name='L71'></a>  71 <strong class='reserved'>class</strong> <a href='../R/12194.html' title='Multiple referred from 47 places.'>sdl_handler</a>
-<a id='L72' name='L72'></a>  72 <em class='brace'>{</em>
-<a id='L73' name='L73'></a>  73 <strong class='reserved'>friend</strong> <strong class='reserved'>class</strong> <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>;
-<a id='L74' name='L74'></a>  74 <strong class='reserved'>public</strong>:
-<a id='L75' name='L75'></a>  75         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/8303.html' title='Multiple defined in 21 places.'>handle_event</a>(<strong class='reserved'>const</strong> <a href='../Y/2474.html' title='Multiple used in 162 places.'>SDL_Event</a>&amp; <a href='../D/5965.html' title='Multiple defined in 11 places.'>event</a>) = 0;
-<a id='L76' name='L76'></a>  76         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/8382.html' title='Multiple defined in 10 places.'>handle_window_event</a>(<strong class='reserved'>const</strong> <a href='../Y/2474.html' title='Multiple used in 162 places.'>SDL_Event</a>&amp; <a href='../D/5965.html' title='Multiple defined in 11 places.'>event</a>) = 0;
-<a id='L77' name='L77'></a>  77         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../R/11031.html' title='Multiple referred from 7 places.'>process_event</a>() <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L78' name='L78'></a>  78         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../R/4975.html' title='Multiple referred from 117 places.'>draw</a>() <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L79' name='L79'></a>  79 
-<a id='L80' name='L80'></a>  80         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../R/14738.html' title='Multiple referred from 3 places.'>volatile_draw</a>() <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L81' name='L81'></a>  81         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../R/14739.html' title='Multiple referred from 2 places.'>volatile_undraw</a>() <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L82' name='L82'></a>  82 
-<a id='L83' name='L83'></a>  83         <strong class='reserved'>virtual</strong> <strong class='reserved'>bool</strong> <a href='../R/11684.html' title='Multiple referred from 7 places.'>requires_event_focus</a>(<strong class='reserved'>const</strong> <a href='../Y/2474.html' title='Multiple used in 162 places.'>SDL_Event</a> * = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>; <em class='brace'>}</em>
-<a id='L84' name='L84'></a>  84 
-<a id='L85' name='L85'></a>  85         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../R/11039.html' title='Multiple referred from 3 places.'>process_help_string</a>(<strong class='reserved'>int</strong> <em class='comment'>/*mousex*/</em>, <strong class='reserved'>int</strong> <em class='comment'>/*mousey*/</em>) <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L86' name='L86'></a>  86         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../R/11053.html' title='Multiple referred from 2 places.'>process_tooltip_string</a>(<strong class='reserved'>int</strong> <em class='comment'>/*mousex*/</em>, <strong class='reserved'>int</strong> <em class='comment'>/*mousey*/</em>) <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L87' name='L87'></a>  87 
-<a id='L88' name='L88'></a>  88         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/9519.html' title='Multiple defined in 3 places.'>join</a>(); <em class='comment'>/*joins the current event context*/</em>
-<a id='L89' name='L89'></a>  89         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/9519.html' title='Multiple defined in 3 places.'>join</a>(<a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a> &amp;<a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a>); <em class='comment'>/*joins the specified event context*/</em>
-<a id='L90' name='L90'></a>  90         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../S/830.html#L260' title='Defined at 260 in src/events.cpp.'>join_same</a>(<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>* <a href='../D/11672.html' title='Multiple defined in 5 places.'>parent</a>); <em class='comment'>/*joins the same event context as the parent is already associated with */</em>
-<a id='L91' name='L91'></a>  91         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../S/830.html#L277' title='Defined at 277 in src/events.cpp.'>leave</a>(); <em class='comment'>/*leave the event context*/</em>
-<a id='L92' name='L92'></a>  92 
-<a id='L93' name='L93'></a>  93         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../S/830.html#L298' title='Defined at 298 in src/events.cpp.'>join_global</a>(); <em class='comment'>/*join the global event context*/</em>
-<a id='L94' name='L94'></a>  94         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../S/830.html#L318' title='Defined at 318 in src/events.cpp.'>leave_global</a>(); <em class='comment'>/*leave the global event context*/</em>
-<a id='L95' name='L95'></a>  95 
-<a id='L96' name='L96'></a>  96         <strong class='reserved'>virtual</strong> <strong class='reserved'>bool</strong> <a href='../S/830.html#L169' title='Referred from 169 in src/events.cpp.'>has_joined</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/11238.html' title='Multiple used in 11 places.'>has_joined_</a>;<em class='brace'>}</em>
-<a id='L97' name='L97'></a>  97         <strong class='reserved'>virtual</strong> <strong class='reserved'>bool</strong> <a href='../S/830.html#L173' title='Referred from 173 in src/events.cpp.'>has_joined_global</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../S/830.html#L211' title='Defined at 211 in src/events.cpp.'>has_joined_global_</a>;<em class='brace'>}</em>
-<a id='L98' name='L98'></a>  98 <strong class='reserved'>protected</strong>:
-<a id='L99' name='L99'></a>  99         <a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/6002.html' title='Multiple used in 29 places.'>auto_join</a>=<strong class='reserved'>true</strong>);
-<a id='L100' name='L100'></a> 100         <strong class='reserved'>virtual</strong> ~<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>();
-<a id='L101' name='L101'></a> 101         <strong class='reserved'>virtual</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>*&gt; <a href='../R/7543.html' title='Multiple referred from 12 places.'>handler_members</a>()
-<a id='L102' name='L102'></a> 102         <em class='brace'>{</em>
-<a id='L103' name='L103'></a> 103                 <strong class='reserved'>return</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>*&gt;();
-<a id='L104' name='L104'></a> 104         <em class='brace'>}</em>
-<a id='L105' name='L105'></a> 105 
-<a id='L106' name='L106'></a> 106 <strong class='reserved'>private</strong>:
-<a id='L107' name='L107'></a> 107         <strong class='reserved'>bool</strong> <a href='../Y/11238.html' title='Multiple used in 11 places.'>has_joined_</a>;
-<a id='L108' name='L108'></a> 108         <strong class='reserved'>bool</strong> <a href='../S/830.html#L211' title='Defined at 211 in src/events.cpp.'>has_joined_global_</a>;
-<a id='L109' name='L109'></a> 109 <em class='brace'>}</em>;
-<a id='L110' name='L110'></a> 110 
-<a id='L111' name='L111'></a> 111 <strong class='reserved'>void</strong> <a href='../S/830.html#L329' title='Defined at 329 in src/events.cpp.'>focus_handler</a>(<strong class='reserved'>const</strong> <a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>* <a href='../D/12177.html' title='Multiple defined in 3 places.'>ptr</a>);
-<a id='L112' name='L112'></a> 112 
-<a id='L113' name='L113'></a> 113 <strong class='reserved'>bool</strong> <a href='../S/830.html#L336' title='Defined at 336 in src/events.cpp.'>has_focus</a>(<strong class='reserved'>const</strong> <a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>* <a href='../D/12177.html' title='Multiple defined in 3 places.'>ptr</a>, <strong class='reserved'>const</strong> <a href='../Y/2474.html' title='Multiple used in 162 places.'>SDL_Event</a>* <a href='../D/5965.html' title='Multiple defined in 11 places.'>event</a>);
-<a id='L114' name='L114'></a> 114 
-<a id='L115' name='L115'></a> 115 <strong class='reserved'>void</strong> <a href='../S/830.html#L746' title='Defined at 746 in src/events.cpp.'>call_in_main_thread</a>(<strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10436.html' title='Multiple used in 257 places.'>function</a>&lt;<strong class='reserved'>void</strong> (<strong class='reserved'>void</strong>)&gt;&amp; <a href='../D/6089.html' title='Multiple defined in 9 places.'>f</a>);
-<a id='L116' name='L116'></a> 116 
-<a id='L117' name='L117'></a> 117 <em class='comment'>//event_context objects control the handler objects that SDL events are sent</em>
-<a id='L118' name='L118'></a> 118 <em class='comment'>//to. When an event_context is created, it will become the current event context.</em>
-<a id='L119' name='L119'></a> 119 <em class='comment'>//event_context objects MUST be created in LIFO ordering in relation to each other,</em>
-<a id='L120' name='L120'></a> 120 <em class='comment'>//and in relation to handler objects. That is, all event_context objects should be</em>
-<a id='L121' name='L121'></a> 121 <em class='comment'>//created as automatic/stack variables.</em>
-<a id='L122' name='L122'></a> 122 <em class='comment'>//</em>
-<a id='L123' name='L123'></a> 123 <em class='comment'>//handler objects need not be created as automatic variables (e.g. you could put</em>
-<a id='L124' name='L124'></a> 124 <em class='comment'>//them in a vector) however you must guarantee that handler objects are destroyed</em>
-<a id='L125' name='L125'></a> 125 <em class='comment'>//before their context is destroyed</em>
-<a id='L126' name='L126'></a> 126 <strong class='reserved'>struct</strong> <a href='../R/5278.html' title='Multiple referred from 27 places.'>event_context</a>
-<a id='L127' name='L127'></a> 127 <em class='brace'>{</em>
-<a id='L128' name='L128'></a> 128         <a href='../D/5966.html' title='Multiple defined in 3 places.'>event_context</a>();
-<a id='L129' name='L129'></a> 129         ~<a href='../D/5966.html' title='Multiple defined in 3 places.'>event_context</a>();
-<a id='L130' name='L130'></a> 130 <em class='brace'>}</em>;
-<a id='L131' name='L131'></a> 131 
-<a id='L132' name='L132'></a> 132 <em class='comment'>//causes events to be dispatched to all handler objects.</em>
-<a id='L133' name='L133'></a> 133 <strong class='reserved'>void</strong> <a href='../D/12187.html' title='Multiple defined in 3 places.'>pump</a>();
-<a id='L134' name='L134'></a> 134 
-<a id='L135' name='L135'></a> 135 <em class='comment'>//look for resize events and update references to the screen area</em>
-<a id='L136' name='L136'></a> 136 <strong class='reserved'>void</strong> <a href='../S/830.html#L735' title='Defined at 735 in src/events.cpp.'>peek_for_resize</a>();
-<a id='L137' name='L137'></a> 137 
-<a id='L138' name='L138'></a> 138 <strong class='reserved'>struct</strong> <a href='../R/11097.html' title='Multiple referred from 12 places.'>pump_info</a> <em class='brace'>{</em>
-<a id='L139' name='L139'></a> 139         <a href='../S/1024.html#L138' title='Defined at 138 in src/events.hpp.'>pump_info</a>() : <a href='../Y/17444.html' title='Multiple used in 4 places.'>resize_dimensions</a>(), <a href='../R/13891.html' title='Multiple referred from 11 places.'>ticks_</a>(0) <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L140' name='L140'></a> 140         <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/15931.html' title='Multiple used in 436 places.'>pair</a>&lt;<strong class='reserved'>int</strong>,<strong class='reserved'>int</strong>&gt; <a href='../Y/17444.html' title='Multiple used in 4 places.'>resize_dimensions</a>;
-<a id='L141' name='L141'></a> 141         <strong class='reserved'>int</strong> <a href='../D/15139.html' title='Multiple defined in 2 places.'>ticks</a>(<strong class='reserved'>unsigned</strong> *<a href='../Y/17181.html' title='Multiple used in 3 places.'>refresh_counter</a>=<a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <strong class='reserved'>unsigned</strong> <a href='../Y/17182.html' title='Multiple used in 4 places.'>refresh_rate</a>=1);
-<a id='L142' name='L142'></a> 142 <strong class='reserved'>private</strong>:
-<a id='L143' name='L143'></a> 143         <strong class='reserved'>int</strong> <a href='../S/1024.html#L139' title='Defined at 139 in src/events.hpp.'>ticks_</a>; <em class='comment'>//0 if not calculated</em>
-<a id='L144' name='L144'></a> 144 <em class='brace'>}</em>;
-<a id='L145' name='L145'></a> 145 
-<a id='L146' name='L146'></a> 146 <strong class='reserved'>class</strong> <a href='../R/11099.html' title='Multiple referred from 11 places.'>pump_monitor</a> <em class='brace'>{</em>
-<a id='L147' name='L147'></a> 147 <em class='comment'>//pump_monitors receive notification after an events::pump() occurs</em>
-<a id='L148' name='L148'></a> 148 <strong class='reserved'>public</strong>:
-<a id='L149' name='L149'></a> 149         <a href='../D/12191.html' title='Multiple defined in 4 places.'>pump_monitor</a>();
-<a id='L150' name='L150'></a> 150         <strong class='reserved'>virtual</strong> ~<a href='../D/12191.html' title='Multiple defined in 4 places.'>pump_monitor</a>();
-<a id='L151' name='L151'></a> 151         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/12111.html' title='Multiple defined in 8 places.'>process</a>(<a href='../S/1024.html#L138' title='Defined at 138 in src/events.hpp.'>pump_info</a>&amp; <a href='../D/8812.html' title='Multiple defined in 2 places.'>info</a>) = 0;
-<a id='L152' name='L152'></a> 152 <em class='brace'>}</em>;
-<a id='L153' name='L153'></a> 153 
-<a id='L154' name='L154'></a> 154 <strong class='reserved'>void</strong> <a href='../S/830.html#L630' title='Defined at 630 in src/events.cpp.'>raise_process_event</a>();
-<a id='L155' name='L155'></a> 155 <strong class='reserved'>void</strong> <a href='../S/830.html#L641' title='Defined at 641 in src/events.cpp.'>raise_resize_event</a>();
-<a id='L156' name='L156'></a> 156 <strong class='reserved'>void</strong> <a href='../S/830.html#L653' title='Defined at 653 in src/events.cpp.'>raise_draw_event</a>();
-<a id='L157' name='L157'></a> 157 <strong class='reserved'>void</strong> <a href='../S/830.html#L666' title='Defined at 666 in src/events.cpp.'>raise_draw_all_event</a>();
-<a id='L158' name='L158'></a> 158 <strong class='reserved'>void</strong> <a href='../S/830.html#L675' title='Defined at 675 in src/events.cpp.'>raise_volatile_draw_event</a>();
-<a id='L159' name='L159'></a> 159 <strong class='reserved'>void</strong> <a href='../S/830.html#L684' title='Defined at 684 in src/events.cpp.'>raise_volatile_draw_all_event</a>();
-<a id='L160' name='L160'></a> 160 <strong class='reserved'>void</strong> <a href='../S/830.html#L693' title='Defined at 693 in src/events.cpp.'>raise_volatile_undraw_event</a>();
-<a id='L161' name='L161'></a> 161 <strong class='reserved'>void</strong> <a href='../S/830.html#L702' title='Defined at 702 in src/events.cpp.'>raise_help_string_event</a>(<strong class='reserved'>int</strong> <a href='../Y/14314.html' title='Multiple used in 50 places.'>mousex</a>, <strong class='reserved'>int</strong> <a href='../Y/14315.html' title='Multiple used in 49 places.'>mousey</a>);
-<a id='L162' name='L162'></a> 162 
-<a id='L163' name='L163'></a> 163 
-<a id='L164' name='L164'></a> 164 <em class='comment'>/**</em>
-<a id='L165' name='L165'></a> 165 <em class='comment'> * Is the event an input event?</em>
-<a id='L166' name='L166'></a> 166 <em class='comment'> *</em>
-<a id='L167' name='L167'></a> 167 <em class='comment'> * @returns                       Whether or not the event is an input event.</em>
-<a id='L168' name='L168'></a> 168 <em class='comment'> */</em>
-<a id='L169' name='L169'></a> 169 <strong class='reserved'>bool</strong> <a href='../S/830.html#L725' title='Defined at 725 in src/events.cpp.'>is_input</a>(<strong class='reserved'>const</strong> <a href='../Y/2474.html' title='Multiple used in 162 places.'>SDL_Event</a>&amp; <a href='../D/5965.html' title='Multiple defined in 11 places.'>event</a>);
-<a id='L170' name='L170'></a> 170 
-<a id='L171' name='L171'></a> 171 <em class='comment'>/** Discards all input events. */</em>
-<a id='L172' name='L172'></a> 172 <strong class='reserved'>void</strong> <a href='../S/830.html#L730' title='Defined at 730 in src/events.cpp.'>discard_input</a>();
-<a id='L173' name='L173'></a> 173 
-<a id='L174' name='L174'></a> 174 <em class='brace'>}</em>
-<a id='L175' name='L175'></a> 175 
-<a id='L176' name='L176'></a> 176 <strong class='reserved'>typedef</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/5978.html' title='Multiple defined in 26 places.'>events</a>::<a href='../D/13326.html' title='Multiple defined in 2 places.'>sdl_handler</a>*&gt; <a href='../R/12195.html' title='Multiple referred from 17 places.'>sdl_handler_vector</a>;
+<a id='L35' name='L35'></a>  35 <em class='brace'>}</em> <em class='comment'>// ends seed_rng namespace</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L45'>[^]</a><a href='#L139'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

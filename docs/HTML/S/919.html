@@ -1,81 +1,167 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/random_synced.cpp</title>
+<title>src/campaign_server/addon_utils.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/random_synced.cpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L26'>[^]</a><a href='#L42'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5837.html'>campaign_server</a>/addon_utils.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L107'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L26' title='Defined at 26.'>gen_</a></li>
-<li><a href='#L29' title='Defined at 29.'>next_random_impl</a></li>
-<li><a href='#L42' title='Defined at 42.'>initialize</a></li>
+<li><a href='#L42' title='Defined at 42.'>fast_interpolate_variables_into_string</a></li>
+<li><a href='#L63' title='Defined at 63.'>format_addon_feedback_url</a></li>
+<li><a href='#L95' title='Defined at 95.'>find_translations</a></li>
+<li><a href='#L107' title='Defined at 107.'>add_license</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2014 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
-<a id='L4' name='L4'></a>   4 <em class='comment'></em>
-<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
-<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
-<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
-<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
-<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
-<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
-<a id='L11' name='L11'></a>  11 <em class='comment'></em>
-<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
-<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
-<a id='L14' name='L14'></a>  14 <em class='sharp'>#include</em> "<a href='1075.html'>random_synced.hpp</a>"
-<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='../I/2026.html'>log.hpp</a>"
-<a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <strong class='reserved'>static</strong> <a href='../D/9756.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/9967.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13375.html' title='Multiple used in 20 places.'>log_random</a>("random");
-<a id='L18' name='L18'></a>  18 <em class='sharp'>#define</em> <a href='../R/272.html' title='Multiple referred from 3 places.'>DBG_RND</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/5227.html' title='Multiple defined in 16 places.'>debug</a>, <a href='../Y/13375.html' title='Multiple used in 20 places.'>log_random</a>)
-<a id='L19' name='L19'></a>  19 <em class='sharp'>#define</em> <a href='../S/919.html#L38' title='Referred from 38 in src/random_synced.cpp.'>LOG_RND</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8812.html' title='Multiple defined in 2 places.'>info</a>, <a href='../Y/13375.html' title='Multiple used in 20 places.'>log_random</a>)
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#define</em> WRN_RND <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/846.html#L84' title='Defined at 84 in src/log.cpp.'>warn</a>, <a href='../Y/13375.html' title='Multiple used in 20 places.'>log_random</a>)
-<a id='L21' name='L21'></a>  21 <em class='sharp'>#define</em> ERR_RND <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/846.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>, <a href='../Y/13375.html' title='Multiple used in 20 places.'>log_random</a>)
-<a id='L22' name='L22'></a>  22 
-<a id='L23' name='L23'></a>  23 <strong class='reserved'>namespace</strong> <a href='../R/11214.html' title='Multiple referred from 79 places.'>randomness</a>
-<a id='L24' name='L24'></a>  24 <em class='brace'>{</em>
-<a id='L25' name='L25'></a>  25         <a href='../D/14887.html' title='Multiple defined in 2 places.'>synced_rng</a>::<a href='../D/14887.html' title='Multiple defined in 2 places.'>synced_rng</a>(<a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10436.html' title='Multiple used in 257 places.'>function</a>&lt;<a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a>()&gt; <a href='../Y/18054.html' title='Multiple used in 3 places.'>seed_generator</a>)
-<a id='L26' name='L26'></a>  26                 : <a href='../Y/11266.html' title='Multiple used in 4 places.'>has_valid_seed_</a>(<strong class='reserved'>false</strong>), <a href='../Y/18055.html' title='Multiple used in 3 places.'>seed_generator_</a>(<a href='../Y/18054.html' title='Multiple used in 3 places.'>seed_generator</a>), <a href='../R/5921.html' title='Multiple referred from 12 places.'>gen_</a>()
-<a id='L27' name='L27'></a>  27         <em class='brace'>{</em>
-<a id='L28' name='L28'></a>  28         <em class='brace'>}</em>
-<a id='L29' name='L29'></a>  29         <a href='../Y/20788.html' title='Multiple used in 253 places.'>uint32_t</a> <a href='../D/14887.html' title='Multiple defined in 2 places.'>synced_rng</a>::<a href='../R/10292.html' title='Multiple referred from 4 places.'>next_random_impl</a>()
-<a id='L30' name='L30'></a>  30         <em class='brace'>{</em>
-<a id='L31' name='L31'></a>  31                 <strong class='reserved'>if</strong>(!<a href='../Y/11266.html' title='Multiple used in 4 places.'>has_valid_seed_</a>)
-<a id='L32' name='L32'></a>  32                 <em class='brace'>{</em>
-<a id='L33' name='L33'></a>  33                         <a href='../D/8891.html' title='Multiple defined in 8 places.'>initialize</a>();
-<a id='L34' name='L34'></a>  34                 <em class='brace'>}</em>
-<a id='L35' name='L35'></a>  35                 <em class='comment'>//getting here means random was called form inside a synced context.</em>
-<a id='L36' name='L36'></a>  36                 <a href='../Y/20788.html' title='Multiple used in 253 places.'>uint32_t</a> <a href='../Y/17530.html' title='Multiple used in 34 places.'>retv</a> = <a href='../S/919.html#L26' title='Defined at 26 in src/random_synced.cpp.'>gen_</a>.<a href='../S/923.html#L63' title='Defined at 63 in src/mt_rng.cpp.'>get_next_random</a>();
-<a id='L37' name='L37'></a>  37 
-<a id='L38' name='L38'></a>  38                 <a href='../D/1113.html' title='Multiple defined in 4 places.'>LOG_RND</a> &lt;&lt; "randomness::rng::next_random_impl returned " &lt;&lt; <a href='../Y/17530.html' title='Multiple used in 34 places.'>retv</a>;
-<a id='L39' name='L39'></a>  39                 <strong class='reserved'>return</strong> <a href='../Y/17530.html' title='Multiple used in 34 places.'>retv</a>;
-<a id='L40' name='L40'></a>  40         <em class='brace'>}</em>
-<a id='L41' name='L41'></a>  41 
-<a id='L42' name='L42'></a>  42         <strong class='reserved'>void</strong> <a href='../D/14887.html' title='Multiple defined in 2 places.'>synced_rng</a>::<a href='../R/8013.html' title='Multiple referred from 13 places.'>initialize</a>()
-<a id='L43' name='L43'></a>  43         <em class='brace'>{</em>
-<a id='L44' name='L44'></a>  44                 <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/14863.html' title='Multiple used in 6 places.'>new_seed</a> = <a href='../Y/18055.html' title='Multiple used in 3 places.'>seed_generator_</a>();
-<a id='L45' name='L45'></a>  45                 <a href='../S/919.html#L26' title='Defined at 26 in src/random_synced.cpp.'>gen_</a>.<a href='../D/13351.html' title='Multiple defined in 2 places.'>seed_random</a>(<a href='../Y/14863.html' title='Multiple used in 6 places.'>new_seed</a>, 0);
-<a id='L46' name='L46'></a>  46                 <a href='../Y/11266.html' title='Multiple used in 4 places.'>has_valid_seed_</a> = <strong class='reserved'>true</strong>;
-<a id='L47' name='L47'></a>  47         <em class='brace'>}</em>
-<a id='L48' name='L48'></a>  48 
-<a id='L49' name='L49'></a>  49         <a href='../R/13685.html' title='Multiple referred from 8 places.'>synced_rng</a>::~<a href='../D/14887.html' title='Multiple defined in 2 places.'>synced_rng</a>()
-<a id='L50' name='L50'></a>  50         <em class='brace'>{</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>                 2013 - 2015 by Ignacio Riquelme Morelle &lt;shadowm2006@gmail.com&gt;</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'></em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   (at your option) any later version.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'></em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>*/</em>
+<a id='L15' name='L15'></a>  15 
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> "<a href='916.html'>campaign_server/addon_utils.hpp</a>"
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='../I/1752.html'>config.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1254.html'>filesystem.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='1109.html'>game_config.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/2027.html'>log.hpp</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='../I/1907.html'>serialization/string_utils.hpp</a>"
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> &lt;boost/algorithm/string.hpp&gt;
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <strong class='reserved'>static</strong> <a href='../D/9803.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/10014.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13508.html' title='Multiple used in 29 places.'>log_network</a>("network");
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#define</em> <a href='../R/973.html' title='Multiple referred from 43 places.'>LOG_CS</a> <strong class='reserved'>if</strong> (<a href='../D/9803.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/847.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>().<a href='../S/660.html#L121' title='Defined at 121 in src/log.hpp.'>dont_log</a>(<a href='../Y/13508.html' title='Multiple used in 29 places.'>log_network</a>)) ; <strong class='reserved'>else</strong> <a href='../D/9803.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/847.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>()(<a href='../Y/13508.html' title='Multiple used in 29 places.'>log_network</a>, <strong class='reserved'>false</strong>)
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>namespace</strong> <em class='brace'>{</em>
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>typedef</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>, <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../R/10840.html' title='Multiple referred from 3 places.'>plain_string_map</a>;
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='comment'>/**</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * Quick and dirty alternative to @a utils::interpolate_variables_into_string</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> * that doesn't require formula AI code. It is definitely NOT safe for normal</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * use since it doesn't do strict checks on where variable placeholders</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * ("$foobar") end and doesn't support pipe ("|") terminators.</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> *</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> * @param str     The format string.</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * @param symbols The symbols table.</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> */</em>
+<a id='L42' name='L42'></a>  42 <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/919.html#L81' title='Referred from 81 in src/campaign_server/addon_utils.cpp.'>fast_interpolate_variables_into_string</a>(<strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> &amp;<a href='../D/14785.html' title='Multiple defined in 25 places.'>str</a>, <strong class='reserved'>const</strong> <a href='../S/919.html#L31' title='Defined at 31 in src/campaign_server/addon_utils.cpp.'>plain_string_map</a> * <strong class='reserved'>const</strong> <a href='../S/1362.html#L36' title='Defined at 36 in utils/unused_functions.py.'>symbols</a>)
+<a id='L43' name='L43'></a>  43 <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44         <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a> = <a href='../D/14785.html' title='Multiple defined in 25 places.'>str</a>;
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>if</strong>(<a href='../S/1362.html#L36' title='Defined at 36 in utils/unused_functions.py.'>symbols</a>) <em class='brace'>{</em>
+<a id='L47' name='L47'></a>  47                 <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../S/919.html#L31' title='Defined at 31 in src/campaign_server/addon_utils.cpp.'>plain_string_map</a>::<a href='../D/15957.html' title='Multiple defined in 21 places.'>value_type</a>&amp; <a href='../Y/19558.html' title='Multiple used in 40 places.'>sym</a> : *<a href='../S/1362.html#L36' title='Defined at 36 in utils/unused_functions.py.'>symbols</a>) <em class='brace'>{</em>
+<a id='L48' name='L48'></a>  48                         <a href='../D/3737.html' title='Multiple defined in 4 places.'>boost</a>::<a href='../Y/17484.html' title='Multiple used in 5 places.'>replace_all</a>(<a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>, "$" + <a href='../Y/19558.html' title='Multiple used in 40 places.'>sym</a>.<a href='../Y/10173.html' title='Multiple used in 914 places.'>first</a>, <a href='../Y/19558.html' title='Multiple used in 40 places.'>sym</a>.<a href='../Y/18179.html' title='Multiple used in 1328 places.'>second</a>);
+<a id='L49' name='L49'></a>  49                 <em class='brace'>}</em>
+<a id='L50' name='L50'></a>  50         <em class='brace'>}</em>
 <a id='L51' name='L51'></a>  51 
-<a id='L52' name='L52'></a>  52         <em class='brace'>}</em>
+<a id='L52' name='L52'></a>  52         <strong class='reserved'>return</strong> <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>;
 <a id='L53' name='L53'></a>  53 <em class='brace'>}</em>
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <em class='brace'>}</em> <em class='comment'>// end anonymous namespace</em>
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <strong class='reserved'>namespace</strong> <a href='../S/920.html#L858' title='Referred from 858 in src/campaign_server/campaign_server.cpp.'>campaignd</a> <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59 <em class='comment'>// Markup characters recognized by GUI1 code. These must be</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'>// the same as the constants defined in marked-up_text.cpp.</em>
+<a id='L61' name='L61'></a>  61 <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/11891.html' title='Multiple used in 3 places.'>illegal_markup_chars</a> = "*`~{^}|@#&lt;&amp;";
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63 <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/5760.html' title='Multiple referred from 2 places.'>format_addon_feedback_url</a>(<strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6471.html' title='Multiple defined in 2 places.'>format</a>, <strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>)
+<a id='L64' name='L64'></a>  64 <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65         <strong class='reserved'>if</strong>(!<a href='../D/6471.html' title='Multiple defined in 2 places.'>format</a>.<a href='../D/5862.html' title='Multiple defined in 30 places.'>empty</a>() &amp;&amp; !<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../D/5862.html' title='Multiple defined in 30 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                 <a href='../S/919.html#L31' title='Defined at 31 in src/campaign_server/addon_utils.cpp.'>plain_string_map</a> <a href='../Y/9635.html' title='Multiple used in 13 places.'>escaped</a>;
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68                 <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>::<a href='../D/4843.html' title='Multiple defined in 2 places.'>const_attr_itors</a> <a href='../Y/6082.html' title='Multiple used in 4 places.'>attrs</a> = <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../D/3494.html' title='Multiple defined in 3 places.'>attribute_range</a>();
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70                 <em class='comment'>// Percent-encode parameter values for URL interpolation. This is</em>
+<a id='L71' name='L71'></a>  71                 <em class='comment'>// VERY important since otherwise people could e.g. alter query</em>
+<a id='L72' name='L72'></a>  72                 <em class='comment'>// strings from the format string.</em>
+<a id='L73' name='L73'></a>  73                 <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>::<a href='../D/3488.html' title='Multiple defined in 2 places.'>attribute</a>&amp; <a href='../D/2733.html' title='Multiple defined in 5 places.'>a</a> : <a href='../Y/6082.html' title='Multiple used in 4 places.'>attrs</a>) <em class='brace'>{</em>
+<a id='L74' name='L74'></a>  74                         <a href='../Y/9635.html' title='Multiple used in 13 places.'>escaped</a>[<a href='../D/2733.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/10173.html' title='Multiple used in 914 places.'>first</a>] = <a href='../D/15903.html' title='Multiple defined in 17 places.'>utils</a>::<a href='../S/116.html#L460' title='Defined at 460 in src/serialization/string_utils.cpp.'>urlencode</a>(<a href='../D/2733.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/18179.html' title='Multiple used in 1328 places.'>second</a>.<a href='../D/14785.html' title='Multiple defined in 25 places.'>str</a>());
+<a id='L75' name='L75'></a>  75                 <em class='brace'>}</em>
+<a id='L76' name='L76'></a>  76 
+<a id='L77' name='L77'></a>  77                 <em class='comment'>// FIXME: We cannot use utils::interpolate_variables_into_string</em>
+<a id='L78' name='L78'></a>  78                 <em class='comment'>//        because it is implemented using a lot of formula AI junk</em>
+<a id='L79' name='L79'></a>  79                 <em class='comment'>//        that really doesn't belong in campaignd.</em>
+<a id='L80' name='L80'></a>  80                 <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a> =
+<a id='L81' name='L81'></a>  81                         <a href='../S/919.html#L42' title='Defined at 42 in src/campaign_server/addon_utils.cpp.'>fast_interpolate_variables_into_string</a>(<a href='../D/6471.html' title='Multiple defined in 2 places.'>format</a>, &amp;<a href='../Y/9635.html' title='Multiple used in 13 places.'>escaped</a>);
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83                 <strong class='reserved'>if</strong>(<a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a> != <a href='../D/6471.html' title='Multiple defined in 2 places.'>format</a>) <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84                         <strong class='reserved'>return</strong> <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>;
+<a id='L85' name='L85'></a>  85                 <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87                 <em class='comment'>// If we get here, that means that no interpolation took place; in</em>
+<a id='L88' name='L88'></a>  88                 <em class='comment'>// that case, the parameters table probably contains entries that</em>
+<a id='L89' name='L89'></a>  89                 <em class='comment'>// do not match the format string expectations.</em>
+<a id='L90' name='L90'></a>  90         <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92         <strong class='reserved'>return</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>();
+<a id='L93' name='L93'></a>  93 <em class='brace'>}</em>
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95 <strong class='reserved'>void</strong> <a href='../R/5630.html' title='Multiple referred from 3 places.'>find_translations</a>(<strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../Y/6278.html' title='Multiple used in 7 places.'>base_dir</a>, <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>)
+<a id='L96' name='L96'></a>  96 <em class='brace'>{</em>
+<a id='L97' name='L97'></a>  97         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a> &amp;<a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a> : <a href='../Y/6278.html' title='Multiple used in 7 places.'>base_dir</a>.<a href='../D/4429.html' title='Multiple defined in 2 places.'>child_range</a>("dir"))
+<a id='L98' name='L98'></a>  98         <em class='brace'>{</em>
+<a id='L99' name='L99'></a>  99                 <strong class='reserved'>if</strong>(<a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>["name"] == "LC_MESSAGES") <em class='brace'>{</em>
+<a id='L100' name='L100'></a> 100                         <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../D/2856.html' title='Multiple defined in 8 places.'>add_child</a>("translation")["language"] = <a href='../Y/6278.html' title='Multiple used in 7 places.'>base_dir</a>["name"];
+<a id='L101' name='L101'></a> 101                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L102' name='L102'></a> 102                         <a href='../S/919.html#L95' title='Defined at 95 in src/campaign_server/addon_utils.cpp.'>find_translations</a>(<a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>, <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
+<a id='L103' name='L103'></a> 103                 <em class='brace'>}</em>
+<a id='L104' name='L104'></a> 104         <em class='brace'>}</em>
+<a id='L105' name='L105'></a> 105 <em class='brace'>}</em>
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107 <strong class='reserved'>void</strong> <a href='../R/2658.html' title='Multiple referred from 2 places.'>add_license</a>(<a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L108' name='L108'></a> 108 <em class='brace'>{</em>
+<a id='L109' name='L109'></a> 109         <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a> = <a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/6288.html' title='Multiple defined in 2 places.'>find_child</a>("dir", "name", <a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>["campaign_name"]);
+<a id='L110' name='L110'></a> 110 
+<a id='L111' name='L111'></a> 111         <em class='comment'>// No top-level directory? Hm..</em>
+<a id='L112' name='L112'></a> 112         <strong class='reserved'>if</strong>(!<a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>) <em class='brace'>{</em>
+<a id='L113' name='L113'></a> 113                 <strong class='reserved'>return</strong>;
+<a id='L114' name='L114'></a> 114         <em class='brace'>}</em>
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <em class='comment'>// Don't add if it already exists.</em>
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>if</strong>(<a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>.<a href='../D/6288.html' title='Multiple defined in 2 places.'>find_child</a>("file", "name", "COPYING.txt")
+<a id='L118' name='L118'></a> 118            || <a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>.<a href='../D/6288.html' title='Multiple defined in 2 places.'>find_child</a>("file", "name", "COPYING")
+<a id='L119' name='L119'></a> 119            || <a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>.<a href='../D/6288.html' title='Multiple defined in 2 places.'>find_child</a>("file", "name", "copying.txt")
+<a id='L120' name='L120'></a> 120            || <a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>.<a href='../D/6288.html' title='Multiple defined in 2 places.'>find_child</a>("file", "name", "Copying.txt")
+<a id='L121' name='L121'></a> 121            || <a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>.<a href='../D/6288.html' title='Multiple defined in 2 places.'>find_child</a>("file", "name", "COPYING.TXT"))
+<a id='L122' name='L122'></a> 122         <em class='brace'>{</em>
+<a id='L123' name='L123'></a> 123                 <strong class='reserved'>return</strong>;
+<a id='L124' name='L124'></a> 124         <em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126         <em class='comment'>// Copy over COPYING.txt</em>
+<a id='L127' name='L127'></a> 127         <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/7892.html' title='Multiple used in 27 places.'>contents</a> = <a href='../D/6223.html' title='Multiple defined in 4 places.'>filesystem</a>::<a href='../D/12414.html' title='Multiple defined in 3 places.'>read_file</a>("COPYING.txt");
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>if</strong> (<a href='../Y/7892.html' title='Multiple used in 27 places.'>contents</a>.<a href='../D/5862.html' title='Multiple defined in 30 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L129' name='L129'></a> 129                 <a href='../D/1086.html' title='Multiple defined in 2 places.'>LOG_CS</a> &lt;&lt; "Could not find COPYING.txt, path is \"" &lt;&lt; <a href='../D/6615.html' title='Multiple defined in 7 places.'>game_config</a>::<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a> &lt;&lt; "\"\n";
+<a id='L130' name='L130'></a> 130                 <strong class='reserved'>return</strong>;
+<a id='L131' name='L131'></a> 131         <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133         <a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../Y/7948.html' title='Multiple used in 3 places.'>copying</a> = <a href='../Y/8834.html' title='Multiple used in 162 places.'>dir</a>.<a href='../D/2856.html' title='Multiple defined in 8 places.'>add_child</a>("file");
+<a id='L134' name='L134'></a> 134         <a href='../Y/7948.html' title='Multiple used in 3 places.'>copying</a>["name"] = "COPYING.txt";
+<a id='L135' name='L135'></a> 135         <a href='../Y/7948.html' title='Multiple used in 3 places.'>copying</a>["contents"] = <a href='../Y/7892.html' title='Multiple used in 27 places.'>contents</a>;
+<a id='L136' name='L136'></a> 136 <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137 
+<a id='L138' name='L138'></a> 138 <em class='brace'>}</em> <em class='comment'>// end namespace campaignd</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L26'>[^]</a><a href='#L42'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L107'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

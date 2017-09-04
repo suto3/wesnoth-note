@@ -1,144 +1,128 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/lua/lopcodes.cpp</title>
+<title>src/lua/lmem.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/<a href='../files/5865.html'>lua</a>/lopcodes.cpp</h2>
-<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5868.html'>lua</a>/lmem.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L48'>[^]</a><a href='#L77'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L48' title='Defined at 48.'>luaM_growaux_</a></li>
+<li><a href='#L68' title='Defined at 68.'>luaM_toobig</a></li>
+<li><a href='#L77' title='Defined at 77.'>luaM_realloc_</a></li>
+</ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>** $Id: lopcodes.c,v 1.55 2015/01/05 13:48:33 roberto Exp $</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'>** Opcodes for Lua virtual machine</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>** $Id: lmem.c,v 1.91 2015/03/06 19:45:54 roberto Exp $</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>** Interface to Memory Manager</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'>** See Copyright Notice in lua.h</em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>*/</em>
 <a id='L6' name='L6'></a>   6 
-<a id='L7' name='L7'></a>   7 <em class='sharp'>#define</em> lopcodes_c
-<a id='L8' name='L8'></a>   8 <em class='sharp'>#define</em> <a href='../S/1213.html#L234' title='Referred from 234 in src/lua/luaconf.h.'>LUA_CORE</a>
+<a id='L7' name='L7'></a>   7 <em class='sharp'>#define</em> lmem_c
+<a id='L8' name='L8'></a>   8 <em class='sharp'>#define</em> <a href='../S/1217.html#L234' title='Referred from 234 in src/lua/luaconf.h.'>LUA_CORE</a>
 <a id='L9' name='L9'></a>   9 
-<a id='L10' name='L10'></a>  10 <em class='sharp'>#include</em> "<a href='1206.html'>lprefix.h</a>"
+<a id='L10' name='L10'></a>  10 <em class='sharp'>#include</em> "<a href='1210.html'>lprefix.h</a>"
 <a id='L11' name='L11'></a>  11 
 <a id='L12' name='L12'></a>  12 
 <a id='L13' name='L13'></a>  13 <em class='sharp'>#include</em> &lt;stddef.h&gt;
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='1164.html'>lopcodes.h</a>"
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='1221.html'>lua.h</a>"
 <a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 
-<a id='L18' name='L18'></a>  18 <em class='comment'>/* ORDER OP */</em>
-<a id='L19' name='L19'></a>  19 
-<a id='L20' name='L20'></a>  20 <a href='../S/1213.html#L274' title='Defined at 274 in src/lua/luaconf.h.'>LUAI_DDEF</a> <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<strong class='reserved'>const</strong> <a href='../Y/13485.html' title='Multiple used in 2 places.'>luaP_opnames</a>[<a href='../S/1164.html#L235' title='Defined at 235 in src/lua/lopcodes.h.'>NUM_OPCODES</a>+1] = <em class='brace'>{</em>
-<a id='L21' name='L21'></a>  21   "MOVE",
-<a id='L22' name='L22'></a>  22   "LOADK",
-<a id='L23' name='L23'></a>  23   "LOADKX",
-<a id='L24' name='L24'></a>  24   "LOADBOOL",
-<a id='L25' name='L25'></a>  25   "LOADNIL",
-<a id='L26' name='L26'></a>  26   "GETUPVAL",
-<a id='L27' name='L27'></a>  27   "GETTABUP",
-<a id='L28' name='L28'></a>  28   "GETTABLE",
-<a id='L29' name='L29'></a>  29   "SETTABUP",
-<a id='L30' name='L30'></a>  30   "SETUPVAL",
-<a id='L31' name='L31'></a>  31   "SETTABLE",
-<a id='L32' name='L32'></a>  32   "NEWTABLE",
-<a id='L33' name='L33'></a>  33   "SELF",
-<a id='L34' name='L34'></a>  34   "ADD",
-<a id='L35' name='L35'></a>  35   "SUB",
-<a id='L36' name='L36'></a>  36   "MUL",
-<a id='L37' name='L37'></a>  37   "MOD",
-<a id='L38' name='L38'></a>  38   "POW",
-<a id='L39' name='L39'></a>  39   "DIV",
-<a id='L40' name='L40'></a>  40   "IDIV",
-<a id='L41' name='L41'></a>  41   "BAND",
-<a id='L42' name='L42'></a>  42   "BOR",
-<a id='L43' name='L43'></a>  43   "BXOR",
-<a id='L44' name='L44'></a>  44   "SHL",
-<a id='L45' name='L45'></a>  45   "SHR",
-<a id='L46' name='L46'></a>  46   "UNM",
-<a id='L47' name='L47'></a>  47   "BNOT",
-<a id='L48' name='L48'></a>  48   "NOT",
-<a id='L49' name='L49'></a>  49   "LEN",
-<a id='L50' name='L50'></a>  50   "CONCAT",
-<a id='L51' name='L51'></a>  51   "JMP",
-<a id='L52' name='L52'></a>  52   "EQ",
-<a id='L53' name='L53'></a>  53   "LT",
-<a id='L54' name='L54'></a>  54   "LE",
-<a id='L55' name='L55'></a>  55   "TEST",
-<a id='L56' name='L56'></a>  56   "TESTSET",
-<a id='L57' name='L57'></a>  57   "CALL",
-<a id='L58' name='L58'></a>  58   "TAILCALL",
-<a id='L59' name='L59'></a>  59   "RETURN",
-<a id='L60' name='L60'></a>  60   "FORLOOP",
-<a id='L61' name='L61'></a>  61   "FORPREP",
-<a id='L62' name='L62'></a>  62   "TFORCALL",
-<a id='L63' name='L63'></a>  63   "TFORLOOP",
-<a id='L64' name='L64'></a>  64   "SETLIST",
-<a id='L65' name='L65'></a>  65   "CLOSURE",
-<a id='L66' name='L66'></a>  66   "VARARG",
-<a id='L67' name='L67'></a>  67   "EXTRAARG",
-<a id='L68' name='L68'></a>  68   <a href='../Y/2028.html' title='Multiple used in 474 places.'>NULL</a>
-<a id='L69' name='L69'></a>  69 <em class='brace'>}</em>;
-<a id='L70' name='L70'></a>  70 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1214.html'>ldebug.h</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='1185.html'>ldo.h</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1201.html'>lgc.h</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='1193.html'>lmem.h</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='1200.html'>lobject.h</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='1181.html'>lstate.h</a>"
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='comment'>/*</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>** About the realloc function:</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>** void * frealloc (void *ud, void *ptr, size_t osize, size_t nsize);</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>** ('osize' is the old size, 'nsize' is the new size)</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>**</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'>** * frealloc(ud, NULL, x, s) creates a new block of size 's' (no</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'>** matter 'x').</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'>**</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'>** * frealloc(ud, p, x, 0) frees the block 'p'</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'>** (in this specific case, frealloc must return NULL);</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'>** particularly, frealloc(ud, NULL, 0, 0) does nothing</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'>** (which is equivalent to free(NULL) in ISO C)</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'>**</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'>** frealloc returns NULL if it cannot create or reallocate the area</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'>** (any reallocation to an equal or smaller size cannot fail!)</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'>*/</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#define</em> <a href='../R/1331.html' title='Multiple referred from 2 places.'>MINSIZEARRAY</a>    4
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <strong class='reserved'>void</strong> *<a href='../R/9333.html' title='Multiple referred from 2 places.'>luaM_growaux_</a> (<a href='../D/10423.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, <strong class='reserved'>void</strong> *<a href='../D/3716.html' title='Multiple defined in 2 places.'>block</a>, <strong class='reserved'>int</strong> *<a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a>, <a href='../Y/18828.html' title='Multiple used in 1745 places.'>size_t</a> <a href='../Y/18821.html' title='Multiple used in 2 places.'>size_elems</a>,
+<a id='L49' name='L49'></a>  49                      <strong class='reserved'>int</strong> <a href='../S/236.html#L154' title='Defined at 154 in src/ai/default/recruitment.hpp.'>limit</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/16328.html' title='Multiple defined in 8 places.'>what</a>) <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50   <strong class='reserved'>void</strong> *<a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a>;
+<a id='L51' name='L51'></a>  51   <strong class='reserved'>int</strong> <a href='../Y/15081.html' title='Multiple used in 45 places.'>newsize</a>;
+<a id='L52' name='L52'></a>  52   <strong class='reserved'>if</strong> (*<a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a> &gt;= <a href='../S/236.html#L154' title='Defined at 154 in src/ai/default/recruitment.hpp.'>limit</a>/2) <em class='brace'>{</em>  <em class='comment'>/* cannot double it? */</em>
+<a id='L53' name='L53'></a>  53     <strong class='reserved'>if</strong> (*<a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a> &gt;= <a href='../S/236.html#L154' title='Defined at 154 in src/ai/default/recruitment.hpp.'>limit</a>)  <em class='comment'>/* cannot grow even a little? */</em>
+<a id='L54' name='L54'></a>  54       <a href='../S/1208.html#L633' title='Defined at 633 in src/lua/ldebug.cpp.'>luaG_runerror</a>(<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, "too many %s (limit is %d)", <a href='../D/16328.html' title='Multiple defined in 8 places.'>what</a>, <a href='../S/236.html#L154' title='Defined at 154 in src/ai/default/recruitment.hpp.'>limit</a>);
+<a id='L55' name='L55'></a>  55     <a href='../Y/15081.html' title='Multiple used in 45 places.'>newsize</a> = <a href='../S/236.html#L154' title='Defined at 154 in src/ai/default/recruitment.hpp.'>limit</a>;  <em class='comment'>/* still have at least one free place */</em>
+<a id='L56' name='L56'></a>  56   <em class='brace'>}</em>
+<a id='L57' name='L57'></a>  57   <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58     <a href='../Y/15081.html' title='Multiple used in 45 places.'>newsize</a> = (*<a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a>)*2;
+<a id='L59' name='L59'></a>  59     <strong class='reserved'>if</strong> (<a href='../Y/15081.html' title='Multiple used in 45 places.'>newsize</a> &lt; <a href='../S/1171.html#L45' title='Defined at 45 in src/lua/lmem.cpp.'>MINSIZEARRAY</a>)
+<a id='L60' name='L60'></a>  60       <a href='../Y/15081.html' title='Multiple used in 45 places.'>newsize</a> = <a href='../S/1171.html#L45' title='Defined at 45 in src/lua/lmem.cpp.'>MINSIZEARRAY</a>;  <em class='comment'>/* minimum size */</em>
+<a id='L61' name='L61'></a>  61   <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62   <a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a> = <a href='../S/1193.html#L30' title='Defined at 30 in src/lua/lmem.h.'>luaM_reallocv</a>(<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, <a href='../D/3716.html' title='Multiple defined in 2 places.'>block</a>, *<a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a>, <a href='../Y/15081.html' title='Multiple used in 45 places.'>newsize</a>, <a href='../Y/18821.html' title='Multiple used in 2 places.'>size_elems</a>);
+<a id='L63' name='L63'></a>  63   *<a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a> = <a href='../Y/15081.html' title='Multiple used in 45 places.'>newsize</a>;  <em class='comment'>/* update only when everything else is OK */</em>
+<a id='L64' name='L64'></a>  64   <strong class='reserved'>return</strong> <a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a>;
+<a id='L65' name='L65'></a>  65 <em class='brace'>}</em>
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68 <a href='../D/9672.html' title='Multiple defined in 3 places.'>l_noret</a> <a href='../R/9343.html' title='Multiple referred from 4 places.'>luaM_toobig</a> (<a href='../D/10423.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>) <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69   <a href='../S/1208.html#L633' title='Defined at 633 in src/lua/ldebug.cpp.'>luaG_runerror</a>(<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, "memory allocation error: block too big");
+<a id='L70' name='L70'></a>  70 <em class='brace'>}</em>
 <a id='L71' name='L71'></a>  71 
-<a id='L72' name='L72'></a>  72 <em class='sharp'>#define</em> <a href='../R/10507.html' title='Multiple referred from 47 places.'>opmode</a>(<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>,<a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>,<a href='../D/3499.html' title='Multiple defined in 3 places.'>b</a>,<a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a>,<a href='../Y/13562.html' title='Multiple used in 568 places.'>m</a>) (((<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>)&lt;&lt;7) | ((<a href='../D/2711.html' title='Multiple defined in 5 places.'>a</a>)&lt;&lt;6) | ((<a href='../D/3499.html' title='Multiple defined in 3 places.'>b</a>)&lt;&lt;4) | ((<a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a>)&lt;&lt;2) | (<a href='../Y/13562.html' title='Multiple used in 568 places.'>m</a>))
+<a id='L72' name='L72'></a>  72 
 <a id='L73' name='L73'></a>  73 
-<a id='L74' name='L74'></a>  74 <a href='../S/1213.html#L274' title='Defined at 274 in src/lua/luaconf.h.'>LUAI_DDEF</a> <strong class='reserved'>const</strong> <a href='../S/1191.html#L35' title='Defined at 35 in src/lua/llimits.h.'>lu_byte</a> <a href='../Y/13484.html' title='Multiple used in 7 places.'>luaP_opmodes</a>[<a href='../S/1164.html#L235' title='Defined at 235 in src/lua/lopcodes.h.'>NUM_OPCODES</a>] = <em class='brace'>{</em>
-<a id='L75' name='L75'></a>  75 <em class='comment'>/*       T  A    B       C     mode                opcode       */</em>
-<a id='L76' name='L76'></a>  76   <a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_MOVE */</em>
-<a id='L77' name='L77'></a>  77  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABx</a>)            <em class='comment'>/* OP_LOADK */</em>
-<a id='L78' name='L78'></a>  78  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABx</a>)            <em class='comment'>/* OP_LOADKX */</em>
-<a id='L79' name='L79'></a>  79  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_LOADBOOL */</em>
-<a id='L80' name='L80'></a>  80  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_LOADNIL */</em>
-<a id='L81' name='L81'></a>  81  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_GETUPVAL */</em>
-<a id='L82' name='L82'></a>  82  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_GETTABUP */</em>
-<a id='L83' name='L83'></a>  83  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_GETTABLE */</em>
-<a id='L84' name='L84'></a>  84  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SETTABUP */</em>
-<a id='L85' name='L85'></a>  85  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SETUPVAL */</em>
-<a id='L86' name='L86'></a>  86  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SETTABLE */</em>
-<a id='L87' name='L87'></a>  87  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_NEWTABLE */</em>
-<a id='L88' name='L88'></a>  88  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SELF */</em>
-<a id='L89' name='L89'></a>  89  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_ADD */</em>
-<a id='L90' name='L90'></a>  90  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SUB */</em>
-<a id='L91' name='L91'></a>  91  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_MUL */</em>
-<a id='L92' name='L92'></a>  92  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_MOD */</em>
-<a id='L93' name='L93'></a>  93  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_POW */</em>
-<a id='L94' name='L94'></a>  94  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_DIV */</em>
-<a id='L95' name='L95'></a>  95  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_IDIV */</em>
-<a id='L96' name='L96'></a>  96  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_BAND */</em>
-<a id='L97' name='L97'></a>  97  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_BOR */</em>
-<a id='L98' name='L98'></a>  98  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_BXOR */</em>
-<a id='L99' name='L99'></a>  99  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SHL */</em>
-<a id='L100' name='L100'></a> 100  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SHR */</em>
-<a id='L101' name='L101'></a> 101  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_UNM */</em>
-<a id='L102' name='L102'></a> 102  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_BNOT */</em>
-<a id='L103' name='L103'></a> 103  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_NOT */</em>
-<a id='L104' name='L104'></a> 104  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_LEN */</em>
-<a id='L105' name='L105'></a> 105  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_CONCAT */</em>
-<a id='L106' name='L106'></a> 106  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iAsBx</a>)           <em class='comment'>/* OP_JMP */</em>
-<a id='L107' name='L107'></a> 107  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(1, 0, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_EQ */</em>
-<a id='L108' name='L108'></a> 108  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(1, 0, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_LT */</em>
-<a id='L109' name='L109'></a> 109  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(1, 0, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L276' title='Defined at 276 in src/lua/lopcodes.h.'>OpArgK</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_LE */</em>
-<a id='L110' name='L110'></a> 110  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(1, 0, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_TEST */</em>
-<a id='L111' name='L111'></a> 111  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(1, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_TESTSET */</em>
-<a id='L112' name='L112'></a> 112  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_CALL */</em>
-<a id='L113' name='L113'></a> 113  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_TAILCALL */</em>
-<a id='L114' name='L114'></a> 114  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_RETURN */</em>
-<a id='L115' name='L115'></a> 115  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iAsBx</a>)           <em class='comment'>/* OP_FORLOOP */</em>
-<a id='L116' name='L116'></a> 116  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iAsBx</a>)           <em class='comment'>/* OP_FORPREP */</em>
-<a id='L117' name='L117'></a> 117  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_TFORCALL */</em>
-<a id='L118' name='L118'></a> 118  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L275' title='Defined at 275 in src/lua/lopcodes.h.'>OpArgR</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iAsBx</a>)           <em class='comment'>/* OP_TFORLOOP */</em>
-<a id='L119' name='L119'></a> 119  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_SETLIST */</em>
-<a id='L120' name='L120'></a> 120  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABx</a>)            <em class='comment'>/* OP_CLOSURE */</em>
-<a id='L121' name='L121'></a> 121  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 1, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L273' title='Defined at 273 in src/lua/lopcodes.h.'>OpArgN</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iABC</a>)            <em class='comment'>/* OP_VARARG */</em>
-<a id='L122' name='L122'></a> 122  ,<a href='../S/1171.html#L72' title='Defined at 72 in src/lua/lopcodes.cpp.'>opmode</a>(0, 0, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L274' title='Defined at 274 in src/lua/lopcodes.h.'>OpArgU</a>, <a href='../S/1164.html#L32' title='Defined at 32 in src/lua/lopcodes.h.'>iAx</a>)             <em class='comment'>/* OP_EXTRAARG */</em>
-<a id='L123' name='L123'></a> 123 <em class='brace'>}</em>;
-<a id='L124' name='L124'></a> 124 
+<a id='L74' name='L74'></a>  74 <em class='comment'>/*</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'>** generic allocation routine.</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'>*/</em>
+<a id='L77' name='L77'></a>  77 <strong class='reserved'>void</strong> *<a href='../R/9339.html' title='Multiple referred from 8 places.'>luaM_realloc_</a> (<a href='../D/10423.html' title='Multiple defined in 2 places.'>lua_State</a> *<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, <strong class='reserved'>void</strong> *<a href='../D/3716.html' title='Multiple defined in 2 places.'>block</a>, <a href='../Y/18828.html' title='Multiple used in 1745 places.'>size_t</a> <a href='../Y/15876.html' title='Multiple used in 7 places.'>osize</a>, <a href='../Y/18828.html' title='Multiple used in 1745 places.'>size_t</a> <a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a>) <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78   <strong class='reserved'>void</strong> *<a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a>;
+<a id='L79' name='L79'></a>  79   <a href='../D/8251.html' title='Multiple defined in 2 places.'>global_State</a> *<a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a> = <a href='../S/1181.html#L186' title='Defined at 186 in src/lua/lstate.h.'>G</a>(<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>);
+<a id='L80' name='L80'></a>  80   <a href='../Y/18828.html' title='Multiple used in 1745 places.'>size_t</a> <a href='../Y/17159.html' title='Multiple used in 5 places.'>realosize</a> = (<a href='../D/3716.html' title='Multiple defined in 2 places.'>block</a>) ? <a href='../Y/15876.html' title='Multiple used in 7 places.'>osize</a> : 0;
+<a id='L81' name='L81'></a>  81   <a href='../D/10435.html' title='Multiple defined in 2 places.'>lua_assert</a>((<a href='../Y/17159.html' title='Multiple used in 5 places.'>realosize</a> == 0) == (<a href='../D/3716.html' title='Multiple defined in 2 places.'>block</a> == <a href='../Y/2045.html' title='Multiple used in 474 places.'>NULL</a>));
+<a id='L82' name='L82'></a>  82 <em class='sharp'>#if</em> <strong class='reserved'>defined</strong>(<a href='../Y/1301.html' title='Multiple used in 2 places.'>HARDMEMTESTS</a>)
+<a id='L83' name='L83'></a>  83   <strong class='reserved'>if</strong> (<a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a> &gt; <a href='../Y/17159.html' title='Multiple used in 5 places.'>realosize</a> &amp;&amp; <a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../Y/10676.html' title='Multiple used in 15 places.'>gcrunning</a>)
+<a id='L84' name='L84'></a>  84     <a href='../S/1206.html#L1156' title='Defined at 1156 in src/lua/lgc.cpp.'>luaC_fullgc</a>(<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, 1);  <em class='comment'>/* force a GC whenever possible */</em>
+<a id='L85' name='L85'></a>  85 <em class='sharp'>#endif</em>
+<a id='L86' name='L86'></a>  86   <a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a> = (*<a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../Y/10478.html' title='Multiple used in 7 places.'>frealloc</a>)(<a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../Y/20957.html' title='Multiple used in 57 places.'>ud</a>, <a href='../D/3716.html' title='Multiple defined in 2 places.'>block</a>, <a href='../Y/15876.html' title='Multiple used in 7 places.'>osize</a>, <a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a>);
+<a id='L87' name='L87'></a>  87   <strong class='reserved'>if</strong> (<a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a> == <a href='../Y/2045.html' title='Multiple used in 474 places.'>NULL</a> &amp;&amp; <a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a> &gt; 0) <em class='brace'>{</em>
+<a id='L88' name='L88'></a>  88     <a href='../D/10435.html' title='Multiple defined in 2 places.'>lua_assert</a>(<a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a> &gt; <a href='../Y/17159.html' title='Multiple used in 5 places.'>realosize</a>);  <em class='comment'>/* cannot fail when shrinking a block */</em>
+<a id='L89' name='L89'></a>  89     <strong class='reserved'>if</strong> (<a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../D/16019.html' title='Multiple defined in 2 places.'>version</a>) <em class='brace'>{</em>  <em class='comment'>/* is state fully built? */</em>
+<a id='L90' name='L90'></a>  90       <a href='../S/1206.html#L1156' title='Defined at 1156 in src/lua/lgc.cpp.'>luaC_fullgc</a>(<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, 1);  <em class='comment'>/* try to free some memory... */</em>
+<a id='L91' name='L91'></a>  91       <a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a> = (*<a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../Y/10478.html' title='Multiple used in 7 places.'>frealloc</a>)(<a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../Y/20957.html' title='Multiple used in 57 places.'>ud</a>, <a href='../D/3716.html' title='Multiple defined in 2 places.'>block</a>, <a href='../Y/15876.html' title='Multiple used in 7 places.'>osize</a>, <a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a>);  <em class='comment'>/* try again */</em>
+<a id='L92' name='L92'></a>  92     <em class='brace'>}</em>
+<a id='L93' name='L93'></a>  93     <strong class='reserved'>if</strong> (<a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a> == <a href='../Y/2045.html' title='Multiple used in 474 places.'>NULL</a>)
+<a id='L94' name='L94'></a>  94       <a href='../S/1211.html#L110' title='Defined at 110 in src/lua/ldo.cpp.'>luaD_throw</a>(<a href='../Y/1695.html' title='Multiple used in 7298 places.'>L</a>, <a href='../S/1221.html#L51' title='Defined at 51 in src/lua/lua.h.'>LUA_ERRMEM</a>);
+<a id='L95' name='L95'></a>  95   <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96   <a href='../D/10435.html' title='Multiple defined in 2 places.'>lua_assert</a>((<a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a> == 0) == (<a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a> == <a href='../Y/2045.html' title='Multiple used in 474 places.'>NULL</a>));
+<a id='L97' name='L97'></a>  97   <a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../Y/1231.html' title='Multiple used in 12 places.'>GCdebt</a> = (<a href='../D/6607.html' title='Multiple defined in 2 places.'>g</a>-&gt;<a href='../Y/1231.html' title='Multiple used in 12 places.'>GCdebt</a> + <a href='../Y/15328.html' title='Multiple used in 17 places.'>nsize</a>) - <a href='../Y/17159.html' title='Multiple used in 5 places.'>realosize</a>;
+<a id='L98' name='L98'></a>  98   <strong class='reserved'>return</strong> <a href='../Y/15058.html' title='Multiple used in 10 places.'>newblock</a>;
+<a id='L99' name='L99'></a>  99 <em class='brace'>}</em>
+<a id='L100' name='L100'></a> 100 
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L48'>[^]</a><a href='#L77'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

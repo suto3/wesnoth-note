@@ -1,23 +1,24 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/configr_assign.hpp</title>
+<title>src/syncmp_handler.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/configr_assign.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L24'>[^]</a><a href='#L29'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
-<hr />
-<h2 class='header'><a href='../J/1757.html' title='Multiple included from 2 places.'>INCLUDED FROM</a></h2>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/syncmp_handler.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L29'>[^]</a><a href='#L58'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L24' title='Defined at 24.'>data_</a></li>
-<li><a href='#L29' title='Defined at 29.'>data_</a></li>
+<li><a href='#L29' title='Defined at 29.'>handlers</a></li>
+<li><a href='#L36' title='Defined at 36.'>remove_handler</a></li>
+<li><a href='#L43' title='Defined at 43.'>add_handler</a></li>
+<li><a href='#L50' title='Defined at 50.'>pull_remote_choice</a></li>
+<li><a href='#L58' title='Defined at 58.'>send_user_choice</a></li>
 </ol>
 <hr />
 <pre>
@@ -34,43 +35,60 @@ This source file includes following definitions.
 <a id='L11' name='L11'></a>  11 <em class='comment'></em>
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
-<a id='L14' name='L14'></a>  14 <em class='sharp'>#pragma</em> once
+<a id='L14' name='L14'></a>  14 <em class='sharp'>#include</em> "<a href='1107.html'>syncmp_handler.hpp</a>"
 <a id='L15' name='L15'></a>  15 
-<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> &lt;string&gt;
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='../I/1752.html'>config.hpp</a>"
-<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> &lt;<a href='781.html'>boost/variant.hpp</a>&gt;
-<a id='L19' name='L19'></a>  19 
-<a id='L20' name='L20'></a>  20 <em class='comment'>//Similar to config_of but it stores references to configs (instead of cyoping them).</em>
-<a id='L21' name='L21'></a>  21 <strong class='reserved'>struct</strong> <a href='../R/4146.html' title='Multiple referred from 15 places.'>configr_of</a>
-<a id='L22' name='L22'></a>  22 <em class='brace'>{</em>
-<a id='L23' name='L23'></a>  23         <strong class='reserved'>template</strong> &lt;<strong class='reserved'>typename</strong> <a href='../Y/176.html' title='Multiple used in 2 places.'>AT</a>&gt;
-<a id='L24' name='L24'></a>  24         <a href='../S/738.html#L21' title='Defined at 21 in src/configr_assign.hpp.'>configr_of</a>(<strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/5982.html' title='Multiple used in 2 places.'>attrname</a>, <a href='../Y/176.html' title='Multiple used in 2 places.'>AT</a> <a href='../D/15885.html' title='Multiple defined in 19 places.'>value</a>) : <a href='../Y/19302.html' title='Multiple used in 5 places.'>subtags_</a>(), <a href='../R/4550.html' title='Multiple referred from 158 places.'>data_</a>()
-<a id='L25' name='L25'></a>  25         <em class='brace'>{</em>
-<a id='L26' name='L26'></a>  26                 <strong class='reserved'>this</strong>-&gt;<strong class='reserved'>operator</strong>()(<a href='../Y/5982.html' title='Multiple used in 2 places.'>attrname</a>, <a href='../D/15885.html' title='Multiple defined in 19 places.'>value</a>);
-<a id='L27' name='L27'></a>  27         <em class='brace'>}</em>
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> &lt;cassert&gt;
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> &lt;algorithm&gt;
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <a href='../R/13740.html' title='Multiple referred from 14 places.'>syncmp_handler</a>::<a href='../D/14945.html' title='Multiple defined in 3 places.'>syncmp_handler</a>()
+<a id='L20' name='L20'></a>  20 <em class='brace'>{</em>
+<a id='L21' name='L21'></a>  21         <a href='../S/1107.html#L30' title='Defined at 30 in src/syncmp_handler.hpp.'>syncmp_registry</a>::<a href='../D/2895.html' title='Multiple defined in 2 places.'>add_handler</a>(<strong class='reserved'>this</strong>);
+<a id='L22' name='L22'></a>  22 <em class='brace'>}</em>
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <a href='../R/13740.html' title='Multiple referred from 14 places.'>syncmp_handler</a>::~<a href='../D/14945.html' title='Multiple defined in 3 places.'>syncmp_handler</a>()
+<a id='L25' name='L25'></a>  25 <em class='brace'>{</em>
+<a id='L26' name='L26'></a>  26         <a href='../S/1107.html#L30' title='Defined at 30 in src/syncmp_handler.hpp.'>syncmp_registry</a>::<a href='../D/12697.html' title='Multiple defined in 2 places.'>remove_handler</a>(<strong class='reserved'>this</strong>);
+<a id='L27' name='L27'></a>  27 <em class='brace'>}</em>
 <a id='L28' name='L28'></a>  28 
-<a id='L29' name='L29'></a>  29         <a href='../S/738.html#L21' title='Defined at 21 in src/configr_assign.hpp.'>configr_of</a>(<strong class='reserved'>const</strong> <a href='../D/4735.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) : <a href='../Y/19302.html' title='Multiple used in 5 places.'>subtags_</a>(), <a href='../R/4550.html' title='Multiple referred from 158 places.'>data_</a>()
-<a id='L30' name='L30'></a>  30         <em class='brace'>{</em>
-<a id='L31' name='L31'></a>  31                 <strong class='reserved'>this</strong>-&gt;<strong class='reserved'>operator</strong>()(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>);
-<a id='L32' name='L32'></a>  32         <em class='brace'>}</em>
-<a id='L33' name='L33'></a>  33 
-<a id='L34' name='L34'></a>  34         <a href='../S/738.html#L21' title='Defined at 21 in src/configr_assign.hpp.'>configr_of</a>&amp; <strong class='reserved'>operator</strong>()(<strong class='reserved'>const</strong> <a href='../D/4735.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L35' name='L35'></a>  35         <em class='brace'>{</em>
-<a id='L36' name='L36'></a>  36                 <a href='../D/5199.html' title='Multiple defined in 8 places.'>data_</a> = &amp;<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>;
-<a id='L37' name='L37'></a>  37                 <strong class='reserved'>return</strong> *<strong class='reserved'>this</strong>;
-<a id='L38' name='L38'></a>  38         <em class='brace'>}</em>
-<a id='L39' name='L39'></a>  39 
-<a id='L40' name='L40'></a>  40         <a href='../S/738.html#L21' title='Defined at 21 in src/configr_assign.hpp.'>configr_of</a>&amp; <strong class='reserved'>operator</strong>()(<strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/19491.html' title='Multiple used in 44 places.'>tagname</a>, <strong class='reserved'>const</strong> <a href='../S/738.html#L21' title='Defined at 21 in src/configr_assign.hpp.'>configr_of</a>&amp; <a href='../D/4385.html' title='Multiple defined in 14 places.'>child</a>)
-<a id='L41' name='L41'></a>  41         <em class='brace'>{</em>
-<a id='L42' name='L42'></a>  42                 <a href='../Y/19302.html' title='Multiple used in 5 places.'>subtags_</a>.<a href='../Y/9191.html' title='Multiple used in 446 places.'>emplace_back</a>(&amp;<a href='../Y/19491.html' title='Multiple used in 44 places.'>tagname</a>, &amp;<a href='../D/4385.html' title='Multiple defined in 14 places.'>child</a>);
-<a id='L43' name='L43'></a>  43                 <strong class='reserved'>return</strong> *<strong class='reserved'>this</strong>;
-<a id='L44' name='L44'></a>  44         <em class='brace'>}</em>
-<a id='L45' name='L45'></a>  45         <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/15931.html' title='Multiple used in 436 places.'>pair</a>&lt;<strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14764.html' title='Multiple defined in 3 places.'>string</a>*, <strong class='reserved'>const</strong> <a href='../S/738.html#L21' title='Defined at 21 in src/configr_assign.hpp.'>configr_of</a>*&gt;&gt; <a href='../Y/19302.html' title='Multiple used in 5 places.'>subtags_</a>;
-<a id='L46' name='L46'></a>  46         <strong class='reserved'>const</strong> <a href='../D/4735.html' title='Multiple defined in 5 places.'>config</a>* <a href='../D/5199.html' title='Multiple defined in 8 places.'>data_</a>;
-<a id='L47' name='L47'></a>  47 <em class='brace'>}</em>;
+<a id='L29' name='L29'></a>  29 <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21571.html' title='Multiple used in 2732 places.'>vector</a>&lt;<a href='../D/14945.html' title='Multiple defined in 3 places.'>syncmp_handler</a>*&gt;&amp; <a href='../S/1107.html#L30' title='Defined at 30 in src/syncmp_handler.hpp.'>syncmp_registry</a>::<a href='../R/7585.html' title='Multiple referred from 59 places.'>handlers</a>()
+<a id='L30' name='L30'></a>  30 <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31         <em class='comment'>//using pointer in order to prevent destruction at programm end. Although in this simple case it shouldn't matter.</em>
+<a id='L32' name='L32'></a>  32         <strong class='reserved'>static</strong> <a href='../D/8426.html' title='Multiple defined in 3 places.'>handler_list</a>* <a href='../Y/11323.html' title='Multiple used in 7 places.'>handlers_</a> = <strong class='reserved'>new</strong> <a href='../D/8426.html' title='Multiple defined in 3 places.'>handler_list</a>();
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>return</strong> *<a href='../Y/11323.html' title='Multiple used in 7 places.'>handlers_</a>;
+<a id='L34' name='L34'></a>  34 <em class='brace'>}</em>
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>void</strong> <a href='../S/1107.html#L30' title='Defined at 30 in src/syncmp_handler.hpp.'>syncmp_registry</a>::<a href='../R/11593.html' title='Multiple referred from 5 places.'>remove_handler</a>(<a href='../D/14945.html' title='Multiple defined in 3 places.'>syncmp_handler</a>* <a href='../Y/11317.html' title='Multiple used in 65 places.'>handler</a>)
+<a id='L37' name='L37'></a>  37 <em class='brace'>{</em>
+<a id='L38' name='L38'></a>  38         <a href='../D/8426.html' title='Multiple defined in 3 places.'>handler_list</a>::<a href='../D/9543.html' title='Multiple defined in 17 places.'>iterator</a> <a href='../S/1119.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/6276.html' title='Multiple defined in 37 places.'>find</a>(<a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/3617.html' title='Multiple defined in 28 places.'>begin</a>(), <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/5896.html' title='Multiple defined in 28 places.'>end</a>(), <a href='../Y/11317.html' title='Multiple used in 65 places.'>handler</a>);
+<a id='L39' name='L39'></a>  39         <a href='../Y/5875.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../S/1119.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> != <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/5896.html' title='Multiple defined in 28 places.'>end</a>());
+<a id='L40' name='L40'></a>  40         <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/5966.html' title='Multiple defined in 12 places.'>erase</a>(<a href='../S/1119.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a>);
+<a id='L41' name='L41'></a>  41 <em class='brace'>}</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <strong class='reserved'>void</strong> <a href='../S/1107.html#L30' title='Defined at 30 in src/syncmp_handler.hpp.'>syncmp_registry</a>::<a href='../R/2643.html' title='Multiple referred from 6 places.'>add_handler</a>(<a href='../D/14945.html' title='Multiple defined in 3 places.'>syncmp_handler</a>* <a href='../Y/11317.html' title='Multiple used in 65 places.'>handler</a>)
+<a id='L44' name='L44'></a>  44 <em class='brace'>{</em>
+<a id='L45' name='L45'></a>  45         <a href='../D/8426.html' title='Multiple defined in 3 places.'>handler_list</a>::<a href='../D/9543.html' title='Multiple defined in 17 places.'>iterator</a> <a href='../S/1119.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> = <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/6276.html' title='Multiple defined in 37 places.'>find</a>(<a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/3617.html' title='Multiple defined in 28 places.'>begin</a>(), <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/5896.html' title='Multiple defined in 28 places.'>end</a>(), <a href='../Y/11317.html' title='Multiple used in 65 places.'>handler</a>);
+<a id='L46' name='L46'></a>  46         <a href='../Y/5875.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../S/1119.html#L175' title='Defined at 175 in src/game_initialization/depcheck.hpp.'>elem</a> == <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/5896.html' title='Multiple defined in 28 places.'>end</a>());
+<a id='L47' name='L47'></a>  47         <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>().<a href='../D/12249.html' title='Multiple defined in 3 places.'>push_back</a>(<a href='../Y/11317.html' title='Multiple used in 65 places.'>handler</a>);
+<a id='L48' name='L48'></a>  48 <em class='brace'>}</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50 <strong class='reserved'>void</strong> <a href='../S/1107.html#L30' title='Defined at 30 in src/syncmp_handler.hpp.'>syncmp_registry</a>::<a href='../R/11140.html' title='Multiple referred from 5 places.'>pull_remote_choice</a>()
+<a id='L51' name='L51'></a>  51 <em class='brace'>{</em>
+<a id='L52' name='L52'></a>  52         <strong class='reserved'>for</strong>(<a href='../D/14945.html' title='Multiple defined in 3 places.'>syncmp_handler</a>* <a href='../Y/16349.html' title='Multiple used in 4 places.'>phandler</a> : <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>())
+<a id='L53' name='L53'></a>  53         <em class='brace'>{</em>
+<a id='L54' name='L54'></a>  54                 <a href='../Y/16349.html' title='Multiple used in 4 places.'>phandler</a>-&gt;<a href='../D/12234.html' title='Multiple defined in 2 places.'>pull_remote_choice</a>();
+<a id='L55' name='L55'></a>  55         <em class='brace'>}</em>
+<a id='L56' name='L56'></a>  56 <em class='brace'>}</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <strong class='reserved'>void</strong> <a href='../S/1107.html#L30' title='Defined at 30 in src/syncmp_handler.hpp.'>syncmp_registry</a>::<a href='../R/12360.html' title='Multiple referred from 7 places.'>send_user_choice</a>()
+<a id='L59' name='L59'></a>  59 <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>for</strong>(<a href='../D/14945.html' title='Multiple defined in 3 places.'>syncmp_handler</a>* <a href='../Y/16349.html' title='Multiple used in 4 places.'>phandler</a> : <a href='../S/738.html#L29' title='Defined at 29 in src/syncmp_handler.cpp.'>handlers</a>())
+<a id='L61' name='L61'></a>  61         <em class='brace'>{</em>
+<a id='L62' name='L62'></a>  62                 <a href='../Y/16349.html' title='Multiple used in 4 places.'>phandler</a>-&gt;<a href='../D/13495.html' title='Multiple defined in 3 places.'>send_user_choice</a>();
+<a id='L63' name='L63'></a>  63         <em class='brace'>}</em>
+<a id='L64' name='L64'></a>  64 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L24'>[^]</a><a href='#L29'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L29'>[^]</a><a href='#L58'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

@@ -1,186 +1,116 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/actions/vision.hpp</title>
+<title>src/actions/undo_recall_action.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5823.html'>src</a>/<a href='../files/5825.html'>actions</a>/vision.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L70'>[^]</a><a href='#L94'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
-<hr />
-<h2 class='header'><a href='../J/1634.html' title='Multiple included from 13 places.'>INCLUDED FROM</a></h2>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5828.html'>actions</a>/undo_recall_action.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L52'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L70' title='Defined at 70.'>cache_units</a></li>
-<li><a href='#L94' title='Defined at 94.'>clear_unit</a></li>
+<li><a href='#L39' title='Defined at 39.'>write</a></li>
+<li><a href='#L52' title='Defined at 52.'>undo</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
-<a id='L4' name='L4'></a>   4 <em class='comment'></em>
-<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
-<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
-<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
-<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
-<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
-<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
-<a id='L11' name='L11'></a>  11 <em class='comment'></em>
-<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
-<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
-<a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
-<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
-<a id='L17' name='L17'></a>  17 <em class='comment'> * Various functions implementing vision (through fog of war and shroud).</em>
-<a id='L18' name='L18'></a>  18 <em class='comment'> */</em>
-<a id='L19' name='L19'></a>  19 
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#pragma</em> once
-<a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='760.html'>movetype.hpp</a>"
-<a id='L23' name='L23'></a>  23 
-<a id='L24' name='L24'></a>  24 <strong class='reserved'>struct</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>;
-<a id='L25' name='L25'></a>  25 <strong class='reserved'>class</strong>  <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a>;
-<a id='L26' name='L26'></a>  26 <strong class='reserved'>class</strong>  <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a>;
-<a id='L27' name='L27'></a>  27 
-<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> &lt;cstring&gt;
-<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> &lt;map&gt;
-<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> &lt;set&gt;
-<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L32' name='L32'></a>  32 
-<a id='L33' name='L33'></a>  33 
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>namespace</strong> <a href='../R/2511.html' title='Multiple referred from 129 places.'>actions</a> <em class='brace'>{</em>
-<a id='L35' name='L35'></a>  35         <strong class='reserved'>class</strong>  <a href='../D/11155.html' title='Multiple defined in 2 places.'>move_unit_spectator</a>;
-<a id='L36' name='L36'></a>  36 
-<a id='L37' name='L37'></a>  37 <em class='comment'>/// Class that stores the part of a unit's data that is needed for fog clearing.</em>
-<a id='L38' name='L38'></a>  38 <em class='comment'>/// (Used by the undo stack as that cannot rely on a unit sticking around, and</em>
-<a id='L39' name='L39'></a>  39 <em class='comment'>/// we do not really need to copy the entire unit.)</em>
-<a id='L40' name='L40'></a>  40 <strong class='reserved'>struct</strong> <a href='../R/3969.html' title='Multiple referred from 8 places.'>clearer_info</a> <em class='brace'>{</em>
-<a id='L41' name='L41'></a>  41         <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../S/991.html#L297' title='Defined at 297 in src/units/unit.hpp.'>underlying_id</a>;
-<a id='L42' name='L42'></a>  42         <strong class='reserved'>int</strong> <a href='../Y/18578.html' title='Multiple used in 13 places.'>sight_range</a>;
-<a id='L43' name='L43'></a>  43         <strong class='reserved'>bool</strong> <a href='../S/991.html#L773' title='Defined at 773 in src/units/unit.hpp.'>slowed</a>;
-<a id='L44' name='L44'></a>  44         <a href='../S/760.html#L26' title='Defined at 26 in src/movetype.hpp.'>movetype</a>::<a href='../S/760.html#L86' title='Defined at 86 in src/movetype.hpp.'>terrain_costs</a> <a href='../D/4927.html' title='Multiple defined in 2 places.'>costs</a>;
-<a id='L45' name='L45'></a>  45 
-<a id='L46' name='L46'></a>  46         <a href='../S/888.html#L40' title='Defined at 40 in src/actions/vision.hpp.'>clearer_info</a>(<strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp; <a href='../Y/21458.html' title='Multiple used in 58 places.'>viewer</a>);
-<a id='L47' name='L47'></a>  47         <a href='../S/888.html#L40' title='Defined at 40 in src/actions/vision.hpp.'>clearer_info</a>(<strong class='reserved'>const</strong> <a href='../D/4735.html' title='Multiple defined in 5 places.'>config</a> &amp; <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>);
-<a id='L48' name='L48'></a>  48 
-<a id='L49' name='L49'></a>  49         <strong class='reserved'>void</strong> <a href='../D/16475.html' title='Multiple defined in 55 places.'>write</a>(<a href='../D/4735.html' title='Multiple defined in 5 places.'>config</a> &amp; <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) <strong class='reserved'>const</strong>;
-<a id='L50' name='L50'></a>  50 <em class='brace'>}</em>;
-<a id='L51' name='L51'></a>  51 
-<a id='L52' name='L52'></a>  52 <em class='comment'>/// Class to encapsulate fog/shroud clearing and the resultant sighted events.</em>
-<a id='L53' name='L53'></a>  53 <em class='comment'>/// Note: This class uses teams as parameters (instead of sides) since a</em>
-<a id='L54' name='L54'></a>  54 <em class='comment'>/// function using this should first check to see if fog/shroud is in use (to</em>
-<a id='L55' name='L55'></a>  55 <em class='comment'>/// save processing when it is not), which implies the team is readily available.</em>
-<a id='L56' name='L56'></a>  56 <strong class='reserved'>class</strong> <a href='../R/13206.html' title='Multiple referred from 26 places.'>shroud_clearer</a> <em class='brace'>{</em>
-<a id='L57' name='L57'></a>  57 <strong class='reserved'>public</strong>:
-<a id='L58' name='L58'></a>  58         <a href='../D/14389.html' title='Multiple defined in 2 places.'>shroud_clearer</a>(<strong class='reserved'>const</strong> <a href='../D/14389.html' title='Multiple defined in 2 places.'>shroud_clearer</a>&amp;) = <strong class='reserved'>delete</strong>;
-<a id='L59' name='L59'></a>  59         <a href='../D/14389.html' title='Multiple defined in 2 places.'>shroud_clearer</a>&amp; <strong class='reserved'>operator</strong>=(<strong class='reserved'>const</strong> <a href='../D/14389.html' title='Multiple defined in 2 places.'>shroud_clearer</a>&amp;) = <strong class='reserved'>delete</strong>;
-<a id='L60' name='L60'></a>  60 
-<a id='L61' name='L61'></a>  61         <a href='../D/14389.html' title='Multiple defined in 2 places.'>shroud_clearer</a>();
-<a id='L62' name='L62'></a>  62         ~<a href='../D/14389.html' title='Multiple defined in 2 places.'>shroud_clearer</a>();
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2017 the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'></em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   (at your option) any later version.</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'></em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>*/</em>
+<a id='L13' name='L13'></a>  13 
+<a id='L14' name='L14'></a>  14 <em class='sharp'>#include</em> "<a href='894.html'>actions/undo_recall_action.hpp</a>"
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='884.html'>actions/create.hpp</a>"
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='459.html'>gui/dialogs/transient_message.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='140.html'>game_board.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='678.html'>resources.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='1080.html'>team.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='834.html'>replay.hpp</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='../I/2434.html'>units/map.hpp</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='89.html'>statistics.hpp</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='../I/2027.html'>log.hpp</a>"
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='745.html'>game_display.hpp</a>"
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>static</strong> <a href='../D/9803.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/10014.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13471.html' title='Multiple used in 194 places.'>log_engine</a>("engine");
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#define</em> <a href='../R/415.html' title='Multiple referred from 101 places.'>ERR_NG</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/847.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>, <a href='../Y/13471.html' title='Multiple used in 194 places.'>log_engine</a>)
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#define</em> <a href='../R/995.html' title='Multiple referred from 132 places.'>LOG_NG</a> <a href='../S/660.html#L187' title='Defined at 187 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8855.html' title='Multiple defined in 2 places.'>info</a>, <a href='../Y/13471.html' title='Multiple used in 194 places.'>log_engine</a>)
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>namespace</strong> <a href='../R/2533.html' title='Multiple referred from 129 places.'>actions</a>
+<a id='L32' name='L32'></a>  32 <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>namespace</strong> <a href='../R/14255.html' title='Multiple referred from 86 places.'>undo</a>
+<a id='L34' name='L34'></a>  34 <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='comment'>/**</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * Writes this into the provided config.</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> */</em>
+<a id='L39' name='L39'></a>  39 <strong class='reserved'>void</strong> <a href='../S/894.html#L27' title='Defined at 27 in src/actions/undo_recall_action.hpp.'>recall_action</a>::<a href='../R/15051.html' title='Multiple referred from 493 places.'>write</a>(<a href='../D/4767.html' title='Multiple defined in 5 places.'>config</a> &amp; <a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>) <strong class='reserved'>const</strong>
+<a id='L40' name='L40'></a>  40 <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41         <a href='../S/889.html#L60' title='Defined at 60 in src/actions/undo_action.hpp.'>undo_action</a>::<a href='../D/16544.html' title='Multiple defined in 55 places.'>write</a>(<a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L42' name='L42'></a>  42         <a href='../S/885.html#L23' title='Defined at 23 in src/actions/shroud_clearing_action.hpp.'>shroud_clearing_action</a>::<a href='../D/16544.html' title='Multiple defined in 55 places.'>write</a>(<a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44         <a href='../D/12494.html' title='Multiple defined in 2 places.'>recall_from</a>.<a href='../D/16544.html' title='Multiple defined in 55 places.'>write</a>(<a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/2856.html' title='Multiple defined in 8 places.'>add_child</a>("leader"));
+<a id='L45' name='L45'></a>  45         <a href='../D/4194.html' title='Multiple defined in 5 places.'>cfg</a>["id"] = <a href='../D/8666.html' title='Multiple defined in 22 places.'>id</a>;
+<a id='L46' name='L46'></a>  46 <em class='brace'>}</em>
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 <em class='comment'>/**</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> * Undoes this action.</em>
+<a id='L50' name='L50'></a>  50 <em class='comment'> * @return true on success; false on an error.</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'> */</em>
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>bool</strong> <a href='../S/894.html#L27' title='Defined at 27 in src/actions/undo_recall_action.hpp.'>recall_action</a>::<a href='../R/14255.html' title='Multiple referred from 86 places.'>undo</a>(<strong class='reserved'>int</strong> <a href='../D/14454.html' title='Multiple defined in 3 places.'>side</a>)
+<a id='L53' name='L53'></a>  53 <em class='brace'>{</em>
+<a id='L54' name='L54'></a>  54         <a href='../D/6620.html' title='Multiple defined in 2 places.'>game_display</a> &amp; <a href='../D/8301.html' title='Multiple defined in 28 places.'>gui</a> = *<a href='../D/12927.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../S/1164.html#L55' title='Defined at 55 in src/reports.hpp.'>screen</a>;
+<a id='L55' name='L55'></a>  55         <a href='../D/15620.html' title='Multiple defined in 2 places.'>unit_map</a> &amp;   <a href='../D/15665.html' title='Multiple defined in 8 places.'>units</a> = <a href='../D/12927.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10637.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15665.html' title='Multiple defined in 8 places.'>units</a>();
+<a id='L56' name='L56'></a>  56         <a href='../D/14993.html' title='Multiple defined in 3 places.'>team</a> &amp;<a href='../D/5196.html' title='Multiple defined in 5 places.'>current_team</a> = <a href='../D/12927.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10637.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/8042.html' title='Multiple defined in 3 places.'>get_team</a>(<a href='../D/14454.html' title='Multiple defined in 3 places.'>side</a>);
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>const</strong> <a href='../S/1096.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp; <a href='../Y/17178.html' title='Multiple used in 11 places.'>recall_loc</a> = <a href='../Y/17801.html' title='Multiple used in 135 places.'>route</a>.<a href='../D/6556.html' title='Multiple defined in 5 places.'>front</a>();
+<a id='L59' name='L59'></a>  59         <a href='../D/15620.html' title='Multiple defined in 2 places.'>unit_map</a>::<a href='../D/9543.html' title='Multiple defined in 17 places.'>iterator</a> <a href='../Y/20997.html' title='Multiple used in 39 places.'>un_it</a> = <a href='../D/15665.html' title='Multiple defined in 8 places.'>units</a>.<a href='../D/6276.html' title='Multiple defined in 37 places.'>find</a>(<a href='../Y/17178.html' title='Multiple used in 11 places.'>recall_loc</a>);
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>if</strong> ( <a href='../Y/20997.html' title='Multiple used in 39 places.'>un_it</a> == <a href='../D/15665.html' title='Multiple defined in 8 places.'>units</a>.<a href='../D/5896.html' title='Multiple defined in 28 places.'>end</a>() ) <em class='brace'>{</em>
+<a id='L61' name='L61'></a>  61                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L62' name='L62'></a>  62         <em class='brace'>}</em>
 <a id='L63' name='L63'></a>  63 
-<a id='L64' name='L64'></a>  64         <em class='comment'>/// Function to be called if units have moved or otherwise changed.</em>
-<a id='L65' name='L65'></a>  65         <em class='comment'>/// It can also be called if it is desirable to calculate the cache</em>
-<a id='L66' name='L66'></a>  66         <em class='comment'>/// in advance of fog clearing.</em>
-<a id='L67' name='L67'></a>  67         <em class='comment'>/// @param[in] new_team  The team whose vision will be used. If left as</em>
-<a id='L68' name='L68'></a>  68         <em class='comment'>///                      nullptr, the cache will be just be cleared (to be</em>
-<a id='L69' name='L69'></a>  69         <em class='comment'>///                      recalculated later as needed).</em>
-<a id='L70' name='L70'></a>  70         <strong class='reserved'>void</strong> <a href='../S/903.html#L684' title='Referred from 684 in src/actions/move.cpp.'>cache_units</a>(<strong class='reserved'>const</strong> <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> * <a href='../S/1077.html#L147' title='Defined at 147 in src/teambuilder.cpp.'>new_team</a>=<a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>) <em class='brace'>{</em> <a href='../S/904.html#L192' title='Defined at 192 in src/actions/vision.cpp.'>calculate_jamming</a>(<a href='../S/1077.html#L147' title='Defined at 147 in src/teambuilder.cpp.'>new_team</a>); <em class='brace'>}</em>
-<a id='L71' name='L71'></a>  71         <em class='comment'>// cache_units() is currently a near-synonym for calculate_jamming(). The</em>
-<a id='L72' name='L72'></a>  72         <em class='comment'>// reason for the two names is so the private function says what it does,</em>
-<a id='L73' name='L73'></a>  73         <em class='comment'>// while the public one says why it might be invoked.</em>
-<a id='L74' name='L74'></a>  74 
-<a id='L75' name='L75'></a>  75         <em class='comment'>/// Clears shroud (and fog) around the provided location for @a view_team</em>
-<a id='L76' name='L76'></a>  76         <em class='comment'>/// based on @a sight_range, @a costs, and @a slowed.</em>
-<a id='L77' name='L77'></a>  77         <strong class='reserved'>bool</strong> <a href='../D/4511.html' title='Multiple defined in 5 places.'>clear_unit</a>(<strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/21450.html' title='Multiple used in 19 places.'>view_loc</a>, <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> &amp;<a href='../Y/21452.html' title='Multiple used in 23 places.'>view_team</a>,
-<a id='L78' name='L78'></a>  78                         <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../Y/21461.html' title='Multiple used in 12 places.'>viewer_id</a>, <strong class='reserved'>int</strong> <a href='../Y/18578.html' title='Multiple used in 13 places.'>sight_range</a>, <strong class='reserved'>bool</strong> <a href='../S/991.html#L773' title='Defined at 773 in src/units/unit.hpp.'>slowed</a>,
-<a id='L79' name='L79'></a>  79                         <strong class='reserved'>const</strong> <a href='../S/760.html#L26' title='Defined at 26 in src/movetype.hpp.'>movetype</a>::<a href='../S/760.html#L86' title='Defined at 86 in src/movetype.hpp.'>terrain_costs</a> &amp; <a href='../D/4927.html' title='Multiple defined in 2 places.'>costs</a>,
-<a id='L80' name='L80'></a>  80                         <strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp; <a href='../Y/16983.html' title='Multiple used in 9 places.'>real_loc</a>,
-<a id='L81' name='L81'></a>  81                             <strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13464.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>&gt;* <a href='../Y/12629.html' title='Multiple used in 7 places.'>known_units</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>,
-<a id='L82' name='L82'></a>  82                         <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> * <a href='../Y/9308.html' title='Multiple used in 15 places.'>enemy_count</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> * <a href='../Y/10364.html' title='Multiple used in 12 places.'>friend_count</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>,
-<a id='L83' name='L83'></a>  83                         <a href='../D/11155.html' title='Multiple defined in 2 places.'>move_unit_spectator</a> * <a href='../Y/18868.html' title='Multiple used in 13 places.'>spectator</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <strong class='reserved'>bool</strong> <a href='../Y/12085.html' title='Multiple used in 16 places.'>instant</a> = <strong class='reserved'>true</strong>);
-<a id='L84' name='L84'></a>  84         <em class='comment'>/// Clears shroud (and fog) around the provided location for @a view_team</em>
-<a id='L85' name='L85'></a>  85         <em class='comment'>/// as if @a viewer was standing there.</em>
-<a id='L86' name='L86'></a>  86         <strong class='reserved'>bool</strong> <a href='../D/4511.html' title='Multiple defined in 5 places.'>clear_unit</a>(<strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/21450.html' title='Multiple used in 19 places.'>view_loc</a>,
-<a id='L87' name='L87'></a>  87                         <strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp;<a href='../Y/21458.html' title='Multiple used in 58 places.'>viewer</a>, <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> &amp;<a href='../Y/21452.html' title='Multiple used in 23 places.'>view_team</a>,
-<a id='L88' name='L88'></a>  88                         <strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/13464.html' title='Multiple defined in 12 places.'>set</a>&lt;<a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>&gt;* <a href='../Y/12629.html' title='Multiple used in 7 places.'>known_units</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>,
-<a id='L89' name='L89'></a>  89                         <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> * <a href='../Y/9308.html' title='Multiple used in 15 places.'>enemy_count</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> * <a href='../Y/10364.html' title='Multiple used in 12 places.'>friend_count</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>,
-<a id='L90' name='L90'></a>  90                         <a href='../D/11155.html' title='Multiple defined in 2 places.'>move_unit_spectator</a> * <a href='../Y/18868.html' title='Multiple used in 13 places.'>spectator</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <strong class='reserved'>bool</strong> <a href='../Y/12085.html' title='Multiple used in 16 places.'>instant</a> = <strong class='reserved'>true</strong>);
-<a id='L91' name='L91'></a>  91         <em class='comment'>/// Clears shroud (and fog) around the provided location for @a view_team</em>
-<a id='L92' name='L92'></a>  92         <em class='comment'>/// as if @a viewer was standing there. Setting @a instant to false</em>
-<a id='L93' name='L93'></a>  93         <em class='comment'>/// allows some drawing delays that are used to make movement look better.</em>
-<a id='L94' name='L94'></a>  94         <strong class='reserved'>bool</strong> <a href='../R/3961.html' title='Multiple referred from 16 places.'>clear_unit</a>(<strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/21450.html' title='Multiple used in 19 places.'>view_loc</a>, <strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp;<a href='../Y/21458.html' title='Multiple used in 58 places.'>viewer</a>,
-<a id='L95' name='L95'></a>  95                         <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> &amp;<a href='../Y/21452.html' title='Multiple used in 23 places.'>view_team</a>, <strong class='reserved'>bool</strong> <a href='../Y/12085.html' title='Multiple used in 16 places.'>instant</a>)
-<a id='L96' name='L96'></a>  96         <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/4511.html' title='Multiple defined in 5 places.'>clear_unit</a>(<a href='../Y/21450.html' title='Multiple used in 19 places.'>view_loc</a>, <a href='../Y/21458.html' title='Multiple used in 58 places.'>viewer</a>, <a href='../Y/21452.html' title='Multiple used in 23 places.'>view_team</a>, <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>, <a href='../Y/12085.html' title='Multiple used in 16 places.'>instant</a>); <em class='brace'>}</em>
-<a id='L97' name='L97'></a>  97         <em class='comment'>/// Clears shroud (and fog) around the provided location for @a view_team</em>
-<a id='L98' name='L98'></a>  98         <em class='comment'>/// as if @a viewer was standing there.</em>
-<a id='L99' name='L99'></a>  99         <strong class='reserved'>bool</strong> <a href='../D/4511.html' title='Multiple defined in 5 places.'>clear_unit</a>(<strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/21450.html' title='Multiple used in 19 places.'>view_loc</a>, <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> &amp;<a href='../Y/21452.html' title='Multiple used in 23 places.'>view_team</a>,
-<a id='L100' name='L100'></a> 100                         <strong class='reserved'>const</strong> <a href='../S/888.html#L40' title='Defined at 40 in src/actions/vision.hpp.'>clearer_info</a> &amp;<a href='../Y/21458.html' title='Multiple used in 58 places.'>viewer</a>, <strong class='reserved'>bool</strong> <a href='../Y/12085.html' title='Multiple used in 16 places.'>instant</a>);
-<a id='L101' name='L101'></a> 101         <em class='comment'>/// Clears shroud (and fog) around the provided location as if @a viewer</em>
-<a id='L102' name='L102'></a> 102         <em class='comment'>/// was standing there.</em>
-<a id='L103' name='L103'></a> 103         <strong class='reserved'>bool</strong> <a href='../D/4511.html' title='Multiple defined in 5 places.'>clear_unit</a>(<strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/21450.html' title='Multiple used in 19 places.'>view_loc</a>, <strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp;<a href='../Y/21458.html' title='Multiple used in 58 places.'>viewer</a>,
-<a id='L104' name='L104'></a> 104                         <strong class='reserved'>bool</strong> <a href='../Y/6956.html' title='Multiple used in 3 places.'>can_delay</a> = <strong class='reserved'>false</strong>, <strong class='reserved'>bool</strong> <a href='../D/9148.html' title='Multiple defined in 6 places.'>invalidate</a> = <strong class='reserved'>true</strong>,
-<a id='L105' name='L105'></a> 105                         <strong class='reserved'>bool</strong> <a href='../Y/12085.html' title='Multiple used in 16 places.'>instant</a> = <strong class='reserved'>true</strong>);
-<a id='L106' name='L106'></a> 106 
-<a id='L107' name='L107'></a> 107         <em class='comment'>/// Clears shroud (and fog) at the provided location and its immediate neighbors.</em>
-<a id='L108' name='L108'></a> 108         <strong class='reserved'>bool</strong> <a href='../S/904.html#L494' title='Defined at 494 in src/actions/vision.cpp.'>clear_dest</a>(<strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/8646.html' title='Multiple used in 152 places.'>dest</a>, <strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp;<a href='../Y/21458.html' title='Multiple used in 58 places.'>viewer</a>);
-<a id='L109' name='L109'></a> 109 
-<a id='L110' name='L110'></a> 110         <em class='comment'>/// Erases the record of sighted events from earlier fog/shroud clearing.</em>
-<a id='L111' name='L111'></a> 111         <strong class='reserved'>void</strong> <a href='../S/904.html#L533' title='Defined at 533 in src/actions/vision.cpp.'>drop_events</a>();
-<a id='L112' name='L112'></a> 112 
-<a id='L113' name='L113'></a> 113         <em class='comment'>/// Fires the sighted events that were earlier recorded by fog/shroud clearing.</em>
-<a id='L114' name='L114'></a> 114         <strong class='reserved'>bool</strong> <a href='../D/6338.html' title='Multiple defined in 2 places.'>fire_events</a>();
-<a id='L115' name='L115'></a> 115 
-<a id='L116' name='L116'></a> 116         <em class='comment'>/// The invalidations that should occur after invoking clear_unit().</em>
-<a id='L117' name='L117'></a> 117         <strong class='reserved'>void</strong> <a href='../S/904.html#L581' title='Defined at 581 in src/actions/vision.cpp.'>invalidate_after_clear</a>();
-<a id='L118' name='L118'></a> 118 
-<a id='L119' name='L119'></a> 119 <strong class='reserved'>private</strong>:
-<a id='L120' name='L120'></a> 120         <em class='comment'>/// A record of a sighting event.</em>
-<a id='L121' name='L121'></a> 121         <strong class='reserved'>struct</strong> <a href='../S/904.html#L141' title='Defined at 141 in src/actions/vision.cpp.'>sight_data</a>;
-<a id='L122' name='L122'></a> 122 
-<a id='L123' name='L123'></a> 123         <em class='comment'>/// Causes this object's "jamming" map to be recalculated.</em>
-<a id='L124' name='L124'></a> 124         <strong class='reserved'>void</strong> <a href='../S/904.html#L192' title='Defined at 192 in src/actions/vision.cpp.'>calculate_jamming</a>(<strong class='reserved'>const</strong> <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> * <a href='../S/1077.html#L147' title='Defined at 147 in src/teambuilder.cpp.'>new_team</a>);
-<a id='L125' name='L125'></a> 125 
-<a id='L126' name='L126'></a> 126         <em class='comment'>/// Clears shroud from a single location.</em>
-<a id='L127' name='L127'></a> 127         <strong class='reserved'>bool</strong> <a href='../S/904.html#L226' title='Defined at 226 in src/actions/vision.cpp.'>clear_loc</a>(<a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> &amp;<a href='../Y/20162.html' title='Multiple used in 149 places.'>tm</a>, <strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../D/9921.html' title='Multiple defined in 7 places.'>loc</a>, <strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/21450.html' title='Multiple used in 19 places.'>view_loc</a>,
-<a id='L128' name='L128'></a> 128                        <strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../Y/9549.html' title='Multiple used in 3 places.'>event_non_loc</a>, <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../Y/21461.html' title='Multiple used in 12 places.'>viewer_id</a>,
-<a id='L129' name='L129'></a> 129                        <strong class='reserved'>bool</strong> <a href='../S/4057.html#L342' title='Defined at 342 in data/tools/unit_tree/helpers.py.'>check_units</a>, <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> &amp;<a href='../Y/9308.html' title='Multiple used in 15 places.'>enemy_count</a>, <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> &amp;<a href='../Y/10364.html' title='Multiple used in 12 places.'>friend_count</a>,
-<a id='L130' name='L130'></a> 130                        <a href='../D/11155.html' title='Multiple defined in 2 places.'>move_unit_spectator</a> * <a href='../Y/18868.html' title='Multiple used in 13 places.'>spectator</a> = <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>);
-<a id='L131' name='L131'></a> 131 
-<a id='L132' name='L132'></a> 132         <em class='comment'>/// Convenience wrapper for adding sighting data to the sightings_ vector.</em>
-<a id='L133' name='L133'></a> 133         <strong class='reserved'>inline</strong> <strong class='reserved'>void</strong> <a href='../S/904.html#L158' title='Defined at 158 in src/actions/vision.cpp.'>record_sighting</a>(<strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp; <a href='../Y/18070.html' title='Multiple used in 20 places.'>seen</a>, <strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp; <a href='../Y/18075.html' title='Multiple used in 6 places.'>seen_loc</a>,
-<a id='L134' name='L134'></a> 134                                     <a href='../Y/18660.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../Y/18582.html' title='Multiple used in 7 places.'>sighter_id</a>, <strong class='reserved'>const</strong> <a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp; <a href='../S/904.html#L145' title='Defined at 145 in src/actions/vision.cpp.'>sighter_loc</a>);
-<a id='L135' name='L135'></a> 135 
-<a id='L136' name='L136'></a> 136 <strong class='reserved'>private</strong>: <em class='comment'>// data</em>
-<a id='L137' name='L137'></a> 137         <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10717.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../S/1092.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>, <strong class='reserved'>int</strong>&gt; <a href='../Y/12486.html' title='Multiple used in 33 places.'>jamming_</a>;
-<a id='L138' name='L138'></a> 138         <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../S/904.html#L141' title='Defined at 141 in src/actions/vision.cpp.'>sight_data</a>&gt; <a href='../Y/18583.html' title='Multiple used in 10 places.'>sightings_</a>;
-<a id='L139' name='L139'></a> 139         <em class='comment'>/// Keeps track of the team associated with jamming_.</em>
-<a id='L140' name='L140'></a> 140         <strong class='reserved'>const</strong> <a href='../D/14940.html' title='Multiple defined in 3 places.'>team</a> * <a href='../S/904.html#L169' title='Defined at 169 in src/actions/vision.cpp.'>view_team_</a>;
-<a id='L141' name='L141'></a> 141 <em class='brace'>}</em>;
-<a id='L142' name='L142'></a> 142 
-<a id='L143' name='L143'></a> 143 
-<a id='L144' name='L144'></a> 144 <em class='comment'>/// Returns the sides that cannot currently see @a target.</em>
-<a id='L145' name='L145'></a> 145 <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<strong class='reserved'>int</strong>&gt; <a href='../S/904.html#L595' title='Defined at 595 in src/actions/vision.cpp.'>get_sides_not_seeing</a>(<strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp; <a href='../D/14926.html' title='Multiple defined in 2 places.'>target</a>);
-<a id='L146' name='L146'></a> 146 <em class='comment'>/// Fires sighted events for the sides that can see @a target.</em>
-<a id='L147' name='L147'></a> 147 <strong class='reserved'>bool</strong> <a href='../S/904.html#L622' title='Defined at 622 in src/actions/vision.cpp.'>actor_sighted</a>(<strong class='reserved'>const</strong> <a href='../D/15504.html' title='Multiple defined in 4 places.'>unit</a> &amp; <a href='../D/14926.html' title='Multiple defined in 2 places.'>target</a>, <strong class='reserved'>const</strong> <a href='../D/14703.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21382.html' title='Multiple used in 2722 places.'>vector</a>&lt;<strong class='reserved'>int</strong>&gt; * <a href='../Y/6866.html' title='Multiple used in 207 places.'>cache</a> =  <a href='../Y/15201.html' title='Multiple used in 1960 places.'>nullptr</a>);
-<a id='L148' name='L148'></a> 148 
-<a id='L149' name='L149'></a> 149 
-<a id='L150' name='L150'></a> 150 <em class='comment'>/// Function that recalculates the fog of war.</em>
-<a id='L151' name='L151'></a> 151 <strong class='reserved'>void</strong> <a href='../S/904.html#L705' title='Defined at 705 in src/actions/vision.cpp.'>recalculate_fog</a>(<strong class='reserved'>int</strong> <a href='../D/14402.html' title='Multiple defined in 3 places.'>side</a>);
-<a id='L152' name='L152'></a> 152 
-<a id='L153' name='L153'></a> 153 <em class='comment'>/// Function that will clear shroud (and fog) based on current unit positions.</em>
-<a id='L154' name='L154'></a> 154 <strong class='reserved'>bool</strong> <a href='../D/4500.html' title='Multiple defined in 2 places.'>clear_shroud</a>(<strong class='reserved'>int</strong> <a href='../D/14402.html' title='Multiple defined in 3 places.'>side</a>, <strong class='reserved'>bool</strong> <a href='../Y/17424.html' title='Multiple used in 4 places.'>reset_fog</a> = <strong class='reserved'>false</strong>, <strong class='reserved'>bool</strong> <a href='../D/6338.html' title='Multiple defined in 2 places.'>fire_events</a> = <strong class='reserved'>true</strong>);
-<a id='L155' name='L155'></a> 155 
-<a id='L156' name='L156'></a> 156 
-<a id='L157' name='L157'></a> 157 <em class='brace'>}</em><em class='comment'>//namespace actions</em>
+<a id='L64' name='L64'></a>  64         <a href='../S/993.html#L29' title='Defined at 29 in src/units/ptr.hpp.'>unit_ptr</a> <a href='../Y/20995.html' title='Multiple used in 197 places.'>un</a> = <a href='../Y/20997.html' title='Multiple used in 39 places.'>un_it</a>.<a href='../S/1003.html#L179' title='Defined at 179 in src/units/map.hpp.'>get_shared_ptr</a>();
+<a id='L65' name='L65'></a>  65         <strong class='reserved'>if</strong> (!<a href='../Y/20995.html' title='Multiple used in 197 places.'>un</a>) <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L67' name='L67'></a>  67         <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <a href='../D/14747.html' title='Multiple defined in 3 places.'>statistics</a>::<a href='../S/1025.html#L520' title='Defined at 520 in src/statistics.cpp.'>un_recall_unit</a>(*<a href='../Y/20995.html' title='Multiple used in 197 places.'>un</a>);
+<a id='L70' name='L70'></a>  70         <strong class='reserved'>int</strong> <a href='../D/4956.html' title='Multiple defined in 12 places.'>cost</a> = <a href='../D/14747.html' title='Multiple defined in 3 places.'>statistics</a>::<a href='../S/1025.html#L534' title='Defined at 534 in src/statistics.cpp.'>un_recall_unit_cost</a>(*<a href='../Y/20995.html' title='Multiple used in 197 places.'>un</a>);
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>if</strong> (<a href='../D/4956.html' title='Multiple defined in 12 places.'>cost</a> &lt; 0) <em class='brace'>{</em>
+<a id='L72' name='L72'></a>  72                 <a href='../D/5196.html' title='Multiple defined in 5 places.'>current_team</a>.<a href='../S/1080.html#L207' title='Defined at 207 in src/team.hpp.'>spend_gold</a>(-<a href='../D/5196.html' title='Multiple defined in 5 places.'>current_team</a>.<a href='../D/12492.html' title='Multiple defined in 3 places.'>recall_cost</a>());
+<a id='L73' name='L73'></a>  73         <em class='brace'>}</em>
+<a id='L74' name='L74'></a>  74         <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75                 <a href='../D/5196.html' title='Multiple defined in 5 places.'>current_team</a>.<a href='../S/1080.html#L207' title='Defined at 207 in src/team.hpp.'>spend_gold</a>(-<a href='../D/4956.html' title='Multiple defined in 12 places.'>cost</a>);
+<a id='L76' name='L76'></a>  76         <em class='brace'>}</em>
+<a id='L77' name='L77'></a>  77 
+<a id='L78' name='L78'></a>  78         <a href='../D/5196.html' title='Multiple defined in 5 places.'>current_team</a>.<a href='../D/12497.html' title='Multiple defined in 2 places.'>recall_list</a>().<a href='../D/2802.html' title='Multiple defined in 10 places.'>add</a>(<a href='../Y/20995.html' title='Multiple used in 197 places.'>un</a>);
+<a id='L79' name='L79'></a>  79         <em class='comment'>// invalidate before erasing allow us</em>
+<a id='L80' name='L80'></a>  80         <em class='comment'>// to also do the overlapped hexes</em>
+<a id='L81' name='L81'></a>  81         <a href='../D/8301.html' title='Multiple defined in 28 places.'>gui</a>.<a href='../D/9190.html' title='Multiple defined in 6 places.'>invalidate</a>(<a href='../Y/17178.html' title='Multiple used in 11 places.'>recall_loc</a>);
+<a id='L82' name='L82'></a>  82         <a href='../D/15665.html' title='Multiple defined in 8 places.'>units</a>.<a href='../D/5966.html' title='Multiple defined in 12 places.'>erase</a>(<a href='../Y/17178.html' title='Multiple used in 11 places.'>recall_loc</a>);
+<a id='L83' name='L83'></a>  83         <strong class='reserved'>this</strong>-&gt;<a href='../S/900.html#L26' title='Defined at 26 in src/actions/shroud_clearing_action.cpp.'>return_village</a>();
+<a id='L84' name='L84'></a>  84         <a href='../S/908.html#L124' title='Defined at 124 in src/actions/undo_action.cpp.'>execute_undo_umc_wml</a>();
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L86' name='L86'></a>  86 <em class='brace'>}</em>
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88 <em class='brace'>}</em>
+<a id='L89' name='L89'></a>  89 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L70'>[^]</a><a href='#L94'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L39'>[^]</a><a href='#L52'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

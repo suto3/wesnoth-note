@@ -1,248 +1,93 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>doc/design/gui2/overall_design.tex</title>
+<title>doc/design/gui2/progress_bar.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5808.html'>doc</a>/<a href='../files/5809.html'>design</a>/<a href='../files/5810.html'>gui2</a>/overall_design.tex</h2>
-<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5811.html'>doc</a>/<a href='../files/5812.html'>design</a>/<a href='../files/5813.html'>gui2</a>/progress_bar.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L15'>[^]</a><a href='#L39'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/1557.html' title='Multiple included from 9 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L15' title='Defined at 15.'>percentage_</a></li>
+<li><a href='#L24' title='Defined at 24.'>set_active</a></li>
+<li><a href='#L27' title='Defined at 27.'>get_active</a></li>
+<li><a href='#L30' title='Defined at 30.'>get_state</a></li>
+<li><a href='#L33' title='Defined at 33.'>disable_click_dismiss</a></li>
+<li><a href='#L39' title='Defined at 39.'>get_percentage</a></li>
+</ol>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 \chapter<em class='brace'>{</em>Overall design<em class='brace'>}</em>
-<a id='L2' name='L2'></a>   2 
-<a id='L3' name='L3'></a>   3 This chapter takes a deeper look into the overall design of the library. Before
-<a id='L4' name='L4'></a>   4 we can explain how things work, we'll have a look at the features; both
-<a id='L5' name='L5'></a>   5 implemented and planned <strong class='reserved'>for</strong> the future. Once we know what the gui should be able
-<a id='L6' name='L6'></a>   6 to <strong class='reserved'>do</strong> I'll explain how these goals are achieved. The chapter ends with a short
-<a id='L7' name='L7'></a>   7 explanation of the directory structure so you'll be able to find the parts of
-<a id='L8' name='L8'></a>   8 the library.
-<a id='L9' name='L9'></a>   9 
-<a id='L10' name='L10'></a>  10 \section<em class='brace'>{</em>Features<em class='brace'>}</em>
-<a id='L11' name='L11'></a>  11 
-<a id='L12' name='L12'></a>  12 Wesnoth runs on a large amount of devices, with an even larger amount of display
-<a id='L13' name='L13'></a>  13 resolutions, from $320\times 240$ on hand-held devices to $2560\times 1600$ on
-<a id='L14' name='L14'></a>  14 large 30" screens. The gui should look appealing on all these devices. Therefore
-<a id='L15' name='L15'></a>  15 there are three resolution groups:
-<a id='L16' name='L16'></a>  16 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L17' name='L17'></a>  17 \item[hand-held devices] For these devices the code needs to be compiled with
-<a id='L18' name='L18'></a>  18 \textbf<em class='brace'>{</em>TINY\_GUI<em class='brace'>}</em>. This forces all images to be scaled down by a factor two.
-<a id='L19' name='L19'></a>  19         The typical resolutions on these devices are $320\times 240$ -- $640\times
-<a id='L20' name='L20'></a>  20         480$.
-<a id='L21' name='L21'></a>  21 \item[PC] For the usage on PC's Wesnoth offers the resolutions $800\times 600$
-<a id='L22' name='L22'></a>  22         -- $2560\times 1600$\footnote<em class='brace'>{</em>And larger once screens that size become
-<a id='L23' name='L23'></a>  23         available.<em class='brace'>}</em>.
-<a id='L24' name='L24'></a>  24 \item[Netbooks] The first time when netbooks were introduced the normal resolution
-<a id='L25' name='L25'></a>  25         was $800\times 480$, which is slightly smaller than the minimum PC resolution.
-<a id='L26' name='L26'></a>  26         Therefore a start option \textsc<em class='brace'>{</em>--smallgui<em class='brace'>}</em> was added making minimal
-<a id='L27' name='L27'></a>  27         modifications to the layout\footnote<em class='brace'>{</em>Actually this is gui1 only.<em class='brace'>}</em>.
-<a id='L28' name='L28'></a>  28 \end<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L29' name='L29'></a>  29 
-<a id='L30' name='L30'></a>  30 In order to facilitate this range of resolutions the gui2 code allows several
-<a id='L31' name='L31'></a>  31 definitions of a window, tuned <strong class='reserved'>for</strong> a specific resolution. The reason is twofold;
-<a id='L32' name='L32'></a>  32 first to make a difference between the hand-held devices and PCs, second to allow
-<a id='L33' name='L33'></a>  33 different views <strong class='reserved'>for</strong> different resolutions.
+<a id='L1' name='L1'></a>   1 <em class='sharp'>#ifndef</em> <a href='../S/1793.html#L2' title='Defined at 2 in doc/design/gui2/progress_bar.hpp.'>GUI_WIDGETS_PROGRESS_BAR_HPP_INCLUDED</a>
+<a id='L2' name='L2'></a>   2 <em class='sharp'>#define</em> <a href='../S/1793.html#L1' title='Referred from 1 in doc/design/gui2/progress_bar.hpp.'>GUI_WIDGETS_PROGRESS_BAR_HPP_INCLUDED</a>
+<a id='L3' name='L3'></a>   3 
+<a id='L4' name='L4'></a>   4 <em class='sharp'>#include</em> "<a href='917.html'>gui/widgets/control.hpp</a>"
+<a id='L5' name='L5'></a>   5 
+<a id='L6' name='L6'></a>   6 <strong class='reserved'>namespace</strong> <a href='../R/7458.html' title='Multiple referred from 721 places.'>gui2</a> <em class='brace'>{</em>
+<a id='L7' name='L7'></a>   7 
+<a id='L8' name='L8'></a>   8 <strong class='reserved'>class</strong> <a href='../R/14085.html' title='Multiple referred from 4 places.'>tprogress_bar</a> <em class='comment'>/*@ \label{progress_bar.hpp:class} @*/</em>
+<a id='L9' name='L9'></a>   9         : <strong class='reserved'>public</strong> <a href='../Y/19744.html' title='Multiple used in 4 places.'>tcontrol</a>
+<a id='L10' name='L10'></a>  10 <em class='brace'>{</em>
+<a id='L11' name='L11'></a>  11 <strong class='reserved'>public</strong>:
+<a id='L12' name='L12'></a>  12 
+<a id='L13' name='L13'></a>  13         <a href='../S/1793.html#L8' title='Defined at 8 in doc/design/gui2/progress_bar.hpp.'>tprogress_bar</a>()  <em class='comment'>/*@ \label{progress_bar.hpp:constructor} @*/</em>
+<a id='L14' name='L14'></a>  14                 : <a href='../Y/19744.html' title='Multiple used in 4 places.'>tcontrol</a>(<a href='../D/206.html' title='Multiple defined in 3 places.'>COUNT</a>)
+<a id='L15' name='L15'></a>  15                 , <a href='../R/10786.html' title='Multiple referred from 8 places.'>percentage_</a>(-1)
+<a id='L16' name='L16'></a>  16         <em class='brace'>{</em>
+<a id='L17' name='L17'></a>  17                 <em class='comment'>// Force canvas update</em>
+<a id='L18' name='L18'></a>  18                 <a href='../S/629.html#L58' title='Defined at 58 in src/gui/widgets/progress_bar.cpp.'>set_percentage</a>(0);
+<a id='L19' name='L19'></a>  19         <em class='brace'>}</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21         <em class='comment'>/***** ***** ***** ***** Inherited ***** ***** ***** *****/</em> <em class='comment'>/*@ \label{progress_bar.hpp:inherited} @*/</em>
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23         <em class='comment'>/** Inherited from tcontrol. */</em>
+<a id='L24' name='L24'></a>  24         <strong class='reserved'>void</strong> <a href='../R/12439.html' title='Multiple referred from 137 places.'>set_active</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <em class='comment'>/*active*/</em>) <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26         <em class='comment'>/** Inherited from tcontrol. */</em>
+<a id='L27' name='L27'></a>  27         <strong class='reserved'>bool</strong> <a href='../R/6460.html' title='Multiple referred from 57 places.'>get_active</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>; <em class='brace'>}</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29         <em class='comment'>/** Inherited from tcontrol. */</em>
+<a id='L30' name='L30'></a>  30         <strong class='reserved'>unsigned</strong> <a href='../R/7190.html' title='Multiple referred from 98 places.'>get_state</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/408.html' title='Multiple defined in 18 places.'>ENABLED</a>; <em class='brace'>}</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32         <em class='comment'>/** Inherited from tcontrol. */</em>
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>bool</strong> <a href='../R/4788.html' title='Multiple referred from 22 places.'>disable_click_dismiss</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>; <em class='brace'>}</em>
 <a id='L34' name='L34'></a>  34 
-<a id='L35' name='L35'></a>  35 The main example of this feature\footnote<em class='brace'>{</em>Not yet implemented, but one of the
-<a id='L36' name='L36'></a>  36 main reasons to add this feature.<em class='brace'>}</em> is the attack dialogue. The dialogue has a
-<a id='L37' name='L37'></a>  37 button to show the damage calculation, which shows a new dialogue with the
-<a id='L38' name='L38'></a>  38 calculation overview. From the UI point of view I consider that rather ugly and
-<a id='L39' name='L39'></a>  39 rather have tabs to <strong class='reserved'>switch</strong> between the views. But when I have a larger screen the
-<a id='L40' name='L40'></a>  40 dialogue only fills a small part and I need to <strong class='reserved'>switch</strong> between tabs to see the
-<a id='L41' name='L41'></a>  41 info, in that <strong class='reserved'>case</strong> I rather have one dialogue without tabs, which directly shows
-<a id='L42' name='L42'></a>  42 all information. When the user changes the resolution the dialogue should <strong class='reserved'>switch</strong>
-<a id='L43' name='L43'></a>  43 between these two views, depending on the current resolution.
-<a id='L44' name='L44'></a>  44 
-<a id='L45' name='L45'></a>  45 \paragraph<em class='brace'>{</em><em class='brace'>}</em>
-<a id='L46' name='L46'></a>  46 
-<a id='L47' name='L47'></a>  47 The gui should be able to adapt to the size actually needed, the current gui
-<a id='L48' name='L48'></a>  48 uses fixed sizes at some places. This leads to problems such as when the screen
-<a id='L49' name='L49'></a>  49 resolution is reduced widgets end up outside the dialogue or get truncated. The
-<a id='L50' name='L50'></a>  50 same <strong class='reserved'>for</strong> some translated texts, where the translation is much longer as the
-<a id='L51' name='L51'></a>  51 English original. Gui2 solves this problem by dynamically determining the size
-<a id='L52' name='L52'></a>  52 of a widget and adjust the layout until it fits. This has the disadvantage that
-<a id='L53' name='L53'></a>  53 dialogues with a lot of dynamic content, resize at random times and changing the
-<a id='L54' name='L54'></a>  54 layout of the dialogue slightly. Another disadvantage is that when a dialogue
-<a id='L55' name='L55'></a>  55 doesn't fit Wesnoth terminates. This problem can be fixed by adding scrollbars
-<a id='L56' name='L56'></a>  56 to every window. When the dialogue doesn't fit the scrollbars are used and the
-<a id='L57' name='L57'></a>  57 dialogue fits again, might be a bit ugly but at least everything fits again.
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36         <em class='comment'>/***** ***** ***** setters / getters for members ***** ****** *****/</em> <em class='comment'>/*@ \label{progress_bar.hpp:settersgetters} @*/</em>
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38         <strong class='reserved'>void</strong> <a href='../S/629.html#L58' title='Defined at 58 in src/gui/widgets/progress_bar.cpp.'>set_percentage</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/16324.html' title='Multiple used in 12 places.'>percentage</a>);
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>unsigned</strong> <a href='../S/184.html#L637' title='Referred from 637 in src/scripting/lua_gui2.cpp.'>get_percentage</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/11857.html' title='Multiple defined in 2 places.'>percentage_</a>; <em class='brace'>}</em>
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 <strong class='reserved'>private</strong>:
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43         <em class='comment'>/**</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'>         * Possible states of the widget.</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'>         *</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'>         * Note the order of the states must be the same as defined in settings.hpp.</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'>         */</em>
+<a id='L48' name='L48'></a>  48         <strong class='reserved'>enum</strong> tstate <em class='brace'>{</em> <a href='../R/352.html' title='Multiple referred from 40 places.'>ENABLED</a>, <a href='../R/180.html' title='Multiple referred from 5 places.'>COUNT</a> <em class='brace'>}</em>; <em class='comment'>/*@ \label{progress_bar.hpp:state} @*/</em>
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50         <em class='comment'>/** The percentage done. */</em>
+<a id='L51' name='L51'></a>  51         <strong class='reserved'>unsigned</strong> <a href='../D/11857.html' title='Multiple defined in 2 places.'>percentage_</a>;
+<a id='L52' name='L52'></a>  52 
+<a id='L53' name='L53'></a>  53         <em class='comment'>/** Inherited from tcontrol. */</em>
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>const</strong> <a href='../D/14757.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14818.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/7435.html' title='Multiple defined in 5 places.'>get_control_type</a>() <strong class='reserved'>const</strong>;
+<a id='L55' name='L55'></a>  55 <em class='brace'>}</em>;
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
 <a id='L58' name='L58'></a>  58 
-<a id='L59' name='L59'></a>  59 \paragraph<em class='brace'>{</em><em class='brace'>}</em>
+<a id='L59' name='L59'></a>  59 <em class='sharp'>#endif</em>
 <a id='L60' name='L60'></a>  60 
-<a id='L61' name='L61'></a>  61 It must be possible <strong class='reserved'>for</strong> WML designers to change the entire gui of Wesnoth with
-<a id='L62' name='L62'></a>  62 their own version. For example Spacenoth\footnote<em class='brace'>{</em>That project is dead, but
-<a id='L63' name='L63'></a>  63 that doesn't matter for this example.} is Wesnoth in a space setting, so the
-<a id='L64' name='L64'></a>  64 project might want to use a more fitting user interface.
-<a id='L65' name='L65'></a>  65 
-<a id='L66' name='L66'></a>  66 Adding a new gui is a lot of work and can't be done in one fell swoop, so the
-<a id='L67' name='L67'></a>  67 code needs to support a gradual conversion. Therefore when you select your own
-<a id='L68' name='L68'></a>  68 theme\footnote<em class='brace'>{</em>Support <strong class='reserved'>for</strong> this selection and the entire fall-back haven't been
-<a id='L69' name='L69'></a>  69 added yet. Obviously I want to add support, but it remains low priority until
-<a id='L70' name='L70'></a>  70 somebody really wants to add their own gui.<em class='brace'>}</em> the engine first searches in the
-<a id='L71' name='L71'></a>  71 new theme <strong class='reserved'>for</strong> items\footnote<em class='brace'>{</em>A widget or window.<em class='brace'>}</em>. When an item is not found it
-<a id='L72' name='L72'></a>  72 uses that item from the <strong class='reserved'>default</strong> theme. Therefore it's mandatory that every item
-<a id='L73' name='L73'></a>  73 is defined <strong class='reserved'>for</strong> the <strong class='reserved'>default</strong> gui, which the engine validates at
-<a id='L74' name='L74'></a>  74 startup\footnote<em class='brace'>{</em>That causes the problem that Wesnoth sometimes refused to start
-<a id='L75' name='L75'></a>  75 when the source and data are out-of-sync.<em class='brace'>}</em>.
-<a id='L76' name='L76'></a>  76 
-<a id='L77' name='L77'></a>  77 \section<em class='brace'>{</em>The big picture<em class='brace'>}</em>
-<a id='L78' name='L78'></a>  78 
-<a id='L79' name='L79'></a>  79 First we dive into the components that define the gui.
-<a id='L80' name='L80'></a>  80 
-<a id='L81' name='L81'></a>  81 \subsection<em class='brace'>{</em>Widget<em class='brace'>}</em>
-<a id='L82' name='L82'></a>  82 
-<a id='L83' name='L83'></a>  83 A widget is the basic user interface element, like a label, a button or a text
-<a id='L84' name='L84'></a>  84 entry. Every widget has its own behaviour, which sometimes can be influenced by
-<a id='L85' name='L85'></a>  85 certain settings, but the main behaviour is fixed per widget. Next to behaviour
-<a id='L86' name='L86'></a>  86 a widget also has a visual representation so the user can see and interact with
-<a id='L87' name='L87'></a>  87 the widget.
-<a id='L88' name='L88'></a>  88 
-<a id='L89' name='L89'></a>  89 Before the widget is shown to the user it needs to be created first, the
-<a id='L90' name='L90'></a>  90 creation happens in the window builder class. This class reads the definition of
-<a id='L91' name='L91'></a>  91 a widget and fills in the blanks et voil\`a the widget is there. Let's go over
-<a id='L92' name='L92'></a>  92 this part in more slow-motion.
-<a id='L93' name='L93'></a>  93 
-<a id='L94' name='L94'></a>  94 \paragraph<em class='brace'>{</em>The definition<em class='brace'>}</em>
-<a id='L95' name='L95'></a>  95 The definition determines how a widget looks and some basic properties, these
-<a id='L96' name='L96'></a>  96 properties are the same <strong class='reserved'>for</strong> all instances of that widget. For example a button
-<a id='L97' name='L97'></a>  97 has a minimum size so the decoration can be drawn. It's possible to make
-<a id='L98' name='L98'></a>  98 multiple definitions of a button. These different definitions, can look
-<a id='L99' name='L99'></a>  99 different, have different minimum sizes and other properties.
-<a id='L100' name='L100'></a> 100 
-<a id='L101' name='L101'></a> 101 These definitions are written in WML and a small loader class loads and
-<a id='L102' name='L102'></a> 102 validates the definition. The definition is then added to the list of known
-<a id='L103' name='L103'></a> 103 widgets of this type.
-<a id='L104' name='L104'></a> 104 
-<a id='L105' name='L105'></a> 105 The definition of the widget depends on the resolution, this is <strong class='reserved'>for</strong> example used
-<a id='L106' name='L106'></a> 106 in the button. It has a minimum size depending on the decoration used, in
-<a id='L107' name='L107'></a> 107 \textbf<em class='brace'>{</em>TINY\_GUI<em class='brace'>}</em> mode the decoration is scaled down, so the minimum size can
-<a id='L108' name='L108'></a> 108 also be reduced.
-<a id='L109' name='L109'></a> 109 
-<a id='L110' name='L110'></a> 110 \paragraph<em class='brace'>{</em>The builder<em class='brace'>}</em>
-<a id='L111' name='L111'></a> 111 The builder is started from the C++ code, started <strong class='reserved'>while</strong> building a window. This
-<a id='L112' name='L112'></a> 112 window definition contains a list of widgets to build with more instance specific
-<a id='L113' name='L113'></a> 113 values. For example a label builder has the text to show to the user as
-<a id='L114' name='L114'></a> 114 parameter.
-<a id='L115' name='L115'></a> 115 
-<a id='L116' name='L116'></a> 116 These builder ``scripts'' are also written in WML and loaded by a small loader
-<a id='L117' name='L117'></a> 117 class that does the validation and builds the needed widget.
-<a id='L118' name='L118'></a> 118 
-<a id='L119' name='L119'></a> 119 \paragraph<em class='brace'>{</em>Widget<em class='brace'>}</em>
-<a id='L120' name='L120'></a> 120 The widget itself is written in a larger C++ class and it defines the behaviour
-<a id='L121' name='L121'></a> 121 and provides various hooks to modify the properties of that widget. These hooks
-<a id='L122' name='L122'></a> 122 are used by the builder, but can also be modified later by the engine.
-<a id='L123' name='L123'></a> 123 
-<a id='L124' name='L124'></a> 124 Other hooks provide bindings to react to events. The bindings are now rather
-<a id='L125' name='L125'></a> 125 <strong class='reserved'>static</strong>, but with the new event handling added late in the 1.8 release series
-<a id='L126' name='L126'></a> 126 more things are possible. The plan is to enhance this part during the 1.9
-<a id='L127' name='L127'></a> 127 release series and deprecate and remove the current interface.
-<a id='L128' name='L128'></a> 128 
-<a id='L129' name='L129'></a> 129 Of course the question ``why wait until 1.9'' raises. The reason is simple: it
-<a id='L130' name='L130'></a> 130 was added late in the 1.8 cycle to fix certain issues with the MP lobby. At that
-<a id='L131' name='L131'></a> 131 time I had no time to convert the rest of the code, since I was working on the
-<a id='L132' name='L132'></a> 132 MP lobby instead.
-<a id='L133' name='L133'></a> 133 
-<a id='L134' name='L134'></a> 134 \subsection<em class='brace'>{</em>Window<em class='brace'>}</em>
-<a id='L135' name='L135'></a> 135 
-<a id='L136' name='L136'></a> 136 A window can mean two things, the window widget and the window definition. In
-<a id='L137' name='L137'></a> 137 this section the window definition is meant. Already discussed before, but a bit
-<a id='L138' name='L138'></a> 138 more verbose this time.
-<a id='L139' name='L139'></a> 139 
-<a id='L140' name='L140'></a> 140 The window definition defines a window and which widgets are placed in the
-<a id='L141' name='L141'></a> 141 window. This window definition also depends on the resolution. This allows the
-<a id='L142' name='L142'></a> 142 window to look different depending on the resolution. The changes can be small
-<a id='L143' name='L143'></a> 143 or the window can look completely different.
-<a id='L144' name='L144'></a> 144 
-<a id='L145' name='L145'></a> 145 \subsection<em class='brace'>{</em>Dialogue<em class='brace'>}</em>
-<a id='L146' name='L146'></a> 146 
-<a id='L147' name='L147'></a> 147 A dialogue is a pure C++ thing. A dialogue shows a window, but is not a window itself.
-<a id='L148' name='L148'></a> 148 So what's the difference\footnote{These are the definitions used in the gui2
-<a id='L149' name='L149'></a> 149 code and not the definition of other window toolkits.<em class='brace'>}</em>? A window is a dumb
-<a id='L150' name='L150'></a> 150 combination of widgets created depending on the definitions in a WML file. After
-<a id='L151' name='L151'></a> 151 the window is created it often needs extra content and reacts to certain events.
-<a id='L152' name='L152'></a> 152 For example the language dialogue after building has an empty list of languages.
-<a id='L153' name='L153'></a> 153 This is where the dialogue comes into play. The user asks <strong class='reserved'>for</strong> the language
-<a id='L154' name='L154'></a> 154 selection dialogue. The code creates and shows a dialogue. The dialogue code
-<a id='L155' name='L155'></a> 155 builds a window, then fills the language list with the available languages,
-<a id='L156' name='L156'></a> 156 selects the current language and then shows it to the user.
-<a id='L157' name='L157'></a> 157 
-<a id='L158' name='L158'></a> 158 In other dialogues the code also needs to wire in event handlers or build other
-<a id='L159' name='L159'></a> 159 structures. It searches the wanted widget by id, in some cases it doesn't even
-<a id='L160' name='L160'></a> 160 care what kind of widget is used. In other cases it needs to be of a certain
-<a id='L161' name='L161'></a> 161 class or ``concept''. This allows a flexible design and lets the user select the
-<a id='L162' name='L162'></a> 162 kind of widget used in some cases.
-<a id='L163' name='L163'></a> 163 
-<a id='L164' name='L164'></a> 164 So the dialogue is the sugar between the WML window and an interactive dialogue
-<a id='L165' name='L165'></a> 165 shown in the game.
-<a id='L166' name='L166'></a> 166 
-<a id='L167' name='L167'></a> 167 \section<em class='brace'>{</em>Directory structure<em class='brace'>}</em>
-<a id='L168' name='L168'></a> 168 
-<a id='L169' name='L169'></a> 169 This section describes the directories available. Instead of listing them in
-<a id='L170' name='L170'></a> 170 alphabetic order, I list them in an order that makes explaining them more natural.
-<a id='L171' name='L171'></a> 171 
-<a id='L172' name='L172'></a> 172 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L173' name='L173'></a> 173 \item[src/gui] The general source code directory with all parts used <strong class='reserved'>for</strong> the gui.
-<a id='L174' name='L174'></a> 174 
-<a id='L175' name='L175'></a> 175 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L176' name='L176'></a> 176 \item[dialogs] This directory contains all dialogues used in Wesnoth, in
-<a id='L177' name='L177'></a> 177         general every file contains one dialogue, the name of the file being the
-<a id='L178' name='L178'></a> 178         logical name of what the dialogue does. Some dialogues have a helper
-<a id='L179' name='L179'></a> 179         dialogue, which is sometimes embedded in the same file.
-<a id='L180' name='L180'></a> 180 \item[widgets] This directory contains all widgets used in the library. Every
-<a id='L181' name='L181'></a> 181         file contains one widget. Also base classes or concepts of widgets are
-<a id='L182' name='L182'></a> 182         stored in this directory. During the development it also accumulated some
-<a id='L183' name='L183'></a> 183         helper files, which don't fit in the aforementioned descriptions - this led
-<a id='L184' name='L184'></a> 184         to the creation of the auxiliary directory. Some files haven't been moved to
-<a id='L185' name='L185'></a> 185         this new directory yet.
-<a id='L186' name='L186'></a> 186 \item[auxiliary] This directory contains auxiliary classes. Some helper
-<a id='L187' name='L187'></a> 187         parts became so large that they got their own subdirectory.
-<a id='L188' name='L188'></a> 188 
-<a id='L189' name='L189'></a> 189 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L190' name='L190'></a> 190 \item[event] Contains all event handling code, the translation from SDL events
-<a id='L191' name='L191'></a> 191         to the internal events and their dispatching.
-<a id='L192' name='L192'></a> 192 \item[widget\_definition] Contains the code to serialize the WML to an internal
-<a id='L193' name='L193'></a> 193         data structure, needed to define that kind of widget. The names of the files
-<a id='L194' name='L194'></a> 194         match the widget names. (Most files are rather small, but I prefer small
-<a id='L195' name='L195'></a> 195         single tasked files over huge files controlling a lot of code\footnote<em class='brace'>{</em>Some
-<a id='L196' name='L196'></a> 196         might remember I started with a single file, which did exactly that, but the
-<a id='L197' name='L197'></a> 197         file got too large to maintain efficiently.<em class='brace'>}</em>.
-<a id='L198' name='L198'></a> 198 \item[window\_builder] Contains the code to create a widget object from the
-<a id='L199' name='L199'></a> 199         widget definition and the data supplied in the window definition. Again the
-<a id='L200' name='L200'></a> 200         name of the file matches the name of widget they build. (These files are
-<a id='L201' name='L201'></a> 201         also mostly small.)
-<a id='L202' name='L202'></a> 202 \end<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L203' name='L203'></a> 203 
-<a id='L204' name='L204'></a> 204 \end<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L205' name='L205'></a> 205 
-<a id='L206' name='L206'></a> 206 \item[data/gui] The general data directory with all parts used <strong class='reserved'>for</strong> the gui. All
-<a id='L207' name='L207'></a> 207         guis shipped with Wesnoth should be in a sub-directory of this one, with a
-<a id='L208' name='L208'></a> 208         config file with the name of the directory as main entry point and include
-<a id='L209' name='L209'></a> 209         the sub-directory. At the time of writing only one gui is shipped, the
-<a id='L210' name='L210'></a> 210         <strong class='reserved'>default</strong> one.
-<a id='L211' name='L211'></a> 211 
-<a id='L212' name='L212'></a> 212 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L213' name='L213'></a> 213 \item[<strong class='reserved'>default</strong>] This directory is the bases <strong class='reserved'>for</strong> the <strong class='reserved'>default</strong> gui.
-<a id='L214' name='L214'></a> 214 
-<a id='L215' name='L215'></a> 215 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L216' name='L216'></a> 216 \item[macro] This directory contains some helper macros, <strong class='reserved'>for</strong> <strong class='reserved'>default</strong> font sizes.
-<a id='L217' name='L217'></a> 217 \item[widget] This directory contains the definitions of widgets. Since there
-<a id='L218' name='L218'></a> 218         can be multiple definitions of a widget their name is the name of the widget
-<a id='L219' name='L219'></a> 219         with a suffix. The suffix <strong class='reserved'>for</strong> the <strong class='reserved'>default</strong> widgets is \textsc<em class='brace'>{</em><strong class='reserved'>default</strong><em class='brace'>}</em>, <strong class='reserved'>for</strong>
-<a id='L220' name='L220'></a> 220         the others an appropriate name is picked.
-<a id='L221' name='L221'></a> 221 \item[window] Contains definitions of windows, the name of the file is the
-<a id='L222' name='L222'></a> 222         name of the dialogue it represents.
-<a id='L223' name='L223'></a> 223 \end<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L224' name='L224'></a> 224 
-<a id='L225' name='L225'></a> 225 \end<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L226' name='L226'></a> 226 
-<a id='L227' name='L227'></a> 227 \end<em class='brace'>{</em>description<em class='brace'>}</em>
-<a id='L228' name='L228'></a> 228 
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L15'>[^]</a><a href='#L39'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

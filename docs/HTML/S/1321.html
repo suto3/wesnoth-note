@@ -1,32 +1,197 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>utils/pywmlx/state/state.py</title>
+<title>utils/pywmlx/wmlerr.py</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5886.html'>utils</a>/<a href='../files/5893.html'>pywmlx</a>/<a href='../files/5894.html'>state</a>/state.py</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L2'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5889.html'>utils</a>/<a href='../files/5896.html'>pywmlx</a>/wmlerr.py</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L36'>[^]</a><a href='#L159'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L2' title='Defined at 2.'>__init__</a></li>
+<li><a href='#L36' title='Defined at 36.'>wmlerr_debug</a></li>
+<li><a href='#L42' title='Defined at 42.'>ansi_setEnabled</a></li>
+<li><a href='#L48' title='Defined at 48.'>wincol_setEnabled</a></li>
+<li><a href='#L69' title='Defined at 69.'>warnall</a></li>
+<li><a href='#L74' title='Defined at 74.'>set_warnall</a></li>
+<li><a href='#L79' title='Defined at 79.'>WmlError</a></li>
+<li><a href='#L82' title='Defined at 82.'>WmlWarning</a></li>
+<li><a href='#L87' title='Defined at 87.'>print_wmlerr</a></li>
+<li><a href='#L134' title='Defined at 134.'>my_showwarning</a></li>
+<li><a href='#L147' title='Defined at 147.'>wmlerr</a></li>
+<li><a href='#L159' title='Defined at 159.'>wmlwarn</a></li>
 </ol>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 class <a href='../R/1882.html' title='Multiple referred from 5 places.'>State</a>:
-<a id='L2' name='L2'></a>   2     def <a href='../R/2410.html' title='Multiple referred from 39 places.'>__init__</a>(<a href='../S/650.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/17196.html' title='Multiple used in 134 places.'>regex</a>, <a href='../D/13123.html' title='Multiple defined in 57 places.'>run</a>, <a href='../Y/11716.html' title='Multiple used in 42 places.'>iffail</a>):
-<a id='L3' name='L3'></a>   3         <a href='../S/650.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/17196.html' title='Multiple used in 134 places.'>regex</a> = regex
-<a id='L4' name='L4'></a>   4         <a href='../S/650.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../D/13123.html' title='Multiple defined in 57 places.'>run</a> = run
-<a id='L5' name='L5'></a>   5         <a href='../S/650.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>.<a href='../Y/11716.html' title='Multiple used in 42 places.'>iffail</a> = iffail
+<a id='L1' name='L1'></a>   1 import <a href='../Y/15871.html' title='Multiple used in 440 places.'>os</a>
+<a id='L2' name='L2'></a>   2 import <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>
+<a id='L3' name='L3'></a>   3 import <a href='../Y/21832.html' title='Multiple used in 7 places.'>warnings</a>
+<a id='L4' name='L4'></a>   4 import <a href='../Y/8088.html' title='Multiple used in 5 places.'>ctypes</a>
+<a id='L5' name='L5'></a>   5 import <strong class='reserved'>struct</strong>
 <a id='L6' name='L6'></a>   6 
+<a id='L7' name='L7'></a>   7 <a href='../R/5195.html' title='Multiple referred from 7 places.'>enabled_text_col</a> = <a href='../Y/3026.html' title='Multiple used in 244 places.'>True</a>
+<a id='L8' name='L8'></a>   8 <a href='../R/8577.html' title='Multiple referred from 3 places.'>is_utest</a> = <a href='../Y/1183.html' title='Multiple used in 286 places.'>False</a>
+<a id='L9' name='L9'></a>   9 <a href='../R/2488.html' title='Multiple referred from 5 places.'>_warnall</a> = <a href='../Y/1183.html' title='Multiple used in 286 places.'>False</a>
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11 
+<a id='L12' name='L12'></a>  12 # these constants are used by the Win32 API
+<a id='L13' name='L13'></a>  13 <a href='../R/503.html' title='Multiple referred from 2 places.'>FG_RED</a> = 4
+<a id='L14' name='L14'></a>  14 <a href='../S/1321.html#L110' title='Referred from 110 in utils/pywmlx/wmlerr.py.'>FG_GREEN</a> = 2
+<a id='L15' name='L15'></a>  15 <a href='../S/1321.html#L104' title='Referred from 104 in utils/pywmlx/wmlerr.py.'>FG_BLUE</a> = 1
+<a id='L16' name='L16'></a>  16 <a href='../R/502.html' title='Multiple referred from 3 places.'>FG_INTENSITY</a> = 8
+<a id='L17' name='L17'></a>  17 BG_RED = 64
+<a id='L18' name='L18'></a>  18 BG_GREEN = 32
+<a id='L19' name='L19'></a>  19 BG_BLUE = 16
+<a id='L20' name='L20'></a>  20 BG_INTENSITY = 128
+<a id='L21' name='L21'></a>  21 STD_INPUT_HANDLE = -10
+<a id='L22' name='L22'></a>  22 <a href='../S/1321.html#L57' title='Referred from 57 in utils/pywmlx/wmlerr.py.'>STD_OUTPUT_HANDLE</a> = -11
+<a id='L23' name='L23'></a>  23 <a href='../S/1280.html#L40' title='Referred from 40 in projectfiles/VC12/WindowsTimeout.cpp.'>STD_ERROR_HANDLE</a> = -12
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 # there are three ways to store the console's default status
+<a id='L26' name='L26'></a>  26 # the first requires to redefine the C structures used by the Win32 API
+<a id='L27' name='L27'></a>  27 # by using the ctypes.Structure class, and pass them by reference
+<a id='L28' name='L28'></a>  28 # by using ctypes.byref
+<a id='L29' name='L29'></a>  29 # the second requires to use ctypes.create_string_buffer
+<a id='L30' name='L30'></a>  30 # the third one just requires to create an empty bytes object
+<a id='L31' name='L31'></a>  31 # both of them must be able to contain exactly 22 bytes/characters
+<a id='L32' name='L32'></a>  32 # and you need to use the <strong class='reserved'>struct</strong> module to decode the values
+<a id='L33' name='L33'></a>  33 <a href='../R/4208.html' title='Multiple referred from 2 places.'>console_defaults</a> = <a href='../Y/6779.html' title='Multiple used in 18 places.'>bytes</a>(22)
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 def wmlerr_debug():
+<a id='L37' name='L37'></a>  37     global <a href='../S/1321.html#L8' title='Defined at 8 in utils/pywmlx/wmlerr.py.'>is_utest</a>
+<a id='L38' name='L38'></a>  38     <a href='../S/1321.html#L8' title='Defined at 8 in utils/pywmlx/wmlerr.py.'>is_utest</a> = <a href='../Y/3026.html' title='Multiple used in 244 places.'>True</a>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41 
+<a id='L42' name='L42'></a>  42 def <a href='../S/1329.html#L1' title='Referred from 1 in utils/pywmlx/__init__.py.'>ansi_setEnabled</a>(<a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a>):
+<a id='L43' name='L43'></a>  43     global <a href='../S/1321.html#L7' title='Defined at 7 in utils/pywmlx/wmlerr.py.'>enabled_text_col</a>
+<a id='L44' name='L44'></a>  44     <a href='../S/1321.html#L7' title='Defined at 7 in utils/pywmlx/wmlerr.py.'>enabled_text_col</a> = <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a>
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48 def <a href='../S/1329.html#L2' title='Referred from 2 in utils/pywmlx/__init__.py.'>wincol_setEnabled</a>(<a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a>):
+<a id='L49' name='L49'></a>  49     global <a href='../S/1321.html#L7' title='Defined at 7 in utils/pywmlx/wmlerr.py.'>enabled_text_col</a>
+<a id='L50' name='L50'></a>  50     global <a href='../D/8318.html' title='Multiple defined in 2 places.'>handle</a>
+<a id='L51' name='L51'></a>  51     global default_console_status
+<a id='L52' name='L52'></a>  52     global <a href='../Y/8503.html' title='Multiple used in 3 places.'>default_color</a>
+<a id='L53' name='L53'></a>  53     <a href='../S/1321.html#L7' title='Defined at 7 in utils/pywmlx/wmlerr.py.'>enabled_text_col</a> = <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a>
+<a id='L54' name='L54'></a>  54     <strong class='reserved'>if</strong> <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/16398.html' title='Multiple used in 9 places.'>platform</a>.<a href='../Y/19210.html' title='Multiple used in 117 places.'>startswith</a>('win') and <a href='../S/1321.html#L7' title='Defined at 7 in utils/pywmlx/wmlerr.py.'>enabled_text_col</a>:
+<a id='L55' name='L55'></a>  55         # and now, let's start playing with the Win32 API
+<a id='L56' name='L56'></a>  56         # first of all, we need to get a handle to the console output
+<a id='L57' name='L57'></a>  57         <a href='../D/8318.html' title='Multiple defined in 2 places.'>handle</a> = <a href='../Y/8088.html' title='Multiple used in 5 places.'>ctypes</a>.<a href='../Y/21984.html' title='Multiple used in 4 places.'>windll</a>.<a href='../Y/12713.html' title='Multiple used in 7 places.'>kernel32</a>.<a href='../Y/1277.html' title='Multiple used in 2 places.'>GetStdHandle</a>(<a href='../S/1321.html#L22' title='Defined at 22 in utils/pywmlx/wmlerr.py.'>STD_OUTPUT_HANDLE</a>)
+<a id='L58' name='L58'></a>  58         # and then we store the current console status
+<a id='L59' name='L59'></a>  59         # to be able to reset the original color
+<a id='L60' name='L60'></a>  60         <a href='../Y/8088.html' title='Multiple used in 5 places.'>ctypes</a>.<a href='../Y/21984.html' title='Multiple used in 4 places.'>windll</a>.<a href='../Y/12713.html' title='Multiple used in 7 places.'>kernel32</a>.GetConsoleScreenBufferInfo(<a href='../D/8318.html' title='Multiple defined in 2 places.'>handle</a>,
+<a id='L61' name='L61'></a>  61                                                           <a href='../S/1321.html#L33' title='Defined at 33 in utils/pywmlx/wmlerr.py.'>console_defaults</a>)
+<a id='L62' name='L62'></a>  62         # by using <strong class='reserved'>struct</strong>.unpack_from, platform endianness is automatically
+<a id='L63' name='L63'></a>  63         # handled
+<a id='L64' name='L64'></a>  64         # this is why I'm using it, instead of a bitwise operation
+<a id='L65' name='L65'></a>  65         <a href='../Y/8503.html' title='Multiple used in 3 places.'>default_color</a> = <strong class='reserved'>struct</strong>.unpack_from("H", <a href='../S/1321.html#L33' title='Defined at 33 in utils/pywmlx/wmlerr.py.'>console_defaults</a>, 8)[0]
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69 def <a href='../R/14821.html' title='Multiple referred from 2 places.'>warnall</a>():
+<a id='L70' name='L70'></a>  70     <strong class='reserved'>return</strong> <a href='../D/2732.html' title='Multiple defined in 2 places.'>_warnall</a>
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74 def <a href='../S/1329.html#L5' title='Referred from 5 in utils/pywmlx/__init__.py.'>set_warnall</a>(<a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a>):
+<a id='L75' name='L75'></a>  75     <a href='../D/2732.html' title='Multiple defined in 2 places.'>_warnall</a> = <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a>
+<a id='L76' name='L76'></a>  76 
+<a id='L77' name='L77'></a>  77 
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79 class <a href='../S/1321.html#L147' title='Referred from 147 in utils/pywmlx/wmlerr.py.'>WmlError</a>(<a href='../Y/3099.html' title='Multiple used in 11 places.'>ValueError</a>):
+<a id='L80' name='L80'></a>  80     pass
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82 class <a href='../S/1321.html#L160' title='Referred from 160 in utils/pywmlx/wmlerr.py.'>WmlWarning</a>(UserWarning):
+<a id='L83' name='L83'></a>  83     pass
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87 def <a href='../R/11060.html' title='Multiple referred from 2 places.'>print_wmlerr</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a>, <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>, <a href='../Y/12471.html' title='Multiple used in 4 places.'>iserr</a>):
+<a id='L88' name='L88'></a>  88     # red <strong class='reserved'>if</strong> error, blue <strong class='reserved'>if</strong> warning
+<a id='L89' name='L89'></a>  89     <a href='../Y/5740.html' title='Multiple used in 2 places.'>ansi_color</a> = '\033[91;1m' <strong class='reserved'>if</strong> <a href='../Y/12471.html' title='Multiple used in 4 places.'>iserr</a> <strong class='reserved'>else</strong> '\033[94m'
+<a id='L90' name='L90'></a>  90     <a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a> = "error:" <strong class='reserved'>if</strong> <a href='../Y/12471.html' title='Multiple used in 4 places.'>iserr</a> <strong class='reserved'>else</strong> "warning:"
+<a id='L91' name='L91'></a>  91     # now we have ascii_color and errtype values
+<a id='L92' name='L92'></a>  92     # here we print the error/warning.
+<a id='L93' name='L93'></a>  93 <em class='sharp'>    #</em> 1) On Windows, write "error" in red and "warning" in blue
+<a id='L94' name='L94'></a>  94     #    by using the Win32 API (except <strong class='reserved'>if</strong> --no-text-colors is used)
+<a id='L95' name='L95'></a>  95     <strong class='reserved'>if</strong> <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/16398.html' title='Multiple used in 9 places.'>platform</a>.<a href='../Y/19210.html' title='Multiple used in 117 places.'>startswith</a>('win') and <a href='../S/1321.html#L7' title='Defined at 7 in utils/pywmlx/wmlerr.py.'>enabled_text_col</a>:
+<a id='L96' name='L96'></a>  96         # a syntactic sugar to make lines shorter
+<a id='L97' name='L97'></a>  97         <a href='../Y/12713.html' title='Multiple used in 7 places.'>kernel32</a> = <a href='../Y/8088.html' title='Multiple used in 5 places.'>ctypes</a>.<a href='../Y/21984.html' title='Multiple used in 4 places.'>windll</a>.kernel32
+<a id='L98' name='L98'></a>  98         # first flush the stderr, otherwise colors might be changed in
+<a id='L99' name='L99'></a>  99         # unpredictable ways
+<a id='L100' name='L100'></a> 100         <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/6422.html' title='Multiple defined in 2 places.'>flush</a>()
+<a id='L101' name='L101'></a> 101         <strong class='reserved'>if</strong> <a href='../Y/12471.html' title='Multiple used in 4 places.'>iserr</a>:
+<a id='L102' name='L102'></a> 102             <a href='../Y/12713.html' title='Multiple used in 7 places.'>kernel32</a>.<a href='../Y/2875.html' title='Multiple used in 4 places.'>SetConsoleTextAttribute</a>(<a href='../D/8318.html' title='Multiple defined in 2 places.'>handle</a>, <a href='../S/1321.html#L13' title='Defined at 13 in utils/pywmlx/wmlerr.py.'>FG_RED</a> | <a href='../S/1321.html#L16' title='Defined at 16 in utils/pywmlx/wmlerr.py.'>FG_INTENSITY</a>)
+<a id='L103' name='L103'></a> 103         <strong class='reserved'>else</strong>:
+<a id='L104' name='L104'></a> 104             <a href='../Y/12713.html' title='Multiple used in 7 places.'>kernel32</a>.<a href='../Y/2875.html' title='Multiple used in 4 places.'>SetConsoleTextAttribute</a>(<a href='../D/8318.html' title='Multiple defined in 2 places.'>handle</a>, <a href='../S/1321.html#L15' title='Defined at 15 in utils/pywmlx/wmlerr.py.'>FG_BLUE</a> | <a href='../S/1321.html#L16' title='Defined at 16 in utils/pywmlx/wmlerr.py.'>FG_INTENSITY</a>)
+<a id='L105' name='L105'></a> 105         # then write the error type and <strong class='reserved'>continue</strong> on the same line
+<a id='L106' name='L106'></a> 106         print(<a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a> + " ", <a href='../D/5896.html' title='Multiple defined in 28 places.'>end</a>="", <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L107' name='L107'></a> 107         # flush again and write file name in yellow on the same line
+<a id='L108' name='L108'></a> 108         <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/6422.html' title='Multiple defined in 2 places.'>flush</a>()
+<a id='L109' name='L109'></a> 109         <a href='../Y/12713.html' title='Multiple used in 7 places.'>kernel32</a>.<a href='../Y/2875.html' title='Multiple used in 4 places.'>SetConsoleTextAttribute</a>(<a href='../D/8318.html' title='Multiple defined in 2 places.'>handle</a>,
+<a id='L110' name='L110'></a> 110                                          <a href='../S/1321.html#L13' title='Defined at 13 in utils/pywmlx/wmlerr.py.'>FG_RED</a> | <a href='../S/1321.html#L14' title='Defined at 14 in utils/pywmlx/wmlerr.py.'>FG_GREEN</a> | <a href='../S/1321.html#L16' title='Defined at 16 in utils/pywmlx/wmlerr.py.'>FG_INTENSITY</a>)
+<a id='L111' name='L111'></a> 111         print(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a> + ": ", <a href='../D/5896.html' title='Multiple defined in 28 places.'>end</a>="", <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L112' name='L112'></a> 112         # then flush again, reset the color and finish writing
+<a id='L113' name='L113'></a> 113         <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/6422.html' title='Multiple defined in 2 places.'>flush</a>()
+<a id='L114' name='L114'></a> 114         <a href='../Y/8088.html' title='Multiple used in 5 places.'>ctypes</a>.<a href='../Y/21984.html' title='Multiple used in 4 places.'>windll</a>.<a href='../Y/12713.html' title='Multiple used in 7 places.'>kernel32</a>.<a href='../Y/2875.html' title='Multiple used in 4 places.'>SetConsoleTextAttribute</a>(<a href='../D/8318.html' title='Multiple defined in 2 places.'>handle</a>, <a href='../Y/8503.html' title='Multiple used in 3 places.'>default_color</a>)
+<a id='L115' name='L115'></a> 115         print(<a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>, <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L116' name='L116'></a> 116         # finally flush again <strong class='reserved'>for</strong> good measure
+<a id='L117' name='L117'></a> 117         <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/6422.html' title='Multiple defined in 2 places.'>flush</a>()
+<a id='L118' name='L118'></a> 118 <em class='sharp'>    #</em> 2) On posix we write "error" in red and "warning" in blue
+<a id='L119' name='L119'></a> 119     #    by using ansi escape codes (except <strong class='reserved'>if</strong> --no-text-colors is used)
+<a id='L120' name='L120'></a> 120     elif <a href='../Y/15871.html' title='Multiple used in 440 places.'>os</a>.<a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a> == "posix" and <a href='../S/1321.html#L7' title='Defined at 7 in utils/pywmlx/wmlerr.py.'>enabled_text_col</a>:
+<a id='L121' name='L121'></a> 121         <a href='../S/786.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = (<a href='../Y/5740.html' title='Multiple used in 2 places.'>ansi_color</a> + <a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a> + ' \033[0m\033[93m' + <a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a> + 
+<a id='L122' name='L122'></a> 122                ':\033[0m ' + <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>)
+<a id='L123' name='L123'></a> 123         print(<a href='../S/786.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>, <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L124' name='L124'></a> 124 <em class='sharp'>    #</em> 3) On non-posix and non-windows system we don't use colors
+<a id='L125' name='L125'></a> 125 <em class='sharp'>    #</em>    (is it ever possible?).
+<a id='L126' name='L126'></a> 126     #    If --no-text-colors option is used, than we don't use colors
+<a id='L127' name='L127'></a> 127     #    regardless of OS.
+<a id='L128' name='L128'></a> 128     <strong class='reserved'>else</strong>:
+<a id='L129' name='L129'></a> 129         <a href='../S/786.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a> + ' ' + <a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a> + ': ' + <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>
+<a id='L130' name='L130'></a> 130         print(<a href='../S/786.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>, <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19259.html' title='Multiple used in 124 places.'>stderr</a>)
+<a id='L131' name='L131'></a> 131 
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134 def <a href='../S/1321.html#L143' title='Referred from 143 in utils/pywmlx/wmlerr.py.'>my_showwarning</a>(<a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>, <a href='../S/1097.html#L156' title='Defined at 156 in src/map/label.hpp.'>category</a>, <a href='../D/6213.html' title='Multiple defined in 4 places.'>filename</a>, <a href='../Y/13215.html' title='Multiple used in 153 places.'>lineno</a>, <a href='../D/6199.html' title='Multiple defined in 3 places.'>file</a>=<a href='../Y/2069.html' title='Multiple used in 432 places.'>None</a>, <a href='../D/9819.html' title='Multiple defined in 3 places.'>line</a>=None):
+<a id='L135' name='L135'></a> 135     try:
+<a id='L136' name='L136'></a> 136         <a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a>, <a href='../S/786.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>.<a href='../D/3379.html' title='Multiple defined in 9 places.'>args</a>[0].<a href='../D/14663.html' title='Multiple defined in 2 places.'>split</a>(": ", 1)
+<a id='L137' name='L137'></a> 137         <a href='../S/1321.html#L87' title='Defined at 87 in utils/pywmlx/wmlerr.py.'>print_wmlerr</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a>, <a href='../S/786.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>, <a href='../Y/1183.html' title='Multiple used in 286 places.'>False</a>)
+<a id='L138' name='L138'></a> 138     except <a href='../Y/2096.html' title='Multiple used in 15 places.'>OSError</a>:
+<a id='L139' name='L139'></a> 139         pass # the file (probably stderr) is invalid - this warning gets lost.
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143 <a href='../Y/21832.html' title='Multiple used in 7 places.'>warnings</a>.<a href='../Y/18666.html' title='Multiple used in 8 places.'>showwarning</a> = <a href='../S/1321.html#L134' title='Defined at 134 in utils/pywmlx/wmlerr.py.'>my_showwarning</a>
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147 def <a href='../R/15035.html' title='Multiple referred from 14 places.'>wmlerr</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a>, <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>, <a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a>=<a href='../S/1321.html#L79' title='Defined at 79 in utils/pywmlx/wmlerr.py.'>WmlError</a>):
+<a id='L148' name='L148'></a> 148     <strong class='reserved'>if</strong> not <a href='../S/1321.html#L8' title='Defined at 8 in utils/pywmlx/wmlerr.py.'>is_utest</a>:
+<a id='L149' name='L149'></a> 149         try:
+<a id='L150' name='L150'></a> 150             raise <a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a> + ": " + <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>)
+<a id='L151' name='L151'></a> 151         except <a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a> as <a href='../S/847.html#L78' title='Defined at 78 in src/log.cpp.'>err</a>:
+<a id='L152' name='L152'></a> 152             <a href='../S/1321.html#L87' title='Defined at 87 in utils/pywmlx/wmlerr.py.'>print_wmlerr</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a>, <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>, <a href='../Y/3026.html' title='Multiple used in 244 places.'>True</a>)
+<a id='L153' name='L153'></a> 153             <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/9740.html' title='Multiple used in 110 places.'>exit</a>(1)
+<a id='L154' name='L154'></a> 154     <strong class='reserved'>else</strong>:
+<a id='L155' name='L155'></a> 155         raise <a href='../Y/9630.html' title='Multiple used in 8 places.'>errtype</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a> + ": " + <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>)
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157 
+<a id='L158' name='L158'></a> 158 
+<a id='L159' name='L159'></a> 159 def <a href='../R/15037.html' title='Multiple referred from 7 places.'>wmlwarn</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a>, <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>):
+<a id='L160' name='L160'></a> 160     <a href='../Y/21832.html' title='Multiple used in 7 places.'>warnings</a>.<a href='../S/847.html#L84' title='Defined at 84 in src/log.cpp.'>warn</a>(<a href='../Y/10162.html' title='Multiple used in 38 places.'>finfo</a> + ": " + <a href='../D/10964.html' title='Multiple defined in 7 places.'>message</a>, <a href='../S/1321.html#L82' title='Defined at 82 in utils/pywmlx/wmlerr.py.'>WmlWarning</a>)
+<a id='L161' name='L161'></a> 161 
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^]<a href='#L2'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L36'>[^]</a><a href='#L159'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

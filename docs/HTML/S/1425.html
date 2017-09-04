@@ -1,158 +1,188 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/SimpleLuaParser.java</title>
+<title>utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5886.html'>utils</a>/<a href='../files/5896.html'>umc_dev</a>/<a href='../files/5930.html'>org.wesnoth</a>/<a href='../files/5943.html'>src</a>/<a href='../files/5944.html'>org</a>/<a href='../files/5945.html'>wesnoth</a>/<a href='../files/5973.html'>wml</a>/SimpleLuaParser.java</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L57'>[^]</a><a href='#L127'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5889.html'>utils</a>/<a href='../files/5899.html'>umc_dev</a>/<a href='../files/5933.html'>org.wesnoth</a>/<a href='../files/5946.html'>src</a>/<a href='../files/5947.html'>org</a>/<a href='../files/5948.html'>wesnoth</a>/<a href='../files/5976.html'>wml</a>/WMLVariable.java</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L148'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L57' title='Defined at 57.'>parse</a></li>
-<li><a href='#L127' title='Defined at 127.'>getTags</a></li>
+<li><a href='#L42' title='Defined at 42.'>getName</a></li>
+<li><a href='#L50' title='Defined at 50.'>isArray</a></li>
+<li><a href='#L61' title='Defined at 61.'>setIsArray</a></li>
+<li><a href='#L69' title='Defined at 69.'>getScopes</a></li>
+<li><a href='#L75' title='Defined at 75.'>toString</a></li>
+<li><a href='#L132' title='Defined at 132.'>toString</a></li>
+<li><a href='#L148' title='Defined at 148.'>contains</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*******************************************************************************</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'> * Copyright (c) 2011 - 2013 by Timotei Dolean &lt;timotei21@gmail.com&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * Copyright (c) 2010 - 2013 by Timotei Dolean &lt;timotei21@gmail.com&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'> * </em>
 <a id='L4' name='L4'></a>   4 <em class='comment'> * This program and the accompanying materials are made available</em>
 <a id='L5' name='L5'></a>   5 <em class='comment'> * under the terms of the Eclipse Public License v1.0</em>
 <a id='L6' name='L6'></a>   6 <em class='comment'> * which accompanies this distribution, and is available at</em>
 <a id='L7' name='L7'></a>   7 <em class='comment'> * http://www.eclipse.org/legal/epl-v10.html</em>
 <a id='L8' name='L8'></a>   8 <em class='comment'> *******************************************************************************/</em>
-<a id='L9' name='L9'></a>   9 <strong class='reserved'>package</strong> <a href='../Y/15685.html' title='Multiple used in 1970 places.'>org</a>.<a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>;
+<a id='L9' name='L9'></a>   9 <strong class='reserved'>package</strong> <a href='../Y/15834.html' title='Multiple used in 1970 places.'>org</a>.<a href='../Y/21891.html' title='Multiple used in 2623 places.'>wesnoth</a>.<a href='../D/16390.html' title='Multiple defined in 4 places.'>wml</a>;
 <a id='L10' name='L10'></a>  10 
-<a id='L11' name='L11'></a>  11 <strong class='reserved'>import</strong> java.io.BufferedReader;
-<a id='L12' name='L12'></a>  12 <strong class='reserved'>import</strong> java.io.IOException;
-<a id='L13' name='L13'></a>  13 <strong class='reserved'>import</strong> java.io.Reader;
-<a id='L14' name='L14'></a>  14 <strong class='reserved'>import</strong> java.io.StringReader;
-<a id='L15' name='L15'></a>  15 <strong class='reserved'>import</strong> java.util.HashMap;
-<a id='L16' name='L16'></a>  16 <strong class='reserved'>import</strong> java.util.List;
-<a id='L17' name='L17'></a>  17 <strong class='reserved'>import</strong> java.util.Map;
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 <strong class='reserved'>import</strong> org.wesnoth.Logger;
-<a id='L20' name='L20'></a>  20 <strong class='reserved'>import</strong> org.wesnoth.utils.StringUtils;
+<a id='L11' name='L11'></a>  11 <strong class='reserved'>import</strong> java.io.Serializable;
+<a id='L12' name='L12'></a>  12 <strong class='reserved'>import</strong> java.util.ArrayList;
+<a id='L13' name='L13'></a>  13 <strong class='reserved'>import</strong> java.util.List;
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * Represents a WML Variable</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> */</em>
+<a id='L18' name='L18'></a>  18 <strong class='reserved'>public</strong> <strong class='reserved'>class</strong> <a href='../R/2323.html' title='Multiple referred from 12 places.'>WMLVariable</a> <strong class='reserved'>implements</strong> <a href='../Y/2873.html' title='Multiple used in 26 places.'>Serializable</a>
+<a id='L19' name='L19'></a>  19 <em class='brace'>{</em>
+<a id='L20' name='L20'></a>  20     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <strong class='reserved'>final</strong> <strong class='reserved'>long</strong> <a href='../Y/18375.html' title='Multiple used in 29 places.'>serialVersionUID</a> = 5293113569770337870L;
 <a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <em class='comment'>/**</em>
-<a id='L23' name='L23'></a>  23 <em class='comment'> * This is a simple Lua parser that returns the interesting tokens found</em>
-<a id='L24' name='L24'></a>  24 <em class='comment'> * from lua code</em>
-<a id='L25' name='L25'></a>  25 <em class='comment'> */</em>
-<a id='L26' name='L26'></a>  26 <strong class='reserved'>public</strong> <strong class='reserved'>class</strong> <a href='../S/1424.html#L207' title='Referred from 207 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/SimpleWMLParser.java.'>SimpleLuaParser</a>
-<a id='L27' name='L27'></a>  27 <em class='brace'>{</em>
-<a id='L28' name='L28'></a>  28     <strong class='reserved'>private</strong> <a href='../Y/1902.html' title='Multiple used in 77 places.'>Map</a>&lt; <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a>, <a href='../S/1586.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> &gt; <a href='../Y/19494.html' title='Multiple used in 49 places.'>tags_</a>;
-<a id='L29' name='L29'></a>  29     <strong class='reserved'>private</strong> <a href='../Y/2323.html' title='Multiple used in 8 places.'>Reader</a>                <a href='../Y/16963.html' title='Multiple used in 3 places.'>reader_</a>;
-<a id='L30' name='L30'></a>  30     <strong class='reserved'>private</strong> <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a>                <a href='../S/233.html#L930' title='Defined at 930 in src/ai/actions.cpp.'>location_</a>;
-<a id='L31' name='L31'></a>  31     <strong class='reserved'>private</strong> <strong class='reserved'>int</strong>                   <a href='../Y/13063.html' title='Multiple used in 3 places.'>lineOffset_</a>;
-<a id='L32' name='L32'></a>  32 
-<a id='L33' name='L33'></a>  33     <strong class='reserved'>private</strong> <strong class='reserved'>final</strong> <strong class='reserved'>static</strong> <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a>   <a href='../Y/2836.html' title='Multiple used in 2 places.'>TAG_REGEX</a>             = "wml_actions\\..+\\( *cfg *\\)";
-<a id='L34' name='L34'></a>  34     <strong class='reserved'>private</strong> <strong class='reserved'>final</strong> <strong class='reserved'>static</strong> <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a>   <a href='../Y/180.html' title='Multiple used in 2 places.'>ATTRIBUTE_REGEX</a>       = "cfg\\.[a-zA-Z0-9_]*";
-<a id='L35' name='L35'></a>  35     <strong class='reserved'>private</strong> <strong class='reserved'>final</strong> <strong class='reserved'>static</strong> <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a>   <a href='../Y/179.html' title='Multiple used in 2 places.'>ATTRIBUTE_CHILD_REGEX</a> = "get_child\\(cfg, *\"[^\"]+\"\\)";
-<a id='L36' name='L36'></a>  36 
-<a id='L37' name='L37'></a>  37     <em class='comment'>/**</em>
-<a id='L38' name='L38'></a>  38 <em class='comment'>     * Creates a new {@link SimpleLuaParser}</em>
-<a id='L39' name='L39'></a>  39 <em class='comment'>     * </em>
-<a id='L40' name='L40'></a>  40 <em class='comment'>     * @param location</em>
-<a id='L41' name='L41'></a>  41 <em class='comment'>     *        The path location of the Lua code</em>
-<a id='L42' name='L42'></a>  42 <em class='comment'>     * @param contents</em>
-<a id='L43' name='L43'></a>  43 <em class='comment'>     *        The Lua code to parse</em>
-<a id='L44' name='L44'></a>  44 <em class='comment'>     */</em>
-<a id='L45' name='L45'></a>  45     <strong class='reserved'>public</strong> SimpleLuaParser( <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/9935.html' title='Multiple defined in 6 places.'>location</a>, <strong class='reserved'>int</strong> <a href='../Y/13062.html' title='Multiple used in 2 places.'>lineOffset</a>, <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/7785.html' title='Multiple used in 27 places.'>contents</a> )
-<a id='L46' name='L46'></a>  46     <em class='brace'>{</em>
-<a id='L47' name='L47'></a>  47         <a href='../Y/19494.html' title='Multiple used in 49 places.'>tags_</a> = <strong class='reserved'>new</strong> <a href='../Y/1334.html' title='Multiple used in 49 places.'>HashMap</a>&lt; <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a>, <a href='../S/1586.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> &gt;( );
-<a id='L48' name='L48'></a>  48         <a href='../Y/16963.html' title='Multiple used in 3 places.'>reader_</a> = <strong class='reserved'>new</strong> <a href='../Y/2823.html' title='Multiple used in 4 places.'>StringReader</a>( <a href='../Y/7785.html' title='Multiple used in 27 places.'>contents</a> == <strong class='reserved'>null</strong> ? "": <a href='../Y/7785.html' title='Multiple used in 27 places.'>contents</a> );
-<a id='L49' name='L49'></a>  49 
-<a id='L50' name='L50'></a>  50         <a href='../S/233.html#L930' title='Defined at 930 in src/ai/actions.cpp.'>location_</a> = <a href='../D/9935.html' title='Multiple defined in 6 places.'>location</a>;
-<a id='L51' name='L51'></a>  51         <a href='../Y/13063.html' title='Multiple used in 3 places.'>lineOffset_</a> = <a href='../Y/13062.html' title='Multiple used in 2 places.'>lineOffset</a>;
-<a id='L52' name='L52'></a>  52     <em class='brace'>}</em>
-<a id='L53' name='L53'></a>  53 
-<a id='L54' name='L54'></a>  54     <em class='comment'>/**</em>
-<a id='L55' name='L55'></a>  55 <em class='comment'>     * Parses the lua code and gathers the list of tags</em>
-<a id='L56' name='L56'></a>  56 <em class='comment'>     */</em>
-<a id='L57' name='L57'></a>  57     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> <a href='../R/10615.html' title='Multiple referred from 52 places.'>parse</a>( )
-<a id='L58' name='L58'></a>  58     <em class='brace'>{</em>
-<a id='L59' name='L59'></a>  59         <a href='../Y/370.html' title='Multiple used in 14 places.'>BufferedReader</a> <a href='../Y/16962.html' title='Multiple used in 22 places.'>reader</a> = <strong class='reserved'>new</strong> <a href='../Y/370.html' title='Multiple used in 14 places.'>BufferedReader</a>( <a href='../Y/16963.html' title='Multiple used in 3 places.'>reader_</a> );
-<a id='L60' name='L60'></a>  60         <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/9772.html' title='Multiple defined in 3 places.'>line</a> = <strong class='reserved'>null</strong>;
-<a id='L61' name='L61'></a>  61 
-<a id='L62' name='L62'></a>  62         <strong class='reserved'>int</strong> <a href='../Y/13059.html' title='Multiple used in 3 places.'>lineCount</a> = <a href='../Y/13063.html' title='Multiple used in 3 places.'>lineOffset_</a>;
-<a id='L63' name='L63'></a>  63 
-<a id='L64' name='L64'></a>  64         <a href='../S/1586.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a> = <strong class='reserved'>null</strong>;
+<a id='L22' name='L22'></a>  22     <strong class='reserved'>private</strong> <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a>            <a href='../D/11302.html' title='Multiple defined in 4 places.'>name_</a>;
+<a id='L23' name='L23'></a>  23     <strong class='reserved'>private</strong> <strong class='reserved'>boolean</strong>           <a href='../Y/12320.html' title='Multiple used in 3 places.'>isArray_</a>;
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25     <strong class='reserved'>private</strong> <a href='../Y/1834.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../S/1425.html#L94' title='Defined at 94 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>Scope</a> &gt;     <a href='../Y/18054.html' title='Multiple used in 5 places.'>scopes_</a>;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27     <em class='comment'>/**</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>     * Creates a new {@link WMLVariable} with the specified name</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'>     * </em>
+<a id='L30' name='L30'></a>  30 <em class='comment'>     * @param name</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'>     *        The name of the variable</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'>     */</em>
+<a id='L33' name='L33'></a>  33     <strong class='reserved'>public</strong> WMLVariable( <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a> )
+<a id='L34' name='L34'></a>  34     <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35         <a href='../D/11302.html' title='Multiple defined in 4 places.'>name_</a> = <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>;
+<a id='L36' name='L36'></a>  36         <a href='../Y/18054.html' title='Multiple used in 5 places.'>scopes_</a> = <strong class='reserved'>new</strong> <a href='../Y/254.html' title='Multiple used in 85 places.'>ArrayList</a>&lt; <a href='../S/1425.html#L94' title='Defined at 94 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>Scope</a> &gt;( );
+<a id='L37' name='L37'></a>  37     <em class='brace'>}</em>
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39     <em class='comment'>/**</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'>     * @return The name of this {@link WMLVariable}</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'>     */</em>
+<a id='L42' name='L42'></a>  42     <strong class='reserved'>public</strong> <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../R/6174.html' title='Multiple referred from 119 places.'>getName</a>( )
+<a id='L43' name='L43'></a>  43     <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>return</strong> <a href='../D/11302.html' title='Multiple defined in 4 places.'>name_</a>;
+<a id='L45' name='L45'></a>  45     <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47     <em class='comment'>/**</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'>     * @return True if the variable is an array, false otherwise</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'>     */</em>
+<a id='L50' name='L50'></a>  50     <strong class='reserved'>public</strong> <strong class='reserved'>boolean</strong> <a href='../R/8358.html' title='Multiple referred from 2 places.'>isArray</a>( )
+<a id='L51' name='L51'></a>  51     <em class='brace'>{</em>
+<a id='L52' name='L52'></a>  52         <strong class='reserved'>return</strong> <a href='../Y/12320.html' title='Multiple used in 3 places.'>isArray_</a>;
+<a id='L53' name='L53'></a>  53     <em class='brace'>}</em>
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55     <em class='comment'>/**</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>     * Sets whether this variable is an array or not</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'>     * </em>
+<a id='L58' name='L58'></a>  58 <em class='comment'>     * @param isArray</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>     *        True if the variable is an array, false otherwise</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'>     */</em>
+<a id='L61' name='L61'></a>  61     <strong class='reserved'>public</strong> <strong class='reserved'>void</strong> setIsArray( <strong class='reserved'>boolean</strong> <a href='../S/1425.html#L50' title='Defined at 50 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>isArray</a> )
+<a id='L62' name='L62'></a>  62     <em class='brace'>{</em>
+<a id='L63' name='L63'></a>  63         <a href='../Y/12320.html' title='Multiple used in 3 places.'>isArray_</a> = <a href='../S/1425.html#L50' title='Defined at 50 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>isArray</a>;
+<a id='L64' name='L64'></a>  64     <em class='brace'>}</em>
 <a id='L65' name='L65'></a>  65 
-<a id='L66' name='L66'></a>  66         <strong class='reserved'>try</strong> <em class='brace'>{</em>
-<a id='L67' name='L67'></a>  67             <strong class='reserved'>while</strong>( ( <a href='../D/9772.html' title='Multiple defined in 3 places.'>line</a> = <a href='../Y/16962.html' title='Multiple used in 22 places.'>reader</a>.<a href='../Y/16952.html' title='Multiple used in 6 places.'>readLine</a>( ) ) != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L68' name='L68'></a>  68                 <a href='../Y/1817.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../Y/19485.html' title='Multiple used in 3 places.'>tagTokens</a> = <a href='../S/1443.html#L23' title='Defined at 23 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>StringUtils</a>.<a href='../S/1443.html#L295' title='Defined at 295 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>getGroups</a>( <a href='../Y/2836.html' title='Multiple used in 2 places.'>TAG_REGEX</a>,
-<a id='L69' name='L69'></a>  69                     <a href='../D/9772.html' title='Multiple defined in 3 places.'>line</a> );
-<a id='L70' name='L70'></a>  70 
-<a id='L71' name='L71'></a>  71                 <em class='comment'>// we handle just on tag per line</em>
-<a id='L72' name='L72'></a>  72                 <strong class='reserved'>if</strong>( ! <a href='../Y/19485.html' title='Multiple used in 3 places.'>tagTokens</a>.<a href='../Y/12192.html' title='Multiple used in 92 places.'>isEmpty</a>( ) ) <em class='brace'>{</em>
-<a id='L73' name='L73'></a>  73                     <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a> = <a href='../Y/19485.html' title='Multiple used in 3 places.'>tagTokens</a>.<a href='../D/6733.html' title='Multiple defined in 42 places.'>get</a>( 0 );
-<a id='L74' name='L74'></a>  74                     <em class='comment'>// parse the tag name</em>
-<a id='L75' name='L75'></a>  75                     <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/19482.html' title='Multiple used in 34 places.'>tagName</a> = <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>.<a href='../Y/19299.html' title='Multiple used in 47 places.'>substring</a>( <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>.<a href='../Y/11935.html' title='Multiple used in 26 places.'>indexOf</a>( '.' ) + 1,
-<a id='L76' name='L76'></a>  76                         <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>.<a href='../Y/12729.html' title='Multiple used in 9 places.'>lastIndexOf</a>( '(' ) );
-<a id='L77' name='L77'></a>  77 
-<a id='L78' name='L78'></a>  78                     <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a> = <a href='../S/1426.html#L16' title='Defined at 16 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WmlFactory2.java.'>WmlFactory2</a>.<a href='../Y/9080.html' title='Multiple used in 66 places.'>eINSTANCE</a>.<a href='../D/5025.html' title='Multiple defined in 8 places.'>createWMLTag</a>( <a href='../Y/19482.html' title='Multiple used in 34 places.'>tagName</a> );
-<a id='L79' name='L79'></a>  79                     <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a>.<a href='../D/13515.html' title='Multiple defined in 3 places.'>set_LuaBased</a>( <strong class='reserved'>true</strong> );
-<a id='L80' name='L80'></a>  80 
-<a id='L81' name='L81'></a>  81                     <strong class='reserved'>if</strong>( <a href='../S/233.html#L930' title='Defined at 930 in src/ai/actions.cpp.'>location_</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L82' name='L82'></a>  82                         <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a>.<a href='../D/13510.html' title='Multiple defined in 3 places.'>set_DefinitionLocation</a>( <a href='../S/233.html#L930' title='Defined at 930 in src/ai/actions.cpp.'>location_</a> );
-<a id='L83' name='L83'></a>  83                         <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a>.<a href='../D/13511.html' title='Multiple defined in 3 places.'>set_DefinitionOffset</a>( <a href='../Y/13059.html' title='Multiple used in 3 places.'>lineCount</a> );
-<a id='L84' name='L84'></a>  84                     <em class='brace'>}</em>
-<a id='L85' name='L85'></a>  85 
-<a id='L86' name='L86'></a>  86                     <a href='../Y/19494.html' title='Multiple used in 49 places.'>tags_</a>.<a href='../D/12228.html' title='Multiple defined in 2 places.'>put</a>( <a href='../Y/19482.html' title='Multiple used in 34 places.'>tagName</a>, <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a> );
-<a id='L87' name='L87'></a>  87                 <em class='brace'>}</em>
-<a id='L88' name='L88'></a>  88 
-<a id='L89' name='L89'></a>  89                 <em class='comment'>// parse the attributes</em>
-<a id='L90' name='L90'></a>  90                 <strong class='reserved'>if</strong>( <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
-<a id='L91' name='L91'></a>  91                     <a href='../Y/1817.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../Y/5979.html' title='Multiple used in 2 places.'>attributeTokens</a> = <a href='../S/1443.html#L23' title='Defined at 23 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>StringUtils</a>.<a href='../S/1443.html#L295' title='Defined at 295 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>getGroups</a>(
-<a id='L92' name='L92'></a>  92                         <a href='../Y/180.html' title='Multiple used in 2 places.'>ATTRIBUTE_REGEX</a>, <a href='../D/9772.html' title='Multiple defined in 3 places.'>line</a> );
-<a id='L93' name='L93'></a>  93                     <strong class='reserved'>for</strong>( <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>: <a href='../Y/5979.html' title='Multiple used in 2 places.'>attributeTokens</a> ) <em class='brace'>{</em>
-<a id='L94' name='L94'></a>  94                         <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/5978.html' title='Multiple used in 2 places.'>attributeName</a> = <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>.<a href='../Y/19299.html' title='Multiple used in 47 places.'>substring</a>( <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>
-<a id='L95' name='L95'></a>  95                             .<a href='../Y/11935.html' title='Multiple used in 26 places.'>indexOf</a>( '.' ) + 1 );
-<a id='L96' name='L96'></a>  96 
-<a id='L97' name='L97'></a>  97                         <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a>.<a href='../D/6829.html' title='Multiple defined in 8 places.'>getExpressions</a>( ).<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>(
-<a id='L98' name='L98'></a>  98                             <a href='../S/1426.html#L16' title='Defined at 16 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WmlFactory2.java.'>WmlFactory2</a>.<a href='../Y/9080.html' title='Multiple used in 66 places.'>eINSTANCE</a>.<a href='../D/5005.html' title='Multiple defined in 6 places.'>createWMLKey</a>(
-<a id='L99' name='L99'></a>  99                                 <a href='../Y/5978.html' title='Multiple used in 2 places.'>attributeName</a>, "string", '1', <strong class='reserved'>false</strong> ) );
-<a id='L100' name='L100'></a> 100                     <em class='brace'>}</em>
-<a id='L101' name='L101'></a> 101 
-<a id='L102' name='L102'></a> 102                     <a href='../Y/1817.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../Y/7273.html' title='Multiple used in 2 places.'>childTokens</a> = <a href='../S/1443.html#L23' title='Defined at 23 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>StringUtils</a>.<a href='../S/1443.html#L295' title='Defined at 295 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>getGroups</a>(
-<a id='L103' name='L103'></a> 103                         <a href='../Y/179.html' title='Multiple used in 2 places.'>ATTRIBUTE_CHILD_REGEX</a>, <a href='../D/9772.html' title='Multiple defined in 3 places.'>line</a> );
-<a id='L104' name='L104'></a> 104                     <strong class='reserved'>for</strong>( <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>: <a href='../Y/7273.html' title='Multiple used in 2 places.'>childTokens</a> ) <em class='brace'>{</em>
-<a id='L105' name='L105'></a> 105                         <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/7270.html' title='Multiple used in 5 places.'>childName</a> = <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>.<a href='../Y/19299.html' title='Multiple used in 47 places.'>substring</a>(
-<a id='L106' name='L106'></a> 106                             <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>.<a href='../Y/11935.html' title='Multiple used in 26 places.'>indexOf</a>( '"' ) + 1,
-<a id='L107' name='L107'></a> 107                             <a href='../D/15261.html' title='Multiple defined in 2 places.'>token</a>.<a href='../Y/12729.html' title='Multiple used in 9 places.'>lastIndexOf</a>( '"' ) );
-<a id='L108' name='L108'></a> 108 
-<a id='L109' name='L109'></a> 109                         <a href='../Y/8033.html' title='Multiple used in 27 places.'>currentTag</a>.<a href='../D/6829.html' title='Multiple defined in 8 places.'>getExpressions</a>( ).<a href='../D/2779.html' title='Multiple defined in 10 places.'>add</a>(
-<a id='L110' name='L110'></a> 110                             <a href='../S/1426.html#L16' title='Defined at 16 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WmlFactory2.java.'>WmlFactory2</a>.<a href='../Y/9080.html' title='Multiple used in 66 places.'>eINSTANCE</a>.<a href='../D/5005.html' title='Multiple defined in 6 places.'>createWMLKey</a>( <a href='../Y/7270.html' title='Multiple used in 5 places.'>childName</a>,
-<a id='L111' name='L111'></a> 111                                 "string", '1', <strong class='reserved'>false</strong> ) );
-<a id='L112' name='L112'></a> 112                     <em class='brace'>}</em>
-<a id='L113' name='L113'></a> 113                 <em class='brace'>}</em>
-<a id='L114' name='L114'></a> 114 
-<a id='L115' name='L115'></a> 115                 ++<a href='../Y/13059.html' title='Multiple used in 3 places.'>lineCount</a>;
-<a id='L116' name='L116'></a> 116             <em class='brace'>}</em>
-<a id='L117' name='L117'></a> 117         <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/1523.html' title='Multiple used in 50 places.'>IOException</a> <a href='../D/5736.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
-<a id='L118' name='L118'></a> 118             <a href='../S/1494.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>Logger</a>.<a href='../D/6887.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1494.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>logException</a>( <a href='../D/5736.html' title='Multiple defined in 3 places.'>e</a> );
-<a id='L119' name='L119'></a> 119         <em class='brace'>}</em>
-<a id='L120' name='L120'></a> 120     <em class='brace'>}</em>
-<a id='L121' name='L121'></a> 121 
-<a id='L122' name='L122'></a> 122     <em class='comment'>/**</em>
-<a id='L123' name='L123'></a> 123 <em class='comment'>     * Returns the parsed tags from the lua code</em>
-<a id='L124' name='L124'></a> 124 <em class='comment'>     * </em>
-<a id='L125' name='L125'></a> 125 <em class='comment'>     * @return A map with Tags</em>
-<a id='L126' name='L126'></a> 126 <em class='comment'>     */</em>
-<a id='L127' name='L127'></a> 127     <strong class='reserved'>public</strong> <a href='../Y/1902.html' title='Multiple used in 77 places.'>Map</a>&lt; <a href='../Y/2819.html' title='Multiple used in 1322 places.'>String</a>, <a href='../S/1586.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src-gen/org/wesnoth/wml/WMLTag.java.'>WMLTag</a> &gt; <a href='../R/6245.html' title='Multiple referred from 9 places.'>getTags</a>( )
-<a id='L128' name='L128'></a> 128     <em class='brace'>{</em>
-<a id='L129' name='L129'></a> 129         <strong class='reserved'>return</strong> <a href='../Y/19494.html' title='Multiple used in 49 places.'>tags_</a>;
-<a id='L130' name='L130'></a> 130     <em class='brace'>}</em>
-<a id='L131' name='L131'></a> 131 <em class='brace'>}</em>
+<a id='L66' name='L66'></a>  66     <em class='comment'>/**</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>     * @return A list of {@link Scope} where this variable is visible</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>     */</em>
+<a id='L69' name='L69'></a>  69     <strong class='reserved'>public</strong> <a href='../Y/1834.html' title='Multiple used in 141 places.'>List</a>&lt; <a href='../S/1425.html#L94' title='Defined at 94 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>Scope</a> &gt; <a href='../R/6258.html' title='Multiple referred from 4 places.'>getScopes</a>( )
+<a id='L70' name='L70'></a>  70     <em class='brace'>{</em>
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>return</strong> <a href='../Y/18054.html' title='Multiple used in 5 places.'>scopes_</a>;
+<a id='L72' name='L72'></a>  72     <em class='brace'>}</em>
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74     @<a href='../Y/2113.html' title='Multiple used in 646 places.'>Override</a>
+<a id='L75' name='L75'></a>  75     <strong class='reserved'>public</strong> <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../R/13981.html' title='Multiple referred from 117 places.'>toString</a>( )
+<a id='L76' name='L76'></a>  76     <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77         <a href='../Y/2906.html' title='Multiple used in 32 places.'>StringBuilder</a> <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a> = <strong class='reserved'>new</strong> <a href='../Y/2906.html' title='Multiple used in 32 places.'>StringBuilder</a>( );
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>.<a href='../D/3323.html' title='Multiple defined in 8 places.'>append</a>( "Variable - Name: " + <a href='../D/11302.html' title='Multiple defined in 4 places.'>name_</a> );
+<a id='L80' name='L80'></a>  80         <strong class='reserved'>if</strong>( ! <a href='../Y/18054.html' title='Multiple used in 5 places.'>scopes_</a>.<a href='../Y/12331.html' title='Multiple used in 92 places.'>isEmpty</a>( ) ) <em class='brace'>{</em>
+<a id='L81' name='L81'></a>  81             <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>.<a href='../D/3323.html' title='Multiple defined in 8 places.'>append</a>( "; Scopes: " );
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83             <strong class='reserved'>for</strong>( <a href='../S/1425.html#L94' title='Defined at 94 in utils/umc_dev/org.wesnoth/src/org/wesnoth/wml/WMLVariable.java.'>Scope</a> <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a>: <a href='../Y/18054.html' title='Multiple used in 5 places.'>scopes_</a> ) <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84                 <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>.<a href='../D/3323.html' title='Multiple defined in 8 places.'>append</a>( <a href='../S/103.html#L30' title='Defined at 30 in src/hotkey/hotkey_command.hpp.'>scope</a> );
+<a id='L85' name='L85'></a>  85             <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86         <em class='brace'>}</em>
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88         <strong class='reserved'>return</strong> <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>.<a href='../D/15236.html' title='Multiple defined in 18 places.'>toString</a>( );
+<a id='L89' name='L89'></a>  89     <em class='brace'>}</em>
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91     <em class='comment'>/**</em>
+<a id='L92' name='L92'></a>  92 <em class='comment'>     * Represents a scope of the WMLVariable</em>
+<a id='L93' name='L93'></a>  93 <em class='comment'>     */</em>
+<a id='L94' name='L94'></a>  94     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <strong class='reserved'>class</strong> <a href='../R/1892.html' title='Multiple referred from 10 places.'>Scope</a> <strong class='reserved'>implements</strong> <a href='../Y/2873.html' title='Multiple used in 26 places.'>Serializable</a>
+<a id='L95' name='L95'></a>  95     <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96         <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <strong class='reserved'>final</strong> <strong class='reserved'>long</strong> <a href='../Y/18375.html' title='Multiple used in 29 places.'>serialVersionUID</a> = - 1919240125062707719L;
+<a id='L97' name='L97'></a>  97 
+<a id='L98' name='L98'></a>  98         <em class='comment'>/**</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>         * The index of the start defined file</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>         */</em>
+<a id='L101' name='L101'></a> 101         <strong class='reserved'>public</strong> <strong class='reserved'>int</strong>                <a href='../Y/2897.html' title='Multiple used in 6 places.'>StartIndex</a>;
+<a id='L102' name='L102'></a> 102         <em class='comment'>/**</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'>         * The offset in the start file</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'>         */</em>
+<a id='L105' name='L105'></a> 105         <strong class='reserved'>public</strong> <strong class='reserved'>int</strong>                <a href='../Y/2898.html' title='Multiple used in 5 places.'>StartOffset</a>;
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107         <em class='comment'>/**</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'>         * The index of the end undefined file</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'>         */</em>
+<a id='L110' name='L110'></a> 110         <strong class='reserved'>public</strong> <strong class='reserved'>int</strong>                <a href='../Y/749.html' title='Multiple used in 7 places.'>EndIndex</a>;
+<a id='L111' name='L111'></a> 111         <em class='comment'>/**</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'>         * The offset in the end file</em>
+<a id='L113' name='L113'></a> 113 <em class='comment'>         */</em>
+<a id='L114' name='L114'></a> 114         <strong class='reserved'>public</strong> <strong class='reserved'>int</strong>                <a href='../Y/750.html' title='Multiple used in 6 places.'>EndOffset</a>;
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116         <em class='comment'>/**</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'>         * Creates a new scope</em>
+<a id='L118' name='L118'></a> 118 <em class='comment'>         * </em>
+<a id='L119' name='L119'></a> 119 <em class='comment'>         * @param startIndex</em>
+<a id='L120' name='L120'></a> 120 <em class='comment'>         *        The start index of the scope</em>
+<a id='L121' name='L121'></a> 121 <em class='comment'>         * @param startOffset</em>
+<a id='L122' name='L122'></a> 122 <em class='comment'>         *        The offset in the file represented by the index</em>
+<a id='L123' name='L123'></a> 123 <em class='comment'>         */</em>
+<a id='L124' name='L124'></a> 124         <strong class='reserved'>public</strong> Scope( <strong class='reserved'>int</strong> <a href='../Y/19161.html' title='Multiple used in 11 places.'>startIndex</a>, <strong class='reserved'>int</strong> <a href='../Y/19165.html' title='Multiple used in 2 places.'>startOffset</a> )
+<a id='L125' name='L125'></a> 125         <em class='brace'>{</em>
+<a id='L126' name='L126'></a> 126             <a href='../Y/2897.html' title='Multiple used in 6 places.'>StartIndex</a> = <a href='../Y/19161.html' title='Multiple used in 11 places.'>startIndex</a>;
+<a id='L127' name='L127'></a> 127             <a href='../Y/2898.html' title='Multiple used in 5 places.'>StartOffset</a> = <a href='../Y/19165.html' title='Multiple used in 2 places.'>startOffset</a>;
+<a id='L128' name='L128'></a> 128             <a href='../Y/749.html' title='Multiple used in 7 places.'>EndIndex</a> = <a href='../Y/750.html' title='Multiple used in 6 places.'>EndOffset</a> = <a href='../Y/1655.html' title='Multiple used in 18 places.'>Integer</a>.<a href='../Y/1882.html' title='Multiple used in 4 places.'>MAX_VALUE</a>;
+<a id='L129' name='L129'></a> 129         <em class='brace'>}</em>
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131         @<a href='../Y/2113.html' title='Multiple used in 646 places.'>Override</a>
+<a id='L132' name='L132'></a> 132         <strong class='reserved'>public</strong> <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../R/13981.html' title='Multiple referred from 117 places.'>toString</a>( )
+<a id='L133' name='L133'></a> 133         <em class='brace'>{</em>
+<a id='L134' name='L134'></a> 134             <strong class='reserved'>return</strong> "( " + <a href='../Y/2897.html' title='Multiple used in 6 places.'>StartIndex</a> + ":" + <a href='../Y/2898.html' title='Multiple used in 5 places.'>StartOffset</a> + " -&gt; " + <a href='../Y/749.html' title='Multiple used in 7 places.'>EndIndex</a>
+<a id='L135' name='L135'></a> 135                 + ":" + <a href='../Y/750.html' title='Multiple used in 6 places.'>EndOffset</a> + " )";
+<a id='L136' name='L136'></a> 136         <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137 
+<a id='L138' name='L138'></a> 138         <em class='comment'>/**</em>
+<a id='L139' name='L139'></a> 139 <em class='comment'>         * Returns true if the specified index and offset lie withing</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'>         * this scope</em>
+<a id='L141' name='L141'></a> 141 <em class='comment'>         * </em>
+<a id='L142' name='L142'></a> 142 <em class='comment'>         * @param index</em>
+<a id='L143' name='L143'></a> 143 <em class='comment'>         *        The index of the file</em>
+<a id='L144' name='L144'></a> 144 <em class='comment'>         * @param offset</em>
+<a id='L145' name='L145'></a> 145 <em class='comment'>         *        The offset in the file</em>
+<a id='L146' name='L146'></a> 146 <em class='comment'>         * @return True of false</em>
+<a id='L147' name='L147'></a> 147 <em class='comment'>         */</em>
+<a id='L148' name='L148'></a> 148         <strong class='reserved'>public</strong> <strong class='reserved'>boolean</strong> <a href='../R/4245.html' title='Multiple referred from 62 places.'>contains</a>( <strong class='reserved'>int</strong> <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a>, <strong class='reserved'>int</strong> <a href='../S/996.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a> )
+<a id='L149' name='L149'></a> 149         <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150             <strong class='reserved'>return</strong>( ( <a href='../Y/2897.html' title='Multiple used in 6 places.'>StartIndex</a> == <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &amp;&amp; <a href='../Y/749.html' title='Multiple used in 7 places.'>EndIndex</a> == <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a>
+<a id='L151' name='L151'></a> 151                 &amp;&amp; <a href='../Y/2898.html' title='Multiple used in 5 places.'>StartOffset</a> &lt;= <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &amp;&amp; <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &lt;= <a href='../Y/750.html' title='Multiple used in 6 places.'>EndOffset</a> )
+<a id='L152' name='L152'></a> 152                 || ( <a href='../Y/2897.html' title='Multiple used in 6 places.'>StartIndex</a> == <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &amp;&amp; <a href='../Y/749.html' title='Multiple used in 7 places.'>EndIndex</a> != <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &amp;&amp; <a href='../S/996.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a> &gt; <a href='../Y/2898.html' title='Multiple used in 5 places.'>StartOffset</a> )
+<a id='L153' name='L153'></a> 153                 || ( <a href='../Y/749.html' title='Multiple used in 7 places.'>EndIndex</a> == <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &amp;&amp; <a href='../Y/2897.html' title='Multiple used in 6 places.'>StartIndex</a> != <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &amp;&amp; <a href='../S/996.html#L181' title='Defined at 181 in src/units/frame.cpp.'>offset</a> &lt; <a href='../Y/750.html' title='Multiple used in 6 places.'>EndOffset</a> ) || ( <a href='../Y/2897.html' title='Multiple used in 6 places.'>StartIndex</a> &lt; <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &amp;&amp; <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> &lt; <a href='../Y/749.html' title='Multiple used in 7 places.'>EndIndex</a> ) );
+<a id='L154' name='L154'></a> 154         <em class='brace'>}</em>
+<a id='L155' name='L155'></a> 155     <em class='brace'>}</em>
+<a id='L156' name='L156'></a> 156 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L57'>[^]</a><a href='#L127'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L42'>[^]</a><a href='#L148'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

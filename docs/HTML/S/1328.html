@@ -1,90 +1,56 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>utils/wml_net.pm</title>
+<title>utils/pywmlx/autof.py</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5886.html'>utils</a>/wml_net.pm</h2>
-<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5889.html'>utils</a>/<a href='../files/5896.html'>pywmlx</a>/autof.py</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L6'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L6' title='Defined at 6.'>autoscan</a></li>
+</ol>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 package wml_net;
-<a id='L2' name='L2'></a>   2 use <a href='../Y/19178.html' title='Multiple used in 6 places.'>strict</a>;
-<a id='L3' name='L3'></a>   3 use <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>;
-<a id='L4' name='L4'></a>   4 use IO::Socket;
+<a id='L1' name='L1'></a>   1 import <a href='../Y/15871.html' title='Multiple used in 440 places.'>os</a>
+<a id='L2' name='L2'></a>   2 import <a href='../Y/19576.html' title='Multiple used in 228 places.'>sys</a>
+<a id='L3' name='L3'></a>   3 import <a href='../Y/17096.html' title='Multiple used in 713 places.'>re</a>
+<a id='L4' name='L4'></a>   4 
 <a id='L5' name='L5'></a>   5 
-<a id='L6' name='L6'></a>   6 %wml_net::<a href='../Y/15794.html' title='Multiple used in 8 places.'>outgoing_schemas</a> = ();
-<a id='L7' name='L7'></a>   7 %wml_net::<a href='../Y/11899.html' title='Multiple used in 8 places.'>incoming_schemas</a> = ();
-<a id='L8' name='L8'></a>   8 
-<a id='L9' name='L9'></a>   9 sub <a href='../R/4157.html' title='Multiple referred from 23 places.'>connect</a>
-<a id='L10' name='L10'></a>  10 <em class='brace'>{</em>
-<a id='L11' name='L11'></a>  11         my ($<a href='../Y/11551.html' title='Multiple used in 47 places.'>host</a>,$<a href='../Y/16367.html' title='Multiple used in 37 places.'>port</a>) = @<a href='../D/2624.html' title='Multiple defined in 3 places.'>_</a>;
-<a id='L12' name='L12'></a>  12         my $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a> = IO::Socket::INET-&gt;new(PeerAddr =&gt; $<a href='../Y/11551.html' title='Multiple used in 47 places.'>host</a>,
-<a id='L13' name='L13'></a>  13                                      PeerPort =&gt; $<a href='../Y/16367.html' title='Multiple used in 37 places.'>port</a>,
-<a id='L14' name='L14'></a>  14                                      <a href='../D/1779.html' title='Multiple defined in 2 places.'>Proto</a> =&gt; 'tcp',
-<a id='L15' name='L15'></a>  15                                      Type =&gt; <a href='../Y/2711.html' title='Multiple used in 3 places.'>SOCK_STREAM</a>)
-<a id='L16' name='L16'></a>  16                            or <a href='../Y/8691.html' title='Multiple used in 9 places.'>die</a> "Could not connect to $host:$port: $@\n";
-<a id='L17' name='L17'></a>  17         print $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a> <a href='../S/1216.html#L194' title='Defined at 194 in src/lua/ltablib.cpp.'>pack</a>('N',0) or <a href='../Y/8691.html' title='Multiple used in 9 places.'>die</a> "Could not send initial handshake";
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19         my $<a href='../Y/7739.html' title='Multiple used in 8 places.'>connection_num</a> = "";
-<a id='L20' name='L20'></a>  20         <a href='../D/12340.html' title='Multiple defined in 23 places.'>read</a> $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>, $<a href='../Y/7739.html' title='Multiple used in 8 places.'>connection_num</a>, 4;
-<a id='L21' name='L21'></a>  21         <a href='../Y/8691.html' title='Multiple used in 9 places.'>die</a> "Could not read connection number" <strong class='reserved'>if</strong> <a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>($<a href='../Y/7739.html' title='Multiple used in 8 places.'>connection_num</a>) != 4;
-<a id='L22' name='L22'></a>  22 
-<a id='L23' name='L23'></a>  23         $wml_net::<a href='../Y/15794.html' title='Multiple used in 8 places.'>outgoing_schemas</a><em class='brace'>{</em>$<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a><em class='brace'>}</em> = [];
-<a id='L24' name='L24'></a>  24         $wml_net::<a href='../Y/11899.html' title='Multiple used in 8 places.'>incoming_schemas</a><em class='brace'>{</em>$<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a><em class='brace'>}</em> = [];
-<a id='L25' name='L25'></a>  25         <strong class='reserved'>return</strong> $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>;
-<a id='L26' name='L26'></a>  26 <em class='brace'>}</em>
-<a id='L27' name='L27'></a>  27 
-<a id='L28' name='L28'></a>  28 sub <a href='../R/4765.html' title='Multiple referred from 7 places.'>disconnect</a>
-<a id='L29' name='L29'></a>  29 <em class='brace'>{</em>
-<a id='L30' name='L30'></a>  30         my ($<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>) = @<a href='../D/2624.html' title='Multiple defined in 3 places.'>_</a>;
-<a id='L31' name='L31'></a>  31         <a href='../Y/8570.html' title='Multiple used in 28 places.'>delete</a>($wml_net::<a href='../Y/15794.html' title='Multiple used in 8 places.'>outgoing_schemas</a><em class='brace'>{</em>$<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a><em class='brace'>}</em>);
-<a id='L32' name='L32'></a>  32         <a href='../Y/8570.html' title='Multiple used in 28 places.'>delete</a>($wml_net::<a href='../Y/11899.html' title='Multiple used in 8 places.'>incoming_schemas</a><em class='brace'>{</em>$<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a><em class='brace'>}</em>);
-<a id='L33' name='L33'></a>  33         <a href='../D/4540.html' title='Multiple defined in 6 places.'>close</a> $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>;
-<a id='L34' name='L34'></a>  34 <em class='brace'>}</em>
-<a id='L35' name='L35'></a>  35 
-<a id='L36' name='L36'></a>  36 sub <a href='../R/11292.html' title='Multiple referred from 5 places.'>read_packet</a>
-<a id='L37' name='L37'></a>  37 <em class='brace'>{</em>
-<a id='L38' name='L38'></a>  38         my ($<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>) = @<a href='../D/2624.html' title='Multiple defined in 3 places.'>_</a>;
-<a id='L39' name='L39'></a>  39         my $<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a> = '';
-<a id='L40' name='L40'></a>  40         <a href='../D/12340.html' title='Multiple defined in 23 places.'>read</a> $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>, $<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a>, 4;
-<a id='L41' name='L41'></a>  41         <a href='../Y/8691.html' title='Multiple used in 9 places.'>die</a> "Could not read length" <strong class='reserved'>if</strong> <a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a>($<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a>) != 4;
-<a id='L42' name='L42'></a>  42 
-<a id='L43' name='L43'></a>  43         my $<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a> = <a href='../S/1216.html#L207' title='Defined at 207 in src/lua/ltablib.cpp.'>unpack</a>('N',$<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a>);
-<a id='L44' name='L44'></a>  44 
-<a id='L45' name='L45'></a>  45         my $<a href='../Y/17406.html' title='Multiple used in 1873 places.'>res</a> = "\0" * $<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a>;
-<a id='L46' name='L46'></a>  46         my $<a href='../D/4928.html' title='Multiple defined in 4 places.'>count</a> = 0;
-<a id='L47' name='L47'></a>  47         <strong class='reserved'>while</strong>($<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a> &gt; $<a href='../D/4928.html' title='Multiple defined in 4 places.'>count</a>) <em class='brace'>{</em>
-<a id='L48' name='L48'></a>  48                 $<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a> = '';
-<a id='L49' name='L49'></a>  49                 my $<a href='../Y/6682.html' title='Multiple used in 18 places.'>bytes</a> = $<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a> - $<a href='../D/4928.html' title='Multiple defined in 4 places.'>count</a>;
-<a id='L50' name='L50'></a>  50                 <a href='../D/12340.html' title='Multiple defined in 23 places.'>read</a> $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>, $<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a>, $<a href='../Y/6682.html' title='Multiple used in 18 places.'>bytes</a> or <a href='../Y/8691.html' title='Multiple used in 9 places.'>die</a> "Error reading socket: $!";
-<a id='L51' name='L51'></a>  51                 <a href='../D/14814.html' title='Multiple defined in 2 places.'>substr</a>($<a href='../Y/17406.html' title='Multiple used in 1873 places.'>res</a>, $<a href='../D/4928.html' title='Multiple defined in 4 places.'>count</a>, <a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a> $<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a>) = $buf;
-<a id='L52' name='L52'></a>  52                 $<a href='../D/4928.html' title='Multiple defined in 4 places.'>count</a> += <a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a> $<a href='../Y/6580.html' title='Multiple used in 182 places.'>buf</a>;
-<a id='L53' name='L53'></a>  53         <em class='brace'>}</em>
-<a id='L54' name='L54'></a>  54 
-<a id='L55' name='L55'></a>  55         $<a href='../Y/17406.html' title='Multiple used in 1873 places.'>res</a> = <a href='../D/14814.html' title='Multiple defined in 2 places.'>substr</a>($res,0,$<a href='../Y/12997.html' title='Multiple used in 354 places.'>len</a>-1);
-<a id='L56' name='L56'></a>  56 
-<a id='L57' name='L57'></a>  57         <strong class='reserved'>return</strong> &amp;wml::<a href='../S/1356.html#L59' title='Defined at 59 in utils/wml.pm.'>read_binary</a>($wml_net::<a href='../Y/11899.html' title='Multiple used in 8 places.'>incoming_schemas</a><em class='brace'>{</em>$<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a><em class='brace'>}</em>,$<a href='../Y/17406.html' title='Multiple used in 1873 places.'>res</a>);
-<a id='L58' name='L58'></a>  58 <em class='brace'>}</em>
-<a id='L59' name='L59'></a>  59 
-<a id='L60' name='L60'></a>  60 sub write_packet
-<a id='L61' name='L61'></a>  61 <em class='brace'>{</em>
-<a id='L62' name='L62'></a>  62         my ($<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a>,$<a href='../Y/8885.html' title='Multiple used in 150 places.'>doc</a>) = @<a href='../D/2624.html' title='Multiple defined in 3 places.'>_</a>;
-<a id='L63' name='L63'></a>  63 
-<a id='L64' name='L64'></a>  64         my $<a href='../D/5198.html' title='Multiple defined in 16 places.'>data</a> = &amp;wml::<a href='../S/1356.html#L277' title='Defined at 277 in utils/wml.pm.'>write_binary</a>($wml_net::<a href='../Y/15794.html' title='Multiple used in 8 places.'>outgoing_schemas</a><em class='brace'>{</em>$<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a><em class='brace'>}</em>,$<a href='../Y/8885.html' title='Multiple used in 150 places.'>doc</a>);
-<a id='L65' name='L65'></a>  65         $<a href='../D/5198.html' title='Multiple defined in 16 places.'>data</a> .= <a href='../Y/7339.html' title='Multiple used in 12 places.'>chr</a> 0;
-<a id='L66' name='L66'></a>  66         my $<a href='../Y/11319.html' title='Multiple used in 44 places.'>header</a> = <a href='../S/1216.html#L194' title='Defined at 194 in src/lua/ltablib.cpp.'>pack</a>('N',<a href='../S/136.html#L123' title='Defined at 123 in src/serialization/string_view.hpp.'>length</a> $<a href='../D/5198.html' title='Multiple defined in 16 places.'>data</a>);
-<a id='L67' name='L67'></a>  67         print $<a href='../Y/18752.html' title='Multiple used in 183 places.'>sock</a> "$header$data" or <a href='../Y/8691.html' title='Multiple used in 9 places.'>die</a> "Error writing to socket: $!";
-<a id='L68' name='L68'></a>  68 <em class='brace'>}</em>
-<a id='L69' name='L69'></a>  69 
-<a id='L70' name='L70'></a>  70 'Wesnoth network protocol';
+<a id='L6' name='L6'></a>   6 def autoscan(<a href='../Y/16282.html' title='Multiple used in 3 places.'>pathdir</a>):
+<a id='L7' name='L7'></a>   7     <a href='../Y/10037.html' title='Multiple used in 43 places.'>filelist</a> = <a href='../Y/2069.html' title='Multiple used in 432 places.'>None</a>
+<a id='L8' name='L8'></a>   8     <a href='../Y/16183.html' title='Multiple used in 3 places.'>parentdir</a> = <a href='../Y/15871.html' title='Multiple used in 440 places.'>os</a>.<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/17160.html' title='Multiple used in 5 places.'>realpath</a>(os.path.<a href='../D/9563.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/16282.html' title='Multiple used in 3 places.'>pathdir</a>, '..'))
+<a id='L9' name='L9'></a>   9     <strong class='reserved'>for</strong> <a href='../D/13015.html' title='Multiple defined in 2 places.'>root</a>, <a href='../Y/8875.html' title='Multiple used in 109 places.'>dirs</a>, <a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a> in <a href='../Y/15871.html' title='Multiple used in 440 places.'>os</a>.<a href='../Y/21805.html' title='Multiple used in 6 places.'>walk</a>(<a href='../Y/16282.html' title='Multiple used in 3 places.'>pathdir</a>, topdown=<a href='../Y/1183.html' title='Multiple used in 286 places.'>False</a>):
+<a id='L10' name='L10'></a>  10         <strong class='reserved'>for</strong> <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a> in <a href='../D/6219.html' title='Multiple defined in 2 places.'>files</a>:
+<a id='L11' name='L11'></a>  11             <a href='../Y/17884.html' title='Multiple used in 39 places.'>rx</a> = <a href='../Y/17096.html' title='Multiple used in 713 places.'>re</a>.<a href='../Y/7749.html' title='Multiple used in 102 places.'>compile</a>(r'\.(cfg|lua)$', re.<a href='../Y/1356.html' title='Multiple used in 26 places.'>I</a>)
+<a id='L12' name='L12'></a>  12             <a href='../Y/13701.html' title='Multiple used in 566 places.'>m</a> = <a href='../Y/17096.html' title='Multiple used in 713 places.'>re</a>.<a href='../D/13380.html' title='Multiple defined in 5 places.'>search</a>(<a href='../Y/17884.html' title='Multiple used in 39 places.'>rx</a>, <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>)
+<a id='L13' name='L13'></a>  13             <strong class='reserved'>if</strong> <a href='../Y/13701.html' title='Multiple used in 566 places.'>m</a>:
+<a id='L14' name='L14'></a>  14                 <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a> = <a href='../Y/15871.html' title='Multiple used in 440 places.'>os</a>.<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/17160.html' title='Multiple used in 5 places.'>realpath</a>(os.path.<a href='../D/9563.html' title='Multiple defined in 3 places.'>join</a>(<a href='../D/13015.html' title='Multiple defined in 2 places.'>root</a>, <a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a>))
+<a id='L15' name='L15'></a>  15                 <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a> = value [ <a href='../Y/13134.html' title='Multiple used in 359 places.'>len</a>(<a href='../Y/16183.html' title='Multiple used in 3 places.'>parentdir</a>) +1 : ]
+<a id='L16' name='L16'></a>  16                 <strong class='reserved'>if</strong> <a href='../Y/15871.html' title='Multiple used in 440 places.'>os</a>.<a href='../D/11301.html' title='Multiple defined in 24 places.'>name</a> == "posix":
+<a id='L17' name='L17'></a>  17                     <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a> = <a href='../Y/17096.html' title='Multiple used in 713 places.'>re</a>.<a href='../Y/19435.html' title='Multiple used in 160 places.'>sub</a>(r'^\/', '', value)
+<a id='L18' name='L18'></a>  18                 <strong class='reserved'>else</strong>:
+<a id='L19' name='L19'></a>  19                     <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a> = <a href='../Y/17096.html' title='Multiple used in 713 places.'>re</a>.<a href='../Y/19435.html' title='Multiple used in 160 places.'>sub</a>(r'^(?:[A-Za-z]\:)?\\', '', value)
+<a id='L20' name='L20'></a>  20                 <strong class='reserved'>if</strong> <a href='../Y/10037.html' title='Multiple used in 43 places.'>filelist</a> is <a href='../Y/2069.html' title='Multiple used in 432 places.'>None</a>: 
+<a id='L21' name='L21'></a>  21                     <a href='../Y/10037.html' title='Multiple used in 43 places.'>filelist</a> = [ <a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a> ]
+<a id='L22' name='L22'></a>  22                 <strong class='reserved'>else</strong>:
+<a id='L23' name='L23'></a>  23                     <a href='../Y/10037.html' title='Multiple used in 43 places.'>filelist</a>.<a href='../D/3323.html' title='Multiple defined in 8 places.'>append</a>(<a href='../D/15946.html' title='Multiple defined in 19 places.'>value</a>)
+<a id='L24' name='L24'></a>  24                 # end <strong class='reserved'>if</strong> m
+<a id='L25' name='L25'></a>  25             # end <strong class='reserved'>for</strong> name
+<a id='L26' name='L26'></a>  26         # end <strong class='reserved'>for</strong> root
+<a id='L27' name='L27'></a>  27     # end <strong class='reserved'>for</strong> scandir
+<a id='L28' name='L28'></a>  28     <strong class='reserved'>return</strong> (<a href='../Y/16183.html' title='Multiple used in 3 places.'>parentdir</a>, <a href='../Y/10037.html' title='Multiple used in 43 places.'>filelist</a>)
+<a id='L29' name='L29'></a>  29 # end autoscan
+<a id='L30' name='L30'></a>  30 
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;][^]<a href='#L6'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

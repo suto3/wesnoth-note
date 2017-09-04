@@ -1,317 +1,211 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>data/lua/core.lua</title>
+<title>data/lua/cave_map_generator.lua</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5638.html'>data</a>/<a href='../files/5780.html'>lua</a>/core.lua</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L3'>[^]</a><a href='#L265'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5641.html'>data</a>/<a href='../files/5783.html'>lua</a>/cave_map_generator.lua</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L9'>[^]</a><a href='#L166'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L3' title='Defined at 3.'>wesnoth.alert</a></li>
-<li><a href='#L11' title='Defined at 11.'>wesnoth.confirm</a></li>
-<li><a href='#L26' title='Defined at 26.'>ensure_config</a></li>
-<li><a href='#L42' title='Defined at 42.'>wml.get_child</a></li>
-<li><a href='#L55' title='Defined at 55.'>wml.get_nth_child</a></li>
-<li><a href='#L66' title='Defined at 66.'>wml.child_count</a></li>
-<li><a href='#L78' title='Defined at 78.'>wml.child_range</a></li>
-<li><a href='#L93' title='Defined at 93.'>wml.child_array</a></li>
-<li><a href='#L115' title='Defined at 115.'>wml.literal</a></li>
-<li><a href='#L123' title='Defined at 123.'>wml.parsed</a></li>
-<li><a href='#L131' title='Defined at 131.'>wml.shallow_literal</a></li>
-<li><a href='#L139' title='Defined at 139.'>wml.shallow_parsed</a></li>
-<li><a href='#L161' title='Defined at 161.'>get_variable_proxy</a></li>
-<li><a href='#L169' title='Defined at 169.'>set_variable_proxy</a></li>
-<li><a href='#L176' title='Defined at 176.'>variable_mt.__index</a></li>
-<li><a href='#L186' title='Defined at 186.'>variable_mt.__newindex</a></li>
-<li><a href='#L214' title='Defined at 214.'>resolve_variable_context</a></li>
-<li><a href='#L243' title='Defined at 243.'>wml.variable.get_array</a></li>
-<li><a href='#L253' title='Defined at 253.'>wml.variable.set_array</a></li>
-<li><a href='#L265' title='Defined at 265.'>wml.variable.get_proxy_array</a></li>
+<li><a href='#L9' title='Defined at 9.'>callbacks.generate_map</a></li>
+<li><a href='#L12' title='Defined at 12.'>build_chamber</a></li>
+<li><a href='#L24' title='Defined at 24.'>clear_tile</a></li>
+<li><a href='#L166' title='Defined at 166.'>callbacks.generate_scenario</a></li>
 </ol>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 -- Note: This file is loaded automatically by the engine.
-<a id='L2' name='L2'></a>   2 
-<a id='L3' name='L3'></a>   3 function <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/5408.html' title='Multiple used in 2 places.'>alert</a>(<a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a>, <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>)
-<a id='L4' name='L4'></a>   4         <strong class='reserved'>if</strong> not <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> then
-<a id='L5' name='L5'></a>   5                 <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a>;
-<a id='L6' name='L6'></a>   6                 <a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a> = "";
-<a id='L7' name='L7'></a>   7         end
-<a id='L8' name='L8'></a>   8         <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../S/184.html#L435' title='Defined at 435 in src/scripting/lua_gui2.cpp.'>show_message_box</a>(<a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a>, <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>, "ok", true)
-<a id='L9' name='L9'></a>   9 end
-<a id='L10' name='L10'></a>  10 
-<a id='L11' name='L11'></a>  11 function <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/7727.html' title='Multiple used in 3 places.'>confirm</a>(<a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a>, <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>)
-<a id='L12' name='L12'></a>  12         <strong class='reserved'>if</strong> not <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> then
-<a id='L13' name='L13'></a>  13                 <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a> = <a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a>;
-<a id='L14' name='L14'></a>  14                 <a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a> = "";
-<a id='L15' name='L15'></a>  15         end
-<a id='L16' name='L16'></a>  16         <strong class='reserved'>return</strong> <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../S/184.html#L435' title='Defined at 435 in src/scripting/lua_gui2.cpp.'>show_message_box</a>(<a href='../D/15173.html' title='Multiple defined in 10 places.'>title</a>, <a href='../S/785.html#L110' title='Defined at 110 in src/formula/debugger.cpp.'>msg</a>, "yes_no", true)
-<a id='L17' name='L17'></a>  17 end
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 
-<a id='L20' name='L20'></a>  20 --[========[Config Manipulation Functions]========]
-<a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L23' name='L23'></a>  23 <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/20458.html' title='Multiple used in 6 places.'>tovconfig</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.tovconfig
-<a id='L24' name='L24'></a>  24 <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../S/1175.html#L454' title='Defined at 454 in src/lua/lvm.cpp.'>tostring</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/5227.html' title='Multiple defined in 16 places.'>debug</a>
-<a id='L25' name='L25'></a>  25 
-<a id='L26' name='L26'></a>  26 local function <a href='../R/5199.html' title='Multiple referred from 5 places.'>ensure_config</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L27' name='L27'></a>  27         <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) == 'table' then
-<a id='L28' name='L28'></a>  28                 <strong class='reserved'>return</strong> true
-<a id='L29' name='L29'></a>  29         end
-<a id='L30' name='L30'></a>  30         <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) == 'userdata' then
-<a id='L31' name='L31'></a>  31                 <strong class='reserved'>if</strong> <a href='../Y/10901.html' title='Multiple used in 7 places.'>getmetatable</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) == 'wml object' then <strong class='reserved'>return</strong> true end
-<a id='L32' name='L32'></a>  32                 <a href='../D/5941.html' title='Multiple defined in 22 places.'>error</a>("Expected a table or wml object but got " .. <a href='../Y/10901.html' title='Multiple used in 7 places.'>getmetatable</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>), 3)
-<a id='L33' name='L33'></a>  33         <strong class='reserved'>else</strong>
-<a id='L34' name='L34'></a>  34                 <a href='../D/5941.html' title='Multiple defined in 22 places.'>error</a>("Expected a table or wml object but got " .. <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>), 3)
-<a id='L35' name='L35'></a>  35         end
-<a id='L36' name='L36'></a>  36         <strong class='reserved'>return</strong> false
-<a id='L37' name='L37'></a>  37 end
+<a id='L1' name='L1'></a>   1 local <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a> = <a href='../Y/21891.html' title='Multiple used in 2623 places.'>wesnoth</a>.<a href='../Y/17550.html' title='Multiple used in 267 places.'>require</a> "helper"
+<a id='L2' name='L2'></a>   2 local <a href='../Y/1892.html' title='Multiple used in 5 places.'>MG</a> = <a href='../Y/21891.html' title='Multiple used in 2623 places.'>wesnoth</a>.<a href='../Y/17550.html' title='Multiple used in 267 places.'>require</a> "mapgen_helper"
+<a id='L3' name='L3'></a>   3 local <a href='../Y/1806.html' title='Multiple used in 99 places.'>LS</a> = <a href='../Y/21891.html' title='Multiple used in 2623 places.'>wesnoth</a>.<a href='../Y/17550.html' title='Multiple used in 267 places.'>require</a> "location_set"
+<a id='L4' name='L4'></a>   4 local <a href='../D/2086.html' title='Multiple defined in 2 places.'>T</a> = <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../Y/18543.html' title='Multiple used in 20 places.'>set_wml_tag_metatable</a> <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L5' name='L5'></a>   5 local <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a> = <a href='../Y/21891.html' title='Multiple used in 2623 places.'>wesnoth</a>.random
+<a id='L6' name='L6'></a>   6 
+<a id='L7' name='L7'></a>   7 local <a href='../S/184.html#L97' title='Defined at 97 in src/scripting/lua_gui2.cpp.'>callbacks</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L8' name='L8'></a>   8 
+<a id='L9' name='L9'></a>   9 function <a href='../S/184.html#L97' title='Defined at 97 in src/scripting/lua_gui2.cpp.'>callbacks</a>.<a href='../S/7.html#L81' title='Defined at 81 in src/generators/default_map_generator.cpp.'>generate_map</a>(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>)
+<a id='L10' name='L10'></a>  10         local <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a> = <a href='../Y/1892.html' title='Multiple used in 5 places.'>MG</a>.<a href='../D/5110.html' title='Multiple defined in 5 places.'>create_map</a>(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/13846.html' title='Multiple used in 13 places.'>map_width</a>, params.<a href='../Y/13827.html' title='Multiple used in 13 places.'>map_height</a>, params.<a href='../Y/19910.html' title='Multiple used in 4 places.'>terrain_wall</a>)
+<a id='L11' name='L11'></a>  11 
+<a id='L12' name='L12'></a>  12         local function <a href='../R/3358.html' title='Multiple referred from 7 places.'>build_chamber</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>, <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>, <a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a>, <a href='../Y/12622.html' title='Multiple used in 30 places.'>jagged</a>)
+<a id='L13' name='L13'></a>  13                 <strong class='reserved'>if</strong> <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>:<a href='../D/6770.html' title='Multiple defined in 42 places.'>get</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) or not <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../D/11535.html' title='Multiple defined in 3 places.'>on_board</a>(x, y) or <a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a> == 0 then
+<a id='L14' name='L14'></a>  14                         <strong class='reserved'>return</strong>
+<a id='L15' name='L15'></a>  15                 end
+<a id='L16' name='L16'></a>  16                 <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>:<a href='../D/8950.html' title='Multiple defined in 13 places.'>insert</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>)
+<a id='L17' name='L17'></a>  17                 <strong class='reserved'>for</strong> <a href='../Y/22266.html' title='Multiple used in 2 places.'>xn</a>, <a href='../Y/22373.html' title='Multiple used in 2 places.'>yn</a> in <a href='../Y/1892.html' title='Multiple used in 5 places.'>MG</a>.<a href='../Y/5391.html' title='Multiple used in 37 places.'>adjacent_tiles</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) <strong class='reserved'>do</strong>
+<a id='L18' name='L18'></a>  18                         <strong class='reserved'>if</strong> <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(100) &lt;= 100 - <a href='../Y/12622.html' title='Multiple used in 30 places.'>jagged</a> then
+<a id='L19' name='L19'></a>  19                                 <a href='../D/3779.html' title='Multiple defined in 2 places.'>build_chamber</a>(<a href='../Y/22266.html' title='Multiple used in 2 places.'>xn</a>, <a href='../Y/22373.html' title='Multiple used in 2 places.'>yn</a>, <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>, <a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a> - 1, <a href='../Y/12622.html' title='Multiple used in 30 places.'>jagged</a>)
+<a id='L20' name='L20'></a>  20                         end
+<a id='L21' name='L21'></a>  21                 end
+<a id='L22' name='L22'></a>  22         end
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24         local function <a href='../R/3988.html' title='Multiple referred from 2 places.'>clear_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>)
+<a id='L25' name='L25'></a>  25                 <strong class='reserved'>if</strong> not <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../D/11535.html' title='Multiple defined in 3 places.'>on_board</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) then
+<a id='L26' name='L26'></a>  26                         <strong class='reserved'>return</strong>
+<a id='L27' name='L27'></a>  27                 end
+<a id='L28' name='L28'></a>  28                 <strong class='reserved'>if</strong> <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../S/309.html#L1211' title='Defined at 1211 in src/terrain/builder.cpp.'>get_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) == <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/19879.html' title='Multiple used in 4 places.'>terrain_castle</a> or map:get_tile(x,y) == params.<a href='../Y/19894.html' title='Multiple used in 4 places.'>terrain_keep</a> then
+<a id='L29' name='L29'></a>  29                         <strong class='reserved'>return</strong>
+<a id='L30' name='L30'></a>  30                 end
+<a id='L31' name='L31'></a>  31                 local <a href='../S/705.html#L600' title='Defined at 600 in src/tests/gui/test_gui2.cpp.'>r</a> = <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(1000)
+<a id='L32' name='L32'></a>  32                 <strong class='reserved'>if</strong> <a href='../S/705.html#L600' title='Defined at 600 in src/tests/gui/test_gui2.cpp.'>r</a> &lt;= <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/21668.html' title='Multiple used in 3 places.'>village_density</a> then
+<a id='L33' name='L33'></a>  33                         <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../Y/18533.html' title='Multiple used in 5 places.'>set_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>, <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/19909.html' title='Multiple used in 3 places.'>terrain_village</a>)
+<a id='L34' name='L34'></a>  34                 <strong class='reserved'>else</strong>
+<a id='L35' name='L35'></a>  35                         <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../Y/18533.html' title='Multiple used in 5 places.'>set_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>, <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/19881.html' title='Multiple used in 3 places.'>terrain_clear</a>)
+<a id='L36' name='L36'></a>  36                 end
+<a id='L37' name='L37'></a>  37         end
 <a id='L38' name='L38'></a>  38 
-<a id='L39' name='L39'></a>  39 --! Returns the first subtag of @a cfg with the given @a name.
-<a id='L40' name='L40'></a>  40 --! If @a id is not nil, the "id" attribute of the subtag has to match too.
-<a id='L41' name='L41'></a>  41 --! The function also returns the index of the subtag in the array.
-<a id='L42' name='L42'></a>  42 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../D/7357.html' title='Multiple defined in 6 places.'>get_child</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>, <a href='../D/11253.html' title='Multiple defined in 26 places.'>name</a>, <a href='../D/8622.html' title='Multiple defined in 22 places.'>id</a>)
-<a id='L43' name='L43'></a>  43         <a href='../S/5557.html#L26' title='Defined at 26 in data/lua/core.lua.'>ensure_config</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L44' name='L44'></a>  44         <strong class='reserved'>for</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a>,<a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a> in <a href='../Y/12173.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) <strong class='reserved'>do</strong>
-<a id='L45' name='L45'></a>  45                 <strong class='reserved'>if</strong> <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>[1] == <a href='../D/11253.html' title='Multiple defined in 26 places.'>name</a> then
-<a id='L46' name='L46'></a>  46                         local <a href='../D/16033.html' title='Multiple defined in 6 places.'>w</a> = <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>[2]
-<a id='L47' name='L47'></a>  47                         <strong class='reserved'>if</strong> not <a href='../D/8622.html' title='Multiple defined in 22 places.'>id</a> or <a href='../D/16033.html' title='Multiple defined in 6 places.'>w</a>.id == id then <strong class='reserved'>return</strong> w, <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> end
-<a id='L48' name='L48'></a>  48                 end
-<a id='L49' name='L49'></a>  49         end
-<a id='L50' name='L50'></a>  50 end
-<a id='L51' name='L51'></a>  51 
-<a id='L52' name='L52'></a>  52 --! Returns the nth subtag of @a cfg with the given @a name.
-<a id='L53' name='L53'></a>  53 --! (Indices start at 1, as always with Lua.)
-<a id='L54' name='L54'></a>  54 --! The function also returns the index of the subtag in the array.
-<a id='L55' name='L55'></a>  55 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/10858.html' title='Multiple used in 3 places.'>get_nth_child</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>, <a href='../D/11253.html' title='Multiple defined in 26 places.'>name</a>, <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a>)
-<a id='L56' name='L56'></a>  56         <a href='../S/5557.html#L26' title='Defined at 26 in data/lua/core.lua.'>ensure_config</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L57' name='L57'></a>  57         <strong class='reserved'>for</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a>,<a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a> in <a href='../Y/12173.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) <strong class='reserved'>do</strong>
-<a id='L58' name='L58'></a>  58                 <strong class='reserved'>if</strong> <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>[1] == <a href='../D/11253.html' title='Multiple defined in 26 places.'>name</a> then
-<a id='L59' name='L59'></a>  59                         <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a> = n - 1
-<a id='L60' name='L60'></a>  60                         <strong class='reserved'>if</strong> <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a> == 0 then <strong class='reserved'>return</strong> <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>[2], <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> end
-<a id='L61' name='L61'></a>  61                 end
-<a id='L62' name='L62'></a>  62         end
-<a id='L63' name='L63'></a>  63 end
-<a id='L64' name='L64'></a>  64 
-<a id='L65' name='L65'></a>  65 --! Returns the number of subtags of @a with the given @a name.
-<a id='L66' name='L66'></a>  66 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../S/680.html#L323' title='Defined at 323 in src/config.cpp.'>child_count</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>, <a href='../D/11253.html' title='Multiple defined in 26 places.'>name</a>)
-<a id='L67' name='L67'></a>  67         <a href='../S/5557.html#L26' title='Defined at 26 in data/lua/core.lua.'>ensure_config</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L68' name='L68'></a>  68         local <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a> = 0
-<a id='L69' name='L69'></a>  69         <strong class='reserved'>for</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a>,<a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a> in <a href='../Y/12173.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) <strong class='reserved'>do</strong>
-<a id='L70' name='L70'></a>  70                 <strong class='reserved'>if</strong> <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>[1] == <a href='../D/11253.html' title='Multiple defined in 26 places.'>name</a> then
-<a id='L71' name='L71'></a>  71                         <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a> = n + 1
-<a id='L72' name='L72'></a>  72                 end
-<a id='L73' name='L73'></a>  73         end
-<a id='L74' name='L74'></a>  74         <strong class='reserved'>return</strong> <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a>
-<a id='L75' name='L75'></a>  75 end
-<a id='L76' name='L76'></a>  76 
-<a id='L77' name='L77'></a>  77 --! Returns an iterator over all the subtags of @a cfg with the given @a name.
-<a id='L78' name='L78'></a>  78 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../D/4399.html' title='Multiple defined in 2 places.'>child_range</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>, <a href='../Y/19475.html' title='Multiple used in 340 places.'>tag</a>)
-<a id='L79' name='L79'></a>  79         <a href='../S/5557.html#L26' title='Defined at 26 in data/lua/core.lua.'>ensure_config</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L80' name='L80'></a>  80         local <a href='../Y/12431.html' title='Multiple used in 297 places.'>iter</a>, <a href='../D/14680.html' title='Multiple defined in 3 places.'>state</a>, <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> = <a href='../Y/12173.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L81' name='L81'></a>  81         local function <a href='../R/5396.html' title='Multiple referred from 825 places.'>f</a>(<a href='../Y/17722.html' title='Multiple used in 1744 places.'>s</a>)
-<a id='L82' name='L82'></a>  82                 local <a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a>
-<a id='L83' name='L83'></a>  83                 repeat
-<a id='L84' name='L84'></a>  84                         <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a>,<a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a> = <a href='../Y/12431.html' title='Multiple used in 297 places.'>iter</a>(<a href='../Y/17722.html' title='Multiple used in 1744 places.'>s</a>,i)
-<a id='L85' name='L85'></a>  85                         <strong class='reserved'>if</strong> not <a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a> then <strong class='reserved'>return</strong> end
-<a id='L86' name='L86'></a>  86                 until <a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a>[1] == <a href='../Y/19475.html' title='Multiple used in 340 places.'>tag</a>
-<a id='L87' name='L87'></a>  87                 <strong class='reserved'>return</strong> <a href='../D/3857.html' title='Multiple defined in 3 places.'>c</a>[2]
-<a id='L88' name='L88'></a>  88         end
-<a id='L89' name='L89'></a>  89         <strong class='reserved'>return</strong> <a href='../D/6089.html' title='Multiple defined in 9 places.'>f</a>, <a href='../D/14680.html' title='Multiple defined in 3 places.'>state</a>
-<a id='L90' name='L90'></a>  90 end
-<a id='L91' name='L91'></a>  91 
-<a id='L92' name='L92'></a>  92 --! Returns an array from the subtags of @a cfg with the given @a name
-<a id='L93' name='L93'></a>  93 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/7275.html' title='Multiple used in 2 places.'>child_array</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>, <a href='../Y/19475.html' title='Multiple used in 340 places.'>tag</a>)
-<a id='L94' name='L94'></a>  94         <a href='../S/5557.html#L26' title='Defined at 26 in data/lua/core.lua.'>ensure_config</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L95' name='L95'></a>  95         local <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L96' name='L96'></a>  96         <strong class='reserved'>for</strong> <a href='../D/15857.html' title='Multiple defined in 2 places.'>val</a> in <a href='../Y/11411.html' title='Multiple used in 345 places.'>helper</a>.<a href='../D/4399.html' title='Multiple defined in 2 places.'>child_range</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>, <a href='../Y/19475.html' title='Multiple used in 340 places.'>tag</a>) <strong class='reserved'>do</strong>
-<a id='L97' name='L97'></a>  97                 table.insert(<a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a>, <a href='../D/15857.html' title='Multiple defined in 2 places.'>val</a>)
-<a id='L98' name='L98'></a>  98         end
-<a id='L99' name='L99'></a>  99         <strong class='reserved'>return</strong> <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L100' name='L100'></a> 100 end
-<a id='L101' name='L101'></a> 101 
-<a id='L102' name='L102'></a> 102 --[========[WML Tag Creation Table]========]
-<a id='L103' name='L103'></a> 103 
-<a id='L104' name='L104'></a> 104 local <a href='../Y/7929.html' title='Multiple used in 2 places.'>create_tag_mt</a> = <em class='brace'>{</em>
-<a id='L105' name='L105'></a> 105         <a href='../Y/4799.html' title='Multiple used in 7 places.'>__metatable</a> = "WML tag builder",
-<a id='L106' name='L106'></a> 106         <a href='../R/2409.html' title='Multiple referred from 13 places.'>__index</a> = function(<a href='../S/650.html#L36' title='Defined at 36 in src/gui/auxiliary/iterator/walker.hpp.'>self</a>, <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a>)
-<a id='L107' name='L107'></a> 107                 <strong class='reserved'>return</strong> function(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) <strong class='reserved'>return</strong> <em class='brace'>{</em> <a href='../Y/14549.html' title='Multiple used in 1582 places.'>n</a>, cfg <em class='brace'>}</em> end
-<a id='L108' name='L108'></a> 108         end
-<a id='L109' name='L109'></a> 109 <em class='brace'>}</em>
-<a id='L110' name='L110'></a> 110 
-<a id='L111' name='L111'></a> 111 <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/19475.html' title='Multiple used in 340 places.'>tag</a> = <a href='../S/190.html#L202' title='Defined at 202 in src/scripting/lua_unit.cpp.'>setmetatable</a>(<em class='brace'>{</em><em class='brace'>}</em>, <a href='../Y/7929.html' title='Multiple used in 2 places.'>create_tag_mt</a>)
-<a id='L112' name='L112'></a> 112 
-<a id='L113' name='L113'></a> 113 --[========[Config / Vconfig Unified Handling]========]
-<a id='L114' name='L114'></a> 114 
-<a id='L115' name='L115'></a> 115 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/13140.html' title='Multiple used in 13 places.'>literal</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L116' name='L116'></a> 116         <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) == "userdata" then
-<a id='L117' name='L117'></a> 117                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>.__literal
-<a id='L118' name='L118'></a> 118         <strong class='reserved'>else</strong>
-<a id='L119' name='L119'></a> 119                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a> or <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L120' name='L120'></a> 120         end
-<a id='L121' name='L121'></a> 121 end
-<a id='L122' name='L122'></a> 122 
-<a id='L123' name='L123'></a> 123 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/16046.html' title='Multiple used in 18 places.'>parsed</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L124' name='L124'></a> 124         <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) == "userdata" then
-<a id='L125' name='L125'></a> 125                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../Y/4801.html' title='Multiple used in 2 places.'>__parsed</a>
-<a id='L126' name='L126'></a> 126         <strong class='reserved'>else</strong>
-<a id='L127' name='L127'></a> 127                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a> or <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L128' name='L128'></a> 128         end
-<a id='L129' name='L129'></a> 129 end
-<a id='L130' name='L130'></a> 130 
-<a id='L131' name='L131'></a> 131 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/18403.html' title='Multiple used in 12 places.'>shallow_literal</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L132' name='L132'></a> 132         <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) == "userdata" then
-<a id='L133' name='L133'></a> 133                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>.__shallow_literal
-<a id='L134' name='L134'></a> 134         <strong class='reserved'>else</strong>
-<a id='L135' name='L135'></a> 135                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a> or <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L136' name='L136'></a> 136         end
-<a id='L137' name='L137'></a> 137 end
-<a id='L138' name='L138'></a> 138 
-<a id='L139' name='L139'></a> 139 function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/18404.html' title='Multiple used in 8 places.'>shallow_parsed</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L140' name='L140'></a> 140         <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>) == "userdata" then
-<a id='L141' name='L141'></a> 141                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../Y/4804.html' title='Multiple used in 2 places.'>__shallow_parsed</a>
-<a id='L142' name='L142'></a> 142         <strong class='reserved'>else</strong>
-<a id='L143' name='L143'></a> 143                 <strong class='reserved'>return</strong> <a href='../D/4164.html' title='Multiple defined in 5 places.'>cfg</a> or <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L144' name='L144'></a> 144         end
-<a id='L145' name='L145'></a> 145 end
-<a id='L146' name='L146'></a> 146 
-<a id='L147' name='L147'></a> 147 <strong class='reserved'>if</strong> <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/12573.html' title='Multiple used in 2 places.'>kernel_type</a>() == "Game Lua Kernel" then
-<a id='L148' name='L148'></a> 148         --[========[Basic variable access]========]
-<a id='L149' name='L149'></a> 149 
-<a id='L150' name='L150'></a> 150         <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L151' name='L151'></a> 151         <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a>.<a href='../D/6733.html' title='Multiple defined in 42 places.'>get</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../S/1096.html#L62' title='Defined at 62 in src/game_data.cpp.'>get_variable</a>
-<a id='L152' name='L152'></a> 152         <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a>.<a href='../D/13464.html' title='Multiple defined in 12 places.'>set</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/14164.html' title='Multiple defined in 3 places.'>set_variable</a>
-<a id='L153' name='L153'></a> 153         <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a>.<a href='../D/7257.html' title='Multiple defined in 5 places.'>get_all</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.get_all_vars
-<a id='L154' name='L154'></a> 154 
-<a id='L155' name='L155'></a> 155         --[========[Variable Proxy Table]========]
-<a id='L156' name='L156'></a> 156 
-<a id='L157' name='L157'></a> 157         local <a href='../Y/21350.html' title='Multiple used in 4 places.'>variable_mt</a> = <em class='brace'>{</em>
-<a id='L158' name='L158'></a> 158                 <a href='../Y/4799.html' title='Multiple used in 7 places.'>__metatable</a> = "WML variable proxy"
-<a id='L159' name='L159'></a> 159         <em class='brace'>}</em>
-<a id='L160' name='L160'></a> 160 
-<a id='L161' name='L161'></a> 161         local function <a href='../R/7279.html' title='Multiple referred from 3 places.'>get_variable_proxy</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>)
-<a id='L162' name='L162'></a> 162                 local <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../S/1096.html#L62' title='Defined at 62 in src/game_data.cpp.'>get_variable</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>)
-<a id='L163' name='L163'></a> 163                 <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>) == "table" then
-<a id='L164' name='L164'></a> 164                         <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a> = <a href='../S/190.html#L202' title='Defined at 202 in src/scripting/lua_unit.cpp.'>setmetatable</a>(<em class='brace'>{</em> <a href='../Y/4811.html' title='Multiple used in 6 places.'>__varname</a> = <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a> <em class='brace'>}</em>, <a href='../Y/21350.html' title='Multiple used in 4 places.'>variable_mt</a>)
-<a id='L165' name='L165'></a> 165                 end
-<a id='L166' name='L166'></a> 166                 <strong class='reserved'>return</strong> <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>
-<a id='L167' name='L167'></a> 167         end
-<a id='L168' name='L168'></a> 168 
-<a id='L169' name='L169'></a> 169         local function <a href='../R/12992.html' title='Multiple referred from 2 places.'>set_variable_proxy</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L170' name='L170'></a> 170                 <strong class='reserved'>if</strong> <a href='../Y/10901.html' title='Multiple used in 7 places.'>getmetatable</a>(<a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>) == "WML variable proxy" then
-<a id='L171' name='L171'></a> 171                         <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../S/1096.html#L62' title='Defined at 62 in src/game_data.cpp.'>get_variable</a>(v.<a href='../Y/4811.html' title='Multiple used in 6 places.'>__varname</a>)
-<a id='L172' name='L172'></a> 172                 end
-<a id='L173' name='L173'></a> 173                 <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/14164.html' title='Multiple defined in 3 places.'>set_variable</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L174' name='L174'></a> 174         end
-<a id='L175' name='L175'></a> 175 
-<a id='L176' name='L176'></a> 176         function <a href='../Y/21350.html' title='Multiple used in 4 places.'>variable_mt</a>.<a href='../D/2647.html' title='Multiple defined in 6 places.'>__index</a>(<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>, <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>)
-<a id='L177' name='L177'></a> 177                 local <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> = <a href='../S/1211.html#L40' title='Defined at 40 in src/lua/lvm.h.'>tonumber</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>)
-<a id='L178' name='L178'></a> 178                 <strong class='reserved'>if</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> then
-<a id='L179' name='L179'></a> 179                         <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a> = <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../Y/4811.html' title='Multiple used in 6 places.'>__varname</a> .. '[' .. <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> .. ']'
-<a id='L180' name='L180'></a> 180                 <strong class='reserved'>else</strong>
-<a id='L181' name='L181'></a> 181                         <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a> = <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../Y/4811.html' title='Multiple used in 6 places.'>__varname</a> .. '.' .. k
-<a id='L182' name='L182'></a> 182                 end
-<a id='L183' name='L183'></a> 183                 <strong class='reserved'>return</strong> <a href='../S/5557.html#L161' title='Defined at 161 in data/lua/core.lua.'>get_variable_proxy</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>)
-<a id='L184' name='L184'></a> 184         end
-<a id='L185' name='L185'></a> 185 
-<a id='L186' name='L186'></a> 186         function <a href='../Y/21350.html' title='Multiple used in 4 places.'>variable_mt</a>.<a href='../D/2650.html' title='Multiple defined in 3 places.'>__newindex</a>(<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>, <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L187' name='L187'></a> 187                 local <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> = <a href='../S/1211.html#L40' title='Defined at 40 in src/lua/lvm.h.'>tonumber</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>)
-<a id='L188' name='L188'></a> 188                 <strong class='reserved'>if</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> then
-<a id='L189' name='L189'></a> 189                         <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a> = <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../Y/4811.html' title='Multiple used in 6 places.'>__varname</a> .. '[' .. <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> .. ']'
-<a id='L190' name='L190'></a> 190                 <strong class='reserved'>else</strong>
-<a id='L191' name='L191'></a> 191                         <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a> = <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>.<a href='../Y/4811.html' title='Multiple used in 6 places.'>__varname</a> .. '.' .. k
-<a id='L192' name='L192'></a> 192                 end
-<a id='L193' name='L193'></a> 193                 <a href='../S/5557.html#L169' title='Defined at 169 in data/lua/core.lua.'>set_variable_proxy</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L194' name='L194'></a> 194         end
-<a id='L195' name='L195'></a> 195 
-<a id='L196' name='L196'></a> 196         local <a href='../Y/17624.html' title='Multiple used in 2 places.'>root_variable_mt</a> = <em class='brace'>{</em>
-<a id='L197' name='L197'></a> 197                 <a href='../Y/4799.html' title='Multiple used in 7 places.'>__metatable</a> = "WML variables",
-<a id='L198' name='L198'></a> 198                 <a href='../R/2409.html' title='Multiple referred from 13 places.'>__index</a>    = function(<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>, <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>)    <strong class='reserved'>return</strong> <a href='../S/5557.html#L161' title='Defined at 161 in data/lua/core.lua.'>get_variable_proxy</a>(k)    end,
-<a id='L199' name='L199'></a> 199                 <a href='../R/2411.html' title='Multiple referred from 2 places.'>__newindex</a> = function(<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>, <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L200' name='L200'></a> 200                         <strong class='reserved'>if</strong> <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>) == "function" then
-<a id='L201' name='L201'></a> 201                                 -- User-friendliness when _G is overloaded early.
-<a id='L202' name='L202'></a> 202                                 -- FIXME: It should be disabled outside the "preload" event.
-<a id='L203' name='L203'></a> 203                                 <a href='../Y/16919.html' title='Multiple used in 2 places.'>rawset</a>(<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>, <a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L204' name='L204'></a> 204                         <strong class='reserved'>else</strong>
-<a id='L205' name='L205'></a> 205                                 <a href='../S/5557.html#L169' title='Defined at 169 in data/lua/core.lua.'>set_variable_proxy</a>(<a href='../Y/12543.html' title='Multiple used in 408 places.'>k</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L206' name='L206'></a> 206                         end
-<a id='L207' name='L207'></a> 207                 end
-<a id='L208' name='L208'></a> 208         <em class='brace'>}</em>
-<a id='L209' name='L209'></a> 209 
-<a id='L210' name='L210'></a> 210         <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a>.<a href='../Y/16713.html' title='Multiple used in 11 places.'>proxy</a> = <a href='../S/190.html#L202' title='Defined at 202 in src/scripting/lua_unit.cpp.'>setmetatable</a>(<em class='brace'>{</em><em class='brace'>}</em>, <a href='../Y/17624.html' title='Multiple used in 2 places.'>root_variable_mt</a>)
-<a id='L211' name='L211'></a> 211 
-<a id='L212' name='L212'></a> 212         --[========[Variable Array Access]========]
-<a id='L213' name='L213'></a> 213 
-<a id='L214' name='L214'></a> 214         local function <a href='../R/11751.html' title='Multiple referred from 3 places.'>resolve_variable_context</a>(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>, <a href='../Y/9467.html' title='Multiple used in 2 places.'>err_hint</a>)
-<a id='L215' name='L215'></a> 215                 <strong class='reserved'>if</strong> <a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a> == nil then
-<a id='L216' name='L216'></a> 216                         <strong class='reserved'>return</strong> <em class='brace'>{</em><a href='../D/6733.html' title='Multiple defined in 42 places.'>get</a> = <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../S/1096.html#L62' title='Defined at 62 in src/game_data.cpp.'>get_variable</a>, <a href='../D/13464.html' title='Multiple defined in 12 places.'>set</a> = wesnoth.<a href='../D/14164.html' title='Multiple defined in 3 places.'>set_variable</a><em class='brace'>}</em>
-<a id='L217' name='L217'></a> 217                 elseif <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>) == 'number' and ctx &gt; 0 and ctx &lt;= #<a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/18562.html' title='Multiple used in 165 places.'>sides</a> then
-<a id='L218' name='L218'></a> 218                         <strong class='reserved'>return</strong> <a href='../S/5557.html#L214' title='Defined at 214 in data/lua/core.lua.'>resolve_variable_context</a>(<a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/18562.html' title='Multiple used in 165 places.'>sides</a>[<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>])
-<a id='L219' name='L219'></a> 219                 elseif <a href='../D/15415.html' title='Multiple defined in 27 places.'>type</a>(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>) == 'string' then
-<a id='L220' name='L220'></a> 220                         -- TODO: Treat it as a namespace <strong class='reserved'>for</strong> a global (persistent) variable
-<a id='L221' name='L221'></a> 221                         -- (Need Lua API <strong class='reserved'>for</strong> accessing them first, though.)
-<a id='L222' name='L222'></a> 222                 elseif <a href='../Y/10901.html' title='Multiple used in 7 places.'>getmetatable</a>(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>) == "unit" then
-<a id='L223' name='L223'></a> 223                         <strong class='reserved'>return</strong> <em class='brace'>{</em>
-<a id='L224' name='L224'></a> 224                                 <a href='../R/5990.html' title='Multiple referred from 1325 places.'>get</a> = function(<a href='../D/11781.html' title='Multiple defined in 6 places.'>path</a>) <strong class='reserved'>return</strong> <a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>.<a href='../D/15914.html' title='Multiple defined in 4 places.'>variables</a>[path] end,
-<a id='L225' name='L225'></a> 225                                 <a href='../R/12330.html' title='Multiple referred from 771 places.'>set</a> = function(<a href='../D/11781.html' title='Multiple defined in 6 places.'>path</a>, <a href='../D/15857.html' title='Multiple defined in 2 places.'>val</a>) <a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>.<a href='../D/15914.html' title='Multiple defined in 4 places.'>variables</a>[path] = val end,
-<a id='L226' name='L226'></a> 226                         <em class='brace'>}</em>
-<a id='L227' name='L227'></a> 227                 elseif <a href='../Y/10901.html' title='Multiple used in 7 places.'>getmetatable</a>(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>) == "side" then
-<a id='L228' name='L228'></a> 228                         <strong class='reserved'>return</strong> <em class='brace'>{</em>
-<a id='L229' name='L229'></a> 229                                 <a href='../R/5990.html' title='Multiple referred from 1325 places.'>get</a> = function(<a href='../D/11781.html' title='Multiple defined in 6 places.'>path</a>) <strong class='reserved'>return</strong> <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.get_side_variable(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>.<a href='../D/14402.html' title='Multiple defined in 3 places.'>side</a>, path) end,
-<a id='L230' name='L230'></a> 230                                 <a href='../R/12330.html' title='Multiple referred from 771 places.'>set</a> = function(<a href='../D/11781.html' title='Multiple defined in 6 places.'>path</a>, <a href='../D/15857.html' title='Multiple defined in 2 places.'>val</a>) <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.set_side_variable(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>.<a href='../D/14402.html' title='Multiple defined in 3 places.'>side</a>, path, val) end,
-<a id='L231' name='L231'></a> 231                         <em class='brace'>}</em>
-<a id='L232' name='L232'></a> 232                 elseif <a href='../Y/10901.html' title='Multiple used in 7 places.'>getmetatable</a>(<a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>) == "unit variables" or getmetatable(ctx) == "side variables" then
-<a id='L233' name='L233'></a> 233                         <strong class='reserved'>return</strong> <em class='brace'>{</em>
-<a id='L234' name='L234'></a> 234                                 <a href='../R/5990.html' title='Multiple referred from 1325 places.'>get</a> = function(<a href='../D/11781.html' title='Multiple defined in 6 places.'>path</a>) <strong class='reserved'>return</strong> <a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>[path] end,
-<a id='L235' name='L235'></a> 235                                 <a href='../R/12330.html' title='Multiple referred from 771 places.'>set</a> = function(<a href='../D/11781.html' title='Multiple defined in 6 places.'>path</a>, <a href='../D/15857.html' title='Multiple defined in 2 places.'>val</a>) <a href='../Y/7977.html' title='Multiple used in 82 places.'>ctx</a>[path] = val end,
-<a id='L236' name='L236'></a> 236                         <em class='brace'>}</em>
-<a id='L237' name='L237'></a> 237                 end
-<a id='L238' name='L238'></a> 238                 <a href='../D/5941.html' title='Multiple defined in 22 places.'>error</a>(string.format("Invalid context for %s: expected nil, side, or unit", <a href='../Y/9467.html' title='Multiple used in 2 places.'>err_hint</a>), 3)
-<a id='L239' name='L239'></a> 239         end
-<a id='L240' name='L240'></a> 240 
-<a id='L241' name='L241'></a> 241         --! Fetches all the WML container variables with name @a var.
-<a id='L242' name='L242'></a> 242         --! @returns a table containing all the variables (starting at index 1).
-<a id='L243' name='L243'></a> 243         function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a>.<a href='../Y/10804.html' title='Multiple used in 2 places.'>get_array</a>(<a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a>, <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>)
-<a id='L244' name='L244'></a> 244                 <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a> = <a href='../S/5557.html#L214' title='Defined at 214 in data/lua/core.lua.'>resolve_variable_context</a>(context, "get_variable_array")
-<a id='L245' name='L245'></a> 245                 local <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L246' name='L246'></a> 246                 <strong class='reserved'>for</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> = 1, <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>.<a href='../D/6733.html' title='Multiple defined in 42 places.'>get</a>(<a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a> .. ".length") <strong class='reserved'>do</strong>
-<a id='L247' name='L247'></a> 247                         <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a>[<a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a>] = <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>.<a href='../D/6733.html' title='Multiple defined in 42 places.'>get</a>(string.format("%s[%d]", <a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a>, i - 1))
-<a id='L248' name='L248'></a> 248                 end
-<a id='L249' name='L249'></a> 249                 <strong class='reserved'>return</strong> <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L250' name='L250'></a> 250         end
-<a id='L251' name='L251'></a> 251 
-<a id='L252' name='L252'></a> 252         --! Puts all the elements of table @a t inside a WML container with name @a var.
-<a id='L253' name='L253'></a> 253         function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a>.<a href='../Y/18326.html' title='Multiple used in 2 places.'>set_array</a>(<a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a>, <a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>, <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>)
-<a id='L254' name='L254'></a> 254                 <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a> = <a href='../S/5557.html#L214' title='Defined at 214 in data/lua/core.lua.'>resolve_variable_context</a>(context, "set_variable_array")
-<a id='L255' name='L255'></a> 255                 <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>.<a href='../D/13464.html' title='Multiple defined in 12 places.'>set</a>(<a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a>)
-<a id='L256' name='L256'></a> 256                 <strong class='reserved'>for</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a>, <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a> in <a href='../Y/12173.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../Y/19413.html' title='Multiple used in 1447 places.'>t</a>) <strong class='reserved'>do</strong>
-<a id='L257' name='L257'></a> 257                         <a href='../D/4855.html' title='Multiple defined in 4 places.'>context</a>.<a href='../D/13464.html' title='Multiple defined in 12 places.'>set</a>(string.format("%s[%d]", <a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a>, <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> - 1), <a href='../Y/21230.html' title='Multiple used in 1404 places.'>v</a>)
-<a id='L258' name='L258'></a> 258                 end
-<a id='L259' name='L259'></a> 259         end
-<a id='L260' name='L260'></a> 260 
-<a id='L261' name='L261'></a> 261         --! Creates proxies <strong class='reserved'>for</strong> all the WML container variables with name @a var.
-<a id='L262' name='L262'></a> 262         --! This is similar to helper.get_variable_array, except that the elements
-<a id='L263' name='L263'></a> 263         --! can be used <strong class='reserved'>for</strong> writing too.
-<a id='L264' name='L264'></a> 264         --! @returns a table containing all the variable proxies (starting at index 1).
-<a id='L265' name='L265'></a> 265         function <a href='../D/16321.html' title='Multiple defined in 4 places.'>wml</a>.<a href='../Y/21347.html' title='Multiple used in 986 places.'>variable</a>.<a href='../Y/10861.html' title='Multiple used in 2 places.'>get_proxy_array</a>(<a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a>)
-<a id='L266' name='L266'></a> 266                 local <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L267' name='L267'></a> 267                 <strong class='reserved'>for</strong> <a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a> = 1, <a href='../Y/21697.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../S/1096.html#L62' title='Defined at 62 in src/game_data.cpp.'>get_variable</a>(<a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a> .. ".length") <strong class='reserved'>do</strong>
-<a id='L268' name='L268'></a> 268                         <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a>[<a href='../D/8611.html' title='Multiple defined in 5 places.'>i</a>] = <a href='../S/5557.html#L161' title='Defined at 161 in data/lua/core.lua.'>get_variable_proxy</a>(string.format("%s[%d]", <a href='../Y/21317.html' title='Multiple used in 156 places.'>var</a>, i - 1))
-<a id='L269' name='L269'></a> 269                 end
-<a id='L270' name='L270'></a> 270                 <strong class='reserved'>return</strong> <a href='../D/12888.html' title='Multiple defined in 10 places.'>result</a>
-<a id='L271' name='L271'></a> 271         end
-<a id='L272' name='L272'></a> 272 end
+<a id='L39' name='L39'></a>  39         local <a href='../Y/7230.html' title='Multiple used in 4 places.'>chambers</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L40' name='L40'></a>  40         local <a href='../Y/7232.html' title='Multiple used in 3 places.'>chambers_by_id</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L41' name='L41'></a>  41         local <a href='../Y/16236.html' title='Multiple used in 3 places.'>passages</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>for</strong> <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a> in <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../D/4429.html' title='Multiple defined in 2 places.'>child_range</a>(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>, "chamber") <strong class='reserved'>do</strong>
+<a id='L44' name='L44'></a>  44                 local <a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> = <a href='../S/1215.html#L40' title='Defined at 40 in src/lua/lvm.h.'>tonumber</a>(<a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>.chance) or 100
+<a id='L45' name='L45'></a>  45                 local <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a> = <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>.x
+<a id='L46' name='L46'></a>  46                 local <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a> = <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>.y
+<a id='L47' name='L47'></a>  47                 local <a href='../D/8666.html' title='Multiple defined in 22 places.'>id</a> = <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>.id
+<a id='L48' name='L48'></a>  48                 <strong class='reserved'>if</strong> <a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> == 0 or <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(100) &gt; chance then
+<a id='L49' name='L49'></a>  49                         -- Set chance to 0 so that the scenario generator can tell which chambers were used
+<a id='L50' name='L50'></a>  50                         <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> = 0
+<a id='L51' name='L51'></a>  51                         <strong class='reserved'>goto</strong> <strong class='reserved'>continue</strong>
+<a id='L52' name='L52'></a>  52                 end
+<a id='L53' name='L53'></a>  53                 -- Ditto, set it to 100
+<a id='L54' name='L54'></a>  54                 <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> = 100
+<a id='L55' name='L55'></a>  55                 <strong class='reserved'>if</strong> <a href='../D/15465.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>) == "string" then
+<a id='L56' name='L56'></a>  56                         local <a href='../Y/22214.html' title='Multiple used in 2 places.'>x_min</a>, <a href='../Y/22213.html' title='Multiple used in 2 places.'>x_max</a> = <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>:<a href='../D/10834.html' title='Multiple defined in 10 places.'>match</a>("(%d+)-(%d+)")
+<a id='L57' name='L57'></a>  57                         <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a> = <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(<a href='../S/1215.html#L40' title='Defined at 40 in src/lua/lvm.h.'>tonumber</a>(<a href='../Y/22214.html' title='Multiple used in 2 places.'>x_min</a>), tonumber(<a href='../Y/22213.html' title='Multiple used in 2 places.'>x_max</a>))
+<a id='L58' name='L58'></a>  58                 end
+<a id='L59' name='L59'></a>  59                 <strong class='reserved'>if</strong> <a href='../D/15465.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) == "string" then
+<a id='L60' name='L60'></a>  60                         local <a href='../Y/22333.html' title='Multiple used in 2 places.'>y_min</a>, <a href='../Y/22332.html' title='Multiple used in 2 places.'>y_max</a> = <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>:<a href='../D/10834.html' title='Multiple defined in 10 places.'>match</a>("(%d+)-(%d+)")
+<a id='L61' name='L61'></a>  61                         <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a> = <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(<a href='../S/1215.html#L40' title='Defined at 40 in src/lua/lvm.h.'>tonumber</a>(<a href='../Y/22333.html' title='Multiple used in 2 places.'>y_min</a>), tonumber(<a href='../Y/22332.html' title='Multiple used in 2 places.'>y_max</a>))
+<a id='L62' name='L62'></a>  62                 end
+<a id='L63' name='L63'></a>  63                 local <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a> = <a href='../Y/1806.html' title='Multiple used in 99 places.'>LS</a>.<a href='../D/4987.html' title='Multiple defined in 58 places.'>create</a>()
+<a id='L64' name='L64'></a>  64                 <a href='../D/3779.html' title='Multiple defined in 2 places.'>build_chamber</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>, <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>, <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>.<a href='../D/14560.html' title='Multiple defined in 18 places.'>size</a> or 3, chamber.<a href='../Y/12622.html' title='Multiple used in 30 places.'>jagged</a> or 0)
+<a id='L65' name='L65'></a>  65                 local <a href='../D/9535.html' title='Multiple defined in 3 places.'>items</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L66' name='L66'></a>  66                 <strong class='reserved'>for</strong> <a href='../D/9522.html' title='Multiple defined in 7 places.'>item</a> in <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../D/4429.html' title='Multiple defined in 2 places.'>child_range</a>(<a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>, "item_location") <strong class='reserved'>do</strong>
+<a id='L67' name='L67'></a>  67                         table.insert(<a href='../D/9535.html' title='Multiple defined in 3 places.'>items</a>, <a href='../D/9522.html' title='Multiple defined in 7 places.'>item</a>)
+<a id='L68' name='L68'></a>  68                 end
+<a id='L69' name='L69'></a>  69                 table.insert(<a href='../Y/7230.html' title='Multiple used in 4 places.'>chambers</a>, <em class='brace'>{</em>
+<a id='L70' name='L70'></a>  70                         <a href='../Y/7173.html' title='Multiple used in 23 places.'>center_x</a> = <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,
+<a id='L71' name='L71'></a>  71                         <a href='../Y/7175.html' title='Multiple used in 23 places.'>center_y</a> = <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>,
+<a id='L72' name='L72'></a>  72                         <a href='../Y/18712.html' title='Multiple used in 182 places.'>side_num</a> = <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>.<a href='../D/14454.html' title='Multiple defined in 3 places.'>side</a>,
+<a id='L73' name='L73'></a>  73                         <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a> = locs_set,
+<a id='L74' name='L74'></a>  74                         <a href='../D/8666.html' title='Multiple defined in 22 places.'>id</a> = id,
+<a id='L75' name='L75'></a>  75                         <a href='../D/9535.html' title='Multiple defined in 3 places.'>items</a> = items,
+<a id='L76' name='L76'></a>  76                 <em class='brace'>}</em>)
+<a id='L77' name='L77'></a>  77                 <a href='../Y/7232.html' title='Multiple used in 3 places.'>chambers_by_id</a>[<a href='../D/8666.html' title='Multiple defined in 22 places.'>id</a>] = <a href='../Y/7230.html' title='Multiple used in 4 places.'>chambers</a>[#chambers]
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>for</strong> <a href='../S/11.html#L57' title='Defined at 57 in src/generators/cave_map_generator.hpp.'>passage</a> in <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../D/4429.html' title='Multiple defined in 2 places.'>child_range</a>(<a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>, "passage") <strong class='reserved'>do</strong>
+<a id='L79' name='L79'></a>  79                         local <a href='../D/5752.html' title='Multiple defined in 3 places.'>dst</a> = <a href='../Y/7232.html' title='Multiple used in 3 places.'>chambers_by_id</a>[<a href='../S/11.html#L57' title='Defined at 57 in src/generators/cave_map_generator.hpp.'>passage</a>.<a href='../Y/8768.html' title='Multiple used in 36 places.'>destination</a>]
+<a id='L80' name='L80'></a>  80                         <strong class='reserved'>if</strong> <a href='../D/5752.html' title='Multiple defined in 3 places.'>dst</a> ~= nil then
+<a id='L81' name='L81'></a>  81                                 table.insert(<a href='../Y/16236.html' title='Multiple used in 3 places.'>passages</a>, <em class='brace'>{</em>
+<a id='L82' name='L82'></a>  82                                         <a href='../Y/19186.html' title='Multiple used in 2 places.'>start_x</a> = <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,
+<a id='L83' name='L83'></a>  83                                         <a href='../Y/19187.html' title='Multiple used in 2 places.'>start_y</a> = <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>,
+<a id='L84' name='L84'></a>  84                                         <a href='../Y/8765.html' title='Multiple used in 2 places.'>dest_x</a> = <a href='../D/5752.html' title='Multiple defined in 3 places.'>dst</a>.<a href='../Y/7173.html' title='Multiple used in 23 places.'>center_x</a>,
+<a id='L85' name='L85'></a>  85                                         <a href='../Y/8766.html' title='Multiple used in 2 places.'>dest_y</a> = <a href='../D/5752.html' title='Multiple defined in 3 places.'>dst</a>.<a href='../Y/7175.html' title='Multiple used in 23 places.'>center_y</a>,
+<a id='L86' name='L86'></a>  86                                         <a href='../D/5234.html' title='Multiple defined in 16 places.'>data</a> = <a href='../S/11.html#L57' title='Defined at 57 in src/generators/cave_map_generator.hpp.'>passage</a>,
+<a id='L87' name='L87'></a>  87                                 <em class='brace'>}</em>)
+<a id='L88' name='L88'></a>  88                         end
+<a id='L89' name='L89'></a>  89                 end
+<a id='L90' name='L90'></a>  90                 ::<strong class='reserved'>continue</strong>::
+<a id='L91' name='L91'></a>  91         end
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>for</strong> <a href='../D/8655.html' title='Multiple defined in 5 places.'>i</a>,<a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a> in <a href='../Y/12312.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../Y/7230.html' title='Multiple used in 4 places.'>chambers</a>) <strong class='reserved'>do</strong>
+<a id='L94' name='L94'></a>  94                 local <a href='../Y/13419.html' title='Multiple used in 5 places.'>locs_list</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L95' name='L95'></a>  95                 <strong class='reserved'>for</strong> <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a> in <a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>:<a href='../Y/19143.html' title='Multiple used in 6 places.'>stable_iter</a>() <strong class='reserved'>do</strong>
+<a id='L96' name='L96'></a>  96                         <a href='../S/5557.html#L24' title='Defined at 24 in data/lua/cave_map_generator.lua.'>clear_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>)
+<a id='L97' name='L97'></a>  97                         <strong class='reserved'>if</strong> <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../Y/15659.html' title='Multiple used in 2 places.'>on_inner_board</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) then
+<a id='L98' name='L98'></a>  98                                 table.insert(<a href='../Y/13419.html' title='Multiple used in 5 places.'>locs_list</a>, <em class='brace'>{</em><a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a><em class='brace'>}</em>)
+<a id='L99' name='L99'></a>  99                         end
+<a id='L100' name='L100'></a> 100                 end
+<a id='L101' name='L101'></a> 101                 <strong class='reserved'>for</strong> <a href='../Y/11765.html' title='Multiple used in 331 places.'>i1</a>, <a href='../D/9522.html' title='Multiple defined in 7 places.'>item</a> in <a href='../Y/12312.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../D/9535.html' title='Multiple defined in 3 places.'>items</a> or <em class='brace'>{</em><em class='brace'>}</em>) <strong class='reserved'>do</strong>
+<a id='L102' name='L102'></a> 102                         local <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a> = <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(#<a href='../Y/13419.html' title='Multiple used in 5 places.'>locs_list</a>)
+<a id='L103' name='L103'></a> 103                         local <a href='../D/9967.html' title='Multiple defined in 7 places.'>loc</a> = <a href='../Y/13419.html' title='Multiple used in 5 places.'>locs_list</a>[<a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a>]
+<a id='L104' name='L104'></a> 104                         table.remove(<a href='../Y/13419.html' title='Multiple used in 5 places.'>locs_list</a>, <a href='../D/8849.html' title='Multiple defined in 6 places.'>index</a>)
+<a id='L105' name='L105'></a> 105                         local <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a> = table.unpack(<a href='../D/9967.html' title='Multiple defined in 7 places.'>loc</a>)
+<a id='L106' name='L106'></a> 106                 
+<a id='L107' name='L107'></a> 107                         <strong class='reserved'>if</strong> <a href='../D/9522.html' title='Multiple defined in 7 places.'>item</a>.<a href='../D/8666.html' title='Multiple defined in 22 places.'>id</a> then
+<a id='L108' name='L108'></a> 108                                 <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../Y/5314.html' title='Multiple used in 2 places.'>add_location</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>, <a href='../D/9522.html' title='Multiple defined in 7 places.'>item</a>.<a href='../D/8666.html' title='Multiple defined in 22 places.'>id</a>)
+<a id='L109' name='L109'></a> 109                         end
+<a id='L110' name='L110'></a> 110                 
+<a id='L111' name='L111'></a> 111                         <strong class='reserved'>if</strong> <a href='../D/9522.html' title='Multiple defined in 7 places.'>item</a>.<a href='../S/8.html#L351' title='Defined at 351 in src/generators/cave_map_generator.cpp.'>place_castle</a> then
+<a id='L112' name='L112'></a> 112                                 <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../Y/18533.html' title='Multiple used in 5 places.'>set_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>, <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/19894.html' title='Multiple used in 4 places.'>terrain_keep</a>)
+<a id='L113' name='L113'></a> 113                                 <strong class='reserved'>for</strong> <a href='../Y/22193.html' title='Multiple used in 83 places.'>x2</a>, <a href='../Y/22312.html' title='Multiple used in 84 places.'>y2</a> in <a href='../Y/1892.html' title='Multiple used in 5 places.'>MG</a>.<a href='../Y/5391.html' title='Multiple used in 37 places.'>adjacent_tiles</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) <strong class='reserved'>do</strong>
+<a id='L114' name='L114'></a> 114                                         <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../Y/18533.html' title='Multiple used in 5 places.'>set_tile</a>(<a href='../Y/22193.html' title='Multiple used in 83 places.'>x2</a>, <a href='../Y/22312.html' title='Multiple used in 84 places.'>y2</a>, <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/19879.html' title='Multiple used in 4 places.'>terrain_castle</a>)
+<a id='L115' name='L115'></a> 115                                 end
+<a id='L116' name='L116'></a> 116                         end
+<a id='L117' name='L117'></a> 117                 end
+<a id='L118' name='L118'></a> 118         end
+<a id='L119' name='L119'></a> 119 
+<a id='L120' name='L120'></a> 120         <strong class='reserved'>for</strong> <a href='../D/8655.html' title='Multiple defined in 5 places.'>i</a>,<a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a> in <a href='../Y/12312.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../Y/16236.html' title='Multiple used in 3 places.'>passages</a>) <strong class='reserved'>do</strong>
+<a id='L121' name='L121'></a> 121                 <strong class='reserved'>if</strong> <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(100) &lt;= (<a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../D/5234.html' title='Multiple defined in 16 places.'>data</a>.<a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> or 100) then
+<a id='L122' name='L122'></a> 122                         local <a href='../Y/21982.html' title='Multiple used in 29 places.'>windiness</a> = <a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../D/5234.html' title='Multiple defined in 16 places.'>data</a>.windiness or 0
+<a id='L123' name='L123'></a> 123                         local <a href='../Y/12971.html' title='Multiple used in 6 places.'>laziness</a> = math.max(<a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../D/5234.html' title='Multiple defined in 16 places.'>data</a>.laziness or 1, 1)
+<a id='L124' name='L124'></a> 124                         local <a href='../D/16362.html' title='Multiple defined in 2 places.'>width</a> = math.max(<a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../D/5234.html' title='Multiple defined in 16 places.'>data</a>.width or 1, 1)
+<a id='L125' name='L125'></a> 125                         local <a href='../Y/12622.html' title='Multiple used in 30 places.'>jagged</a> = <a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../D/5234.html' title='Multiple defined in 16 places.'>data</a>.jagged or 0
+<a id='L126' name='L126'></a> 126                         local <a href='../R/3480.html' title='Multiple referred from 47 places.'>calc</a> = function(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>, <a href='../Y/8164.html' title='Multiple used in 6 places.'>current_cost</a>)
+<a id='L127' name='L127'></a> 127                                 local <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a> = 1.0
+<a id='L128' name='L128'></a> 128                                 <strong class='reserved'>if</strong> <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>:<a href='../S/309.html#L1211' title='Defined at 1211 in src/terrain/builder.cpp.'>get_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>) == <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/19910.html' title='Multiple used in 4 places.'>terrain_wall</a> then
+<a id='L129' name='L129'></a> 129                                         <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a> = <a href='../Y/12971.html' title='Multiple used in 6 places.'>laziness</a>
+<a id='L130' name='L130'></a> 130                                 end
+<a id='L131' name='L131'></a> 131                                 <strong class='reserved'>if</strong> <a href='../Y/21982.html' title='Multiple used in 29 places.'>windiness</a> &gt; 1 then
+<a id='L132' name='L132'></a> 132                                         <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a> = res * <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(<a href='../Y/21982.html' title='Multiple used in 29 places.'>windiness</a>)
+<a id='L133' name='L133'></a> 133                                 end
+<a id='L134' name='L134'></a> 134                                 <strong class='reserved'>return</strong> <a href='../Y/17566.html' title='Multiple used in 1905 places.'>res</a>
+<a id='L135' name='L135'></a> 135                         end
+<a id='L136' name='L136'></a> 136                         local <a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>, <a href='../D/4956.html' title='Multiple defined in 12 places.'>cost</a> = <a href='../Y/21891.html' title='Multiple used in 2623 places.'>wesnoth</a>.<a href='../Y/10151.html' title='Multiple used in 23 places.'>find_path</a>(<a href='../Y/21420.html' title='Multiple used in 1417 places.'>v</a>.<a href='../Y/19186.html' title='Multiple used in 2 places.'>start_x</a>, v.<a href='../Y/19187.html' title='Multiple used in 2 places.'>start_y</a>, v.<a href='../Y/8765.html' title='Multiple used in 2 places.'>dest_x</a>, v.<a href='../Y/8766.html' title='Multiple used in 2 places.'>dest_y</a>, <a href='../S/5557.html#L126' title='Defined at 126 in data/lua/cave_map_generator.lua.'>calc</a>, <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/13846.html' title='Multiple used in 13 places.'>map_width</a>, params.<a href='../Y/13827.html' title='Multiple used in 13 places.'>map_height</a>)
+<a id='L137' name='L137'></a> 137                         <strong class='reserved'>for</strong> <a href='../D/8655.html' title='Multiple defined in 5 places.'>i</a>, <a href='../D/9967.html' title='Multiple defined in 7 places.'>loc</a> in <a href='../Y/12312.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../D/11831.html' title='Multiple defined in 6 places.'>path</a>) <strong class='reserved'>do</strong>
+<a id='L138' name='L138'></a> 138                                 local <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a> = <a href='../Y/1806.html' title='Multiple used in 99 places.'>LS</a>.<a href='../D/4987.html' title='Multiple defined in 58 places.'>create</a>()
+<a id='L139' name='L139'></a> 139                                 <a href='../D/3779.html' title='Multiple defined in 2 places.'>build_chamber</a>(<a href='../D/9967.html' title='Multiple defined in 7 places.'>loc</a>[1], loc[2], <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>, <a href='../D/16362.html' title='Multiple defined in 2 places.'>width</a>, <a href='../Y/12622.html' title='Multiple used in 30 places.'>jagged</a>)
+<a id='L140' name='L140'></a> 140                                 <strong class='reserved'>for</strong> <a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a> in <a href='../Y/13421.html' title='Multiple used in 11 places.'>locs_set</a>:<a href='../Y/19143.html' title='Multiple used in 6 places.'>stable_iter</a>() <strong class='reserved'>do</strong>
+<a id='L141' name='L141'></a> 141                                         <a href='../S/5557.html#L24' title='Defined at 24 in data/lua/cave_map_generator.lua.'>clear_tile</a>(<a href='../D/16607.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16622.html' title='Multiple defined in 8 places.'>y</a>)
+<a id='L142' name='L142'></a> 142                                 end
+<a id='L143' name='L143'></a> 143                         end
+<a id='L144' name='L144'></a> 144                 end
+<a id='L145' name='L145'></a> 145 
+<a id='L146' name='L146'></a> 146         end
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148         <strong class='reserved'>if</strong> <a href='../D/15465.html' title='Multiple defined in 27 places.'>type</a>(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/20681.html' title='Multiple used in 30 places.'>transform</a>) == "string" then
+<a id='L149' name='L149'></a> 149                 local <a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> = <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/20682.html' title='Multiple used in 2 places.'>transform_chance</a> or 100
+<a id='L150' name='L150'></a> 150                 <strong class='reserved'>if</strong> <a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(100) &lt;= <a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> then
+<a id='L151' name='L151'></a> 151                         local <a href='../Y/20686.html' title='Multiple used in 4 places.'>transforms</a> = <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L152' name='L152'></a> 152                         <strong class='reserved'>for</strong> <a href='../Y/19593.html' title='Multiple used in 1445 places.'>t</a> in <a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>.<a href='../Y/20681.html' title='Multiple used in 30 places.'>transform</a>:<a href='../S/1222.html#L689' title='Defined at 689 in src/lua/lstrlib.cpp.'>gmatch</a>("[^%s,][^,]*") <strong class='reserved'>do</strong>
+<a id='L153' name='L153'></a> 153                                 <strong class='reserved'>if</strong> <a href='../Y/1892.html' title='Multiple used in 5 places.'>MG</a>.<a href='../Y/12455.html' title='Multiple used in 2 places.'>is_valid_transform</a>(<a href='../Y/19593.html' title='Multiple used in 1445 places.'>t</a>) then
+<a id='L154' name='L154'></a> 154                                         table.insert(<a href='../Y/20686.html' title='Multiple used in 4 places.'>transforms</a>, <a href='../Y/19593.html' title='Multiple used in 1445 places.'>t</a>)
+<a id='L155' name='L155'></a> 155                                 <strong class='reserved'>else</strong>
+<a id='L156' name='L156'></a> 156                                         <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../D/16502.html' title='Multiple defined in 2 places.'>wml_error</a>("Unknown transformation '" .. <a href='../Y/19593.html' title='Multiple used in 1445 places.'>t</a> .. "'")
+<a id='L157' name='L157'></a> 157                                 end
+<a id='L158' name='L158'></a> 158                         end
+<a id='L159' name='L159'></a> 159                         <a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>[<a href='../Y/20686.html' title='Multiple used in 4 places.'>transforms</a>[<a href='../Y/17022.html' title='Multiple used in 60 places.'>random</a>(#transforms)]](map)
+<a id='L160' name='L160'></a> 160                 end
+<a id='L161' name='L161'></a> 161         end
+<a id='L162' name='L162'></a> 162 
+<a id='L163' name='L163'></a> 163         <strong class='reserved'>return</strong> <a href='../S/1179.html#L454' title='Defined at 454 in src/lua/lvm.cpp.'>tostring</a>(<a href='../D/10764.html' title='Multiple defined in 18 places.'>map</a>)
+<a id='L164' name='L164'></a> 164 end
+<a id='L165' name='L165'></a> 165 
+<a id='L166' name='L166'></a> 166 function <a href='../S/184.html#L97' title='Defined at 97 in src/scripting/lua_gui2.cpp.'>callbacks</a>.generate_scenario(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>)
+<a id='L167' name='L167'></a> 167         -- This is more or less backwards compatible with the cave generator syntax
+<a id='L168' name='L168'></a> 168         local <a href='../D/13298.html' title='Multiple defined in 2 places.'>scenario</a> = <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../D/7394.html' title='Multiple defined in 6 places.'>get_child</a>(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>, "scenario")
+<a id='L169' name='L169'></a> 169         <a href='../D/13298.html' title='Multiple defined in 2 places.'>scenario</a>.<a href='../D/10772.html' title='Multiple defined in 2 places.'>map_data</a> = <a href='../S/184.html#L97' title='Defined at 97 in src/scripting/lua_gui2.cpp.'>callbacks</a>.<a href='../S/7.html#L81' title='Defined at 81 in src/generators/default_map_generator.cpp.'>generate_map</a>(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>)
+<a id='L170' name='L170'></a> 170         <strong class='reserved'>for</strong> <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a> in <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../D/4429.html' title='Multiple defined in 2 places.'>child_range</a>(<a href='../D/11717.html' title='Multiple defined in 3 places.'>params</a>, "chamber") <strong class='reserved'>do</strong>
+<a id='L171' name='L171'></a> 171                 local <a href='../D/9535.html' title='Multiple defined in 3 places.'>items</a> = <a href='../Y/11545.html' title='Multiple used in 359 places.'>helper</a>.<a href='../D/7394.html' title='Multiple defined in 6 places.'>get_child</a>(<a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>, "items")
+<a id='L172' name='L172'></a> 172                 <strong class='reserved'>if</strong> <a href='../S/11.html#L44' title='Defined at 44 in src/generators/cave_map_generator.hpp.'>chamber</a>.<a href='../S/92.html#L193' title='Defined at 193 in src/soundsource.hpp.'>chance</a> == 100 and <a href='../Y/7228.html' title='Multiple used in 2 places.'>chamber_items</a> then
+<a id='L173' name='L173'></a> 173                         -- TODO: Should we support [event]same_location_as_previous=yes?
+<a id='L174' name='L174'></a> 174                         <strong class='reserved'>for</strong> <a href='../D/8655.html' title='Multiple defined in 5 places.'>i</a>,<a href='../Y/19656.html' title='Multiple used in 338 places.'>tag</a> in <a href='../Y/12312.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../Y/7228.html' title='Multiple used in 2 places.'>chamber_items</a>) <strong class='reserved'>do</strong>
+<a id='L175' name='L175'></a> 175                                 table.insert(<a href='../D/13298.html' title='Multiple defined in 2 places.'>scenario</a>, <a href='../Y/19656.html' title='Multiple used in 338 places.'>tag</a>)
+<a id='L176' name='L176'></a> 176                         end
+<a id='L177' name='L177'></a> 177                 end
+<a id='L178' name='L178'></a> 178         end
+<a id='L179' name='L179'></a> 179         <strong class='reserved'>return</strong> <a href='../D/13298.html' title='Multiple defined in 2 places.'>scenario</a>
+<a id='L180' name='L180'></a> 180 end
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182 <strong class='reserved'>return</strong> <a href='../S/184.html#L97' title='Defined at 97 in src/scripting/lua_gui2.cpp.'>callbacks</a>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L3'>[^]</a><a href='#L265'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L9'>[^]</a><a href='#L166'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>
