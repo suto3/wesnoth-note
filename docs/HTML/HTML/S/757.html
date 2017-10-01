@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/image.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/image.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L85'>[^]</a><a href='#L95'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2247.html' title='Multiple included from 58 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L85' title='Defined at 85.'>get_filename</a></li>
+<li><a href='#L86' title='Defined at 86.'>get_loc</a></li>
+<li><a href='#L87' title='Defined at 87.'>get_center_x</a></li>
+<li><a href='#L88' title='Defined at 88.'>get_center_y</a></li>
+<li><a href='#L89' title='Defined at 89.'>get_modifications</a></li>
+<li><a href='#L90' title='Defined at 90.'>get_type</a></li>
+<li><a href='#L95' title='Defined at 95.'>is_void</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1099.html'>map/location.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='312.html'>terrain/translation.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1112.html'>game_config.hpp</a>"
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;SDL.h&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;unordered_map&gt;
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>class</strong> <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>;
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='comment'>///this module manages the cache of images. With an image name, you can get</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'>///the surface corresponding to that image.</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'>//</em>
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>namespace</strong> <a href='../R/7826.html' title='Multiple referred from 5527 places.'>image</a> <em class='brace'>{</em>
+<a id='L30' name='L30'></a>  30         <strong class='reserved'>template</strong>&lt;<strong class='reserved'>typename</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L31' name='L31'></a>  31         <strong class='reserved'>class</strong> <a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>;
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33         <em class='comment'>//a generic image locator. Abstracts the location of an image.</em>
+<a id='L34' name='L34'></a>  34         <strong class='reserved'>class</strong> <a href='../R/9065.html' title='Multiple referred from 133 places.'>locator</a>
+<a id='L35' name='L35'></a>  35         <em class='brace'>{</em>
+<a id='L36' name='L36'></a>  36         <strong class='reserved'>public</strong>:
+<a id='L37' name='L37'></a>  37                 <strong class='reserved'>enum</strong> <a href='../R/14220.html' title='Multiple referred from 6836 places.'>type</a> <em class='brace'>{</em> <a href='../R/1411.html' title='Multiple referred from 203 places.'>NONE</a>, <a href='../R/506.html' title='Multiple referred from 31 places.'>FILE</a>, <a href='../R/1874.html' title='Multiple referred from 10 places.'>SUB_FILE</a> <em class='brace'>}</em>;
+<a id='L38' name='L38'></a>  38         <strong class='reserved'>private</strong>:
+<a id='L39' name='L39'></a>  39                 <em class='comment'>// Called by each constructor after actual construction to</em>
+<a id='L40' name='L40'></a>  40                 <em class='comment'>// initialize the index_ field</em>
+<a id='L41' name='L41'></a>  41                 <strong class='reserved'>void</strong> <a href='../S/681.html#L246' title='Defined at 246 in src/image.cpp.'>init_index</a>();
+<a id='L42' name='L42'></a>  42                 <strong class='reserved'>void</strong> <a href='../S/681.html#L258' title='Defined at 258 in src/image.cpp.'>parse_arguments</a>();
+<a id='L43' name='L43'></a>  43                 <strong class='reserved'>struct</strong> <a href='../R/14678.html' title='Multiple referred from 2801 places.'>value</a> <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44                         <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>();
+<a id='L45' name='L45'></a>  45                         <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>(<strong class='reserved'>const</strong> <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a> &amp;<a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>);
+<a id='L46' name='L46'></a>  46                         <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>);
+<a id='L47' name='L47'></a>  47                         <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>);
+<a id='L48' name='L48'></a>  48                         <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/795.html#L730' title='Defined at 730 in src/preferences/game.cpp.'>modifications</a>);
+<a id='L49' name='L49'></a>  49                         <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>, <strong class='reserved'>const</strong> <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>&amp; <a href='../D/9972.html' title='Multiple defined in 7 places.'>loc</a>, <strong class='reserved'>int</strong> <a href='../Y/7176.html' title='Multiple used in 23 places.'>center_x</a>, <strong class='reserved'>int</strong> <a href='../Y/7178.html' title='Multiple used in 23 places.'>center_y</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/795.html#L730' title='Defined at 730 in src/preferences/game.cpp.'>modifications</a>);
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51                         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>==(<strong class='reserved'>const</strong> <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>&amp; <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>) <strong class='reserved'>const</strong>;
+<a id='L52' name='L52'></a>  52                         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>&lt;(<strong class='reserved'>const</strong> <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>&amp; <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>) <strong class='reserved'>const</strong>;
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54                         <a href='../D/15484.html' title='Multiple defined in 27 places.'>type</a> <a href='../D/15488.html' title='Multiple defined in 2 places.'>type_</a>;
+<a id='L55' name='L55'></a>  55                         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/467.html#L202' title='Defined at 202 in src/gui/dialogs/lua_interpreter.cpp.'>filename_</a>;
+<a id='L56' name='L56'></a>  56                         <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <a href='../D/9973.html' title='Multiple defined in 7 places.'>loc_</a>;
+<a id='L57' name='L57'></a>  57                         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/14396.html' title='Multiple used in 34 places.'>modifications_</a>;
+<a id='L58' name='L58'></a>  58                         <strong class='reserved'>int</strong> <a href='../Y/7177.html' title='Multiple used in 12 places.'>center_x_</a>;
+<a id='L59' name='L59'></a>  59                         <strong class='reserved'>int</strong> <a href='../D/4193.html' title='Multiple defined in 6 places.'>center_y_</a>;
+<a id='L60' name='L60'></a>  60                 <em class='brace'>}</em>;
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62                 <strong class='reserved'>friend</strong> <strong class='reserved'>struct</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/8499.html' title='Multiple defined in 5 places.'>hash</a>&lt;<a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>&gt;;
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>public</strong>:
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66                 <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21248.html' title='Multiple used in 6 places.'>unordered_map</a>&lt;<a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a>, <strong class='reserved'>int</strong>&gt; <a href='../S/681.html#L167' title='Referred from 167 in src/image.cpp.'>locator_finder_t</a>;
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68                 <em class='comment'>// Constructing locators is somewhat slow, accessing image</em>
+<a id='L69' name='L69'></a>  69                 <em class='comment'>// through locators is fast. The idea is that calling functions</em>
+<a id='L70' name='L70'></a>  70                 <em class='comment'>// should store locators, and not strings to construct locators</em>
+<a id='L71' name='L71'></a>  71                 <em class='comment'>// (the second will work, of course, but will be slower)</em>
+<a id='L72' name='L72'></a>  72                 <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>();
+<a id='L73' name='L73'></a>  73                 <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a> &amp;<a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> &amp;<a href='../Y/14412.html' title='Multiple used in 100 places.'>mods</a> ="");
+<a id='L74' name='L74'></a>  74                 <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>(<strong class='reserved'>const</strong> <strong class='reserved'>char</strong> *<a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>);
+<a id='L75' name='L75'></a>  75                 <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>);
+<a id='L76' name='L76'></a>  76                 <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/795.html#L730' title='Defined at 730 in src/preferences/game.cpp.'>modifications</a>);
+<a id='L77' name='L77'></a>  77                 <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> &amp;<a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>, <strong class='reserved'>const</strong> <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> &amp;<a href='../D/9972.html' title='Multiple defined in 7 places.'>loc</a>,
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>int</strong> <a href='../Y/7176.html' title='Multiple used in 23 places.'>center_x</a>, <strong class='reserved'>int</strong> <a href='../Y/7178.html' title='Multiple used in 23 places.'>center_y</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../S/795.html#L730' title='Defined at 730 in src/preferences/game.cpp.'>modifications</a> = "");
+<a id='L79' name='L79'></a>  79 
+<a id='L80' name='L80'></a>  80                 <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>&amp; <strong class='reserved'>operator</strong>=(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a> &amp;<a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>);
+<a id='L81' name='L81'></a>  81                 <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>==(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a> &amp;<a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/12089.html' title='Multiple used in 69 places.'>index_</a> == <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/12089.html' title='Multiple used in 69 places.'>index_</a>; <em class='brace'>}</em>
+<a id='L82' name='L82'></a>  82                 <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>!=(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a> &amp;<a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/12089.html' title='Multiple used in 69 places.'>index_</a> != <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/12089.html' title='Multiple used in 69 places.'>index_</a>; <em class='brace'>}</em>
+<a id='L83' name='L83'></a>  83                 <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>&lt;(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a> &amp;<a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>) <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/12089.html' title='Multiple used in 69 places.'>index_</a> &lt; <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/12089.html' title='Multiple used in 69 places.'>index_</a>; <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85                 <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> &amp;<a href='../R/6744.html' title='Multiple referred from 54 places.'>get_filename</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>.<a href='../S/467.html#L202' title='Defined at 202 in src/gui/dialogs/lua_interpreter.cpp.'>filename_</a>; <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86                 <strong class='reserved'>const</strong> <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>&amp; <a href='../R/6889.html' title='Multiple referred from 6 places.'>get_loc</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>.<a href='../D/9973.html' title='Multiple defined in 7 places.'>loc_</a> ; <em class='brace'>}</em>
+<a id='L87' name='L87'></a>  87                 <strong class='reserved'>int</strong> <a href='../R/6585.html' title='Multiple referred from 4 places.'>get_center_x</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>.<a href='../Y/7177.html' title='Multiple used in 12 places.'>center_x_</a>; <em class='brace'>}</em>
+<a id='L88' name='L88'></a>  88                 <strong class='reserved'>int</strong> <a href='../R/6586.html' title='Multiple referred from 4 places.'>get_center_y</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>.<a href='../D/4193.html' title='Multiple defined in 6 places.'>center_y_</a>; <em class='brace'>}</em>
+<a id='L89' name='L89'></a>  89                 <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../R/6935.html' title='Multiple referred from 11 places.'>get_modifications</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em><strong class='reserved'>return</strong> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>.<a href='../Y/14396.html' title='Multiple used in 34 places.'>modifications_</a>;<em class='brace'>}</em>
+<a id='L90' name='L90'></a>  90                 <a href='../D/15484.html' title='Multiple defined in 27 places.'>type</a> <a href='../R/7273.html' title='Multiple referred from 13 places.'>get_type</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>.<a href='../D/15488.html' title='Multiple defined in 2 places.'>type_</a>; <em class='brace'>}</em>
+<a id='L91' name='L91'></a>  91                 <em class='comment'>// const int get_index() const { return index_; };</em>
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93                 <em class='comment'>// returns true if the locator does not correspond to any</em>
+<a id='L94' name='L94'></a>  94                 <em class='comment'>// actual image</em>
+<a id='L95' name='L95'></a>  95                 <strong class='reserved'>bool</strong> <a href='../R/8593.html' title='Multiple referred from 10 places.'>is_void</a>() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>.<a href='../D/15488.html' title='Multiple defined in 2 places.'>type_</a> == <a href='../D/1549.html' title='Multiple defined in 4 places.'>NONE</a>; <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97                 <em class='comment'>/**</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>                 * Tests whether the file the locater points at exists.</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>                 *</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>                 * is_void doesn't seem to work before the image is loaded and also in</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'>                 * debug mode a placeholder is returned. So it's not possible to test</em>
+<a id='L102' name='L102'></a> 102 <em class='comment'>                 * for the existence of a file. So this function does that. (Note it</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'>                 * tests for existence not whether or not it's a valid image.)</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'>                 *</em>
+<a id='L105' name='L105'></a> 105 <em class='comment'>                 * @return                Whether or not the file exists.</em>
+<a id='L106' name='L106'></a> 106 <em class='comment'>                 */</em>
+<a id='L107' name='L107'></a> 107                 <strong class='reserved'>bool</strong> <a href='../D/6204.html' title='Multiple defined in 3 places.'>file_exists</a>() <strong class='reserved'>const</strong>;
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109                 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>typename</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L110' name='L110'></a> 110                 <strong class='reserved'>bool</strong> <a href='../S/681.html#L137' title='Defined at 137 in src/image.cpp.'>in_cache</a>(<a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; &amp;<a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>) <strong class='reserved'>const</strong>;
+<a id='L111' name='L111'></a> 111                 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>typename</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L112' name='L112'></a> 112                 <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a> &amp;<a href='../S/681.html#L150' title='Defined at 150 in src/image.cpp.'>access_in_cache</a>(<a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; &amp;<a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>) <strong class='reserved'>const</strong>;
+<a id='L113' name='L113'></a> 113                 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>typename</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L114' name='L114'></a> 114                 <strong class='reserved'>const</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a> &amp;<a href='../S/681.html#L143' title='Defined at 143 in src/image.cpp.'>locate_in_cache</a>(<a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; &amp;<a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>) <strong class='reserved'>const</strong>;
+<a id='L115' name='L115'></a> 115                 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>typename</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
+<a id='L116' name='L116'></a> 116                 <strong class='reserved'>void</strong> <a href='../S/681.html#L157' title='Defined at 157 in src/image.cpp.'>add_to_cache</a>(<a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; &amp;<a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>, <strong class='reserved'>const</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a> &amp;<a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>) <strong class='reserved'>const</strong>;
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118         <strong class='reserved'>private</strong>:
+<a id='L119' name='L119'></a> 119 
+<a id='L120' name='L120'></a> 120                 <strong class='reserved'>int</strong> <a href='../Y/12089.html' title='Multiple used in 69 places.'>index_</a>;
+<a id='L121' name='L121'></a> 121                 <a href='../D/15967.html' title='Multiple defined in 19 places.'>value</a> <a href='../D/15940.html' title='Multiple defined in 7 places.'>val_</a>;
+<a id='L122' name='L122'></a> 122         <em class='brace'>}</em>;
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124         <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../S/681.html#L695' title='Defined at 695 in src/image.cpp.'>load_from_disk</a>(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a> &amp;<a href='../D/9972.html' title='Multiple defined in 7 places.'>loc</a>);
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126 
+<a id='L127' name='L127'></a> 127         <strong class='reserved'>typedef</strong> <a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>&lt;<a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&gt; <a href='../R/7830.html' title='Multiple referred from 2 places.'>image_cache</a>;
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>typedef</strong> <a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>&lt;<strong class='reserved'>bool</strong>&gt; <a href='../R/3314.html' title='Multiple referred from 2 places.'>bool_cache</a>;
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130         <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10772.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14971.html' title='Multiple defined in 5 places.'>t_translation</a>::<a href='../S/312.html#L55' title='Defined at 55 in src/terrain/translation.hpp.'>terrain_code</a>, <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&gt; <a href='../R/10009.html' title='Multiple referred from 7 places.'>mini_terrain_cache_map</a>;
+<a id='L131' name='L131'></a> 131         <strong class='reserved'>extern</strong> <a href='../S/757.html#L130' title='Defined at 130 in src/image.hpp.'>mini_terrain_cache_map</a> <a href='../Y/14283.html' title='Multiple used in 4 places.'>mini_terrain_cache</a>;
+<a id='L132' name='L132'></a> 132         <strong class='reserved'>extern</strong> <a href='../S/757.html#L130' title='Defined at 130 in src/image.hpp.'>mini_terrain_cache_map</a> <a href='../Y/14280.html' title='Multiple used in 4 places.'>mini_fogged_terrain_cache</a>;
+<a id='L133' name='L133'></a> 133         <strong class='reserved'>extern</strong> <a href='../S/757.html#L130' title='Defined at 130 in src/image.hpp.'>mini_terrain_cache_map</a> <a href='../Y/14281.html' title='Multiple used in 4 places.'>mini_highlighted_terrain_cache</a>;
+<a id='L134' name='L134'></a> 134 
+<a id='L135' name='L135'></a> 135         <em class='comment'>///light_string store colors info of central and adjacent hexes.</em>
+<a id='L136' name='L136'></a> 136         <em class='comment'>///The structure is one or several 4 chars blocks (L,R,G,B)</em>
+<a id='L137' name='L137'></a> 137         <em class='comment'>///where RGB is the color and L is the lightmap to use:</em>
+<a id='L138' name='L138'></a> 138     <em class='comment'>///   -1: none</em>
+<a id='L139' name='L139'></a> 139     <em class='comment'>///    0: full hex</em>
+<a id='L140' name='L140'></a> 140     <em class='comment'>///  1-6: concave corners</em>
+<a id='L141' name='L141'></a> 141     <em class='comment'>/// 7-12: convex half-corners 1</em>
+<a id='L142' name='L142'></a> 142     <em class='comment'>///13-19: convex half-corners 2</em>
+<a id='L143' name='L143'></a> 143         <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/6331.html' title='Multiple used in 23 places.'>basic_string</a>&lt;<strong class='reserved'>signed</strong> <strong class='reserved'>char</strong>&gt; <a href='../R/8898.html' title='Multiple referred from 10 places.'>light_string</a>;
+<a id='L144' name='L144'></a> 144         <em class='comment'>///return light_string of one light operation(see above)</em>
+<a id='L145' name='L145'></a> 145         <a href='../S/757.html#L143' title='Defined at 143 in src/image.hpp.'>light_string</a> <a href='../S/681.html#L624' title='Defined at 624 in src/image.cpp.'>get_light_string</a>(<strong class='reserved'>int</strong> <a href='../Y/15724.html' title='Multiple used in 159 places.'>op</a>, <strong class='reserved'>int</strong> <a href='../S/705.html#L600' title='Defined at 600 in src/tests/gui/test_gui2.cpp.'>r</a>, <strong class='reserved'>int</strong> <a href='../D/6611.html' title='Multiple defined in 2 places.'>g</a>, <strong class='reserved'>int</strong> <a href='../D/3528.html' title='Multiple defined in 3 places.'>b</a>);
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147         <em class='comment'>// pair each light possibility with its lighted surface</em>
+<a id='L148' name='L148'></a> 148         <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10772.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../S/757.html#L143' title='Defined at 143 in src/image.hpp.'>light_string</a>, <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&gt; <a href='../R/8952.html' title='Multiple referred from 4 places.'>lit_variants</a>;
+<a id='L149' name='L149'></a> 149         <em class='comment'>// lighted variants for each locator</em>
+<a id='L150' name='L150'></a> 150         <strong class='reserved'>typedef</strong> <a href='../S/681.html#L112' title='Defined at 112 in src/image.cpp.'>cache_type</a>&lt;<a href='../S/757.html#L148' title='Defined at 148 in src/image.hpp.'>lit_variants</a>&gt; <a href='../R/8951.html' title='Multiple referred from 2 places.'>lit_cache</a>;
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>void</strong> <a href='../S/681.html#L217' title='Defined at 217 in src/image.cpp.'>flush_cache</a>();
+<a id='L153' name='L153'></a> 153 
+<a id='L154' name='L154'></a> 154         <em class='comment'>///the image manager is responsible for setting up images, and destroying</em>
+<a id='L155' name='L155'></a> 155         <em class='comment'>///all images when the program exits. It should probably</em>
+<a id='L156' name='L156'></a> 156         <em class='comment'>///be created once for the life of the program</em>
+<a id='L157' name='L157'></a> 157         <strong class='reserved'>struct</strong> <a href='../R/9792.html' title='Multiple referred from 454 places.'>manager</a>
+<a id='L158' name='L158'></a> 158         <em class='brace'>{</em>
+<a id='L159' name='L159'></a> 159                 <a href='../D/10769.html' title='Multiple defined in 32 places.'>manager</a>();
+<a id='L160' name='L160'></a> 160                 ~<a href='../D/10769.html' title='Multiple defined in 32 places.'>manager</a>();
+<a id='L161' name='L161'></a> 161         <em class='brace'>}</em>;
+<a id='L162' name='L162'></a> 162 
+<a id='L163' name='L163'></a> 163         <em class='comment'>///will make all scaled images have these rgb values added to all</em>
+<a id='L164' name='L164'></a> 164         <em class='comment'>///their pixels. i.e. add a certain color hint to images. useful</em>
+<a id='L165' name='L165'></a> 165         <em class='comment'>///for representing day/night. Invalidates all scaled images.</em>
+<a id='L166' name='L166'></a> 166         <strong class='reserved'>void</strong> <a href='../S/681.html#L751' title='Defined at 751 in src/image.cpp.'>set_color_adjustment</a>(<strong class='reserved'>int</strong> <a href='../S/705.html#L600' title='Defined at 600 in src/tests/gui/test_gui2.cpp.'>r</a>, <strong class='reserved'>int</strong> <a href='../D/6611.html' title='Multiple defined in 2 places.'>g</a>, <strong class='reserved'>int</strong> <a href='../D/3528.html' title='Multiple defined in 3 places.'>b</a>);
+<a id='L167' name='L167'></a> 167 
+<a id='L168' name='L168'></a> 168         <em class='comment'>///set the team colors used by the TC image modification</em>
+<a id='L169' name='L169'></a> 169         <em class='comment'>///use a vector with one string for each team</em>
+<a id='L170' name='L170'></a> 170         <em class='comment'>///using nullptr will reset to default TC</em>
+<a id='L171' name='L171'></a> 171         <strong class='reserved'>void</strong> <a href='../S/681.html#L765' title='Defined at 765 in src/image.cpp.'>set_team_colors</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&gt;* <a href='../D/4629.html' title='Multiple defined in 2 places.'>colors</a> = <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>);
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&gt;&amp; <a href='../S/681.html#L774' title='Defined at 774 in src/image.cpp.'>get_team_colors</a>();
+<a id='L174' name='L174'></a> 174 
+<a id='L175' name='L175'></a> 175         <em class='comment'>///sets the pixel format used by the images. Is called every time the</em>
+<a id='L176' name='L176'></a> 176         <em class='comment'>///video mode changes. Invalidates all images.</em>
+<a id='L177' name='L177'></a> 177         <strong class='reserved'>void</strong> <a href='../S/681.html#L718' title='Defined at 718 in src/image.cpp.'>set_pixel_format</a>(<a href='../Y/2645.html' title='Multiple used in 8 places.'>SDL_PixelFormat</a>* <a href='../D/6475.html' title='Multiple defined in 2 places.'>format</a>);
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179         <em class='comment'>///sets the amount scaled images should be scaled. Invalidates all</em>
+<a id='L180' name='L180'></a> 180         <em class='comment'>///scaled images.</em>
+<a id='L181' name='L181'></a> 181         <strong class='reserved'>void</strong> <a href='../D/14274.html' title='Multiple defined in 3 places.'>set_zoom</a>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../Y/22459.html' title='Multiple used in 46 places.'>zoom</a>);
+<a id='L182' name='L182'></a> 182 
+<a id='L183' name='L183'></a> 183         <em class='comment'>/// UNSCALED : image will be drawn "as is" without changing size, even in case of redraw</em>
+<a id='L184' name='L184'></a> 184         <em class='comment'>/// SCALED_TO_ZOOM : image will be scaled taking zoom into account</em>
+<a id='L185' name='L185'></a> 185         <em class='comment'>/// HEXED : the hex mask is applied on the image</em>
+<a id='L186' name='L186'></a> 186         <em class='comment'>/// SCALED_TO_HEX : image will be scaled to fit into a hex, taking zoom into account</em>
+<a id='L187' name='L187'></a> 187         <em class='comment'>/// TOD_COLORED : same as SCALED_TO_HEX but ToD coloring is also applied</em>
+<a id='L188' name='L188'></a> 188         <em class='comment'>/// BRIGHTENED  : same as TOD_COLORED but also brightened</em>
+<a id='L189' name='L189'></a> 189         <strong class='reserved'>enum</strong> <a href='../R/2043.html' title='Multiple referred from 105 places.'>TYPE</a> <em class='brace'>{</em> <a href='../R/2079.html' title='Multiple referred from 12 places.'>UNSCALED</a>, <a href='../R/1729.html' title='Multiple referred from 13 places.'>SCALED_TO_ZOOM</a>, <a href='../R/611.html' title='Multiple referred from 13 places.'>HEXED</a>, <a href='../R/1728.html' title='Multiple referred from 37 places.'>SCALED_TO_HEX</a>, <a href='../R/2001.html' title='Multiple referred from 12 places.'>TOD_COLORED</a>, <a href='../R/134.html' title='Multiple referred from 4 places.'>BRIGHTENED</a><em class='brace'>}</em>;
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191         <em class='comment'>///function to get the surface corresponding to an image.</em>
+<a id='L192' name='L192'></a> 192         <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../D/7627.html' title='Multiple defined in 4 places.'>get_image</a>(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>&amp; <a href='../Y/11801.html' title='Multiple used in 58 places.'>i_locator</a>, <a href='../D/2228.html' title='Multiple defined in 3 places.'>TYPE</a> <a href='../D/15484.html' title='Multiple defined in 27 places.'>type</a>=<a href='../S/757.html#L189' title='Defined at 189 in src/image.hpp.'>UNSCALED</a>);
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194         <em class='comment'>///function to get the surface corresponding to an image.</em>
+<a id='L195' name='L195'></a> 195         <em class='comment'>///after applying the lightmap encoded in ls</em>
+<a id='L196' name='L196'></a> 196         <em class='comment'>///type should be HEXED or SCALED_TO_HEX</em>
+<a id='L197' name='L197'></a> 197         <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../S/681.html#L1010' title='Defined at 1010 in src/image.cpp.'>get_lighted_image</a>(<strong class='reserved'>const</strong> <a href='../D/8702.html' title='Multiple defined in 19 places.'>image</a>::<a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>&amp; <a href='../Y/11801.html' title='Multiple used in 58 places.'>i_locator</a>, <strong class='reserved'>const</strong> <a href='../S/757.html#L143' title='Defined at 143 in src/image.hpp.'>light_string</a>&amp; <a href='../Y/13623.html' title='Multiple used in 695 places.'>ls</a>, <a href='../D/2228.html' title='Multiple defined in 3 places.'>TYPE</a> <a href='../D/15484.html' title='Multiple defined in 27 places.'>type</a>);
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199         <em class='comment'>///function to get the standard hex mask</em>
+<a id='L200' name='L200'></a> 200         <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../S/681.html#L1062' title='Defined at 1062 in src/image.cpp.'>get_hexmask</a>();
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202         <em class='comment'>///function to check if an image fit into an hex</em>
+<a id='L203' name='L203'></a> 203         <em class='comment'>///return false if the image has not the standard size.</em>
+<a id='L204' name='L204'></a> 204         <strong class='reserved'>bool</strong> <a href='../S/681.html#L1068' title='Defined at 1068 in src/image.cpp.'>is_in_hex</a>(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>&amp; <a href='../Y/11801.html' title='Multiple used in 58 places.'>i_locator</a>);
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206         <em class='comment'>///function to check if an image is empty after hex cut</em>
+<a id='L207' name='L207'></a> 207         <em class='comment'>///should be only used on terrain image (cache the hex cut version)</em>
+<a id='L208' name='L208'></a> 208         <strong class='reserved'>bool</strong> <a href='../S/681.html#L1094' title='Defined at 1094 in src/image.cpp.'>is_empty_hex</a>(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>&amp; <a href='../Y/11801.html' title='Multiple used in 58 places.'>i_locator</a>);
+<a id='L209' name='L209'></a> 209 
+<a id='L210' name='L210'></a> 210         <em class='comment'>///function to reverse an image. The image MUST have originally been returned from</em>
+<a id='L211' name='L211'></a> 211         <em class='comment'>///an image:: function. Returned images have the same semantics as for get_image()</em>
+<a id='L212' name='L212'></a> 212         <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> <a href='../S/681.html#L1113' title='Defined at 1113 in src/image.cpp.'>reverse_image</a>(<strong class='reserved'>const</strong> <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a> &amp;<a href='../D/14911.html' title='Multiple defined in 2 places.'>surf</a>);
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214         <em class='comment'>///returns true if the given image actually exists, without loading it.</em>
+<a id='L215' name='L215'></a> 215         <strong class='reserved'>bool</strong> <a href='../D/6055.html' title='Multiple defined in 9 places.'>exists</a>(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>&amp; <a href='../Y/11801.html' title='Multiple used in 58 places.'>i_locator</a>);
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217         <em class='comment'>/// precache the existence of files in the subdir (ex: "terrain/")</em>
+<a id='L218' name='L218'></a> 218         <strong class='reserved'>void</strong> <a href='../S/681.html#L1185' title='Defined at 1185 in src/image.cpp.'>precache_file_existence</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/19491.html' title='Multiple used in 41 places.'>subdir</a> = "");
+<a id='L219' name='L219'></a> 219         <strong class='reserved'>bool</strong> <a href='../S/681.html#L1194' title='Defined at 1194 in src/image.cpp.'>precached_file_exists</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6202.html' title='Multiple defined in 3 places.'>file</a>);
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221         <em class='comment'>/// initialize any private data, e.g. algorithm choices from preferences</em>
+<a id='L222' name='L222'></a> 222         <strong class='reserved'>bool</strong> <a href='../S/681.html#L1229' title='Defined at 1229 in src/image.cpp.'>update_from_preferences</a>();
+<a id='L223' name='L223'></a> 223 
+<a id='L224' name='L224'></a> 224         <strong class='reserved'>bool</strong> <a href='../D/13264.html' title='Multiple defined in 2 places.'>save_image</a>(<strong class='reserved'>const</strong> <a href='../S/757.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>&amp; <a href='../Y/11801.html' title='Multiple used in 58 places.'>i_locator</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/15969.html' title='Multiple used in 7 places.'>outfile</a>);
+<a id='L225' name='L225'></a> 225         <strong class='reserved'>bool</strong> <a href='../D/13264.html' title='Multiple defined in 2 places.'>save_image</a>(<strong class='reserved'>const</strong> <a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&amp; <a href='../D/14911.html' title='Multiple defined in 2 places.'>surf</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/15969.html' title='Multiple used in 7 places.'>outfile</a>);
+<a id='L226' name='L226'></a> 226 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L85'>[^]</a><a href='#L95'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

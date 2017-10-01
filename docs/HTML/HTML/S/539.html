@@ -1,0 +1,345 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/gui/widgets/tree_view_node.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5853.html'>gui</a>/<a href='../files/5865.html'>widgets</a>/tree_view_node.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L86'>[^]</a><a href='#L211'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2309.html' title='Multiple included from 12 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L86' title='Defined at 86.'>add_sibling</a></li>
+<li><a href='#L100' title='Defined at 100.'>is_root_node</a></li>
+<li><a href='#L113' title='Defined at 113.'>empty</a></li>
+<li><a href='#L119' title='Defined at 119.'>is_folded</a></li>
+<li><a href='#L166' title='Defined at 166.'>count_children</a></li>
+<li><a href='#L188' title='Defined at 188.'>get_tree_view</a></li>
+<li><a href='#L193' title='Defined at 193.'>get_tree_view</a></li>
+<li><a href='#L211' title='Defined at 211.'>get_grid</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2010 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='../I/2317.html'>gui/widgets/widget.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='612.html'>gui/widgets/grid.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;memory&gt;
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>namespace</strong> <a href='../R/7462.html' title='Multiple referred from 719 places.'>gui2</a>
+<a id='L22' name='L22'></a>  22 <em class='brace'>{</em>
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>namespace</strong> <a href='../R/7944.html' title='Multiple referred from 136 places.'>implementation</a> <em class='brace'>{</em>
+<a id='L25' name='L25'></a>  25         <strong class='reserved'>struct</strong> <a href='../D/15400.html' title='Multiple defined in 2 places.'>tree_node</a>;
+<a id='L26' name='L26'></a>  26 <em class='brace'>}</em>
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <strong class='reserved'>class</strong> <a href='../S/585.html#L31' title='Defined at 31 in src/gui/widgets/selectable_item.hpp.'>selectable_item</a>;
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>class</strong> <a href='../D/15401.html' title='Multiple defined in 2 places.'>tree_view</a>;
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>class</strong> <a href='../R/14143.html' title='Multiple referred from 182 places.'>tree_view_node</a> : <strong class='reserved'>public</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>
+<a id='L32' name='L32'></a>  32 <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33         <strong class='reserved'>friend</strong> <strong class='reserved'>struct</strong> <a href='../S/619.html#L294' title='Defined at 294 in src/gui/widgets/tree_view_node.cpp.'>tree_view_node_implementation</a>;
+<a id='L34' name='L34'></a>  34         <strong class='reserved'>friend</strong> <strong class='reserved'>class</strong> <a href='../D/15401.html' title='Multiple defined in 2 places.'>tree_view</a>;
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>public</strong>:
+<a id='L37' name='L37'></a>  37         <strong class='reserved'>using</strong> <a href='../R/10378.html' title='Multiple referred from 7 places.'>node_children_vector</a> = <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21100.html' title='Multiple used in 212 places.'>unique_ptr</a>&lt;<a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>&gt;&gt;;
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39         <strong class='reserved'>bool</strong> <strong class='reserved'>operator</strong>==(<strong class='reserved'>const</strong> <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>&amp; <a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>)
+<a id='L40' name='L40'></a>  40         <em class='brace'>{</em>
+<a id='L41' name='L41'></a>  41                 <strong class='reserved'>return</strong> &amp;<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a> == <strong class='reserved'>this</strong>;
+<a id='L42' name='L42'></a>  42         <em class='brace'>}</em>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>(
+<a id='L45' name='L45'></a>  45                         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>,
+<a id='L46' name='L46'></a>  46                         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>* <a href='../D/11741.html' title='Multiple defined in 2 places.'>parent_node</a>,
+<a id='L47' name='L47'></a>  47                         <a href='../D/15401.html' title='Multiple defined in 2 places.'>tree_view</a>&amp; <a href='../Y/16209.html' title='Multiple used in 4 places.'>parent_tree_view</a>,
+<a id='L48' name='L48'></a>  48                         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10772.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <em class='comment'>/* widget id */</em>, <a href='../D/14845.html' title='Multiple defined in 2 places.'>string_map</a>&gt;&amp; <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>);
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50         ~<a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>();
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52         <em class='comment'>/**</em>
+<a id='L53' name='L53'></a>  53 <em class='comment'>         * Adds a child item to the list of child nodes.</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'>         *</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'>         * @param id                  The id of the node definition to use for the</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>         *                            new node.</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'>         * @param data                The data to send to the set_members of the</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'>         *                            widgets. If the member id is not an empty</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>         *                            string it is only send to the widget that has</em>
+<a id='L60' name='L60'></a>  60 <em class='comment'>         *                            the wanted id (if any). If the member id is an</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'>         *                            empty string, it is send to all members.</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'>         *                            Having both empty and non-empty id's gives</em>
+<a id='L63' name='L63'></a>  63 <em class='comment'>         *                            undefined behavior.</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'>         * @param index               The item before which to add the new item,</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'>         *                            0 == begin, -1 == end.</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'>         */</em>
+<a id='L67' name='L67'></a>  67         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>&amp;
+<a id='L68' name='L68'></a>  68         <a href='../D/2855.html' title='Multiple defined in 8 places.'>add_child</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>,
+<a id='L69' name='L69'></a>  69                           <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10772.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <em class='comment'>/* widget id */</em>, <a href='../D/14845.html' title='Multiple defined in 2 places.'>string_map</a>&gt;&amp; <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>,
+<a id='L70' name='L70'></a>  70                           <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8854.html' title='Multiple defined in 6 places.'>index</a> = -1);
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72         <em class='comment'>/**</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'>         * Adds a sibbling for a node at the end of the list.</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'>         *</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'>         * @param id                  The id of the node definition to use for the</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'>         *                            new node.</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'>         * @param data                The data to send to the set_members of the</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'>         *                            widgets. If the member id is not an empty</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'>         *                            string it is only send to the widget that has</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'>         *                            the wanted id (if any). If the member id is an</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'>         *                            empty string, it is send to all members.</em>
+<a id='L82' name='L82'></a>  82 <em class='comment'>         *                            Having both empty and non-empty id's gives</em>
+<a id='L83' name='L83'></a>  83 <em class='comment'>         *                            undefined behavior.</em>
+<a id='L84' name='L84'></a>  84 <em class='comment'>         */</em>
+<a id='L85' name='L85'></a>  85         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>&amp;
+<a id='L86' name='L86'></a>  86         <a href='../R/2710.html' title='Multiple referred from 2 places.'>add_sibling</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>,
+<a id='L87' name='L87'></a>  87                                 <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10772.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <em class='comment'>/* widget id */</em>, <a href='../D/14845.html' title='Multiple defined in 2 places.'>string_map</a>&gt;&amp; <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>)
+<a id='L88' name='L88'></a>  88         <em class='brace'>{</em>
+<a id='L89' name='L89'></a>  89                 <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(!<a href='../S/539.html#L100' title='Defined at 100 in src/gui/widgets/tree_view_node.hpp.'>is_root_node</a>());
+<a id='L90' name='L90'></a>  90                 <strong class='reserved'>return</strong> <a href='../D/11741.html' title='Multiple defined in 2 places.'>parent_node</a>().<a href='../D/2855.html' title='Multiple defined in 8 places.'>add_child</a>(<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>, <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>);
+<a id='L91' name='L91'></a>  91         <em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93         <em class='comment'>/**</em>
+<a id='L94' name='L94'></a>  94 <em class='comment'>         * Is this node the root node?</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'>         *</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'>         * When the parent tree view is created it adds one special node, the root</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'>         * node. This node has no parent node and some other special features so</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>         * several code paths need to check whether they are the parent node.</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>         */</em>
+<a id='L100' name='L100'></a> 100         <strong class='reserved'>bool</strong> <a href='../R/8546.html' title='Multiple referred from 10 places.'>is_root_node</a>() <strong class='reserved'>const</strong>
+<a id='L101' name='L101'></a> 101         <em class='brace'>{</em>
+<a id='L102' name='L102'></a> 102                 <strong class='reserved'>return</strong> <a href='../Y/16206.html' title='Multiple used in 26 places.'>parent_node_</a> == <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>;
+<a id='L103' name='L103'></a> 103         <em class='brace'>}</em>
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105         <em class='comment'>/**</em>
+<a id='L106' name='L106'></a> 106 <em class='comment'>         * The indentation level of the node.</em>
+<a id='L107' name='L107'></a> 107 <em class='comment'>         *</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'>         * The root node starts at level 0.</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'>         */</em>
+<a id='L110' name='L110'></a> 110         <strong class='reserved'>unsigned</strong> <a href='../S/619.html#L185' title='Defined at 185 in src/gui/widgets/tree_view_node.cpp.'>get_indentation_level</a>() <strong class='reserved'>const</strong>;
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112         <em class='comment'>/** Does the node have children? */</em>
+<a id='L113' name='L113'></a> 113         <strong class='reserved'>bool</strong> <a href='../R/5179.html' title='Multiple referred from 2126 places.'>empty</a>() <strong class='reserved'>const</strong>
+<a id='L114' name='L114'></a> 114         <em class='brace'>{</em>
+<a id='L115' name='L115'></a> 115                 <strong class='reserved'>return</strong> <a href='../S/566.html#L46' title='Defined at 46 in src/gui/widgets/grid.cpp.'>children_</a>.<a href='../D/5865.html' title='Multiple defined in 31 places.'>empty</a>();
+<a id='L116' name='L116'></a> 116         <em class='brace'>}</em>
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118         <em class='comment'>/** Is the node folded? */</em>
+<a id='L119' name='L119'></a> 119         <strong class='reserved'>bool</strong> <a href='../R/8461.html' title='Multiple referred from 18 places.'>is_folded</a>() <strong class='reserved'>const</strong>
+<a id='L120' name='L120'></a> 120         <em class='brace'>{</em>
+<a id='L121' name='L121'></a> 121                 <strong class='reserved'>return</strong> !<a href='../S/619.html#L48' title='Defined at 48 in src/gui/widgets/tree_view_node.cpp.'>unfolded_</a>;
+<a id='L122' name='L122'></a> 122         <em class='brace'>}</em>
+<a id='L123' name='L123'></a> 123 
+<a id='L124' name='L124'></a> 124 <em class='sharp'>#if</em> 0
+<a id='L125' name='L125'></a> 125         <em class='comment'>// TODO: implement if different expand modes become necessary</em>
+<a id='L126' name='L126'></a> 126         <strong class='reserved'>enum</strong> expand_mode <em class='brace'>{</em>
+<a id='L127' name='L127'></a> 127                 recursive_restore, <em class='comment'>// recursively restores collapse mode</em>
+<a id='L128' name='L128'></a> 128                 recursive_expand, <em class='comment'>// recursively expands the children</em>
+<a id='L129' name='L129'></a> 129                 not_recursive
+<a id='L130' name='L130'></a> 130         <em class='brace'>}</em>;
+<a id='L131' name='L131'></a> 131 <em class='sharp'>#endif</em>
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133         <strong class='reserved'>void</strong> <a href='../S/619.html#L215' title='Defined at 215 in src/gui/widgets/tree_view_node.cpp.'>fold</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../S/4071.html#L241' title='Defined at 241 in data/tools/scoutDefault.py.'>recursive</a> = <strong class='reserved'>false</strong>);
+<a id='L134' name='L134'></a> 134         <strong class='reserved'>void</strong> <a href='../S/619.html#L231' title='Defined at 231 in src/gui/widgets/tree_view_node.cpp.'>unfold</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../S/4071.html#L241' title='Defined at 241 in data/tools/scoutDefault.py.'>recursive</a> = <strong class='reserved'>false</strong>);
+<a id='L135' name='L135'></a> 135 
+<a id='L136' name='L136'></a> 136         <em class='comment'>/**</em>
+<a id='L137' name='L137'></a> 137 <em class='comment'>         * See @ref widget::create_walker.</em>
+<a id='L138' name='L138'></a> 138 <em class='comment'>         *</em>
+<a id='L139' name='L139'></a> 139 <em class='comment'>         * @todo Implement properly.</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'>         */</em>
+<a id='L141' name='L141'></a> 141         <strong class='reserved'>virtual</strong> <a href='../D/9547.html' title='Multiple defined in 14 places.'>iteration</a>::<a href='../S/650.html#L26' title='Defined at 26 in src/gui/auxiliary/iterator/walker.hpp.'>walker_base</a>* <a href='../D/5141.html' title='Multiple defined in 8 places.'>create_walker</a>() <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143         <a href='../S/539.html#L37' title='Defined at 37 in src/gui/widgets/tree_view_node.hpp.'>node_children_vector</a>&amp; <a href='../R/3886.html' title='Multiple referred from 90 places.'>children</a>()
+<a id='L144' name='L144'></a> 144         <em class='brace'>{</em>
+<a id='L145' name='L145'></a> 145                 <strong class='reserved'>return</strong> <a href='../S/566.html#L46' title='Defined at 46 in src/gui/widgets/grid.cpp.'>children_</a>;
+<a id='L146' name='L146'></a> 146         <em class='brace'>}</em>
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148         <em class='comment'>/** See @ref widget::find_at. */</em>
+<a id='L149' name='L149'></a> 149         <strong class='reserved'>virtual</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>* <a href='../D/6285.html' title='Multiple defined in 37 places.'>find_at</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>,
+<a id='L150' name='L150'></a> 150                                                          <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/14652.html' title='Multiple used in 218 places.'>must_be_active</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152         <em class='comment'>/** See @ref widget::find_at. */</em>
+<a id='L153' name='L153'></a> 153         <strong class='reserved'>virtual</strong> <strong class='reserved'>const</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>* <a href='../D/6285.html' title='Multiple defined in 37 places.'>find_at</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../S/312.html#L126' title='Defined at 126 in src/terrain/translation.hpp.'>coordinate</a>,
+<a id='L154' name='L154'></a> 154                                                                    <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/14652.html' title='Multiple used in 218 places.'>must_be_active</a>) <strong class='reserved'>const</strong> <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L155' name='L155'></a> 155 
+<a id='L156' name='L156'></a> 156         <em class='comment'>/** See @ref widget::find. */</em>
+<a id='L157' name='L157'></a> 157         <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>* <a href='../D/6279.html' title='Multiple defined in 39 places.'>find</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>, <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/14652.html' title='Multiple used in 218 places.'>must_be_active</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L158' name='L158'></a> 158 
+<a id='L159' name='L159'></a> 159         <em class='comment'>/** See @ref widget::find. */</em>
+<a id='L160' name='L160'></a> 160         <strong class='reserved'>const</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>* <a href='../D/6279.html' title='Multiple defined in 39 places.'>find</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>,
+<a id='L161' name='L161'></a> 161                                                 <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/14652.html' title='Multiple used in 218 places.'>must_be_active</a>) <strong class='reserved'>const</strong> <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L162' name='L162'></a> 162 
+<a id='L163' name='L163'></a> 163         <em class='comment'>/**</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'>         * The number of children in this widget.</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'>         */</em>
+<a id='L166' name='L166'></a> 166         <a href='../Y/18861.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../R/4333.html' title='Multiple referred from 23 places.'>count_children</a>() <strong class='reserved'>const</strong>
+<a id='L167' name='L167'></a> 167         <em class='brace'>{</em>
+<a id='L168' name='L168'></a> 168                 <strong class='reserved'>return</strong> <a href='../S/566.html#L46' title='Defined at 46 in src/gui/widgets/grid.cpp.'>children_</a>.<a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a>();
+<a id='L169' name='L169'></a> 169         <em class='brace'>}</em>
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171         <em class='comment'>/**</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'>         * Removes all child items from the widget.</em>
+<a id='L173' name='L173'></a> 173 <em class='comment'>         */</em>
+<a id='L174' name='L174'></a> 174         <strong class='reserved'>void</strong> <a href='../D/4477.html' title='Multiple defined in 39 places.'>clear</a>();
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176         <em class='comment'>/***** ***** ***** setters / getters for members ***** ****** *****/</em>
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178         <em class='comment'>/**</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'>         * Returns the parent node.</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'>         *</em>
+<a id='L181' name='L181'></a> 181 <em class='comment'>         * @pre                       is_root_node() == false.</em>
+<a id='L182' name='L182'></a> 182 <em class='comment'>         */</em>
+<a id='L183' name='L183'></a> 183         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>&amp; <a href='../D/11741.html' title='Multiple defined in 2 places.'>parent_node</a>();
+<a id='L184' name='L184'></a> 184 
+<a id='L185' name='L185'></a> 185         <em class='comment'>/** The const version of @ref parent_node. */</em>
+<a id='L186' name='L186'></a> 186         <strong class='reserved'>const</strong> <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>&amp; <a href='../D/11741.html' title='Multiple defined in 2 places.'>parent_node</a>() <strong class='reserved'>const</strong>;
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188         <a href='../D/15401.html' title='Multiple defined in 2 places.'>tree_view</a>&amp; <a href='../R/7266.html' title='Multiple referred from 35 places.'>get_tree_view</a>()
+<a id='L189' name='L189'></a> 189         <em class='brace'>{</em>
+<a id='L190' name='L190'></a> 190                 <strong class='reserved'>return</strong> *<a href='../Y/20755.html' title='Multiple used in 6 places.'>tree_view_</a>;
+<a id='L191' name='L191'></a> 191         <em class='brace'>}</em>
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193         <strong class='reserved'>const</strong> <a href='../D/15401.html' title='Multiple defined in 2 places.'>tree_view</a>&amp; <a href='../R/7266.html' title='Multiple referred from 35 places.'>get_tree_view</a>() <strong class='reserved'>const</strong>
+<a id='L194' name='L194'></a> 194         <em class='brace'>{</em>
+<a id='L195' name='L195'></a> 195                 <strong class='reserved'>return</strong> *<a href='../Y/20755.html' title='Multiple used in 6 places.'>tree_view_</a>;
+<a id='L196' name='L196'></a> 196         <em class='brace'>}</em>
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>&amp; <a href='../D/7399.html' title='Multiple defined in 4 places.'>get_child_at</a>(<strong class='reserved'>int</strong> <a href='../D/8854.html' title='Multiple defined in 6 places.'>index</a>);
+<a id='L199' name='L199'></a> 199 
+<a id='L200' name='L200'></a> 200         <em class='comment'>/**</em>
+<a id='L201' name='L201'></a> 201 <em class='comment'>         * Calculates the node indicies needed to get from the root node to this node.</em>
+<a id='L202' name='L202'></a> 202 <em class='comment'>         */</em>
+<a id='L203' name='L203'></a> 203         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<strong class='reserved'>int</strong>&gt; <a href='../S/619.html#L677' title='Defined at 677 in src/gui/widgets/tree_view_node.cpp.'>describe_path</a>();
+<a id='L204' name='L204'></a> 204 
+<a id='L205' name='L205'></a> 205         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>* <a href='../S/619.html#L713' title='Defined at 713 in src/gui/widgets/tree_view_node.cpp.'>get_last_visible_parent_node</a>();
+<a id='L206' name='L206'></a> 206         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>* <a href='../S/619.html#L723' title='Defined at 723 in src/gui/widgets/tree_view_node.cpp.'>get_node_above</a>();
+<a id='L207' name='L207'></a> 207         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>* <a href='../S/619.html#L749' title='Defined at 749 in src/gui/widgets/tree_view_node.cpp.'>get_node_below</a>();
+<a id='L208' name='L208'></a> 208         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>* <a href='../S/619.html#L775' title='Defined at 775 in src/gui/widgets/tree_view_node.cpp.'>get_selectable_node_above</a>();
+<a id='L209' name='L209'></a> 209         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>* <a href='../S/619.html#L784' title='Defined at 784 in src/gui/widgets/tree_view_node.cpp.'>get_selectable_node_below</a>();
+<a id='L210' name='L210'></a> 210         <strong class='reserved'>void</strong> <a href='../S/619.html#L793' title='Defined at 793 in src/gui/widgets/tree_view_node.cpp.'>select_node</a>(<strong class='reserved'>bool</strong> <a href='../Y/9766.html' title='Multiple used in 3 places.'>expand_parents</a> = <strong class='reserved'>false</strong>);
+<a id='L211' name='L211'></a> 211         <a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>&amp; <a href='../R/6776.html' title='Multiple referred from 34 places.'>get_grid</a>() <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../D/8291.html' title='Multiple defined in 2 places.'>grid_</a>; <em class='brace'>}</em>
+<a id='L212' name='L212'></a> 212         <strong class='reserved'>void</strong> <a href='../D/9745.html' title='Multiple defined in 11 places.'>layout_initialize</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/10562.html' title='Multiple used in 40 places.'>full_initialization</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214         <strong class='reserved'>void</strong> <a href='../S/619.html#L122' title='Defined at 122 in src/gui/widgets/tree_view_node.cpp.'>clear_before_destruct</a>();
+<a id='L215' name='L215'></a> 215 
+<a id='L216' name='L216'></a> 216 <strong class='reserved'>private</strong>:
+<a id='L217' name='L217'></a> 217         <strong class='reserved'>int</strong> <a href='../S/619.html#L695' title='Defined at 695 in src/gui/widgets/tree_view_node.cpp.'>calculate_ypos</a>();
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219         <em class='comment'>/** See @ref widget::request_reduce_width. */</em>
+<a id='L220' name='L220'></a> 220         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/12859.html' title='Multiple defined in 15 places.'>request_reduce_width</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/14079.html' title='Multiple used in 144 places.'>maximum_width</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L221' name='L221'></a> 221 
+<a id='L222' name='L222'></a> 222         <em class='comment'>/**</em>
+<a id='L223' name='L223'></a> 223 <em class='comment'>         * Our parent node.</em>
+<a id='L224' name='L224'></a> 224 <em class='comment'>         *</em>
+<a id='L225' name='L225'></a> 225 <em class='comment'>         * All nodes except the root node have a parent node.</em>
+<a id='L226' name='L226'></a> 226 <em class='comment'>         */</em>
+<a id='L227' name='L227'></a> 227         <a href='../D/15403.html' title='Multiple defined in 2 places.'>tree_view_node</a>* <a href='../Y/16206.html' title='Multiple used in 26 places.'>parent_node_</a>;
+<a id='L228' name='L228'></a> 228 
+<a id='L229' name='L229'></a> 229         <em class='comment'>/** The tree view that owns us. */</em>
+<a id='L230' name='L230'></a> 230         <a href='../D/15401.html' title='Multiple defined in 2 places.'>tree_view</a>* <a href='../Y/20755.html' title='Multiple used in 6 places.'>tree_view_</a>;
+<a id='L231' name='L231'></a> 231 
+<a id='L232' name='L232'></a> 232         <em class='comment'>/** Grid holding our contents. */</em>
+<a id='L233' name='L233'></a> 233         <a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a> <a href='../D/8291.html' title='Multiple defined in 2 places.'>grid_</a>;
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235         <em class='comment'>/**</em>
+<a id='L236' name='L236'></a> 236 <em class='comment'>         * Our children.</em>
+<a id='L237' name='L237'></a> 237 <em class='comment'>         *</em>
+<a id='L238' name='L238'></a> 238 <em class='comment'>         * We want the returned child nodes to remain stable so store pointers.</em>
+<a id='L239' name='L239'></a> 239 <em class='comment'>         */</em>
+<a id='L240' name='L240'></a> 240         <a href='../S/539.html#L37' title='Defined at 37 in src/gui/widgets/tree_view_node.hpp.'>node_children_vector</a> <a href='../S/566.html#L46' title='Defined at 46 in src/gui/widgets/grid.cpp.'>children_</a>;
+<a id='L241' name='L241'></a> 241 
+<a id='L242' name='L242'></a> 242         <em class='comment'>/** The toggle for the folded state. */</em>
+<a id='L243' name='L243'></a> 243         <a href='../S/585.html#L31' title='Defined at 31 in src/gui/widgets/selectable_item.hpp.'>selectable_item</a>* <a href='../Y/20550.html' title='Multiple used in 12 places.'>toggle_</a>;
+<a id='L244' name='L244'></a> 244 
+<a id='L245' name='L245'></a> 245         <em class='comment'>/** The label to show our selected state. */</em>
+<a id='L246' name='L246'></a> 246         <a href='../S/585.html#L31' title='Defined at 31 in src/gui/widgets/selectable_item.hpp.'>selectable_item</a>* <a href='../S/94.html#L37' title='Defined at 37 in src/floating_textbox.cpp.'>label_</a>;
+<a id='L247' name='L247'></a> 247 
+<a id='L248' name='L248'></a> 248         <strong class='reserved'>bool</strong> <a href='../S/619.html#L48' title='Defined at 48 in src/gui/widgets/tree_view_node.cpp.'>unfolded_</a>;
+<a id='L249' name='L249'></a> 249         <strong class='reserved'>void</strong> <a href='../S/619.html#L247' title='Defined at 247 in src/gui/widgets/tree_view_node.cpp.'>fold_internal</a>();
+<a id='L250' name='L250'></a> 250         <strong class='reserved'>void</strong> <a href='../S/619.html#L260' title='Defined at 260 in src/gui/widgets/tree_view_node.cpp.'>unfold_internal</a>();
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252         <em class='comment'>/**</em>
+<a id='L253' name='L253'></a> 253 <em class='comment'>         * "Inherited" from widget.</em>
+<a id='L254' name='L254'></a> 254 <em class='comment'>         *</em>
+<a id='L255' name='L255'></a> 255 <em class='comment'>         * This version needs to call its children, which are it's child nodes.</em>
+<a id='L256' name='L256'></a> 256 <em class='comment'>         */</em>
+<a id='L257' name='L257'></a> 257         <strong class='reserved'>void</strong> <a href='../S/619.html#L386' title='Defined at 386 in src/gui/widgets/tree_view_node.cpp.'>impl_populate_dirty_list</a>(<a href='../D/16394.html' title='Multiple defined in 7 places.'>window</a>&amp; <a href='../Y/7027.html' title='Multiple used in 47 places.'>caller</a>,
+<a id='L258' name='L258'></a> 258                                                                   <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>*&gt;&amp; <a href='../Y/7013.html' title='Multiple used in 62 places.'>call_stack</a>);
+<a id='L259' name='L259'></a> 259 
+<a id='L260' name='L260'></a> 260         <em class='comment'>/** See @ref widget::calculate_best_size. */</em>
+<a id='L261' name='L261'></a> 261         <strong class='reserved'>virtual</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../D/4021.html' title='Multiple defined in 19 places.'>calculate_best_size</a>() <strong class='reserved'>const</strong> <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L262' name='L262'></a> 262 
+<a id='L263' name='L263'></a> 263         <em class='comment'>/** See @ref widget::disable_click_dismiss. */</em>
+<a id='L264' name='L264'></a> 264         <strong class='reserved'>bool</strong> <a href='../D/5458.html' title='Multiple defined in 16 places.'>disable_click_dismiss</a>() <strong class='reserved'>const</strong> <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L265' name='L265'></a> 265 
+<a id='L266' name='L266'></a> 266         <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../D/4021.html' title='Multiple defined in 19 places.'>calculate_best_size</a>(<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../Y/12079.html' title='Multiple used in 5 places.'>indentation_level</a>,
+<a id='L267' name='L267'></a> 267                                                            <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/12080.html' title='Multiple used in 21 places.'>indentation_step_size</a>) <strong class='reserved'>const</strong>;
+<a id='L268' name='L268'></a> 268         <em class='comment'>/** @param assume_visible if false (default) it will return 0 if the parent node is folded*/</em>
+<a id='L269' name='L269'></a> 269         <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../S/619.html#L411' title='Defined at 411 in src/gui/widgets/tree_view_node.cpp.'>get_current_size</a>(<strong class='reserved'>bool</strong> <a href='../Y/5889.html' title='Multiple used in 3 places.'>assume_visible</a> = <strong class='reserved'>false</strong>) <strong class='reserved'>const</strong>;
+<a id='L270' name='L270'></a> 270         <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../S/619.html#L436' title='Defined at 436 in src/gui/widgets/tree_view_node.cpp.'>get_folded_size</a>() <strong class='reserved'>const</strong>;
+<a id='L271' name='L271'></a> 271         <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../S/619.html#L445' title='Defined at 445 in src/gui/widgets/tree_view_node.cpp.'>get_unfolded_size</a>() <strong class='reserved'>const</strong>;
+<a id='L272' name='L272'></a> 272 
+<a id='L273' name='L273'></a> 273         <em class='comment'>/** See @ref widget::set_origin. */</em>
+<a id='L274' name='L274'></a> 274         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/14008.html' title='Multiple defined in 10 places.'>set_origin</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../Y/15882.html' title='Multiple used in 176 places.'>origin</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L275' name='L275'></a> 275 
+<a id='L276' name='L276'></a> 276         <em class='comment'>/** See @ref widget::place. */</em>
+<a id='L277' name='L277'></a> 277         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/11912.html' title='Multiple defined in 22 places.'>place</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../Y/15882.html' title='Multiple used in 176 places.'>origin</a>, <strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L278' name='L278'></a> 278 
+<a id='L279' name='L279'></a> 279         <strong class='reserved'>unsigned</strong>
+<a id='L280' name='L280'></a> 280         <a href='../D/11912.html' title='Multiple defined in 22 places.'>place</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/12080.html' title='Multiple used in 21 places.'>indentation_step_size</a>, <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../Y/15882.html' title='Multiple used in 176 places.'>origin</a>, <strong class='reserved'>unsigned</strong> <a href='../D/16383.html' title='Multiple defined in 2 places.'>width</a>);
+<a id='L281' name='L281'></a> 281 
+<a id='L282' name='L282'></a> 282         <em class='comment'>/** See @ref widget::set_visible_rectangle. */</em>
+<a id='L283' name='L283'></a> 283         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/14249.html' title='Multiple defined in 10 places.'>set_visible_rectangle</a>(<strong class='reserved'>const</strong> <a href='../Y/2661.html' title='Multiple used in 513 places.'>SDL_Rect</a>&amp; <a href='../Y/17300.html' title='Multiple used in 36 places.'>rectangle</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L284' name='L284'></a> 284 
+<a id='L285' name='L285'></a> 285         <em class='comment'>/** See @ref widget::impl_draw_children. */</em>
+<a id='L286' name='L286'></a> 286         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/8741.html' title='Multiple defined in 9 places.'>impl_draw_children</a>(<a href='../S/986.html#L22' title='Defined at 22 in src/sdl/surface.hpp.'>surface</a>&amp; <a href='../Y/10482.html' title='Multiple used in 75 places.'>frame_buffer</a>,
+<a id='L287' name='L287'></a> 287                                                                         <strong class='reserved'>int</strong> <a href='../Y/22267.html' title='Multiple used in 106 places.'>x_offset</a>,
+<a id='L288' name='L288'></a> 288                                                                         <strong class='reserved'>int</strong> <a href='../Y/22386.html' title='Multiple used in 106 places.'>y_offset</a>) <a href='../D/11700.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290         <em class='comment'>// FIXME rename to icon</em>
+<a id='L291' name='L291'></a> 291         <strong class='reserved'>void</strong> <a href='../D/14507.html' title='Multiple defined in 8 places.'>signal_handler_left_button_click</a>(<strong class='reserved'>const</strong> <a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a> <a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>);
+<a id='L292' name='L292'></a> 292 
+<a id='L293' name='L293'></a> 293         <strong class='reserved'>void</strong> <a href='../S/619.html#L603' title='Defined at 603 in src/gui/widgets/tree_view_node.cpp.'>signal_handler_label_left_button_click</a>(<strong class='reserved'>const</strong> <a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a> <a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>,
+<a id='L294' name='L294'></a> 294                                                                                                 <strong class='reserved'>bool</strong>&amp; <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a>,
+<a id='L295' name='L295'></a> 295                                                                                                 <strong class='reserved'>bool</strong>&amp; <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a>);
+<a id='L296' name='L296'></a> 296 
+<a id='L297' name='L297'></a> 297         <strong class='reserved'>void</strong>
+<a id='L298' name='L298'></a> 298         <a href='../D/8891.html' title='Multiple defined in 2 places.'>init_grid</a>(<a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>* <a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>,
+<a id='L299' name='L299'></a> 299                           <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10772.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <em class='comment'>/* widget id */</em>, <a href='../D/14845.html' title='Multiple defined in 2 places.'>string_map</a>&gt;&amp; <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>);
+<a id='L300' name='L300'></a> 300 
+<a id='L301' name='L301'></a> 301         <em class='comment'>/**</em>
+<a id='L302' name='L302'></a> 302 <em class='comment'>         * Returns the control_type of the @ref tree_view_node.</em>
+<a id='L303' name='L303'></a> 303 <em class='comment'>         *</em>
+<a id='L304' name='L304'></a> 304 <em class='comment'>         * This class does not derive from @ref styled_widget but the function behaves</em>
+<a id='L305' name='L305'></a> 305 <em class='comment'>         * similar as @ref styled_widget::get_control_type.</em>
+<a id='L306' name='L306'></a> 306 <em class='comment'>         */</em>
+<a id='L307' name='L307'></a> 307         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/7439.html' title='Multiple defined in 5 places.'>get_control_type</a>() <strong class='reserved'>const</strong>;
+<a id='L308' name='L308'></a> 308 <em class='brace'>}</em>;
+<a id='L309' name='L309'></a> 309 
+<a id='L310' name='L310'></a> 310 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L86'>[^]</a><a href='#L211'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

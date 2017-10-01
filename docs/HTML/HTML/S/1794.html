@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>doc/design/gui2/creating_widgets_and_dialogs.tex</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5811.html'>doc</a>/<a href='../files/5812.html'>design</a>/<a href='../files/5813.html'>gui2</a>/creating_widgets_and_dialogs.tex</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 \chapter<em class='brace'>{</em>Creating new widgets and dialogues<em class='brace'>}</em>
+<a id='L2' name='L2'></a>   2 
+<a id='L3' name='L3'></a>   3 This chapter dives into the area of creating your own widgets or dialogues. For
+<a id='L4' name='L4'></a>   4 this example we use a real widget and a dialogue under development. The widget
+<a id='L5' name='L5'></a>   5 being developed is the progress bar and the screen the initial load screen.
+<a id='L6' name='L6'></a>   6 
+<a id='L7' name='L7'></a>   7 First we make the widget, then the screen in order to test the widget. It
+<a id='L8' name='L8'></a>   8 happens often that, when you need to add a new widget, you need it <strong class='reserved'>for</strong> a new
+<a id='L9' name='L9'></a>   9 dialogue - so you need to create both <strong class='reserved'>for</strong> testing. Another option is to add the
+<a id='L10' name='L10'></a>  10 widget as dummy item to another existing dialogue. When adding a dialogue <strong class='reserved'>for</strong>
+<a id='L11' name='L11'></a>  11 which all widgets already exist this doesn't matter and you can directly dive
+<a id='L12' name='L12'></a>  12 into generating the dialogue.
+<a id='L13' name='L13'></a>  13 
+<a id='L14' name='L14'></a>  14 \section<em class='brace'>{</em>Creating the widget<em class='brace'>}</em>
+<a id='L15' name='L15'></a>  15 \label<em class='brace'>{</em>sec:creating_the_widget<em class='brace'>}</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 The widget is normally split in 7 different files. Three .cpp/.hpp files and one
+<a id='L18' name='L18'></a>  18 WML file. Usually I start to create the new files by simply copy pasting the old
+<a id='L19' name='L19'></a>  19 files and pick a rather small class like timage or something. Then, I start to
+<a id='L20' name='L20'></a>  20 update the build system files, followed by creating the code <strong class='reserved'>for</strong> the
+<a id='L21' name='L21'></a>  21 classes\footnote<em class='brace'>{</em>Obviously I already thought about the design of the class
+<a id='L22' name='L22'></a>  22 before that, but that's of less importance in this tutorial.}.
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 Now, we start to explain what the various files <strong class='reserved'>do</strong>. First, I <strong class='reserved'>do</strong> a general overview of
+<a id='L25' name='L25'></a>  25 the files after which I dive more into the implementation of each file.
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 \item[src/gui/auxiliary/widget\_definition/progress\_bar.*]
+<a id='L30' name='L30'></a>  30         These files contain the definition of the progress bar. This mainly involves
+<a id='L31' name='L31'></a>  31         the fixed fields <strong class='reserved'>for</strong> the widget. This widget has no extra fields so the copy
+<a id='L32' name='L32'></a>  32         pasted version suffices. This file contains the \emph<em class='brace'>{</em><strong class='reserved'>static</strong><em class='brace'>}</em> properties <strong class='reserved'>for</strong>
+<a id='L33' name='L33'></a>  33         a certain definition of a progress bar.
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L36' name='L36'></a>  36 \item[hpp] \Liref<em class='brace'>{</em>widget_definition.hpp<em class='brace'>}</em> contains the sample code. 
+<a id='L37' name='L37'></a>  37         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L38' name='L38'></a>  38         \item[\Lref<em class='brace'>{</em>widget_definition.hpp:control<em class='brace'>}</em>] Normally a
+<a id='L39' name='L39'></a>  39                 widget definition inherits from tcontrol\_definition which defines the
+<a id='L40' name='L40'></a>  40                 basic mandatory fields <strong class='reserved'>for</strong> a widget definition and a templated load
+<a id='L41' name='L41'></a>  41                 function <strong class='reserved'>for</strong> the resolution. Most widgets don't add more members to this
+<a id='L42' name='L42'></a>  42                 class.
+<a id='L43' name='L43'></a>  43         \item[\Lref<em class='brace'>{</em>widget_definition.hpp:resolution<em class='brace'>}</em>] Normally a resolution
+<a id='L44' name='L44'></a>  44                 definition inherits from tresolution\_definition\_ which define the
+<a id='L45' name='L45'></a>  45                 basic mandatory fields <strong class='reserved'>for</strong> a resolution definition. Not all widgets use
+<a id='L46' name='L46'></a>  46                 these members, but most <strong class='reserved'>do</strong>. Most widgets don't add more members to this
+<a id='L47' name='L47'></a>  47                 class, except most container classes that add a grid builder
+<a id='L48' name='L48'></a>  48                 definition. Another example is are the scrollbars which define some
+<a id='L49' name='L49'></a>  49                 minimum sizes <strong class='reserved'>for</strong> parts of their control.
+<a id='L50' name='L50'></a>  50         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 \item[cpp] \Liref<em class='brace'>{</em>widget_definition.cpp<em class='brace'>}</em> contains the sample code. 
+<a id='L53' name='L53'></a>  53         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L54' name='L54'></a>  54         \item[\Lref<em class='brace'>{</em>widget_definition.cpp:textdomain<em class='brace'>}</em>] Every file in the library
+<a id='L55' name='L55'></a>  55                 is inside the ``wesnoth-lib'' text domain.
+<a id='L56' name='L56'></a>  56         \item[\Lref<em class='brace'>{</em>widget_definition.cpp:constructor<em class='brace'>}</em>] The constructor used is
+<a id='L57' name='L57'></a>  57                 pretty typical <strong class='reserved'>for</strong> all widgets.
+<a id='L58' name='L58'></a>  58         \item[\Lref<em class='brace'>{</em>widget_definition.cpp:resolution_constructor<em class='brace'>}</em>] The
+<a id='L59' name='L59'></a>  59                 constructor used is semi-typical. Resolutions that have their own
+<a id='L60' name='L60'></a>  60                 members initialize them in the constructor, but also validate mandatory
+<a id='L61' name='L61'></a>  61                 fields <strong class='reserved'>for</strong> their existence.
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63                 Also the progress bar only has one state, most widgets have more and
+<a id='L64' name='L64'></a>  64                 thus add more states.
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66                 And maybe the most important part of this constructor is the wiki
+<a id='L67' name='L67'></a>  67                 comment. This comment is used to generate wiki pages about the widget.
+<a id='L68' name='L68'></a>  68                 These wiki pages are used by content creators to know how to create a
+<a id='L69' name='L69'></a>  69                 proper WML file <strong class='reserved'>for</strong> the class.
+<a id='L70' name='L70'></a>  70         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L71' name='L71'></a>  71 \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73 \item[data/gui/<strong class='reserved'>default</strong>/widget/progress\_bar\_default.cfg]
+<a id='L74' name='L74'></a>  74         Now that the widget is defined, we can decide how it should look. Which is
+<a id='L75' name='L75'></a>  75         done in this file. Note that in the formula we use ``percentage'' which is
+<a id='L76' name='L76'></a>  76         the percentage of the bar to be filled.
+<a id='L77' name='L77'></a>  77 
+<a id='L78' name='L78'></a>  78         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L79' name='L79'></a>  79         \item[\Lref<em class='brace'>{</em>progress_bar.cfg:textdomain<em class='brace'>}</em>] Every file in the library
+<a id='L80' name='L80'></a>  80                 is inside the ``wesnoth-lib'' text domain.
+<a id='L81' name='L81'></a>  81 
+<a id='L82' name='L82'></a>  82         \item[\Lref<em class='brace'>{</em>progress_bar.cfg:class<em class='brace'>}</em>]
+<a id='L83' name='L83'></a>  83                 Beginning of the progress bar. This part is much better documented in
+<a id='L84' name='L84'></a>  84                 the wiki\footnote<em class='brace'>{</em>\url<em class='brace'>{</em>http:<em class='comment'>//wiki.wesnoth.org/GUIWidgetDefinitionWML}}. </em>
+<a id='L85' name='L85'></a>  85                 Since this part is aimed at WML authors, duplicating that effort here
+<a id='L86' name='L86'></a>  86                 makes no sense so just visit the wiki.
+<a id='L87' name='L87'></a>  87 
+<a id='L88' name='L88'></a>  88         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90 \item[src/gui/auxiliary/window\_builder/progress\_bar.*]
+<a id='L91' name='L91'></a>  91         These files contain the code to build a widget from the definition described
+<a id='L92' name='L92'></a>  92         above and a config object as defined in the window. These files contain also the
+<a id='L93' name='L93'></a>  93         \emph<em class='brace'>{</em>dynamic<em class='brace'>}</em> properties of the progress bar. Since the progress bar has no
+<a id='L94' name='L94'></a>  94         dynamic content this file is also rather <strong class='reserved'>short</strong>.
+<a id='L95' name='L95'></a>  95 
+<a id='L96' name='L96'></a>  96 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97 \item[hpp] \Liref<em class='brace'>{</em>window_builder.hpp<em class='brace'>}</em> contains the sample code. 
+<a id='L98' name='L98'></a>  98         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L99' name='L99'></a>  99         \item[\Lref<em class='brace'>{</em>window_builder.hpp:control<em class='brace'>}</em>] Normally a
+<a id='L100' name='L100'></a> 100                 window builder inherits from tbuilder\_control which defines the
+<a id='L101' name='L101'></a> 101                 basic mandatory fields <strong class='reserved'>for</strong> a window builder.
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103                 The function also declares the build function.
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105                 Widget define their own member <strong class='reserved'>if</strong> they want to have some runtime
+<a id='L106' name='L106'></a> 106                 settings, e.g. the spacer defines its fixed size <strong class='reserved'>if</strong> needed.
+<a id='L107' name='L107'></a> 107         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109 \item[cpp] \Liref<em class='brace'>{</em>window_builder.cpp<em class='brace'>}</em> contains the sample code. 
+<a id='L110' name='L110'></a> 110         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L111' name='L111'></a> 111         \item[\Lref<em class='brace'>{</em>window_builder.cpp:textdomain<em class='brace'>}</em>] Every file in the library
+<a id='L112' name='L112'></a> 112                 is inside the ``wesnoth-lib'' text domain.
+<a id='L113' name='L113'></a> 113         \item[\Lref<em class='brace'>{</em>window_builder.cpp:constructor<em class='brace'>}</em>] The constructor used is
+<a id='L114' name='L114'></a> 114                 pretty typical <strong class='reserved'>for</strong> all widgets.
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116                 If the constructor initializes custom members it may also add some validation.
+<a id='L117' name='L117'></a> 117                 This is also true when the widget has a grid, like the listbox or
+<a id='L118' name='L118'></a> 118                 multi\_page.
+<a id='L119' name='L119'></a> 119         \item[\Lref<em class='brace'>{</em>window_builder.cpp:build<em class='brace'>}</em>]
+<a id='L120' name='L120'></a> 120                 This build() is semi-typical, it creates the widget, initializes the
+<a id='L121' name='L121'></a> 121                 <strong class='reserved'>default</strong> fields and returns the created object.
+<a id='L122' name='L122'></a> 122 
+<a id='L123' name='L123'></a> 123                 Widgets with their own members initialize them after initializing the
+<a id='L124' name='L124'></a> 124                 <strong class='reserved'>default</strong> members.
+<a id='L125' name='L125'></a> 125         \item[\Lref<em class='brace'>{</em>window_builder.cpp:wiki<em class='brace'>}</em>]
+<a id='L126' name='L126'></a> 126                 At the end of the file it contains two wiki comment sections:
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128                 The first defines a macro with a <strong class='reserved'>short</strong> description of the widget.
+<a id='L129' name='L129'></a> 129 
+<a id='L130' name='L130'></a> 130                 The second describes the extra fields <strong class='reserved'>for</strong> the instance of the widget.
+<a id='L131' name='L131'></a> 131         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134 \item[src/gui/widgets/progress\_bar.*]
+<a id='L135' name='L135'></a> 135         These files contain the interaction the widget has with the outer world and
+<a id='L136' name='L136'></a> 136         how it reacts to events. Again, the progress bar is rather boring. The
+<a id='L137' name='L137'></a> 137         interesting part is the setter of the percentage. The value of the
+<a id='L138' name='L138'></a> 138         percentage used in the drawing routines is set here\footnote<em class='brace'>{</em>Other classes have a
+<a id='L139' name='L139'></a> 139         separate update canvas, but that's because the canvas in those classes is
+<a id='L140' name='L140'></a> 140         invalidated in several functions.<em class='brace'>}</em>.
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L143' name='L143'></a> 143 \item[hpp] \Liref<em class='brace'>{</em>progress_bar.hpp<em class='brace'>}</em> contains the sample code. 
+<a id='L144' name='L144'></a> 144         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L145' name='L145'></a> 145         \item[\Lref<em class='brace'>{</em>progress_bar.hpp:class<em class='brace'>}</em>]
+<a id='L146' name='L146'></a> 146                 Most simple widgets derive from tcontrol, which is the base class of the
+<a id='L147' name='L147'></a> 147                 visual widgets. Another common base is tcontainer or
+<a id='L148' name='L148'></a> 148                 tscrollbar\_container.
+<a id='L149' name='L149'></a> 149 
+<a id='L150' name='L150'></a> 150         \item[\Lref<em class='brace'>{</em>progress_bar.hpp:constructor<em class='brace'>}</em>]
+<a id='L151' name='L151'></a> 151                 The class calls the control constructor with the number of states, which
+<a id='L152' name='L152'></a> 152                 is the number of canvases used. Other then that, it does the
+<a id='L153' name='L153'></a> 153                 initialization of its members. Some constructors <strong class='reserved'>do</strong> a bit more
+<a id='L154' name='L154'></a> 154                 processing, but where a lot needs to be done it's often deferred to a
+<a id='L155' name='L155'></a> 155                 finalize() function.    
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157         \item[\Lref<em class='brace'>{</em>progress_bar.hpp:inherited<em class='brace'>}</em>]
+<a id='L158' name='L158'></a> 158                 This section implements or overrides member functions of the base class.
+<a id='L159' name='L159'></a> 159                 Some functions are purely virtual and need to be overridden by others to
+<a id='L160' name='L160'></a> 160                 change the behaviour.\footnote<em class='brace'>{</em>Of course, adding here a list of functions which are
+<a id='L161' name='L161'></a> 161                 common would be nice. However, the library is still too
+<a id='L162' name='L162'></a> 162                 <strong class='reserved'>volatile</strong> to <strong class='reserved'>do</strong> so - no need to create a soon out of date list.<em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         \item[\Lref<em class='brace'>{</em>progress_bar.hpp:settersgetters<em class='brace'>}</em>]
+<a id='L165' name='L165'></a> 165                 This section contains the setters and getters <strong class='reserved'>for</strong> the class. The
+<a id='L166' name='L166'></a> 166                 list below shows the common convention where T is the type of the
+<a id='L167' name='L167'></a> 167                 setter/getter and ``foo'' the name of the member without trailing
+<a id='L168' name='L168'></a> 168                 underscore.
+<a id='L169' name='L169'></a> 169 
+<a id='L170' name='L170'></a> 170                 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L171' name='L171'></a> 171                 \item<em class='brace'>{</em>setter<em class='brace'>}</em>
+<a id='L172' name='L172'></a> 172                         Signature <strong class='reserved'>void</strong> set\_foo(<strong class='reserved'>const</strong> T foo); The type T can be by reference
+<a id='L173' name='L173'></a> 173                         <strong class='reserved'>if</strong> a larger class.
+<a id='L174' name='L174'></a> 174 
+<a id='L175' name='L175'></a> 175                 \item<em class='brace'>{</em>getter<em class='brace'>}</em>
+<a id='L176' name='L176'></a> 176                         Signature T get\_foo() <strong class='reserved'>const</strong> <em class='brace'>{</em> <strong class='reserved'>return</strong> foo\_; <em class='brace'>}</em> The type T is always
+<a id='L177' name='L177'></a> 177                         returned by value.
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179                 \item<em class='brace'>{</em>reference<em class='brace'>}</em>
+<a id='L180' name='L180'></a> 180                         Signature T\&amp; foo() <em class='brace'>{</em> <strong class='reserved'>return</strong> foo\_; <em class='brace'>}</em> This version returns the value
+<a id='L181' name='L181'></a> 181                         by reference, and it should also have a <strong class='reserved'>const</strong> version. These
+<a id='L182' name='L182'></a> 182                         functions or at least the non-<strong class='reserved'>const</strong> version are often not public.
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184                 \item<em class='brace'>{</em>pointer<em class='brace'>}</em>
+<a id='L185' name='L185'></a> 185                         Signature T* foo() <em class='brace'>{</em> <strong class='reserved'>return</strong> foo\_; <em class='brace'>}</em> Almost the same as the
+<a id='L186' name='L186'></a> 186                         reference version and is used <strong class='reserved'>for</strong> members that are pointers. The
+<a id='L187' name='L187'></a> 187                         text of the reference also applies here.
+<a id='L188' name='L188'></a> 188                 \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L189' name='L189'></a> 189 
+<a id='L190' name='L190'></a> 190                 The setter is normally available. The getter is often omitted when a
+<a id='L191' name='L191'></a> 191                 reference or pointer function are used. Especially it there is a <strong class='reserved'>const</strong>
+<a id='L192' name='L192'></a> 192                 version of these functions.
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194         \item[\Lref<em class='brace'>{</em>progress_bar.hpp:state<em class='brace'>}</em>]
+<a id='L195' name='L195'></a> 195                 The state has the list of states available and normally has COUNT as
+<a id='L196' name='L196'></a> 196                 last value, which in turn is used in the constructor to initialize the
+<a id='L197' name='L197'></a> 197                 base class.
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L200' name='L200'></a> 200 
+<a id='L201' name='L201'></a> 201 \item[cpp] \Liref<em class='brace'>{</em>progress_bar.cpp<em class='brace'>}</em> contains the sample code. 
+<a id='L202' name='L202'></a> 202         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L203' name='L203'></a> 203         \item[\Lref<em class='brace'>{</em>progress_bar.cpp:textdomain<em class='brace'>}</em>] Every file in the library
+<a id='L204' name='L204'></a> 204                 is inside the ``wesnoth-lib'' text domain.
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206         \item[\Lref<em class='brace'>{</em>progress_bar.cpp:logheader<em class='brace'>}</em>]
+<a id='L207' name='L207'></a> 207                 The common headers used <strong class='reserved'>for</strong> logging, this makes sure the output of the
+<a id='L208' name='L208'></a> 208                 items always have the same format. Used by
+<a id='L209' name='L209'></a> 209                 LOG\_FOO \textless\textless<em class='brace'>{</em><em class='brace'>}</em> LOG\_HEADER \textless\textless<em class='brace'>{</em><em class='brace'>}</em> "foo.\textbackslash{}n"; or
+<a id='L210' name='L210'></a> 210                 log\_scope(foo, LOG\_SCOPE); % check function signature
+<a id='L211' name='L211'></a> 211 
+<a id='L212' name='L212'></a> 212         \item[\Lref<em class='brace'>{</em>progress_bar.cpp:<strong class='reserved'>register</strong><em class='brace'>}</em>]
+<a id='L213' name='L213'></a> 213                 Registers a widget, this part is really <strong class='reserved'>volatile</strong> and still has some
+<a id='L214' name='L214'></a> 214                 hoops and rings to jump through. Normally, it works. If not, too bad -
+<a id='L215' name='L215'></a> 215                 try to look through the other widgets to see how to fix it. 
+<a id='L216' name='L216'></a> 216 
+<a id='L217' name='L217'></a> 217                 \textbf<em class='brace'>{</em>Caveat emptor<em class='brace'>}</em> Just when all compiles fine and you suddenly get a runtime
+<a id='L218' name='L218'></a> 218                 error about your new nice class, the builder claims your widget doesn't
+<a id='L219' name='L219'></a> 219                 exist. \emph<em class='brace'>{</em>Don't panic}, probably you did nothing wrong. Grep TRY in
+<a id='L220' name='L220'></a> 220                 src/gui/auxiliary/window\_builder.cpp (at the moment of writing line 96)
+<a id='L221' name='L221'></a> 221                 and read the comment above, duly add your class to the list and be
+<a id='L222' name='L222'></a> 222                 happy.
+<a id='L223' name='L223'></a> 223 
+<a id='L224' name='L224'></a> 224         \item[\Lref<em class='brace'>{</em>progress_bar.cpp:get_control_type<em class='brace'>}</em>]
+<a id='L225' name='L225'></a> 225                 A simple helper to get the human readable name of the class. The first
+<a id='L226' name='L226'></a> 226                 version was inlined in the header, but that seems to be an ODR
+<a id='L227' name='L227'></a> 227                 violation. At least at some point a compiler or linker complained, can't
+<a id='L228' name='L228'></a> 228                 really remember which one. % TODO git pick-axe
+<a id='L229' name='L229'></a> 229 
+<a id='L230' name='L230'></a> 230         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L231' name='L231'></a> 231 \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233 This completes the writing of the files <strong class='reserved'>for</strong> the new classes, some files need to
+<a id='L234' name='L234'></a> 234 be modified to get things up and running. The build system files need the three
+<a id='L235' name='L235'></a> 235 new .cpp files listed, these are:
+<a id='L236' name='L236'></a> 236 \begin<em class='brace'>{</em>itemize<em class='brace'>}</em>
+<a id='L237' name='L237'></a> 237 \item src/Makefile.am
+<a id='L238' name='L238'></a> 238 \item src/SConstruct
+<a id='L239' name='L239'></a> 239 \item src/CmakeLists.txt
+<a id='L240' name='L240'></a> 240 \end<em class='brace'>{</em>itemize<em class='brace'>}</em>
+<a id='L241' name='L241'></a> 241 
+<a id='L242' name='L242'></a> 242 The next step has become optional now, when most of build systems can glob the files
+<a id='L243' name='L243'></a> 243 needed <strong class='reserved'>for</strong> translation, but I still add them manually as well. The file is 
+<a id='L244' name='L244'></a> 244 po/wesnoth-lib/POTFILES.IN. It holds the files <strong class='reserved'>for</strong> the wesnoth-lib text
+<a id='L245' name='L245'></a> 245 domain.
+<a id='L246' name='L246'></a> 246 
+<a id='L247' name='L247'></a> 247 The last file to be edited is src/gui/widgets/settings.cpp. Here, a wiki comment
+<a id='L248' name='L248'></a> 248 <strong class='reserved'>for</strong> the new class needs to be added, this might change later. The reason is that
+<a id='L249' name='L249'></a> 249 before automatically registering widgets this file needed more modification, so
+<a id='L250' name='L250'></a> 250 it was done in one fell swoop.
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252 \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L253' name='L253'></a> 253 
+<a id='L254' name='L254'></a> 254 This concludes the simple progress bar widget. Of course, we haven't tested it
+<a id='L255' name='L255'></a> 255 yet, since there's no dialogue to test it in. So let's implement a dialogue.
+<a id='L256' name='L256'></a> 256 
+<a id='L257' name='L257'></a> 257 
+<a id='L258' name='L258'></a> 258 \section<em class='brace'>{</em>Creating the window<em class='brace'>}</em>
+<a id='L259' name='L259'></a> 259 \label<em class='brace'>{</em>sec:creating_the_window<em class='brace'>}</em>
+<a id='L260' name='L260'></a> 260 
+<a id='L261' name='L261'></a> 261 The window is normally split in 3 files. One .cpp/.hpp file and one WML file.
+<a id='L262' name='L262'></a> 262 The dialogue used is the unit attack dialogue, at least an initial version. This
+<a id='L263' name='L263'></a> 263 version barely does what it needs to <strong class='reserved'>do</strong>, and the in game version will be more
+<a id='L264' name='L264'></a> 264 polished. This simple version is nice as an example here since it's not too large.
+<a id='L265' name='L265'></a> 265 
+<a id='L266' name='L266'></a> 266 Now, let's explain what the various files do. First, a general overview of
+<a id='L267' name='L267'></a> 267 the files after which I dive more into the implementation of the file.
+<a id='L268' name='L268'></a> 268 
+<a id='L269' name='L269'></a> 269 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L270' name='L270'></a> 270 
+<a id='L271' name='L271'></a> 271 \item[src/gui/dialogs/unit\_attack.*pp]
+<a id='L272' name='L272'></a> 272         These files contain the code of the dialogue. This code `binds' the WML
+<a id='L273' name='L273'></a> 273         code and allows the C++ code to show the dialogue show the right data at the
+<a id='L274' name='L274'></a> 274         right place. In several cases this also allows the designer of the WML file
+<a id='L275' name='L275'></a> 275         to decide which widget s/he picks.
+<a id='L276' name='L276'></a> 276 
+<a id='L277' name='L277'></a> 277 \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L278' name='L278'></a> 278 \item[hpp] \Liref<em class='brace'>{</em>unit_attack.hpp<em class='brace'>}</em> contains the sample code. 
+<a id='L279' name='L279'></a> 279         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L280' name='L280'></a> 280         \item[\Lref<em class='brace'>{</em>unit_attack.hpp:class<em class='brace'>}</em>]
+<a id='L281' name='L281'></a> 281                 Defines the class itself, which normally inherits from tdialog.
+<a id='L282' name='L282'></a> 282                 Sometimes a class inherits from another class, but this other class then
+<a id='L283' name='L283'></a> 283 derives from tdialog; <strong class='reserved'>for</strong> example the wml\_dialogs have a common base and
+<a id='L284' name='L284'></a> 284 separate classes <strong class='reserved'>for</strong> left and right.
+<a id='L285' name='L285'></a> 285 
+<a id='L286' name='L286'></a> 286         \item[\Lref<em class='brace'>{</em>unit_attack.hpp:constructor<em class='brace'>}</em>]
+<a id='L287' name='L287'></a> 287                 Dialogues are often created and then shown once before being destroyed,
+<a id='L288' name='L288'></a> 288 therefore the constructor often takes all the parameters needed. Since the show()
+<a id='L289' name='L289'></a> 289 function shouldn't be overloaded, the only other alternative would be member
+<a id='L290' name='L290'></a> 290 functions to set the members. Note that when keeping `references' to widgets these
+<a id='L291' name='L291'></a> 291 members must be pointers and set to NULL in the constructor, this due to the
+<a id='L292' name='L292'></a> 292 simple fact that the widgets aren't yet created at this point. Also keep in mind that
+<a id='L293' name='L293'></a> 293 when the dialogue is shown twice (using the \emph<em class='brace'>{</em>same<em class='brace'>}</em> object) the widgets won't be
+<a id='L294' name='L294'></a> 294 the same. The window owning the widgets is destroyed after being shown and
+<a id='L295' name='L295'></a> 295 a new one created upon the next call to show().
+<a id='L296' name='L296'></a> 296 
+<a id='L297' name='L297'></a> 297         \item[\Lref<em class='brace'>{</em>unit_attack.hpp:settersgetters<em class='brace'>}</em>]
+<a id='L298' name='L298'></a> 298                 As said before, there are often no setters, since all is set in the
+<a id='L299' name='L299'></a> 299 contructor. Most members also remain hidden, since the caller has the
+<a id='L300' name='L300'></a> 300 information. Only members that change are `exported'. The most common example in
+<a id='L301' name='L301'></a> 301 a class with a listbox, the last selected item is made public, since this is
+<a id='L302' name='L302'></a> 302 often used as the choice the user made.
+<a id='L303' name='L303'></a> 303 
+<a id='L304' name='L304'></a> 304         \item[\Lref<em class='brace'>{</em>unit_attack.hpp:window_id<em class='brace'>}</em>]
+<a id='L305' name='L305'></a> 305                 This function is a part of the window registration and only needs to be
+<a id='L306' name='L306'></a> 306 declared in the header, the definition will be provided by a macro.
+<a id='L307' name='L307'></a> 307 
+<a id='L308' name='L308'></a> 308         \item[\Lref<em class='brace'>{</em>unit_attack.hpp:pre_show<em class='brace'>}</em>]
+<a id='L309' name='L309'></a> 309                 This function is called after the window is created, but before being
+<a id='L310' name='L310'></a> 310 shown. This is the point to set the members that point to a widget. As said
+<a id='L311' name='L311'></a> 311 before, every time the dialogue is shown a newly created window is shown as well, so
+<a id='L312' name='L312'></a> 312 setting the pointers can be unconditional. This is also the place to fill the
+<a id='L313' name='L313'></a> 313 widgets with the proper content, <strong class='reserved'>if</strong> needed. E.g. filling the languages in the
+<a id='L314' name='L314'></a> 314 language selection dialogue.
+<a id='L315' name='L315'></a> 315 
+<a id='L316' name='L316'></a> 316         \item[\Lref<em class='brace'>{</em>unit_attack.hpp:post_show<em class='brace'>}</em>]
+<a id='L317' name='L317'></a> 317                 Called after the dialogue is shown, this allows you to update certain
+<a id='L318' name='L318'></a> 318 statuses. E.g. <strong class='reserved'>if</strong> the dialogue is closed with the OK button set the selected
+<a id='L319' name='L319'></a> 319 language to the newly selected language. You can also update it unconditionally
+<a id='L320' name='L320'></a> 320 and let the caller test the status.
+<a id='L321' name='L321'></a> 321 
+<a id='L322' name='L322'></a> 322         \item[\Lref<em class='brace'>{</em>unit_attack.hpp:members<em class='brace'>}</em>]
+<a id='L323' name='L323'></a> 323                 At this point the list of private members start.
+<a id='L324' name='L324'></a> 324 
+<a id='L325' name='L325'></a> 325         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L326' name='L326'></a> 326 
+<a id='L327' name='L327'></a> 327 \item[cpp] \Liref<em class='brace'>{</em>unit_attack.cpp<em class='brace'>}</em> contains the sample code. Note some
+<a id='L328' name='L328'></a> 328 parts are already described more verbosely in the header and thus not mentioned
+<a id='L329' name='L329'></a> 329 here.
+<a id='L330' name='L330'></a> 330         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L331' name='L331'></a> 331         \item[\Lref<em class='brace'>{</em>unit_attack.cpp:textdomain<em class='brace'>}</em>]
+<a id='L332' name='L332'></a> 332                 Like written <strong class='reserved'>for</strong> the widget, every file is inside the `wesnoth-lib' text
+<a id='L333' name='L333'></a> 333 domain.
+<a id='L334' name='L334'></a> 334 
+<a id='L335' name='L335'></a> 335         \item[\Lref<em class='brace'>{</em>unit_attack.cpp:wiki<em class='brace'>}</em>]
+<a id='L336' name='L336'></a> 336                 Directly after the includes (inside the gui2 namespace) the wiki
+<a id='L337' name='L337'></a> 337 documentation starts.
+<a id='L338' name='L338'></a> 338 
+<a id='L339' name='L339'></a> 339         \item[\Lref<em class='brace'>{</em>unit_attack.cpp:<strong class='reserved'>register</strong><em class='brace'>}</em>]
+<a id='L340' name='L340'></a> 340                 After the wiki documentation the registration code follows, it defines
+<a id='L341' name='L341'></a> 341 the window\_id function and does some other registration parts.
+<a id='L342' name='L342'></a> 342 
+<a id='L343' name='L343'></a> 343         \item[\Lref<em class='brace'>{</em>unit_attack.cpp:pre_show<em class='brace'>}</em>]
+<a id='L344' name='L344'></a> 344                 The pre\_show is already mentioned in the header file and it the one
+<a id='L345' name='L345'></a> 345 used here uses several <strong class='reserved'>static</strong> helper functions to <strong class='reserved'>do</strong> it's job.
+<a id='L346' name='L346'></a> 346 
+<a id='L347' name='L347'></a> 347         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L348' name='L348'></a> 348 
+<a id='L349' name='L349'></a> 349 \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L350' name='L350'></a> 350 
+<a id='L351' name='L351'></a> 351 \item[src/gui/dialogs/unit\_attack.cfg]
+<a id='L352' name='L352'></a> 352         This file contains the WML that defines the widget. It should honour the
+<a id='L353' name='L353'></a> 353 restrains set in the wiki comment like \lref<em class='brace'>{</em>unit_attack.cpp:wiki<em class='brace'>}</em>. These
+<a id='L354' name='L354'></a> 354 constrains set the minimum set of needed widgets and their types, and mentions
+<a id='L355' name='L355'></a> 355 the optional widgets. How the widgets are placed and whether only the optional
+<a id='L356' name='L356'></a> 356 ones are set is up to the designer of the dialog. The gui toolkit wiki has more
+<a id='L357' name='L357'></a> 357 information on the subject. Still some parts are worth mentioning.
+<a id='L358' name='L358'></a> 358 
+<a id='L359' name='L359'></a> 359         \begin<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L360' name='L360'></a> 360         \item[\Lref<em class='brace'>{</em>unit_attack.cfg:textdomain<em class='brace'>}</em>]
+<a id='L361' name='L361'></a> 361                 Every file in the library is inside the ``wesnoth-lib'' text domain.
+<a id='L362' name='L362'></a> 362 
+<a id='L363' name='L363'></a> 363         \item[\Lref<em class='brace'>{</em>unit_attack.cfg:defines<em class='brace'>}</em>]
+<a id='L364' name='L364'></a> 364                 With larger dialogs, I often first design them on paper and then divide the
+<a id='L365' name='L365'></a> 365 dialog in several sections. These sections often are turned into defines in
+<a id='L366' name='L366'></a> 366 order to keep the main dialog rather simple. WML tends to be verbose and deeply
+<a id='L367' name='L367'></a> 367 nested, and the GUI's also tend to have a lot of nested items, these powers
+<a id='L368' name='L368'></a> 368 combined result in deeply nested structure, where one can easily lose the way.
+<a id='L369' name='L369'></a> 369 Also note that all local macros are prefixed with \_GUI, this is to avoid clashes
+<a id='L370' name='L370'></a> 370 with other macros. The BIG in the names are just because I want to make a
+<a id='L371' name='L371'></a> 371 different definition of high resolution screens (this will be the first screen
+<a id='L372' name='L372'></a> 372 using that feature, but that will be added later).
+<a id='L373' name='L373'></a> 373 
+<a id='L374' name='L374'></a> 374         \item[\Lref<em class='brace'>{</em>unit_attack.cfg:window<em class='brace'>}</em>]
+<a id='L375' name='L375'></a> 375                 Not much to tell about this part, since it's all documented in the wiki. %TODO add ref?
+<a id='L376' name='L376'></a> 376 But <strong class='reserved'>do</strong> note that due to the defines above, the grid in the window itself is
+<a id='L377' name='L377'></a> 377 rather simple.
+<a id='L378' name='L378'></a> 378 
+<a id='L379' name='L379'></a> 379         \item[\Lref<em class='brace'>{</em>unit_attack.cfg:undefines<em class='brace'>}</em>]
+<a id='L380' name='L380'></a> 380                 The local macros are no longer needed so undefine them, I normally
+<a id='L381' name='L381'></a> 381 undefine them in the oposite order of the definitions. I'm quite sure that's not
+<a id='L382' name='L382'></a> 382 actually needed, but it feels the right way\texttrademark.
+<a id='L383' name='L383'></a> 383 
+<a id='L384' name='L384'></a> 384         \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L385' name='L385'></a> 385 
+<a id='L386' name='L386'></a> 386 \end<em class='brace'>{</em>description<em class='brace'>}</em>
+<a id='L387' name='L387'></a> 387 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

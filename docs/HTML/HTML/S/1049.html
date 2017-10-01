@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/desktop/clipboard.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5839.html'>desktop</a>/clipboard.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L35'>[^]</a><a href='#L56'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L35' title='Defined at 35.'>copy_to_clipboard</a></li>
+<li><a href='#L40' title='Defined at 40.'>copy_from_clipboard</a></li>
+<li><a href='#L52' title='Defined at 52.'>handle_system_event</a></li>
+<li><a href='#L56' title='Defined at 56.'>available</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/** @file */</em>
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='1035.html'>desktop/clipboard.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='133.html'>serialization/unicode.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;algorithm&gt;
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> &lt;SDL_events.h&gt;
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;SDL_clipboard.h&gt;
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#define</em> CLIPBOARD_FUNCS_DEFINED
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='comment'>/*</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> * Note SDL 2.0 has its own clipboard routines, but they don't support</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * different clipboards (yet).</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> */</em>
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>namespace</strong> <a href='../R/4754.html' title='Multiple referred from 63 places.'>desktop</a> <em class='brace'>{</em>
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>namespace</strong> <a href='../R/4017.html' title='Multiple referred from 31 places.'>clipboard</a> <em class='brace'>{</em>
+<a id='L34' name='L34'></a>  34 
+<a id='L35' name='L35'></a>  35 <strong class='reserved'>void</strong> <a href='../R/4316.html' title='Multiple referred from 15 places.'>copy_to_clipboard</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>, <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong>)
+<a id='L36' name='L36'></a>  36 <em class='brace'>{</em>
+<a id='L37' name='L37'></a>  37         SDL_SetClipboardText(<a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>.<a href='../D/3892.html' title='Multiple defined in 2 places.'>c_str</a>());
+<a id='L38' name='L38'></a>  38 <em class='brace'>}</em>
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/4308.html' title='Multiple referred from 4 places.'>copy_from_clipboard</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong>)
+<a id='L41' name='L41'></a>  41 <em class='brace'>{</em>
+<a id='L42' name='L42'></a>  42         <strong class='reserved'>char</strong>* <a href='../D/4569.html' title='Multiple defined in 2 places.'>clipboard</a> = SDL_GetClipboardText();
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>if</strong>(!<a href='../D/4569.html' title='Multiple defined in 2 places.'>clipboard</a>) <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44                 <strong class='reserved'>return</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>();
+<a id='L45' name='L45'></a>  45         <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/12959.html' title='Multiple defined in 10 places.'>result</a>(<a href='../D/4569.html' title='Multiple defined in 2 places.'>clipboard</a>);
+<a id='L48' name='L48'></a>  48         SDL_free(<a href='../D/4569.html' title='Multiple defined in 2 places.'>clipboard</a>);
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>return</strong> <a href='../D/12959.html' title='Multiple defined in 10 places.'>result</a>;
+<a id='L50' name='L50'></a>  50 <em class='brace'>}</em>
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>void</strong> <a href='../R/7567.html' title='Multiple referred from 4 places.'>handle_system_event</a>(<strong class='reserved'>const</strong> <a href='../Y/2551.html' title='Multiple used in 157 places.'>SDL_Event</a>&amp; <em class='comment'>/*event*/</em>)
+<a id='L53' name='L53'></a>  53 <em class='brace'>{</em>
+<a id='L54' name='L54'></a>  54 <em class='brace'>}</em>
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56 <strong class='reserved'>bool</strong> <a href='../R/3157.html' title='Multiple referred from 17 places.'>available</a>()
+<a id='L57' name='L57'></a>  57 <em class='brace'>{</em>
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L59' name='L59'></a>  59 <em class='brace'>}</em>
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 <em class='brace'>}</em> <em class='comment'>// end namespace clipboard</em>
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63 <em class='brace'>}</em> <em class='comment'>// end namespace desktop</em>
+<a id='L64' name='L64'></a>  64 
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L35'>[^]</a><a href='#L56'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

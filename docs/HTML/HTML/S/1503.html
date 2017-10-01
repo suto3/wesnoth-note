@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectUtils.java</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5889.html'>utils</a>/<a href='../files/5899.html'>umc_dev</a>/<a href='../files/5933.html'>org.wesnoth</a>/<a href='../files/5946.html'>src</a>/<a href='../files/5947.html'>org</a>/<a href='../files/5948.html'>wesnoth</a>/<a href='../files/5960.html'>projects</a>/ProjectUtils.java</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L55'>[^]</a><a href='#L236'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L55' title='Defined at 55.'>getProjectCaches</a></li>
+<li><a href='#L68' title='Defined at 68.'>getPropertiesForProject</a></li>
+<li><a href='#L81' title='Defined at 81.'>getCacheForProject</a></li>
+<li><a href='#L105' title='Defined at 105.'>createCoreLibraryFolder</a></li>
+<li><a href='#L167' title='Defined at 167.'>createWesnothProject</a></li>
+<li><a href='#L191' title='Defined at 191.'>createWesnothProject</a></li>
+<li><a href='#L236' title='Defined at 236.'>createWesnothProject</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*******************************************************************************</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> * Copyright (c) 2010 - 2013 by Timotei Dolean &lt;timotei21@gmail.com&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> * </em>
+<a id='L4' name='L4'></a>   4 <em class='comment'> * This program and the accompanying materials are made available</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> * under the terms of the Eclipse Public License v1.0</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> * which accompanies this distribution, and is available at</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> * http://www.eclipse.org/legal/epl-v10.html</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'> *******************************************************************************/</em>
+<a id='L9' name='L9'></a>   9 <strong class='reserved'>package</strong> <a href='../Y/15860.html' title='Multiple used in 1970 places.'>org</a>.<a href='../Y/21937.html' title='Multiple used in 2622 places.'>wesnoth</a>.<a href='../Y/16866.html' title='Multiple used in 32 places.'>projects</a>;
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11 <strong class='reserved'>import</strong> java.util.ArrayList;
+<a id='L12' name='L12'></a>  12 <strong class='reserved'>import</strong> java.util.HashMap;
+<a id='L13' name='L13'></a>  13 <strong class='reserved'>import</strong> java.util.Map;
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <strong class='reserved'>import</strong> org.eclipse.core.resources.IFolder;
+<a id='L16' name='L16'></a>  16 <strong class='reserved'>import</strong> org.eclipse.core.resources.IProject;
+<a id='L17' name='L17'></a>  17 <strong class='reserved'>import</strong> org.eclipse.core.resources.IProjectDescription;
+<a id='L18' name='L18'></a>  18 <strong class='reserved'>import</strong> org.eclipse.core.resources.IResource;
+<a id='L19' name='L19'></a>  19 <strong class='reserved'>import</strong> org.eclipse.core.resources.IWorkspaceRoot;
+<a id='L20' name='L20'></a>  20 <strong class='reserved'>import</strong> org.eclipse.core.resources.ResourcesPlugin;
+<a id='L21' name='L21'></a>  21 <strong class='reserved'>import</strong> org.eclipse.core.runtime.CoreException;
+<a id='L22' name='L22'></a>  22 <strong class='reserved'>import</strong> org.eclipse.core.runtime.IProgressMonitor;
+<a id='L23' name='L23'></a>  23 <strong class='reserved'>import</strong> org.eclipse.core.runtime.IStatus;
+<a id='L24' name='L24'></a>  24 <strong class='reserved'>import</strong> org.eclipse.core.runtime.NullProgressMonitor;
+<a id='L25' name='L25'></a>  25 <strong class='reserved'>import</strong> org.eclipse.core.runtime.Path;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>import</strong> org.wesnoth.Logger;
+<a id='L28' name='L28'></a>  28 <strong class='reserved'>import</strong> org.wesnoth.Messages;
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>import</strong> org.wesnoth.builder.WesnothProjectNature;
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>import</strong> org.wesnoth.preferences.Preferences;
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>import</strong> org.wesnoth.preferences.Preferences.Paths;
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>import</strong> org.wesnoth.templates.ReplaceableParameter;
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>import</strong> org.wesnoth.templates.TemplateProvider;
+<a id='L34' name='L34'></a>  34 <strong class='reserved'>import</strong> org.wesnoth.utils.GUIUtils;
+<a id='L35' name='L35'></a>  35 <strong class='reserved'>import</strong> org.wesnoth.utils.ResourceUtils;
+<a id='L36' name='L36'></a>  36 <strong class='reserved'>import</strong> org.wesnoth.utils.StringUtils;
+<a id='L37' name='L37'></a>  37 <strong class='reserved'>import</strong> org.wesnoth.views.WesnothProjectsExplorer;
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39 <em class='comment'>/**</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * Utilities class handling with Projects</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> */</em>
+<a id='L42' name='L42'></a>  42 <strong class='reserved'>public</strong> <strong class='reserved'>class</strong> <a href='../R/1641.html' title='Multiple referred from 63 places.'>ProjectUtils</a>
+<a id='L43' name='L43'></a>  43 <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44     <em class='comment'>/**</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'>     * A map which stores the caches for each project.</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'>     * The properties are stored in '.wesnoth' file</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'>     */</em>
+<a id='L48' name='L48'></a>  48     <strong class='reserved'>private</strong> <strong class='reserved'>static</strong> <a href='../Y/1919.html' title='Multiple used in 77 places.'>Map</a>&lt; <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a>, <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a> &gt; <a href='../Y/16854.html' title='Multiple used in 38 places.'>projectCache_</a> = <strong class='reserved'>new</strong> <a href='../Y/1351.html' title='Multiple used in 49 places.'>HashMap</a>&lt; <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a>, <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a> &gt;( );
+<a id='L49' name='L49'></a>  49 
+<a id='L50' name='L50'></a>  50     <em class='comment'>/**</em>
+<a id='L51' name='L51'></a>  51 <em class='comment'>     * Returns a map with projects and their caches</em>
+<a id='L52' name='L52'></a>  52 <em class='comment'>     * </em>
+<a id='L53' name='L53'></a>  53 <em class='comment'>     * @return A {@link Map} instance.</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'>     */</em>
+<a id='L55' name='L55'></a>  55     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1919.html' title='Multiple used in 77 places.'>Map</a>&lt; <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a>, <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a> &gt; <a href='../R/6229.html' title='Multiple referred from 2 places.'>getProjectCaches</a>( )
+<a id='L56' name='L56'></a>  56     <em class='brace'>{</em>
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>return</strong> <a href='../Y/16854.html' title='Multiple used in 38 places.'>projectCache_</a>;
+<a id='L58' name='L58'></a>  58     <em class='brace'>}</em>
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60     <em class='comment'>/**</em>
+<a id='L61' name='L61'></a>  61 <em class='comment'>     * Gets the properties map for this project.</em>
+<a id='L62' name='L62'></a>  62 <em class='comment'>     * </em>
+<a id='L63' name='L63'></a>  63 <em class='comment'>     * @param project</em>
+<a id='L64' name='L64'></a>  64 <em class='comment'>     *        The project to get the propertiesfor</em>
+<a id='L65' name='L65'></a>  65 <em class='comment'>     * </em>
+<a id='L66' name='L66'></a>  66 <em class='comment'>     * @return A map with properties of the project</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>     */</em>
+<a id='L68' name='L68'></a>  68     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1919.html' title='Multiple used in 77 places.'>Map</a>&lt; <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a>, <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> &gt; <a href='../R/6234.html' title='Multiple referred from 3 places.'>getPropertiesForProject</a>(
+<a id='L69' name='L69'></a>  69         <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a> <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a> )
+<a id='L70' name='L70'></a>  70     <em class='brace'>{</em>
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>return</strong> <a href='../S/1503.html#L81' title='Defined at 81 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectUtils.java.'>getCacheForProject</a>( <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a> ).<a href='../S/1502.html#L101' title='Defined at 101 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>getProperties</a>( );
+<a id='L72' name='L72'></a>  72     <em class='brace'>}</em>
+<a id='L73' name='L73'></a>  73 
+<a id='L74' name='L74'></a>  74     <em class='comment'>/**</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'>     * Gets the cache for the specified project. If the cache doesn't</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'>     * exist, a new one will be created.</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'>     * </em>
+<a id='L78' name='L78'></a>  78 <em class='comment'>     * @param project</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'>     * @return A {@link ProjectCache} instance. It will never be null.</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'>     */</em>
+<a id='L81' name='L81'></a>  81     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a> <a href='../R/6048.html' title='Multiple referred from 33 places.'>getCacheForProject</a>( <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a> <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a> )
+<a id='L82' name='L82'></a>  82     <em class='brace'>{</em>
+<a id='L83' name='L83'></a>  83         <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a> <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a> = <a href='../Y/16854.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../D/6774.html' title='Multiple defined in 42 places.'>get</a>( <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a> );
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>if</strong>( <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L86' name='L86'></a>  86             <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a> = <strong class='reserved'>new</strong> <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a>( <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a> );
+<a id='L87' name='L87'></a>  87             <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>.<a href='../S/1502.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>loadCache</a>( );
+<a id='L88' name='L88'></a>  88             <a href='../Y/16854.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../D/12295.html' title='Multiple defined in 2 places.'>put</a>( <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a>, <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a> );
+<a id='L89' name='L89'></a>  89         <em class='brace'>}</em>
+<a id='L90' name='L90'></a>  90         <strong class='reserved'>return</strong> <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>;
+<a id='L91' name='L91'></a>  91     <em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92 
+<a id='L93' name='L93'></a>  93     <em class='comment'>/**</em>
+<a id='L94' name='L94'></a>  94 <em class='comment'>     * Creates a folder that link to the project's wesnoth installation's</em>
+<a id='L95' name='L95'></a>  95 <em class='comment'>     * 'data/core' directory</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'>     * </em>
+<a id='L97' name='L97'></a>  97 <em class='comment'>     * @param updateFlags</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>     *        bit-wise or of update flag constants</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>     *        (IResource.ALLOW_MISSING_LOCAL, IResource.REPLACE,</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>     *        IResource.BACKGROUND_REFRESH, and IResource.HIDDEN)</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'>     * @param project</em>
+<a id='L102' name='L102'></a> 102 <em class='comment'>     *        The project to create the link for</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'>     * @return True if the creation was successfully, false otherwise</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'>     */</em>
+<a id='L105' name='L105'></a> 105     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <strong class='reserved'>boolean</strong> <a href='../R/4360.html' title='Multiple referred from 3 places.'>createCoreLibraryFolder</a>( <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a> <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a>,
+<a id='L106' name='L106'></a> 106         <strong class='reserved'>int</strong> <a href='../Y/21289.html' title='Multiple used in 2 places.'>updateFlags</a> )
+<a id='L107' name='L107'></a> 107     <em class='brace'>{</em>
+<a id='L108' name='L108'></a> 108         <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a> <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a> = <a href='../S/1503.html#L81' title='Defined at 81 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectUtils.java.'>getCacheForProject</a>( <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a> );
+<a id='L109' name='L109'></a> 109         <a href='../S/1440.html#L299' title='Defined at 299 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>Paths</a> <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a> = <a href='../S/1440.html#L25' title='Defined at 25 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>Preferences</a>.<a href='../S/1440.html#L279' title='Defined at 279 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getPaths</a>( <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>.<a href='../D/6924.html' title='Multiple defined in 2 places.'>getInstallName</a>( ) );
+<a id='L110' name='L110'></a> 110 
+<a id='L111' name='L111'></a> 111         <strong class='reserved'>if</strong>( ! <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a>.<a href='../S/1440.html#L318' title='Defined at 318 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>isValid</a>( ) ) <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112             <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L113' name='L113'></a> 113         <em class='brace'>}</em>
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115         <a href='../Y/1429.html' title='Multiple used in 18 places.'>IFolder</a> <a href='../Y/7950.html' title='Multiple used in 7 places.'>coreLibrary</a> = <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a>
+<a id='L116' name='L116'></a> 116             .<a href='../Y/10839.html' title='Multiple used in 5 places.'>getFolder</a>( <a href='../S/1481.html#L26' title='Defined at 26 in utils/umc_dev/org.wesnoth/src/org/wesnoth/views/WesnothProjectsExplorer.java.'>WesnothProjectsExplorer</a>.<a href='../Y/456.html' title='Multiple used in 7 places.'>CORE_LIBRARY_NAME</a> );
+<a id='L117' name='L117'></a> 117 
+<a id='L118' name='L118'></a> 118         <strong class='reserved'>if</strong>( <a href='../Y/2358.html' title='Multiple used in 57 places.'>ResourcesPlugin</a>.<a href='../Y/10941.html' title='Multiple used in 33 places.'>getWorkspace</a>( ).validateLinkLocation( <a href='../Y/7950.html' title='Multiple used in 7 places.'>coreLibrary</a>,
+<a id='L119' name='L119'></a> 119             <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a>.<a href='../S/1440.html#L378' title='Defined at 378 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getCoreDirPath</a>( ) ).getCode( ) != <a href='../Y/1594.html' title='Multiple used in 21 places.'>IStatus</a>.<a href='../Y/704.html' title='Multiple used in 4 places.'>ERROR</a> ) <em class='brace'>{</em>
+<a id='L120' name='L120'></a> 120             <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L121' name='L121'></a> 121                 <strong class='reserved'>if</strong>( <a href='../Y/7950.html' title='Multiple used in 7 places.'>coreLibrary</a>.<a href='../D/6055.html' title='Multiple defined in 9 places.'>exists</a>( ) ) <em class='brace'>{</em>
+<a id='L122' name='L122'></a> 122                     <em class='comment'>// the new Core Library will point to the same location.</em>
+<a id='L123' name='L123'></a> 123                     <em class='comment'>// Skip it then.</em>
+<a id='L124' name='L124'></a> 124                     <strong class='reserved'>if</strong>( <a href='../Y/7950.html' title='Multiple used in 7 places.'>coreLibrary</a>.<a href='../D/6945.html' title='Multiple defined in 2 places.'>getLocation</a>( ).<a href='../D/5967.html' title='Multiple defined in 10 places.'>equals</a>( <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a>.<a href='../S/1440.html#L378' title='Defined at 378 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getCoreDirPath</a>( ) ) ) <em class='brace'>{</em>
+<a id='L125' name='L125'></a> 125                         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L126' name='L126'></a> 126                     <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128                     <a href='../Y/7950.html' title='Multiple used in 7 places.'>coreLibrary</a>.<a href='../Y/8684.html' title='Multiple used in 28 places.'>delete</a>( <strong class='reserved'>true</strong>, <strong class='reserved'>new</strong> <a href='../Y/2074.html' title='Multiple used in 71 places.'>NullProgressMonitor</a>( ) );
+<a id='L129' name='L129'></a> 129                 <em class='brace'>}</em>
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131                 <a href='../Y/7950.html' title='Multiple used in 7 places.'>coreLibrary</a>.<a href='../S/1615.html#L149' title='Defined at 149 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/editor/WMLEditor.java.'>createLink</a>( <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a>.<a href='../S/1440.html#L378' title='Defined at 378 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getCoreDirPath</a>( ), <a href='../Y/21289.html' title='Multiple used in 2 places.'>updateFlags</a>,
+<a id='L132' name='L132'></a> 132                     <strong class='reserved'>new</strong> <a href='../Y/2074.html' title='Multiple used in 71 places.'>NullProgressMonitor</a>( ) );
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134                 <a href='../Y/7950.html' title='Multiple used in 7 places.'>coreLibrary</a>.setDerived( <strong class='reserved'>true</strong>, <strong class='reserved'>new</strong> <a href='../Y/2074.html' title='Multiple used in 71 places.'>NullProgressMonitor</a>( ) );
+<a id='L135' name='L135'></a> 135             <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/545.html' title='Multiple used in 63 places.'>CoreException</a> <a href='../D/5774.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136                 <a href='../S/1501.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>Logger</a>.<a href='../D/6928.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1501.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>logException</a>( <a href='../D/5774.html' title='Multiple defined in 3 places.'>e</a> );
+<a id='L137' name='L137'></a> 137                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L138' name='L138'></a> 138             <em class='brace'>}</em>
+<a id='L139' name='L139'></a> 139         <em class='brace'>}</em>
+<a id='L140' name='L140'></a> 140         <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L141' name='L141'></a> 141             <a href='../S/1501.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>Logger</a>.<a href='../D/6928.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../D/10009.html' title='Multiple defined in 9 places.'>log</a>(
+<a id='L142' name='L142'></a> 142                 "Couldn't create link on:" + <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a>.<a href='../S/1440.html#L368' title='Defined at 368 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getCoreDir</a>( ) <em class='comment'>//$NON-NLS-1$</em>
+<a id='L143' name='L143'></a> 143                     + "; project: " + <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a>.<a href='../D/6957.html' title='Multiple defined in 6 places.'>getName</a>( ), <em class='comment'>//$NON-NLS-1$</em>
+<a id='L144' name='L144'></a> 144                 "Cannot create the Wesnoth Core Library folder for project " <em class='comment'>//$NON-NLS-1$</em>
+<a id='L145' name='L145'></a> 145                     + <a href='../D/12225.html' title='Multiple defined in 3 places.'>project</a>.<a href='../D/6957.html' title='Multiple defined in 6 places.'>getName</a>( ) + "!" ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L146' name='L146'></a> 146             <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L147' name='L147'></a> 147         <em class='brace'>}</em>
+<a id='L148' name='L148'></a> 148 
+<a id='L149' name='L149'></a> 149         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L150' name='L150'></a> 150     <em class='brace'>}</em>
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152     <em class='comment'>/**</em>
+<a id='L153' name='L153'></a> 153 <em class='comment'>     * Creates a new wesnoth project with the specified name</em>
+<a id='L154' name='L154'></a> 154 <em class='comment'>     * and on the specified location on disk</em>
+<a id='L155' name='L155'></a> 155 <em class='comment'>     * </em>
+<a id='L156' name='L156'></a> 156 <em class='comment'>     * @param name</em>
+<a id='L157' name='L157'></a> 157 <em class='comment'>     *        The name of the new project</em>
+<a id='L158' name='L158'></a> 158 <em class='comment'>     * @param location</em>
+<a id='L159' name='L159'></a> 159 <em class='comment'>     *        The location of the new project</em>
+<a id='L160' name='L160'></a> 160 <em class='comment'>     * @param installName</em>
+<a id='L161' name='L161'></a> 161 <em class='comment'>     *        The name of the install this project belongs to</em>
+<a id='L162' name='L162'></a> 162 <em class='comment'>     * @param monitor</em>
+<a id='L163' name='L163'></a> 163 <em class='comment'>     *        The monitor to monitor the progress</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'>     * @return A project handle</em>
+<a id='L165' name='L165'></a> 165 <em class='comment'>     * @throws CoreException</em>
+<a id='L166' name='L166'></a> 166 <em class='comment'>     */</em>
+<a id='L167' name='L167'></a> 167     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a> <a href='../R/4426.html' title='Multiple referred from 7 places.'>createWesnothProject</a>( <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>, <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/9987.html' title='Multiple defined in 6 places.'>location</a>,
+<a id='L168' name='L168'></a> 168         <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a>, <a href='../Y/1557.html' title='Multiple used in 46 places.'>IProgressMonitor</a> <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> )
+<a id='L169' name='L169'></a> 169     <em class='brace'>{</em>
+<a id='L170' name='L170'></a> 170         <strong class='reserved'>return</strong> <a href='../D/5069.html' title='Multiple defined in 3 places.'>createWesnothProject</a>( <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>, <a href='../D/9987.html' title='Multiple defined in 6 places.'>location</a>, <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a>, <strong class='reserved'>false</strong>,
+<a id='L171' name='L171'></a> 171             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> );
+<a id='L172' name='L172'></a> 172     <em class='brace'>}</em>
+<a id='L173' name='L173'></a> 173 
+<a id='L174' name='L174'></a> 174     <em class='comment'>/**</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'>     * Creates a new wesnoth project with the specified name</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'>     * and on the specified location on disk</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'>     * </em>
+<a id='L178' name='L178'></a> 178 <em class='comment'>     * @param name</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'>     *        The name of the new project</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'>     * @param location</em>
+<a id='L181' name='L181'></a> 181 <em class='comment'>     *        The location of the new project</em>
+<a id='L182' name='L182'></a> 182 <em class='comment'>     * @param installName</em>
+<a id='L183' name='L183'></a> 183 <em class='comment'>     *        The name of the install this project belongs to</em>
+<a id='L184' name='L184'></a> 184 <em class='comment'>     * @param skipCreateBuildXML</em>
+<a id='L185' name='L185'></a> 185 <em class='comment'>     *        True to skip creating a build xml even if needed</em>
+<a id='L186' name='L186'></a> 186 <em class='comment'>     * @param monitor</em>
+<a id='L187' name='L187'></a> 187 <em class='comment'>     *        The monitor to monitor the progress</em>
+<a id='L188' name='L188'></a> 188 <em class='comment'>     * @return A project handle</em>
+<a id='L189' name='L189'></a> 189 <em class='comment'>     * @throws CoreException</em>
+<a id='L190' name='L190'></a> 190 <em class='comment'>     */</em>
+<a id='L191' name='L191'></a> 191     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a> <a href='../R/4426.html' title='Multiple referred from 7 places.'>createWesnothProject</a>( <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>, <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../D/9987.html' title='Multiple defined in 6 places.'>location</a>,
+<a id='L192' name='L192'></a> 192         <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a>, <strong class='reserved'>boolean</strong> <a href='../Y/18873.html' title='Multiple used in 4 places.'>skipCreateBuildXML</a>,
+<a id='L193' name='L193'></a> 193         <a href='../Y/1557.html' title='Multiple used in 46 places.'>IProgressMonitor</a> <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> )
+<a id='L194' name='L194'></a> 194     <em class='brace'>{</em>
+<a id='L195' name='L195'></a> 195         <a href='../Y/1626.html' title='Multiple used in 14 places.'>IWorkspaceRoot</a> <a href='../D/13032.html' title='Multiple defined in 2 places.'>root</a> = <a href='../Y/2358.html' title='Multiple used in 57 places.'>ResourcesPlugin</a>.<a href='../Y/10941.html' title='Multiple used in 33 places.'>getWorkspace</a>( ).<a href='../Y/10893.html' title='Multiple used in 27 places.'>getRoot</a>( );
+<a id='L196' name='L196'></a> 196         <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a> <a href='../Y/14888.html' title='Multiple used in 6 places.'>newProject</a> = <a href='../D/13032.html' title='Multiple defined in 2 places.'>root</a>.<a href='../D/7009.html' title='Multiple defined in 3 places.'>getProject</a>( <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a> );
+<a id='L197' name='L197'></a> 197         <a href='../Y/1559.html' title='Multiple used in 9 places.'>IProjectDescription</a> <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a> = <strong class='reserved'>null</strong>;
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199         <em class='comment'>// set the path only if the project's location is outside the workspace</em>
+<a id='L200' name='L200'></a> 200         <em class='comment'>// root</em>
+<a id='L201' name='L201'></a> 201         <strong class='reserved'>if</strong>( <a href='../D/9987.html' title='Multiple defined in 6 places.'>location</a> != <strong class='reserved'>null</strong>
+<a id='L202' name='L202'></a> 202             &amp;&amp; ! <a href='../D/9987.html' title='Multiple defined in 6 places.'>location</a>.<a href='../D/5967.html' title='Multiple defined in 10 places.'>equals</a>( <a href='../D/13032.html' title='Multiple defined in 2 places.'>root</a>.<a href='../D/6945.html' title='Multiple defined in 2 places.'>getLocation</a>( ).<a href='../Y/20470.html' title='Multiple used in 38 places.'>toOSString</a>( ) ) ) <em class='brace'>{</em>
+<a id='L203' name='L203'></a> 203             <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a> = <a href='../Y/2358.html' title='Multiple used in 57 places.'>ResourcesPlugin</a>.<a href='../Y/10941.html' title='Multiple used in 33 places.'>getWorkspace</a>( )
+<a id='L204' name='L204'></a> 204                 .newProjectDescription( <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a> );
+<a id='L205' name='L205'></a> 205             <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>.<a href='../S/1619.html#L36' title='Defined at 36 in utils/umc_dev/org.wesnoth.ui/src/org/wesnoth/ui/navigation/MapOpenerHyperlink.java.'>setLocation</a>( <strong class='reserved'>new</strong> <a href='../Y/2215.html' title='Multiple used in 49 places.'>Path</a>( <a href='../D/9987.html' title='Multiple defined in 6 places.'>location</a> ) );
+<a id='L206' name='L206'></a> 206         <em class='brace'>}</em>
+<a id='L207' name='L207'></a> 207 
+<a id='L208' name='L208'></a> 208         <a href='../D/5069.html' title='Multiple defined in 3 places.'>createWesnothProject</a>( <a href='../Y/14888.html' title='Multiple used in 6 places.'>newProject</a>, <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>, <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a>,
+<a id='L209' name='L209'></a> 209             <a href='../Y/18873.html' title='Multiple used in 4 places.'>skipCreateBuildXML</a>, <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> );
+<a id='L210' name='L210'></a> 210 
+<a id='L211' name='L211'></a> 211         <strong class='reserved'>return</strong> <a href='../Y/14888.html' title='Multiple used in 6 places.'>newProject</a>;
+<a id='L212' name='L212'></a> 212     <em class='brace'>}</em>
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214     <em class='comment'>/**</em>
+<a id='L215' name='L215'></a> 215 <em class='comment'>     * Creates a project that has associated the wesnoth nature using</em>
+<a id='L216' name='L216'></a> 216 <em class='comment'>     * the specified handle. If the project is created there will be</em>
+<a id='L217' name='L217'></a> 217 <em class='comment'>     * no modifications done by this method.</em>
+<a id='L218' name='L218'></a> 218 <em class='comment'>     * </em>
+<a id='L219' name='L219'></a> 219 <em class='comment'>     * @param handle</em>
+<a id='L220' name='L220'></a> 220 <em class='comment'>     *        the handle to the project</em>
+<a id='L221' name='L221'></a> 221 <em class='comment'>     * @param description</em>
+<a id='L222' name='L222'></a> 222 <em class='comment'>     *        the default description used when the project is created</em>
+<a id='L223' name='L223'></a> 223 <em class='comment'>     * @param installName</em>
+<a id='L224' name='L224'></a> 224 <em class='comment'>     *        The name of the install this project belongs to</em>
+<a id='L225' name='L225'></a> 225 <em class='comment'>     * @param skipCreateBuildXML</em>
+<a id='L226' name='L226'></a> 226 <em class='comment'>     *        True to skip creating a build xml even if needed</em>
+<a id='L227' name='L227'></a> 227 <em class='comment'>     * @param monitor</em>
+<a id='L228' name='L228'></a> 228 <em class='comment'>     *        the monitor will do a 30 worked amount in the method</em>
+<a id='L229' name='L229'></a> 229 <em class='comment'>     * @return</em>
+<a id='L230' name='L230'></a> 230 <em class='comment'>     *         0 - project was created successfully.</em>
+<a id='L231' name='L231'></a> 231 <em class='comment'>     *         -1 - project already exists or the handle is null</em>
+<a id='L232' name='L232'></a> 232 <em class='comment'>     *         1 - there was an error.</em>
+<a id='L233' name='L233'></a> 233 <em class='comment'>     * </em>
+<a id='L234' name='L234'></a> 234 <em class='comment'>     * @throws CoreException</em>
+<a id='L235' name='L235'></a> 235 <em class='comment'>     */</em>
+<a id='L236' name='L236'></a> 236     <strong class='reserved'>public</strong> <strong class='reserved'>static</strong> <strong class='reserved'>int</strong> <a href='../R/4426.html' title='Multiple referred from 7 places.'>createWesnothProject</a>( <a href='../Y/1558.html' title='Multiple used in 95 places.'>IProject</a> <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>,
+<a id='L237' name='L237'></a> 237         <a href='../Y/1559.html' title='Multiple used in 9 places.'>IProjectDescription</a> <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>, <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a>,
+<a id='L238' name='L238'></a> 238         <strong class='reserved'>boolean</strong> <a href='../Y/18873.html' title='Multiple used in 4 places.'>skipCreateBuildXML</a>, <a href='../Y/1557.html' title='Multiple used in 46 places.'>IProgressMonitor</a> <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> )
+<a id='L239' name='L239'></a> 239     <em class='brace'>{</em>
+<a id='L240' name='L240'></a> 240         <strong class='reserved'>if</strong>( <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a> == <strong class='reserved'>null</strong> || <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6055.html' title='Multiple defined in 9 places.'>exists</a>( ) ) <em class='brace'>{</em>
+<a id='L241' name='L241'></a> 241             <strong class='reserved'>return</strong> - 1;
+<a id='L242' name='L242'></a> 242         <em class='brace'>}</em>
+<a id='L243' name='L243'></a> 243 
+<a id='L244' name='L244'></a> 244         <strong class='reserved'>if</strong>( <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a>.<a href='../Y/12345.html' title='Multiple used in 92 places.'>isEmpty</a>( ) ) <em class='brace'>{</em>
+<a id='L245' name='L245'></a> 245             <a href='../S/1451.html#L26' title='Defined at 26 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/GUIUtils.java.'>GUIUtils</a>.<a href='../S/1451.html#L61' title='Defined at 61 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/GUIUtils.java.'>showErrorMessageBox</a>( <a href='../D/1525.html' title='Multiple defined in 2 places.'>Messages</a>.<a href='../Y/2252.html' title='Multiple used in 2 places.'>ProjectUtils_7</a> );
+<a id='L246' name='L246'></a> 246             <strong class='reserved'>return</strong> - 1;
+<a id='L247' name='L247'></a> 247         <em class='brace'>}</em>
+<a id='L248' name='L248'></a> 248 
+<a id='L249' name='L249'></a> 249         <strong class='reserved'>try</strong> <em class='brace'>{</em>
+<a id='L250' name='L250'></a> 250             <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> = <strong class='reserved'>null</strong>;
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252             <strong class='reserved'>if</strong>( <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6945.html' title='Multiple defined in 2 places.'>getLocation</a>( ) == <strong class='reserved'>null</strong> &amp;&amp; <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a> != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L253' name='L253'></a> 253                 <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> = <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>.<a href='../Y/10864.html' title='Multiple used in 3 places.'>getLocationURI</a>( ).<a href='../S/1659.html#L61' title='Defined at 61 in utils/umc_dev/org.wesnoth.tests/src/org/wesnoth/tests/pde/PDETest.java.'>getPath</a>( )
+<a id='L254' name='L254'></a> 254                     .<a href='../Y/19515.html' title='Multiple used in 47 places.'>substring</a>( 1 );
+<a id='L255' name='L255'></a> 255             <em class='brace'>}</em>
+<a id='L256' name='L256'></a> 256             <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>( <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6945.html' title='Multiple defined in 2 places.'>getLocation</a>( ) != <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L257' name='L257'></a> 257                 <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> = <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6945.html' title='Multiple defined in 2 places.'>getLocation</a>( ).<a href='../Y/20470.html' title='Multiple used in 38 places.'>toOSString</a>( );
+<a id='L258' name='L258'></a> 258             <em class='brace'>}</em>
+<a id='L259' name='L259'></a> 259             <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L260' name='L260'></a> 260                 <em class='comment'>// project is in workspace</em>
+<a id='L261' name='L261'></a> 261                 <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> = <a href='../Y/2358.html' title='Multiple used in 57 places.'>ResourcesPlugin</a>.<a href='../Y/10941.html' title='Multiple used in 33 places.'>getWorkspace</a>( ).<a href='../Y/10893.html' title='Multiple used in 27 places.'>getRoot</a>( )
+<a id='L262' name='L262'></a> 262                     .<a href='../D/6945.html' title='Multiple defined in 2 places.'>getLocation</a>( ).<a href='../Y/20470.html' title='Multiple used in 38 places.'>toOSString</a>( )
+<a id='L263' name='L263'></a> 263                     + "/" + <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/7009.html' title='Multiple defined in 3 places.'>getProject</a>( ).<a href='../D/6957.html' title='Multiple defined in 6 places.'>getName</a>( ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L264' name='L264'></a> 264             <em class='brace'>}</em>
+<a id='L265' name='L265'></a> 265 
+<a id='L266' name='L266'></a> 266             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/19475.html' title='Multiple used in 12 places.'>subTask</a>( <a href='../D/1525.html' title='Multiple defined in 2 places.'>Messages</a>.<a href='../Y/2249.html' title='Multiple used in 2 places.'>ProjectUtils_0</a> );
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268             <em class='comment'>// cleanup existing files</em>
+<a id='L269' name='L269'></a> 269             <a href='../S/1443.html#L59' title='Defined at 59 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>ResourceUtils</a>.<a href='../S/1443.html#L380' title='Defined at 380 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>removeFile</a>( <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> + "/.wesnoth" ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L270' name='L270'></a> 270             <a href='../S/1443.html#L59' title='Defined at 59 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>ResourceUtils</a>.<a href='../S/1443.html#L380' title='Defined at 380 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>removeFile</a>( <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> + "/.project" ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L271' name='L271'></a> 271             <a href='../S/1443.html#L59' title='Defined at 59 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>ResourceUtils</a>.<a href='../S/1443.html#L380' title='Defined at 380 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>removeFile</a>( <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> + "/.build.xml" ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L272' name='L272'></a> 272             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/22190.html' title='Multiple used in 39 places.'>worked</a>( 5 );
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/19475.html' title='Multiple used in 12 places.'>subTask</a>( <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a>.<a href='../D/6475.html' title='Multiple defined in 2 places.'>format</a>( <a href='../D/1525.html' title='Multiple defined in 2 places.'>Messages</a>.<a href='../Y/2250.html' title='Multiple used in 2 places.'>ProjectUtils_4</a>,
+<a id='L275' name='L275'></a> 275                 <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6957.html' title='Multiple defined in 6 places.'>getName</a>( ) ) );
+<a id='L276' name='L276'></a> 276 
+<a id='L277' name='L277'></a> 277             <em class='comment'>// create the project</em>
+<a id='L278' name='L278'></a> 278             <strong class='reserved'>if</strong>( <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a> == <strong class='reserved'>null</strong> ) <em class='brace'>{</em>
+<a id='L279' name='L279'></a> 279                 <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/4989.html' title='Multiple defined in 58 places.'>create</a>( <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> );
+<a id='L280' name='L280'></a> 280             <em class='brace'>}</em>
+<a id='L281' name='L281'></a> 281             <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L282' name='L282'></a> 282                 <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/4989.html' title='Multiple defined in 58 places.'>create</a>( <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>, <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> );
+<a id='L283' name='L283'></a> 283             <em class='brace'>}</em>
+<a id='L284' name='L284'></a> 284 
+<a id='L285' name='L285'></a> 285             <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/11609.html' title='Multiple defined in 3 places.'>open</a>( <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> );
+<a id='L286' name='L286'></a> 286             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/22190.html' title='Multiple used in 39 places.'>worked</a>( 10 );
+<a id='L287' name='L287'></a> 287 
+<a id='L288' name='L288'></a> 288             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/19475.html' title='Multiple used in 12 places.'>subTask</a>( <a href='../D/1525.html' title='Multiple defined in 2 places.'>Messages</a>.<a href='../Y/2251.html' title='Multiple used in 2 places.'>ProjectUtils_6</a> );
+<a id='L289' name='L289'></a> 289             <em class='comment'>// add wesnoth nature</em>
+<a id='L290' name='L290'></a> 290             <a href='../Y/1559.html' title='Multiple used in 9 places.'>IProjectDescription</a> <a href='../Y/20405.html' title='Multiple used in 3 places.'>tmpDescription</a> = <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6829.html' title='Multiple defined in 2 places.'>getDescription</a>( );
+<a id='L291' name='L291'></a> 291             <a href='../Y/20405.html' title='Multiple used in 3 places.'>tmpDescription</a>
+<a id='L292' name='L292'></a> 292                 .<a href='../Y/18488.html' title='Multiple used in 3 places.'>setNatureIds</a>( <strong class='reserved'>new</strong> <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a>[] <em class='brace'>{</em> <a href='../S/1490.html#L21' title='Defined at 21 in utils/umc_dev/org.wesnoth/src/org/wesnoth/builder/WesnothProjectNature.java.'>WesnothProjectNature</a>.<a href='../Y/1404.html' title='Multiple used in 4 places.'>ID_NATURE</a> <em class='brace'>}</em> );
+<a id='L293' name='L293'></a> 293             <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../Y/18447.html' title='Multiple used in 23 places.'>setDescription</a>( <a href='../Y/20405.html' title='Multiple used in 3 places.'>tmpDescription</a>, <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> );
+<a id='L294' name='L294'></a> 294             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/22190.html' title='Multiple used in 39 places.'>worked</a>( 5 );
+<a id='L295' name='L295'></a> 295 
+<a id='L296' name='L296'></a> 296             <strong class='reserved'>if</strong>( ! <a href='../Y/18873.html' title='Multiple used in 4 places.'>skipCreateBuildXML</a> ) <em class='brace'>{</em>
+<a id='L297' name='L297'></a> 297                 <em class='comment'>// add the build.xml file, but only if the project is not</em>
+<a id='L298' name='L298'></a> 298                 <em class='comment'>// located</em>
+<a id='L299' name='L299'></a> 299                 <em class='comment'>// into the data/campaigns or user's /addons directory</em>
+<a id='L300' name='L300'></a> 300                 <a href='../S/1440.html#L299' title='Defined at 299 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>Paths</a> <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a> = <a href='../S/1440.html#L25' title='Defined at 25 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>Preferences</a>.<a href='../S/1440.html#L279' title='Defined at 279 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getPaths</a>( <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a> );
+<a id='L301' name='L301'></a> 301                 <a href='../Y/2904.html' title='Multiple used in 1322 places.'>String</a> <a href='../Y/15292.html' title='Multiple used in 3 places.'>normalizedPath</a> = <a href='../S/1450.html#L23' title='Defined at 23 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>StringUtils</a>.<a href='../S/1450.html#L187' title='Defined at 187 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>normalizePath</a>( <a href='../Y/16857.html' title='Multiple used in 13 places.'>projectPath</a> );
+<a id='L302' name='L302'></a> 302                 <strong class='reserved'>if</strong>( ! <a href='../Y/15292.html' title='Multiple used in 3 places.'>normalizedPath</a>.<a href='../D/4876.html' title='Multiple defined in 6 places.'>contains</a>( <a href='../S/1450.html#L23' title='Defined at 23 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>StringUtils</a>.<a href='../S/1450.html#L187' title='Defined at 187 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>normalizePath</a>( <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a>
+<a id='L303' name='L303'></a> 303                     .<a href='../S/1440.html#L358' title='Defined at 358 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getCampaignDir</a>( ) ) )
+<a id='L304' name='L304'></a> 304                     &amp;&amp; ! <a href='../Y/15292.html' title='Multiple used in 3 places.'>normalizedPath</a>.<a href='../D/4876.html' title='Multiple defined in 6 places.'>contains</a>( <a href='../S/1450.html#L23' title='Defined at 23 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>StringUtils</a>
+<a id='L305' name='L305'></a> 305                         .<a href='../S/1450.html#L187' title='Defined at 187 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/StringUtils.java.'>normalizePath</a>( <a href='../D/11860.html' title='Multiple defined in 3 places.'>paths</a>.<a href='../S/1440.html#L338' title='Defined at 338 in utils/umc_dev/org.wesnoth/src/org/wesnoth/preferences/Preferences.java.'>getAddonsDir</a>( ) ) ) ) <em class='brace'>{</em>
+<a id='L306' name='L306'></a> 306 
+<a id='L307' name='L307'></a> 307                     <a href='../Y/254.html' title='Multiple used in 85 places.'>ArrayList</a>&lt; <a href='../S/1460.html#L14' title='Defined at 14 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/ReplaceableParameter.java.'>ReplaceableParameter</a> &gt; <a href='../Y/16181.html' title='Multiple used in 82 places.'>param</a> = <strong class='reserved'>new</strong> <a href='../Y/254.html' title='Multiple used in 85 places.'>ArrayList</a>&lt; <a href='../S/1460.html#L14' title='Defined at 14 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/ReplaceableParameter.java.'>ReplaceableParameter</a> &gt;( );
+<a id='L308' name='L308'></a> 308                     <a href='../Y/16181.html' title='Multiple used in 82 places.'>param</a>.<a href='../D/2801.html' title='Multiple defined in 10 places.'>add</a>( <strong class='reserved'>new</strong> <a href='../S/1460.html#L14' title='Defined at 14 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/ReplaceableParameter.java.'>ReplaceableParameter</a>( "$$project_name", <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6957.html' title='Multiple defined in 6 places.'>getName</a>( ) ) ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L309' name='L309'></a> 309                     <a href='../Y/16181.html' title='Multiple used in 82 places.'>param</a>.<a href='../D/2801.html' title='Multiple defined in 10 places.'>add</a>( <strong class='reserved'>new</strong> <a href='../S/1460.html#L14' title='Defined at 14 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/ReplaceableParameter.java.'>ReplaceableParameter</a>( "$$project_dir_name", <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../D/6957.html' title='Multiple defined in 6 places.'>getName</a>( ) ) ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L310' name='L310'></a> 310                     <a href='../S/1443.html#L59' title='Defined at 59 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ResourceUtils.java.'>ResourceUtils</a>.<a href='../D/5007.html' title='Multiple defined in 2 places.'>createFile</a>( <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>, "build.xml", <em class='comment'>//$NON-NLS-1$</em>
+<a id='L311' name='L311'></a> 311                         <a href='../S/1461.html#L32' title='Defined at 32 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/TemplateProvider.java.'>TemplateProvider</a>.<a href='../D/6928.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1461.html#L153' title='Defined at 153 in utils/umc_dev/org.wesnoth/src/org/wesnoth/templates/TemplateProvider.java.'>getProcessedTemplate</a>( "build_xml", <a href='../Y/16181.html' title='Multiple used in 82 places.'>param</a> ), <strong class='reserved'>true</strong> ); <em class='comment'>//$NON-NLS-1$</em>
+<a id='L312' name='L312'></a> 312                 <em class='brace'>}</em>
+<a id='L313' name='L313'></a> 313             <em class='brace'>}</em>
+<a id='L314' name='L314'></a> 314             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/22190.html' title='Multiple used in 39 places.'>worked</a>( 10 );
+<a id='L315' name='L315'></a> 315 
+<a id='L316' name='L316'></a> 316             <em class='comment'>// save the install name</em>
+<a id='L317' name='L317'></a> 317             <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a> <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a> = <strong class='reserved'>new</strong> <a href='../S/1502.html#L45' title='Defined at 45 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>ProjectCache</a>( <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a> );
+<a id='L318' name='L318'></a> 318             <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>.<a href='../S/1502.html#L315' title='Defined at 315 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>setInstallName</a>( <a href='../Y/12216.html' title='Multiple used in 83 places.'>installName</a> );
+<a id='L319' name='L319'></a> 319             <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a>.<a href='../S/1502.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectCache.java.'>loadCache</a>( );
+<a id='L320' name='L320'></a> 320             <a href='../Y/16854.html' title='Multiple used in 38 places.'>projectCache_</a>.<a href='../D/12295.html' title='Multiple defined in 2 places.'>put</a>( <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>, <a href='../Y/6968.html' title='Multiple used in 207 places.'>cache</a> );
+<a id='L321' name='L321'></a> 321 
+<a id='L322' name='L322'></a> 322             <em class='comment'>// create the Core library link</em>
+<a id='L323' name='L323'></a> 323             <a href='../S/1503.html#L105' title='Defined at 105 in utils/umc_dev/org.wesnoth/src/org/wesnoth/projects/ProjectUtils.java.'>createCoreLibraryFolder</a>( <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>, <a href='../Y/1565.html' title='Multiple used in 96 places.'>IResource</a>.<a href='../D/1549.html' title='Multiple defined in 4 places.'>NONE</a> );
+<a id='L324' name='L324'></a> 324             <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a>.<a href='../Y/22190.html' title='Multiple used in 39 places.'>worked</a>( 10 );
+<a id='L325' name='L325'></a> 325 
+<a id='L326' name='L326'></a> 326             <a href='../D/8323.html' title='Multiple defined in 2 places.'>handle</a>.<a href='../Y/17368.html' title='Multiple used in 21 places.'>refreshLocal</a>( <a href='../Y/1565.html' title='Multiple used in 96 places.'>IResource</a>.<a href='../Y/590.html' title='Multiple used in 2 places.'>DEPTH_ONE</a>, <a href='../Y/14420.html' title='Multiple used in 156 places.'>monitor</a> );
+<a id='L327' name='L327'></a> 327         <em class='brace'>}</em> <strong class='reserved'>catch</strong>( <a href='../Y/545.html' title='Multiple used in 63 places.'>CoreException</a> <a href='../D/5774.html' title='Multiple defined in 3 places.'>e</a> ) <em class='brace'>{</em>
+<a id='L328' name='L328'></a> 328             <a href='../S/1501.html#L30' title='Defined at 30 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>Logger</a>.<a href='../D/6928.html' title='Multiple defined in 6 places.'>getInstance</a>( ).<a href='../S/1501.html#L151' title='Defined at 151 in utils/umc_dev/org.wesnoth/src/org/wesnoth/Logger.java.'>logException</a>( <a href='../D/5774.html' title='Multiple defined in 3 places.'>e</a> );
+<a id='L329' name='L329'></a> 329             <strong class='reserved'>return</strong> 1;
+<a id='L330' name='L330'></a> 330         <em class='brace'>}</em>
+<a id='L331' name='L331'></a> 331         <strong class='reserved'>return</strong> 0;
+<a id='L332' name='L332'></a> 332     <em class='brace'>}</em>
+<a id='L333' name='L333'></a> 333 <em class='brace'>}</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L55'>[^]</a><a href='#L236'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

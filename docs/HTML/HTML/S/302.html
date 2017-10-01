@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/sound_music_track.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/sound_music_track.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L129'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L40' title='Defined at 40.'>shuffle_</a></li>
+<li><a href='#L53' title='Defined at 53.'>shuffle_</a></li>
+<li><a href='#L67' title='Defined at 67.'>shuffle_</a></li>
+<li><a href='#L72' title='Defined at 72.'>resolve</a></li>
+<li><a href='#L129' title='Defined at 129.'>write</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Copyright (C) 2009 - 2017 by Ignacio R. Morelle &lt;shadowm2006@gmail.com&gt;</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'></em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   (at your option) any later version.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'></em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>*/</em>
+<a id='L15' name='L15'></a>  15 
+<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> "<a href='932.html'>sound_music_track.hpp</a>"
+<a id='L17' name='L17'></a>  17 
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='../I/1754.html'>config.hpp</a>"
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1257.html'>filesystem.hpp</a>"
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='../I/2029.html'>log.hpp</a>"
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/1909.html'>serialization/string_utils.hpp</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#if</em> !<strong class='reserved'>defined</strong>(<a href='../Y/4851.html' title='Multiple used in 105 places.'>_WIN32</a>) &amp;&amp; !<strong class='reserved'>defined</strong>(<a href='../Y/4856.html' title='Multiple used in 39 places.'>__APPLE__</a>)
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "vorbis/vorbisfile.h"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#endif</em>
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <strong class='reserved'>static</strong> <a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13479.html' title='Multiple used in 11 places.'>log_audio</a>("audio");
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#define</em> <a href='../R/389.html' title='Multiple referred from 10 places.'>ERR_AUDIO</a> <a href='../S/660.html#L189' title='Defined at 189 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/847.html#L79' title='Defined at 79 in src/log.cpp.'>err</a>, <a href='../Y/13479.html' title='Multiple used in 11 places.'>log_audio</a>)
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#define</em> <a href='../R/966.html' title='Multiple referred from 16 places.'>LOG_AUDIO</a> <a href='../S/660.html#L189' title='Defined at 189 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>, <a href='../Y/13479.html' title='Multiple used in 11 places.'>log_audio</a>)
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30 <strong class='reserved'>namespace</strong> <a href='../R/13446.html' title='Multiple referred from 509 places.'>sound</a> <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>::<a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>() :
+<a id='L33' name='L33'></a>  33         <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a>(),
+<a id='L34' name='L34'></a>  34         <a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a>(),
+<a id='L35' name='L35'></a>  35         <a href='../Y/14573.html' title='Multiple used in 7 places.'>ms_before_</a>(0),
+<a id='L36' name='L36'></a>  36         <a href='../Y/14572.html' title='Multiple used in 7 places.'>ms_after_</a>(0),
+<a id='L37' name='L37'></a>  37         <a href='../Y/15699.html' title='Multiple used in 6 places.'>once_</a>(<strong class='reserved'>false</strong>),
+<a id='L38' name='L38'></a>  38         <a href='../Y/5770.html' title='Multiple used in 5 places.'>append_</a>(<strong class='reserved'>false</strong>),
+<a id='L39' name='L39'></a>  39         <a href='../Y/11981.html' title='Multiple used in 5 places.'>immediate_</a>(<strong class='reserved'>false</strong>),
+<a id='L40' name='L40'></a>  40         <a href='../R/13280.html' title='Multiple referred from 4 places.'>shuffle_</a>(<strong class='reserved'>true</strong>)
+<a id='L41' name='L41'></a>  41 <em class='brace'>{</em>
+<a id='L42' name='L42'></a>  42 <em class='brace'>}</em>
+<a id='L43' name='L43'></a>  43 
+<a id='L44' name='L44'></a>  44 <a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>::<a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>) :
+<a id='L45' name='L45'></a>  45         <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["name"]),
+<a id='L46' name='L46'></a>  46         <a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a>(),
+<a id='L47' name='L47'></a>  47         <a href='../Y/20356.html' title='Multiple used in 55 places.'>title_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["title"]),
+<a id='L48' name='L48'></a>  48         <a href='../Y/14573.html' title='Multiple used in 7 places.'>ms_before_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["ms_before"]),
+<a id='L49' name='L49'></a>  49         <a href='../Y/14572.html' title='Multiple used in 7 places.'>ms_after_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["ms_after"]),
+<a id='L50' name='L50'></a>  50         <a href='../Y/15699.html' title='Multiple used in 6 places.'>once_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["play_once"].<a href='../D/15259.html' title='Multiple defined in 2 places.'>to_bool</a>()),
+<a id='L51' name='L51'></a>  51         <a href='../Y/5770.html' title='Multiple used in 5 places.'>append_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["append"].<a href='../D/15259.html' title='Multiple defined in 2 places.'>to_bool</a>()),
+<a id='L52' name='L52'></a>  52         <a href='../Y/11981.html' title='Multiple used in 5 places.'>immediate_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["immediate"].<a href='../D/15259.html' title='Multiple defined in 2 places.'>to_bool</a>()),
+<a id='L53' name='L53'></a>  53         <a href='../R/13280.html' title='Multiple referred from 4 places.'>shuffle_</a>(<a href='../D/11428.html' title='Multiple defined in 4 places.'>node</a>["shuffle"].<a href='../D/15259.html' title='Multiple defined in 2 places.'>to_bool</a>(<strong class='reserved'>true</strong>))
+<a id='L54' name='L54'></a>  54 <em class='brace'>{</em>
+<a id='L55' name='L55'></a>  55         <a href='../S/302.html#L72' title='Defined at 72 in src/sound_music_track.cpp.'>resolve</a>();
+<a id='L56' name='L56'></a>  56 <em class='brace'>}</em>
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>::<a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../Y/21479.html' title='Multiple used in 3 places.'>v_name</a>) :
+<a id='L59' name='L59'></a>  59         <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a>(<a href='../Y/21479.html' title='Multiple used in 3 places.'>v_name</a>),
+<a id='L60' name='L60'></a>  60         <a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a>(),
+<a id='L61' name='L61'></a>  61         <a href='../Y/20356.html' title='Multiple used in 55 places.'>title_</a>(),
+<a id='L62' name='L62'></a>  62         <a href='../Y/14573.html' title='Multiple used in 7 places.'>ms_before_</a>(0),
+<a id='L63' name='L63'></a>  63         <a href='../Y/14572.html' title='Multiple used in 7 places.'>ms_after_</a>(0),
+<a id='L64' name='L64'></a>  64         <a href='../Y/15699.html' title='Multiple used in 6 places.'>once_</a>(<strong class='reserved'>false</strong>),
+<a id='L65' name='L65'></a>  65         <a href='../Y/5770.html' title='Multiple used in 5 places.'>append_</a>(<strong class='reserved'>false</strong>),
+<a id='L66' name='L66'></a>  66         <a href='../Y/11981.html' title='Multiple used in 5 places.'>immediate_</a>(<strong class='reserved'>false</strong>),
+<a id='L67' name='L67'></a>  67         <a href='../R/13280.html' title='Multiple referred from 4 places.'>shuffle_</a>(<strong class='reserved'>true</strong>)
+<a id='L68' name='L68'></a>  68 <em class='brace'>{</em>
+<a id='L69' name='L69'></a>  69         <a href='../S/302.html#L72' title='Defined at 72 in src/sound_music_track.cpp.'>resolve</a>();
+<a id='L70' name='L70'></a>  70 <em class='brace'>}</em>
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72 <strong class='reserved'>void</strong> <a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>::<a href='../R/11810.html' title='Multiple referred from 25 places.'>resolve</a>()
+<a id='L73' name='L73'></a>  73 <em class='brace'>{</em>
+<a id='L74' name='L74'></a>  74         <strong class='reserved'>if</strong> (<a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a>.<a href='../D/5865.html' title='Multiple defined in 31 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75                 <a href='../D/1080.html' title='Multiple defined in 3 places.'>LOG_AUDIO</a> &lt;&lt; "empty track filename specified for track identification\n";
+<a id='L76' name='L76'></a>  76                 <strong class='reserved'>return</strong>;
+<a id='L77' name='L77'></a>  77         <em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78 
+<a id='L79' name='L79'></a>  79         <a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a> = <a href='../D/6226.html' title='Multiple defined in 6 places.'>filesystem</a>::<a href='../S/314.html#L1156' title='Defined at 1156 in src/filesystem_boost.cpp.'>get_binary_file_location</a>("music", <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a>);
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>if</strong> (<a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a>.<a href='../D/5865.html' title='Multiple defined in 31 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L82' name='L82'></a>  82                 <a href='../D/1080.html' title='Multiple defined in 3 places.'>LOG_AUDIO</a> &lt;&lt; "could not find track '" &lt;&lt; <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a> &lt;&lt; "' for track identification\n";
+<a id='L83' name='L83'></a>  83                 <strong class='reserved'>return</strong>;
+<a id='L84' name='L84'></a>  84         <em class='brace'>}</em>
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87 <em class='sharp'>#if</em> !<strong class='reserved'>defined</strong>(<a href='../Y/4851.html' title='Multiple used in 105 places.'>_WIN32</a>) &amp;&amp; !<strong class='reserved'>defined</strong>(<a href='../Y/4856.html' title='Multiple used in 39 places.'>__APPLE__</a>)
+<a id='L88' name='L88'></a>  88         <strong class='reserved'>if</strong> (<a href='../Y/20356.html' title='Multiple used in 55 places.'>title_</a>.<a href='../D/5865.html' title='Multiple defined in 31 places.'>empty</a>()) <em class='brace'>{</em>
+<a id='L89' name='L89'></a>  89                 <a href='../S/757.html#L37' title='Defined at 37 in src/image.hpp.'>FILE</a>* <a href='../D/6125.html' title='Multiple defined in 9 places.'>f</a>;
+<a id='L90' name='L90'></a>  90                 <a href='../D/6125.html' title='Multiple defined in 9 places.'>f</a> = <a href='../Y/10370.html' title='Multiple used in 6 places.'>fopen</a>(<a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a>.<a href='../D/3892.html' title='Multiple defined in 2 places.'>c_str</a>(), "r");
+<a id='L91' name='L91'></a>  91                 <strong class='reserved'>if</strong> (<a href='../D/6125.html' title='Multiple defined in 9 places.'>f</a> == <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>) <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92                         <a href='../D/1080.html' title='Multiple defined in 3 places.'>LOG_AUDIO</a> &lt;&lt; "Error opening file '" &lt;&lt; <a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a>
+<a id='L93' name='L93'></a>  93                                         &lt;&lt; "' for track identification\n";
+<a id='L94' name='L94'></a>  94                         <strong class='reserved'>return</strong>;
+<a id='L95' name='L95'></a>  95                 <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97                 OggVorbis_File <a href='../Y/21669.html' title='Multiple used in 5 places.'>vf</a>;
+<a id='L98' name='L98'></a>  98                 <strong class='reserved'>if</strong>(ov_open(<a href='../D/6125.html' title='Multiple defined in 9 places.'>f</a>, &amp;<a href='../Y/21669.html' title='Multiple used in 5 places.'>vf</a>, <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>, 0) &lt; 0) <em class='brace'>{</em>
+<a id='L99' name='L99'></a>  99                         <a href='../D/1080.html' title='Multiple defined in 3 places.'>LOG_AUDIO</a> &lt;&lt; "track does not appear to be an Ogg file '"
+<a id='L100' name='L100'></a> 100                                         &lt;&lt; <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a> &lt;&lt; "', cannot be identified\n";
+<a id='L101' name='L101'></a> 101                         <a href='../Y/15990.html' title='Multiple used in 2 places.'>ov_clear</a>(&amp;<a href='../Y/21669.html' title='Multiple used in 5 places.'>vf</a>);
+<a id='L102' name='L102'></a> 102                         <strong class='reserved'>return</strong>;
+<a id='L103' name='L103'></a> 103                 <em class='brace'>}</em>
+<a id='L104' name='L104'></a> 104 
+<a id='L105' name='L105'></a> 105                 vorbis_comment* <a href='../Y/7735.html' title='Multiple used in 5 places.'>comments</a> = ov_comment(&amp;<a href='../Y/21669.html' title='Multiple used in 5 places.'>vf</a>, -1);
+<a id='L106' name='L106'></a> 106                 <strong class='reserved'>char</strong>** <a href='../Y/21403.html' title='Multiple used in 2 places.'>user_comments</a> = <a href='../Y/7735.html' title='Multiple used in 5 places.'>comments</a>-&gt;<a href='../Y/21403.html' title='Multiple used in 2 places.'>user_comments</a>;
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108                 <strong class='reserved'>bool</strong> <a href='../S/1674.html#L200' title='Defined at 200 in utils/umc_dev/manual/dev_manual.tex.'>found</a> = <strong class='reserved'>false</strong>;
+<a id='L109' name='L109'></a> 109                 <strong class='reserved'>for</strong> (<strong class='reserved'>int</strong> <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>=0; <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>&lt; <a href='../Y/7735.html' title='Multiple used in 5 places.'>comments</a>-&gt;<a href='../Y/7735.html' title='Multiple used in 5 places.'>comments</a>; <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>++) <em class='brace'>{</em>
+<a id='L110' name='L110'></a> 110                         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/7733.html' title='Multiple used in 2 places.'>comment_string</a>(<a href='../Y/21403.html' title='Multiple used in 2 places.'>user_comments</a>[<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>]);
+<a id='L111' name='L111'></a> 111                         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&gt; <a href='../Y/7732.html' title='Multiple used in 3 places.'>comment_list</a> = <a href='../D/15924.html' title='Multiple defined in 17 places.'>utils</a>::<a href='../D/14681.html' title='Multiple defined in 2 places.'>split</a>(<a href='../Y/7733.html' title='Multiple used in 2 places.'>comment_string</a>, '=');
+<a id='L112' name='L112'></a> 112 
+<a id='L113' name='L113'></a> 113                         <strong class='reserved'>if</strong> (<a href='../Y/7732.html' title='Multiple used in 3 places.'>comment_list</a>[0] == "TITLE" || <a href='../Y/7732.html' title='Multiple used in 3 places.'>comment_list</a>[0] == "title") <em class='brace'>{</em>
+<a id='L114' name='L114'></a> 114                                 <a href='../Y/20356.html' title='Multiple used in 55 places.'>title_</a> = <a href='../Y/7732.html' title='Multiple used in 3 places.'>comment_list</a>[1];
+<a id='L115' name='L115'></a> 115                                 <a href='../S/1674.html#L200' title='Defined at 200 in utils/umc_dev/manual/dev_manual.tex.'>found</a> = <strong class='reserved'>true</strong>;
+<a id='L116' name='L116'></a> 116                         <em class='brace'>}</em>
+<a id='L117' name='L117'></a> 117                 <em class='brace'>}</em>
+<a id='L118' name='L118'></a> 118                 <strong class='reserved'>if</strong> (!<a href='../S/1674.html#L200' title='Defined at 200 in utils/umc_dev/manual/dev_manual.tex.'>found</a>) <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119                         <a href='../D/1080.html' title='Multiple defined in 3 places.'>LOG_AUDIO</a> &lt;&lt; "No title for music track '" &lt;&lt; <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a> &lt;&lt; "'\n";
+<a id='L120' name='L120'></a> 120                 <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <a href='../Y/15990.html' title='Multiple used in 2 places.'>ov_clear</a>(&amp;<a href='../Y/21669.html' title='Multiple used in 5 places.'>vf</a>);
+<a id='L123' name='L123'></a> 123         <em class='brace'>}</em>
+<a id='L124' name='L124'></a> 124 <em class='sharp'>#endif</em>
+<a id='L125' name='L125'></a> 125 
+<a id='L126' name='L126'></a> 126         <a href='../D/1080.html' title='Multiple defined in 3 places.'>LOG_AUDIO</a> &lt;&lt; "resolved music track '" &lt;&lt; <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a> &lt;&lt; "' into '" &lt;&lt; <a href='../Y/10038.html' title='Multiple used in 11 places.'>file_path_</a> &lt;&lt; "'\n";
+<a id='L127' name='L127'></a> 127 <em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129 <strong class='reserved'>void</strong> <a href='../S/932.html#L28' title='Defined at 28 in src/sound_music_track.hpp.'>music_track</a>::<a href='../R/15072.html' title='Multiple referred from 495 places.'>write</a>(<a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a> &amp;<a href='../D/11741.html' title='Multiple defined in 2 places.'>parent_node</a>, <strong class='reserved'>bool</strong> <a href='../D/3323.html' title='Multiple defined in 8 places.'>append</a>) <strong class='reserved'>const</strong>
+<a id='L130' name='L130'></a> 130 <em class='brace'>{</em>
+<a id='L131' name='L131'></a> 131         <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../Y/13720.html' title='Multiple used in 568 places.'>m</a> = <a href='../D/11741.html' title='Multiple defined in 2 places.'>parent_node</a>.<a href='../D/2855.html' title='Multiple defined in 8 places.'>add_child</a>("music");
+<a id='L132' name='L132'></a> 132         <a href='../Y/13720.html' title='Multiple used in 568 places.'>m</a>["name"] = <a href='../D/8673.html' title='Multiple defined in 8 places.'>id_</a>;
+<a id='L133' name='L133'></a> 133         <a href='../Y/13720.html' title='Multiple used in 568 places.'>m</a>["ms_before"] = <a href='../Y/14573.html' title='Multiple used in 7 places.'>ms_before_</a>;
+<a id='L134' name='L134'></a> 134         <a href='../Y/13720.html' title='Multiple used in 568 places.'>m</a>["ms_after"] = <a href='../Y/14572.html' title='Multiple used in 7 places.'>ms_after_</a>;
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>if</strong>(<a href='../D/3323.html' title='Multiple defined in 8 places.'>append</a>) <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136                 <a href='../Y/13720.html' title='Multiple used in 568 places.'>m</a>["append"] = <strong class='reserved'>true</strong>;
+<a id='L137' name='L137'></a> 137         <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138         <em class='comment'>//default behaviour is to shuffle</em>
+<a id='L139' name='L139'></a> 139         <a href='../Y/13720.html' title='Multiple used in 568 places.'>m</a>["shuffle"] = <a href='../D/14466.html' title='Multiple defined in 3 places.'>shuffle_</a>;
+<a id='L140' name='L140'></a> 140 <em class='brace'>}</em>
+<a id='L141' name='L141'></a> 141 
+<a id='L142' name='L142'></a> 142 <em class='brace'>}</em> <em class='comment'>/* end namespace sound */</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L40'>[^]</a><a href='#L129'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

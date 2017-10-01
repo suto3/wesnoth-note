@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/whiteboard/recall.cpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5886.html'>whiteboard</a>/recall.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L54'>[^]</a><a href='#L244'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L54' title='Defined at 54.'>print</a></li>
+<li><a href='#L64' title='Defined at 64.'>fake_unit_</a></li>
+<li><a href='#L73' title='Defined at 73.'>fake_unit_</a></li>
+<li><a href='#L94' title='Defined at 94.'>init</a></li>
+<li><a href='#L110' title='Defined at 110.'>accept</a></li>
+<li><a href='#L115' title='Defined at 115.'>execute</a></li>
+<li><a href='#L140' title='Defined at 140.'>apply_temp_modifier</a></li>
+<li><a href='#L167' title='Defined at 167.'>remove_temp_modifier</a></li>
+<li><a href='#L176' title='Defined at 176.'>draw_hex</a></li>
+<li><a href='#L199' title='Defined at 199.'>redraw</a></li>
+<li><a href='#L204' title='Defined at 204.'>check_validity</a></li>
+<li><a href='#L227' title='Defined at 227.'>to_config</a></li>
+<li><a href='#L243' title='Defined at 243.'>do_hide</a></li>
+<li><a href='#L244' title='Defined at 244.'>do_show</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'> Copyright (C) 2010 - 2017 by Gabriel Morin &lt;gabrielmorin (at) gmail (dot) com&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'> Part of the Battle for Wesnoth Project http://www.wesnoth.org</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'> This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'> it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'> the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'> This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'> but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'> See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'> */</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> */</em>
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1233.html'>whiteboard/recall.hpp</a>"
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/1640.html'>whiteboard/manager.hpp</a>"
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='1236.html'>whiteboard/side_actions.hpp</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='1237.html'>whiteboard/utility.hpp</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='1249.html'>whiteboard/visitor.hpp</a>"
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='884.html'>actions/create.hpp</a>"
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='322.html'>fake_unit_manager.hpp</a>"
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='736.html'>fake_unit_ptr.hpp</a>"
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='140.html'>game_board.hpp</a>"
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='745.html'>game_display.hpp</a>"
+<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='1054.html'>recall_list_manager.hpp</a>"
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='678.html'>resources.hpp</a>"
+<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> "<a href='974.html'>replay_helper.hpp</a>"
+<a id='L34' name='L34'></a>  34 <em class='sharp'>#include</em> "<a href='89.html'>statistics.hpp</a>"
+<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> "<a href='747.html'>synced_context.hpp</a>"
+<a id='L36' name='L36'></a>  36 <em class='sharp'>#include</em> "<a href='1083.html'>team.hpp</a>"
+<a id='L37' name='L37'></a>  37 <em class='sharp'>#include</em> "<a href='997.html'>units/unit.hpp</a>"
+<a id='L38' name='L38'></a>  38 <em class='sharp'>#include</em> "<a href='993.html'>units/animation_component.hpp</a>"
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40 <strong class='reserved'>namespace</strong> <a href='../R/14847.html' title='Multiple referred from 74 places.'>wb</a>
+<a id='L41' name='L41'></a>  41 <em class='brace'>{</em>
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a>&amp; <strong class='reserved'>operator</strong>&lt;&lt;(<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a>&amp; <a href='../Y/17915.html' title='Multiple used in 1743 places.'>s</a>, <a href='../S/1241.html#L74' title='Defined at 74 in src/whiteboard/typedefs.hpp.'>recall_ptr</a> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>)
+<a id='L44' name='L44'></a>  44 <em class='brace'>{</em>
+<a id='L45' name='L45'></a>  45         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>);
+<a id='L46' name='L46'></a>  46         <strong class='reserved'>return</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>-&gt;<a href='../D/12148.html' title='Multiple defined in 16 places.'>print</a>(<a href='../Y/17915.html' title='Multiple used in 1743 places.'>s</a>);
+<a id='L47' name='L47'></a>  47 <em class='brace'>}</em>
+<a id='L48' name='L48'></a>  48 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a>&amp; <strong class='reserved'>operator</strong>&lt;&lt;(<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a>&amp; <a href='../Y/17915.html' title='Multiple used in 1743 places.'>s</a>, <a href='../S/1241.html#L75' title='Defined at 75 in src/whiteboard/typedefs.hpp.'>recall_const_ptr</a> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>)
+<a id='L49' name='L49'></a>  49 <em class='brace'>{</em>
+<a id='L50' name='L50'></a>  50         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>);
+<a id='L51' name='L51'></a>  51         <strong class='reserved'>return</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>-&gt;<a href='../D/12148.html' title='Multiple defined in 16 places.'>print</a>(<a href='../Y/17915.html' title='Multiple used in 1743 places.'>s</a>);
+<a id='L52' name='L52'></a>  52 <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a>&amp; <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/11059.html' title='Multiple referred from 79 places.'>print</a>(<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a> &amp;<a href='../Y/17915.html' title='Multiple used in 1743 places.'>s</a>) <strong class='reserved'>const</strong>
+<a id='L55' name='L55'></a>  55 <em class='brace'>{</em>
+<a id='L56' name='L56'></a>  56         <a href='../Y/17915.html' title='Multiple used in 1743 places.'>s</a> &lt;&lt; "Recalling " &lt;&lt; <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>() &lt;&lt; " [" &lt;&lt; <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>() &lt;&lt; "] on hex " &lt;&lt; <a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>;
+<a id='L57' name='L57'></a>  57         <strong class='reserved'>return</strong> <a href='../Y/17915.html' title='Multiple used in 1743 places.'>s</a>;
+<a id='L58' name='L58'></a>  58 <em class='brace'>}</em>
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>(<a href='../Y/18861.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>, <strong class='reserved'>bool</strong> <a href='../D/8575.html' title='Multiple defined in 7 places.'>hidden</a>, <strong class='reserved'>const</strong> <a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>&amp; <a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>, <strong class='reserved'>const</strong> <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>&amp; <a href='../Y/17197.html' title='Multiple used in 9 places.'>recall_hex</a>):
+<a id='L61' name='L61'></a>  61                 <a href='../D/2763.html' title='Multiple defined in 10 places.'>action</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>,<a href='../D/8575.html' title='Multiple defined in 7 places.'>hidden</a>),
+<a id='L62' name='L62'></a>  62                 <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>(<strong class='reserved'>new</strong> <strong class='reserved'>class</strong> <a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>(<a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>)),
+<a id='L63' name='L63'></a>  63                 <a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>(<a href='../Y/17197.html' title='Multiple used in 9 places.'>recall_hex</a>),
+<a id='L64' name='L64'></a>  64                 <a href='../R/5468.html' title='Multiple referred from 48 places.'>fake_unit_</a>(<a href='../S/996.html#L29' title='Defined at 29 in src/units/ptr.hpp.'>unit_ptr</a>( <strong class='reserved'>new</strong> <strong class='reserved'>class</strong> <a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>(<a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>) ) )
+<a id='L65' name='L65'></a>  65 <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66         <strong class='reserved'>this</strong>-&gt;<a href='../D/8869.html' title='Multiple defined in 40 places.'>init</a>();
+<a id='L67' name='L67'></a>  67 <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69 <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>(<a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a> <strong class='reserved'>const</strong>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>, <strong class='reserved'>bool</strong> <a href='../D/8575.html' title='Multiple defined in 7 places.'>hidden</a>)
+<a id='L70' name='L70'></a>  70         : <a href='../D/2763.html' title='Multiple defined in 10 places.'>action</a>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>,<a href='../D/8575.html' title='Multiple defined in 7 places.'>hidden</a>)
+<a id='L71' name='L71'></a>  71         , <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>()
+<a id='L72' name='L72'></a>  72         , <a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4417.html' title='Multiple defined in 14 places.'>child</a>("recall_hex_")["x"],<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4417.html' title='Multiple defined in 14 places.'>child</a>("recall_hex_")["y"], <a href='../S/1099.html#L30' title='Defined at 30 in src/map/location.hpp.'>wml_loc</a>())
+<a id='L73' name='L73'></a>  73         , <a href='../R/5468.html' title='Multiple referred from 48 places.'>fake_unit_</a>()
+<a id='L74' name='L74'></a>  74 <em class='brace'>{</em>
+<a id='L75' name='L75'></a>  75         <em class='comment'>// Construct and validate temp_unit_</em>
+<a id='L76' name='L76'></a>  76         <a href='../Y/18861.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../S/997.html#L297' title='Defined at 297 in src/units/unit.hpp.'>underlying_id</a> = <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>["temp_unit_"];
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../S/996.html#L30' title='Defined at 30 in src/units/ptr.hpp.'>unit_const_ptr</a> &amp; <a href='../D/12519.html' title='Multiple defined in 2 places.'>recall_unit</a> : <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()).<a href='../D/12514.html' title='Multiple defined in 2 places.'>recall_list</a>())
+<a id='L78' name='L78'></a>  78         <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79                 <strong class='reserved'>if</strong>(<a href='../D/12519.html' title='Multiple defined in 2 places.'>recall_unit</a>-&gt;<a href='../S/997.html#L297' title='Defined at 297 in src/units/unit.hpp.'>underlying_id</a>()==<a href='../S/997.html#L297' title='Defined at 297 in src/units/unit.hpp.'>underlying_id</a>)
+<a id='L80' name='L80'></a>  80                 <em class='brace'>{</em>
+<a id='L81' name='L81'></a>  81                         <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>.<a href='../D/12869.html' title='Multiple defined in 13 places.'>reset</a>(<strong class='reserved'>new</strong> <strong class='reserved'>class</strong> <a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>(*<a href='../D/12519.html' title='Multiple defined in 2 places.'>recall_unit</a>)); <em class='comment'>//TODO: is it necessary to make a copy?</em>
+<a id='L82' name='L82'></a>  82                         <strong class='reserved'>break</strong>;
+<a id='L83' name='L83'></a>  83                 <em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84         <em class='brace'>}</em>
+<a id='L85' name='L85'></a>  85         <strong class='reserved'>if</strong>(!<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>.<a href='../D/6774.html' title='Multiple defined in 42 places.'>get</a>()) <em class='brace'>{</em>
+<a id='L86' name='L86'></a>  86                 <strong class='reserved'>throw</strong> <a href='../D/2763.html' title='Multiple defined in 10 places.'>action</a>::<a href='../S/1239.html#L93' title='Defined at 93 in src/whiteboard/action.hpp.'>ctor_err</a>("recall: Invalid underlying_id");
+<a id='L87' name='L87'></a>  87         <em class='brace'>}</em>
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89         <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>.<a href='../D/12869.html' title='Multiple defined in 13 places.'>reset</a>(<a href='../S/996.html#L29' title='Defined at 29 in src/units/ptr.hpp.'>unit_ptr</a>(<strong class='reserved'>new</strong> <strong class='reserved'>class</strong> <a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a>(*<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>))); <em class='comment'>//makes copy of temp_unit_</em>
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91         <strong class='reserved'>this</strong>-&gt;<a href='../D/8869.html' title='Multiple defined in 40 places.'>init</a>();
+<a id='L92' name='L92'></a>  92 <em class='brace'>}</em>
+<a id='L93' name='L93'></a>  93 
+<a id='L94' name='L94'></a>  94 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/7990.html' title='Multiple referred from 129 places.'>init</a>()
+<a id='L95' name='L95'></a>  95 <em class='brace'>{</em>
+<a id='L96' name='L96'></a>  96         <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../S/1016.html#L1153' title='Defined at 1153 in src/units/unit.cpp.'>set_movement</a>(0, <strong class='reserved'>true</strong>);
+<a id='L97' name='L97'></a>  97         <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../S/997.html#L854' title='Defined at 854 in src/units/unit.hpp.'>set_attacks</a>(0);
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99         <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../D/13915.html' title='Multiple defined in 6 places.'>set_location</a>(<a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>);
+<a id='L100' name='L100'></a> 100         <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../S/1016.html#L1153' title='Defined at 1153 in src/units/unit.cpp.'>set_movement</a>(0, <strong class='reserved'>true</strong>);
+<a id='L101' name='L101'></a> 101         <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../S/997.html#L854' title='Defined at 854 in src/units/unit.hpp.'>set_attacks</a>(0);
+<a id='L102' name='L102'></a> 102         <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../S/997.html#L1329' title='Defined at 1329 in src/units/unit.hpp.'>anim_comp</a>().<a href='../S/1015.html#L63' title='Defined at 63 in src/units/animation_component.cpp.'>set_ghosted</a>(<strong class='reserved'>false</strong>);
+<a id='L103' name='L103'></a> 103         <a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>.<a href='../S/942.html#L115' title='Defined at 115 in src/fake_unit_ptr.cpp.'>place_on_fake_unit_manager</a>( <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/9922.html' title='Multiple used in 16 places.'>fake_units</a>);
+<a id='L104' name='L104'></a> 104 <em class='brace'>}</em>
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106 <a href='../R/11406.html' title='Multiple referred from 75 places.'>recall</a>::~<a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>()
+<a id='L107' name='L107'></a> 107 <em class='brace'>{</em>
+<a id='L108' name='L108'></a> 108 <em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109 
+<a id='L110' name='L110'></a> 110 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/2502.html' title='Multiple referred from 27 places.'>accept</a>(<a href='../S/1249.html#L31' title='Defined at 31 in src/whiteboard/visitor.hpp.'>visitor</a>&amp; <a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>)
+<a id='L111' name='L111'></a> 111 <em class='brace'>{</em>
+<a id='L112' name='L112'></a> 112         <a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>.<a href='../D/16097.html' title='Multiple defined in 30 places.'>visit</a>(<a href='../D/14350.html' title='Multiple defined in 6 places.'>shared_from_this</a>());
+<a id='L113' name='L113'></a> 113 <em class='brace'>}</em>
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/5333.html' title='Multiple referred from 112 places.'>execute</a>(<strong class='reserved'>bool</strong>&amp; <a href='../Y/19523.html' title='Multiple used in 83 places.'>success</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/7753.html' title='Multiple used in 27 places.'>complete</a>)
+<a id='L116' name='L116'></a> 116 <em class='brace'>{</em>
+<a id='L117' name='L117'></a> 117         <a href='../D/15011.html' title='Multiple defined in 3 places.'>team</a> &amp; <a href='../D/5198.html' title='Multiple defined in 5 places.'>current_team</a> = <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>());
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../D/15941.html' title='Multiple defined in 18 places.'>valid</a>());
+<a id='L120' name='L120'></a> 120         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>.<a href='../D/6774.html' title='Multiple defined in 42 places.'>get</a>());
+<a id='L121' name='L121'></a> 121         <a href='../D/15041.html' title='Multiple defined in 3 places.'>temporary_unit_hider</a> <strong class='reserved'>const</strong> <a href='../Y/17040.html' title='Multiple used in 8 places.'>raii</a>(*<a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>);
+<a id='L122' name='L122'></a> 122         <em class='comment'>//Give back the spent gold so we don't get "not enough gold" message</em>
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>int</strong> <a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a> = <a href='../D/5198.html' title='Multiple defined in 5 places.'>current_team</a>.<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>();
+<a id='L124' name='L124'></a> 124         <strong class='reserved'>if</strong> (<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>() &gt; -1) <em class='brace'>{</em>
+<a id='L125' name='L125'></a> 125                 <a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a>=<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>();
+<a id='L126' name='L126'></a> 126         <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127         <a href='../D/5198.html' title='Multiple defined in 5 places.'>current_team</a>.<a href='../S/1083.html#L378' title='Defined at 378 in src/team.hpp.'>get_side_actions</a>()-&gt;<a href='../S/1238.html#L620' title='Defined at 620 in src/whiteboard/side_actions.cpp.'>change_gold_spent_by</a>(-<a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a>);
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>bool</strong> <strong class='reserved'>const</strong> <a href='../D/12959.html' title='Multiple defined in 10 places.'>result</a> = <a href='../S/747.html#L31' title='Defined at 31 in src/synced_context.hpp.'>synced_context</a>::<a href='../S/767.html#L105' title='Defined at 105 in src/synced_context.cpp.'>run_and_throw</a>("recall",
+<a id='L129' name='L129'></a> 129                 <a href='../S/974.html#L23' title='Defined at 23 in src/replay_helper.hpp.'>replay_helper</a>::<a href='../S/87.html#L34' title='Defined at 34 in src/replay_helper.cpp.'>get_recall</a>(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>(), <a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>, <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../S/1099.html#L220' title='Defined at 220 in src/map/location.hpp.'>null_location</a>()),
+<a id='L130' name='L130'></a> 130                 <strong class='reserved'>true</strong>,
+<a id='L131' name='L131'></a> 131                 <strong class='reserved'>true</strong>,
+<a id='L132' name='L132'></a> 132                 <a href='../S/747.html#L31' title='Defined at 31 in src/synced_context.hpp.'>synced_context</a>::<a href='../S/767.html#L159' title='Defined at 159 in src/synced_context.cpp.'>ignore_error_function</a>);
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134         <strong class='reserved'>if</strong> (!<a href='../D/12959.html' title='Multiple defined in 10 places.'>result</a>) <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                 <a href='../D/5198.html' title='Multiple defined in 5 places.'>current_team</a>.<a href='../S/1083.html#L378' title='Defined at 378 in src/team.hpp.'>get_side_actions</a>()-&gt;<a href='../S/1238.html#L620' title='Defined at 620 in src/whiteboard/side_actions.cpp.'>change_gold_spent_by</a>(<a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a>);
+<a id='L136' name='L136'></a> 136         <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137         <a href='../Y/19523.html' title='Multiple used in 83 places.'>success</a> = <a href='../Y/7753.html' title='Multiple used in 27 places.'>complete</a> = <a href='../D/12959.html' title='Multiple defined in 10 places.'>result</a>;
+<a id='L138' name='L138'></a> 138 <em class='brace'>}</em>
+<a id='L139' name='L139'></a> 139 
+<a id='L140' name='L140'></a> 140 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/3005.html' title='Multiple referred from 8 places.'>apply_temp_modifier</a>(<a href='../D/15641.html' title='Multiple defined in 2 places.'>unit_map</a>&amp; <a href='../D/15641.html' title='Multiple defined in 2 places.'>unit_map</a>)
+<a id='L141' name='L141'></a> 141 <em class='brace'>{</em>
+<a id='L142' name='L142'></a> 142         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../D/15941.html' title='Multiple defined in 18 places.'>valid</a>());
+<a id='L143' name='L143'></a> 143         <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/13915.html' title='Multiple defined in 6 places.'>set_location</a>(<a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>);
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145         <a href='../S/1241.html#L27' title='Defined at 27 in src/whiteboard/typedefs.hpp.'>DBG_WB</a> &lt;&lt; "Inserting future recall " &lt;&lt; <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>() &lt;&lt; " [" &lt;&lt; <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>()
+<a id='L146' name='L146'></a> 146                         &lt;&lt; "] at position " &lt;&lt; <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/7707.html' title='Multiple defined in 4 places.'>get_location</a>() &lt;&lt; ".\n";
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148         <em class='comment'>//temporarily remove unit from recall list</em>
+<a id='L149' name='L149'></a> 149         <a href='../S/996.html#L29' title='Defined at 29 in src/units/ptr.hpp.'>unit_ptr</a> <a href='../Y/12527.html' title='Multiple used in 755 places.'>it</a> = <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()).<a href='../D/12514.html' title='Multiple defined in 2 places.'>recall_list</a>().<a href='../S/1055.html#L76' title='Defined at 76 in src/recall_list_manager.cpp.'>extract_if_matches_id</a>(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>());
+<a id='L150' name='L150'></a> 150         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../Y/12527.html' title='Multiple used in 755 places.'>it</a>);
+<a id='L151' name='L151'></a> 151 
+<a id='L152' name='L152'></a> 152         <em class='comment'>//Add cost to money spent on recruits.</em>
+<a id='L153' name='L153'></a> 153         <strong class='reserved'>int</strong> <a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a> = <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()).<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>();
+<a id='L154' name='L154'></a> 154         <strong class='reserved'>if</strong> (<a href='../Y/12527.html' title='Multiple used in 755 places.'>it</a>-&gt;<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>() &gt; -1) <em class='brace'>{</em>
+<a id='L155' name='L155'></a> 155                 <a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a> = <a href='../Y/12527.html' title='Multiple used in 755 places.'>it</a>-&gt;<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>();
+<a id='L156' name='L156'></a> 156         <em class='brace'>}</em>
+<a id='L157' name='L157'></a> 157 
+<a id='L158' name='L158'></a> 158         <em class='comment'>// Temporarily insert unit into unit_map</em>
+<a id='L159' name='L159'></a> 159         <em class='comment'>//unit map takes ownership of temp_unit</em>
+<a id='L160' name='L160'></a> 160         <a href='../D/15641.html' title='Multiple defined in 2 places.'>unit_map</a>.<a href='../D/8955.html' title='Multiple defined in 13 places.'>insert</a>(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>);
+<a id='L161' name='L161'></a> 161 
+<a id='L162' name='L162'></a> 162         <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()).<a href='../S/1083.html#L378' title='Defined at 378 in src/team.hpp.'>get_side_actions</a>()-&gt;<a href='../S/1238.html#L620' title='Defined at 620 in src/whiteboard/side_actions.cpp.'>change_gold_spent_by</a>(<a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a>);
+<a id='L163' name='L163'></a> 163         <em class='comment'>// Update gold in top bar</em>
+<a id='L164' name='L164'></a> 164         <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../S/1167.html#L55' title='Defined at 55 in src/reports.hpp.'>screen</a>-&gt;<a href='../S/966.html#L292' title='Defined at 292 in src/display.hpp.'>invalidate_game_status</a>();
+<a id='L165' name='L165'></a> 165 <em class='brace'>}</em>
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/11643.html' title='Multiple referred from 8 places.'>remove_temp_modifier</a>(<a href='../D/15641.html' title='Multiple defined in 2 places.'>unit_map</a>&amp; <a href='../D/15641.html' title='Multiple defined in 2 places.'>unit_map</a>)
+<a id='L168' name='L168'></a> 168 <em class='brace'>{</em>
+<a id='L169' name='L169'></a> 169         <a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a> = <a href='../D/15641.html' title='Multiple defined in 2 places.'>unit_map</a>.<a href='../D/6116.html' title='Multiple defined in 3 places.'>extract</a>(<a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>);
+<a id='L170' name='L170'></a> 170         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>.<a href='../D/6774.html' title='Multiple defined in 42 places.'>get</a>());
+<a id='L171' name='L171'></a> 171 
+<a id='L172' name='L172'></a> 172         <em class='comment'>//Put unit back into recall list</em>
+<a id='L173' name='L173'></a> 173         <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()).<a href='../D/12514.html' title='Multiple defined in 2 places.'>recall_list</a>().<a href='../D/2801.html' title='Multiple defined in 10 places.'>add</a>(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>);
+<a id='L174' name='L174'></a> 174 <em class='brace'>}</em>
+<a id='L175' name='L175'></a> 175 
+<a id='L176' name='L176'></a> 176 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/5026.html' title='Multiple referred from 17 places.'>draw_hex</a>(<a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <strong class='reserved'>const</strong>&amp; <a href='../Y/11569.html' title='Multiple used in 414 places.'>hex</a>)
+<a id='L177' name='L177'></a> 177 <em class='brace'>{</em>
+<a id='L178' name='L178'></a> 178         <strong class='reserved'>if</strong> (<a href='../Y/11569.html' title='Multiple used in 414 places.'>hex</a> == <a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>)
+<a id='L179' name='L179'></a> 179         <em class='brace'>{</em>
+<a id='L180' name='L180'></a> 180                 <strong class='reserved'>const</strong> <strong class='reserved'>double</strong> <a href='../Y/22267.html' title='Multiple used in 106 places.'>x_offset</a> = 0.5;
+<a id='L181' name='L181'></a> 181                 <strong class='reserved'>const</strong> <strong class='reserved'>double</strong> <a href='../Y/22386.html' title='Multiple used in 106 places.'>y_offset</a> = 0.7;
+<a id='L182' name='L182'></a> 182                 <em class='comment'>//position 0,0 in the hex is the upper left corner</em>
+<a id='L183' name='L183'></a> 183                 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19430.html' title='Multiple used in 264 places.'>stringstream</a> <a href='../Y/15431.html' title='Multiple used in 9 places.'>number_text</a>;
+<a id='L184' name='L184'></a> 184                 <a href='../D/15576.html' title='Multiple defined in 4 places.'>unit</a> &amp;<a href='../Y/12527.html' title='Multiple used in 755 places.'>it</a> = *<a href='../D/8114.html' title='Multiple defined in 12 places.'>get_unit</a>();
+<a id='L185' name='L185'></a> 185                 <strong class='reserved'>int</strong> <a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a> = <a href='../D/14765.html' title='Multiple defined in 3 places.'>statistics</a>::<a href='../S/1028.html#L534' title='Defined at 534 in src/statistics.cpp.'>un_recall_unit_cost</a>(<a href='../Y/12527.html' title='Multiple used in 755 places.'>it</a>);
+<a id='L186' name='L186'></a> 186                 <strong class='reserved'>if</strong> (<a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a> &lt; 0) <em class='brace'>{</em>
+<a id='L187' name='L187'></a> 187                         <a href='../Y/15431.html' title='Multiple used in 9 places.'>number_text</a> &lt;&lt; <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/21085.html' title='Multiple used in 11 places.'>unicode_minus</a> &lt;&lt; <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>().<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()).<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>();
+<a id='L188' name='L188'></a> 188                 <em class='brace'>}</em>
+<a id='L189' name='L189'></a> 189                 <strong class='reserved'>else</strong> <em class='brace'>{</em>
+<a id='L190' name='L190'></a> 190                         <a href='../Y/15431.html' title='Multiple used in 9 places.'>number_text</a> &lt;&lt; <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/21085.html' title='Multiple used in 11 places.'>unicode_minus</a> &lt;&lt; <a href='../D/4958.html' title='Multiple defined in 12 places.'>cost</a>;
+<a id='L191' name='L191'></a> 191                 <em class='brace'>}</em>
+<a id='L192' name='L192'></a> 192                 <a href='../Y/18861.html' title='Multiple used in 1749 places.'>size_t</a> <a href='../D/6453.html' title='Multiple defined in 3 places.'>font_size</a> = 16;
+<a id='L193' name='L193'></a> 193                 <a href='../S/976.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../D/4614.html' title='Multiple defined in 5 places.'>color</a> <em class='brace'>{</em>255, 0, 0<em class='brace'>}</em>; <em class='comment'>//red</em>
+<a id='L194' name='L194'></a> 194                 <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../S/1167.html#L55' title='Defined at 55 in src/reports.hpp.'>screen</a>-&gt;<a href='../S/683.html#L1524' title='Defined at 1524 in src/display.cpp.'>draw_text_in_hex</a>(<a href='../Y/11569.html' title='Multiple used in 414 places.'>hex</a>, <a href='../D/5489.html' title='Multiple defined in 23 places.'>display</a>::<a href='../S/966.html#L820' title='Defined at 820 in src/display.hpp.'>LAYER_ACTIONS_NUMBERING</a>,
+<a id='L195' name='L195'></a> 195                                                 <a href='../Y/15431.html' title='Multiple used in 9 places.'>number_text</a>.<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>(), <a href='../D/6453.html' title='Multiple defined in 3 places.'>font_size</a>, <a href='../D/4614.html' title='Multiple defined in 5 places.'>color</a>, <a href='../Y/22267.html' title='Multiple used in 106 places.'>x_offset</a>, <a href='../Y/22386.html' title='Multiple used in 106 places.'>y_offset</a>);
+<a id='L196' name='L196'></a> 196         <em class='brace'>}</em>
+<a id='L197' name='L197'></a> 197 <em class='brace'>}</em>
+<a id='L198' name='L198'></a> 198 
+<a id='L199' name='L199'></a> 199 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/11476.html' title='Multiple referred from 40 places.'>redraw</a>()
+<a id='L200' name='L200'></a> 200 <em class='brace'>{</em>
+<a id='L201' name='L201'></a> 201         <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../S/1167.html#L55' title='Defined at 55 in src/reports.hpp.'>screen</a>-&gt;<a href='../D/9195.html' title='Multiple defined in 6 places.'>invalidate</a>(<a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>);
+<a id='L202' name='L202'></a> 202 <em class='brace'>}</em>
+<a id='L203' name='L203'></a> 203 
+<a id='L204' name='L204'></a> 204 <a href='../D/2763.html' title='Multiple defined in 10 places.'>action</a>::<a href='../D/5980.html' title='Multiple defined in 22 places.'>error</a> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/3836.html' title='Multiple referred from 9 places.'>check_validity</a>() <strong class='reserved'>const</strong>
+<a id='L205' name='L205'></a> 205 <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206         <em class='comment'>//Check that destination hex is still free</em>
+<a id='L207' name='L207'></a> 207         <strong class='reserved'>if</strong>(<a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15686.html' title='Multiple defined in 8 places.'>units</a>().<a href='../D/6279.html' title='Multiple defined in 39 places.'>find</a>(<a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>) != <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15686.html' title='Multiple defined in 8 places.'>units</a>().<a href='../D/5899.html' title='Multiple defined in 28 places.'>end</a>()) <em class='brace'>{</em>
+<a id='L208' name='L208'></a> 208                 <strong class='reserved'>return</strong> <a href='../S/1239.html#L109' title='Defined at 109 in src/whiteboard/action.hpp.'>LOCATION_OCCUPIED</a>;
+<a id='L209' name='L209'></a> 209         <em class='brace'>}</em>
+<a id='L210' name='L210'></a> 210         <em class='comment'>//Check that unit to recall is still in side's recall list</em>
+<a id='L211' name='L211'></a> 211         <strong class='reserved'>if</strong>( !<a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>()[<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()].<a href='../D/12514.html' title='Multiple defined in 2 places.'>recall_list</a>().<a href='../D/6302.html' title='Multiple defined in 2 places.'>find_if_matches_id</a>(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>()) ) <em class='brace'>{</em>
+<a id='L212' name='L212'></a> 212                 <strong class='reserved'>return</strong> <a href='../S/1239.html#L114' title='Defined at 114 in src/whiteboard/action.hpp.'>UNIT_UNAVAILABLE</a>;
+<a id='L213' name='L213'></a> 213         <em class='brace'>}</em>
+<a id='L214' name='L214'></a> 214         <em class='comment'>//Check that there is still enough gold to recall this unit</em>
+<a id='L215' name='L215'></a> 215         <strong class='reserved'>if</strong>(<a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>()[<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()].<a href='../D/12509.html' title='Multiple defined in 3 places.'>recall_cost</a>() &gt; <a href='../D/12944.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../Y/10651.html' title='Multiple used in 670 places.'>gameboard</a>-&gt;<a href='../D/15029.html' title='Multiple defined in 8 places.'>teams</a>()[<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>()].<a href='../D/8269.html' title='Multiple defined in 3 places.'>gold</a>()) <em class='brace'>{</em>
+<a id='L216' name='L216'></a> 216                 <strong class='reserved'>return</strong> <a href='../S/1239.html#L115' title='Defined at 115 in src/whiteboard/action.hpp.'>NOT_ENOUGH_GOLD</a>;
+<a id='L217' name='L217'></a> 217         <em class='brace'>}</em>
+<a id='L218' name='L218'></a> 218         <em class='comment'>//Check that there is a leader available to recall this unit</em>
+<a id='L219' name='L219'></a> 219         <strong class='reserved'>if</strong>(!<a href='../S/1243.html#L79' title='Defined at 79 in src/whiteboard/utility.cpp.'>find_recruiter</a>(<a href='../D/15019.html' title='Multiple defined in 2 places.'>team_index</a>(),<a href='../S/1233.html#L68' title='Defined at 68 in src/whiteboard/recall.hpp.'>get_recall_hex</a>())) <em class='brace'>{</em>
+<a id='L220' name='L220'></a> 220                 <strong class='reserved'>return</strong> <a href='../S/1239.html#L116' title='Defined at 116 in src/whiteboard/action.hpp.'>NO_LEADER</a>;
+<a id='L221' name='L221'></a> 221         <em class='brace'>}</em>
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223         <strong class='reserved'>return</strong> <a href='../D/1613.html' title='Multiple defined in 2 places.'>OK</a>;
+<a id='L224' name='L224'></a> 224 <em class='brace'>}</em>
+<a id='L225' name='L225'></a> 225 
+<a id='L226' name='L226'></a> 226 <em class='comment'>///@todo Find a better way to serialize unit_ because underlying_id isn't cutting it</em>
+<a id='L227' name='L227'></a> 227 <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/14005.html' title='Multiple referred from 107 places.'>to_config</a>() <strong class='reserved'>const</strong>
+<a id='L228' name='L228'></a> 228 <em class='brace'>{</em>
+<a id='L229' name='L229'></a> 229         <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a> <a href='../Y/10131.html' title='Multiple used in 30 places.'>final_cfg</a> = <a href='../D/2763.html' title='Multiple defined in 10 places.'>action</a>::<a href='../D/15260.html' title='Multiple defined in 51 places.'>to_config</a>();
+<a id='L230' name='L230'></a> 230 
+<a id='L231' name='L231'></a> 231         <a href='../Y/10131.html' title='Multiple used in 30 places.'>final_cfg</a>["type"] = "recall";
+<a id='L232' name='L232'></a> 232         <a href='../Y/10131.html' title='Multiple used in 30 places.'>final_cfg</a>["temp_unit_"] = <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../Y/19887.html' title='Multiple used in 37 places.'>temp_unit_</a>-&gt;<a href='../S/997.html#L297' title='Defined at 297 in src/units/unit.hpp.'>underlying_id</a>());
+<a id='L233' name='L233'></a> 233 <em class='comment'>//      final_cfg["temp_cost_"] = temp_cost_; //Unnecessary</em>
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235         <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a> <a href='../Y/13347.html' title='Multiple used in 18 places.'>loc_cfg</a>;
+<a id='L236' name='L236'></a> 236         <a href='../Y/13347.html' title='Multiple used in 18 places.'>loc_cfg</a>["x"]=<a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>.<a href='../S/1099.html#L115' title='Defined at 115 in src/map/location.hpp.'>wml_x</a>();
+<a id='L237' name='L237'></a> 237         <a href='../Y/13347.html' title='Multiple used in 18 places.'>loc_cfg</a>["y"]=<a href='../Y/17198.html' title='Multiple used in 15 places.'>recall_hex_</a>.<a href='../S/1099.html#L116' title='Defined at 116 in src/map/location.hpp.'>wml_y</a>();
+<a id='L238' name='L238'></a> 238         <a href='../Y/10131.html' title='Multiple used in 30 places.'>final_cfg</a>.<a href='../D/2855.html' title='Multiple defined in 8 places.'>add_child</a>("recall_hex_",<a href='../Y/13347.html' title='Multiple used in 18 places.'>loc_cfg</a>);
+<a id='L239' name='L239'></a> 239 
+<a id='L240' name='L240'></a> 240         <strong class='reserved'>return</strong> <a href='../Y/10131.html' title='Multiple used in 30 places.'>final_cfg</a>;
+<a id='L241' name='L241'></a> 241 <em class='brace'>}</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/4901.html' title='Multiple referred from 4 places.'>do_hide</a>() <em class='brace'>{</em><a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../D/13850.html' title='Multiple defined in 2 places.'>set_hidden</a>(<strong class='reserved'>true</strong>);<em class='brace'>}</em>
+<a id='L244' name='L244'></a> 244 <strong class='reserved'>void</strong> <a href='../D/12505.html' title='Multiple defined in 5 places.'>recall</a>::<a href='../R/4960.html' title='Multiple referred from 4 places.'>do_show</a>() <em class='brace'>{</em><a href='../D/6166.html' title='Multiple defined in 2 places.'>fake_unit_</a>-&gt;<a href='../D/13850.html' title='Multiple defined in 2 places.'>set_hidden</a>(<strong class='reserved'>false</strong>);<em class='brace'>}</em>
+<a id='L245' name='L245'></a> 245 
+<a id='L246' name='L246'></a> 246 <em class='brace'>}</em> <em class='comment'>//end namespace wb</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L54'>[^]</a><a href='#L244'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

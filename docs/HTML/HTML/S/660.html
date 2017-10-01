@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/log.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/log.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L119'>[^]</a><a href='#L133'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2029.html' title='Multiple included from 304 places.'>INCLUDED FROM</a></h2>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L119' title='Defined at 119.'>severity_</a></li>
+<li><a href='#L123' title='Defined at 123.'>dont_log</a></li>
+<li><a href='#L128' title='Defined at 128.'>get_severity</a></li>
+<li><a href='#L133' title='Defined at 133.'>get_name</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 by David White &lt;dave@whitevine.net&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>                 2004 - 2015 by Guillaume Melquiond &lt;guillaume.melquiond@gmail.com&gt;</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L5' name='L5'></a>   5 <em class='comment'></em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   (at your option) any later version.</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L12' name='L12'></a>  12 <em class='comment'></em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L14' name='L14'></a>  14 <em class='comment'>*/</em>
+<a id='L15' name='L15'></a>  15 
+<a id='L16' name='L16'></a>  16 <em class='comment'>/**</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * @file</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> * Standard logging facilities (interface).</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> *</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * To use one of the standard log channels, put something like the following at the start</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * of your .cpp file:</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> *</em>
+<a id='L23' name='L23'></a>  23 <em class='comment'> * static lg::log_domain log_display("display");</em>
+<a id='L24' name='L24'></a>  24 <em class='comment'> * #define ERR_DP LOG_STREAM(err, log_display)</em>
+<a id='L25' name='L25'></a>  25 <em class='comment'> * #define LOG_DP LOG_STREAM(info, log_display)</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> *</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> * Then stream logging info to ERR_DP, or LOG_DP, as if it were an ostream like std::cerr.</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * (In general it will actually be std::cerr at runtime when logging is enabled.)</em>
+<a id='L29' name='L29'></a>  29 <em class='comment'> *</em>
+<a id='L30' name='L30'></a>  30 <em class='comment'> * LOG_DP &lt;&lt; "Found a window resize event: ...\n";</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> *</em>
+<a id='L32' name='L32'></a>  32 <em class='comment'> * Please do not use iomanip features like std::hex directly on the logger. Because of the</em>
+<a id='L33' name='L33'></a>  33 <em class='comment'> * design of the logger, this will result in all of the loggers (in fact std::cerr) being</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * imbued with std::hex. Please use a formatter instead.</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> *</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * #include "formatter.hpp"</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> *</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * LOG_DP &lt;&lt; (formatter() &lt;&lt; "The random seed is: '" &lt;&lt; std::hex &lt;&lt; seed &lt;&lt; "'\n").str();</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> *</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * It might be nice if somehow the logger class / macros could support using iomanip</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> * things directly, but right now it doesn't, and it seems that it would complicate the</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> * design greatly enough that it doesn't seem worth it.</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> */</em>
+<a id='L44' name='L44'></a>  44 
+<a id='L45' name='L45'></a>  45 <em class='sharp'>#pragma</em> once
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <em class='sharp'>#include</em> "<a href='1166.html'>global.hpp</a>"
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49 <em class='sharp'>#ifndef</em> <a href='../D/2664.html' title='Multiple defined in 2 places.'>__func__</a>
+<a id='L50' name='L50'></a>  50 <em class='sharp'> #ifdef</em> <a href='../Y/4860.html' title='Multiple used in 5 places.'>__FUNCTION__</a>
+<a id='L51' name='L51'></a>  51 <em class='sharp'>  #define</em> <a href='../R/2427.html' title='Multiple referred from 69 places.'>__func__</a> <a href='../Y/4860.html' title='Multiple used in 5 places.'>__FUNCTION__</a>
+<a id='L52' name='L52'></a>  52 <em class='sharp'> #endif</em>
+<a id='L53' name='L53'></a>  53 <em class='sharp'>#endif</em>
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55 <em class='sharp'>#include</em> &lt;iostream&gt; <em class='comment'>// needed else all files including log.hpp need to do it.</em>
+<a id='L56' name='L56'></a>  56 <em class='sharp'>#include</em> &lt;sstream&gt; <em class='comment'>// as above. iostream (actually, iosfwd) declares stringstream as an incomplete type, but does not define it</em>
+<a id='L57' name='L57'></a>  57 <em class='sharp'>#include</em> &lt;string&gt;
+<a id='L58' name='L58'></a>  58 <em class='sharp'>#include</em> &lt;utility&gt;
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 <em class='sharp'>#include</em> &lt;boost/date_time/posix_time/posix_time_types.hpp&gt;
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62 <strong class='reserved'>using</strong> <a href='../D/3739.html' title='Multiple defined in 4 places.'>boost</a>::<a href='../Y/16574.html' title='Multiple used in 9 places.'>posix_time</a>::<a href='../Y/16907.html' title='Multiple used in 2 places.'>ptime</a>;
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64 <strong class='reserved'>namespace</strong> <a href='../R/8887.html' title='Multiple referred from 500 places.'>lg</a> <em class='brace'>{</em>
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66 <em class='comment'>/**</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'> * Helper class to redirect the output of the logger in a certain scope.</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'> *</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'> * The main usage of the redirection is for the unit tests to validate the</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'> * output on the logger with the expected output.</em>
+<a id='L71' name='L71'></a>  71 <em class='comment'> */</em>
+<a id='L72' name='L72'></a>  72 <strong class='reserved'>class</strong> <a href='../R/11473.html' title='Multiple referred from 10 places.'>redirect_output_setter</a>
+<a id='L73' name='L73'></a>  73 <em class='brace'>{</em>
+<a id='L74' name='L74'></a>  74 <strong class='reserved'>public</strong>:
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76         <em class='comment'>/**</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'>         * Constructor.</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'>         *</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'>         * @param stream              The stream to direct the output to.</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'>         */</em>
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>explicit</strong> <a href='../D/12576.html' title='Multiple defined in 3 places.'>redirect_output_setter</a>(<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a>&amp; <a href='../S/764.html#L107' title='Defined at 107 in src/buffered_istream.hpp.'>stream</a>);
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83         ~<a href='../D/12576.html' title='Multiple defined in 3 places.'>redirect_output_setter</a>();
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85 <strong class='reserved'>private</strong>:
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87         <em class='comment'>/**</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'>         * The previously set redirection.</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>         *</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>         * This value is stored here to be restored in this destructor.</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>         */</em>
+<a id='L92' name='L92'></a>  92         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a>* <a href='../Y/15626.html' title='Multiple used in 3 places.'>old_stream_</a>;
+<a id='L93' name='L93'></a>  93 <em class='brace'>}</em>;
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95 <strong class='reserved'>class</strong> <a href='../D/10043.html' title='Multiple defined in 4 places.'>logger</a>;
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97 <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/16108.html' title='Multiple used in 438 places.'>pair</a>&lt;<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>, <strong class='reserved'>int</strong>&gt; <a href='../R/9104.html' title='Multiple referred from 5 places.'>logd</a>;
+<a id='L98' name='L98'></a>  98 
+<a id='L99' name='L99'></a>  99 <strong class='reserved'>class</strong> <a href='../R/9081.html' title='Multiple referred from 324 places.'>log_domain</a> <em class='brace'>{</em>
+<a id='L100' name='L100'></a> 100         <a href='../S/660.html#L97' title='Defined at 97 in src/log.hpp.'>logd</a> *<a href='../Y/9035.html' title='Multiple used in 13 places.'>domain_</a>;
+<a id='L101' name='L101'></a> 101 <strong class='reserved'>public</strong>:
+<a id='L102' name='L102'></a> 102         <a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a>(<strong class='reserved'>char</strong> <strong class='reserved'>const</strong> *<a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>);
+<a id='L103' name='L103'></a> 103         <strong class='reserved'>friend</strong> <strong class='reserved'>class</strong> <a href='../D/10043.html' title='Multiple defined in 4 places.'>logger</a>;
+<a id='L104' name='L104'></a> 104 <em class='brace'>}</em>;
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106 <strong class='reserved'>bool</strong> <a href='../D/13916.html' title='Multiple defined in 2 places.'>set_log_domain_severity</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>, <strong class='reserved'>int</strong> <a href='../Y/18595.html' title='Multiple used in 38 places.'>severity</a>);
+<a id='L107' name='L107'></a> 107 <strong class='reserved'>bool</strong> <a href='../D/13916.html' title='Multiple defined in 2 places.'>set_log_domain_severity</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>, <strong class='reserved'>const</strong> <a href='../D/10043.html' title='Multiple defined in 4 places.'>logger</a> &amp;<a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>);
+<a id='L108' name='L108'></a> 108 <strong class='reserved'>bool</strong> <a href='../S/847.html#L142' title='Defined at 142 in src/log.cpp.'>get_log_domain_severity</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>, <strong class='reserved'>int</strong> &amp;<a href='../Y/18595.html' title='Multiple used in 38 places.'>severity</a>);
+<a id='L109' name='L109'></a> 109 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/847.html#L151' title='Defined at 151 in src/log.cpp.'>list_logdomains</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6249.html' title='Multiple defined in 4 places.'>filter</a>);
+<a id='L110' name='L110'></a> 110 
+<a id='L111' name='L111'></a> 111 <strong class='reserved'>void</strong> <a href='../D/14156.html' title='Multiple defined in 2 places.'>set_strict_severity</a>(<strong class='reserved'>int</strong> <a href='../Y/18595.html' title='Multiple used in 38 places.'>severity</a>);
+<a id='L112' name='L112'></a> 112 <strong class='reserved'>void</strong> <a href='../D/14156.html' title='Multiple defined in 2 places.'>set_strict_severity</a>(<strong class='reserved'>const</strong> <a href='../D/10043.html' title='Multiple defined in 4 places.'>logger</a> &amp;<a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>);
+<a id='L113' name='L113'></a> 113 <strong class='reserved'>bool</strong> <a href='../S/847.html#L171' title='Defined at 171 in src/log.cpp.'>broke_strict</a>();
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115 <strong class='reserved'>class</strong> <a href='../R/9105.html' title='Multiple referred from 78 places.'>logger</a> <em class='brace'>{</em>
+<a id='L116' name='L116'></a> 116         <strong class='reserved'>char</strong> <strong class='reserved'>const</strong> *<a href='../D/11311.html' title='Multiple defined in 4 places.'>name_</a>;
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>int</strong> <a href='../S/660.html#L119' title='Defined at 119 in src/log.hpp.'>severity_</a>;
+<a id='L118' name='L118'></a> 118 <strong class='reserved'>public</strong>:
+<a id='L119' name='L119'></a> 119         <a href='../D/10043.html' title='Multiple defined in 4 places.'>logger</a>(<strong class='reserved'>char</strong> <strong class='reserved'>const</strong> *<a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>, <strong class='reserved'>int</strong> <a href='../Y/18595.html' title='Multiple used in 38 places.'>severity</a>): <a href='../D/11311.html' title='Multiple defined in 4 places.'>name_</a>(<a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>), <a href='../R/13155.html' title='Multiple referred from 5 places.'>severity_</a>(<a href='../Y/18595.html' title='Multiple used in 38 places.'>severity</a>) <em class='brace'>{</em><em class='brace'>}</em>
+<a id='L120' name='L120'></a> 120         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a> &amp;<strong class='reserved'>operator</strong>()(<a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a> <strong class='reserved'>const</strong> &amp;<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>,
+<a id='L121' name='L121'></a> 121                 <strong class='reserved'>bool</strong> <a href='../Y/18673.html' title='Multiple used in 3 places.'>show_names</a> = <strong class='reserved'>true</strong>, <strong class='reserved'>bool</strong> <a href='../S/847.html#L263' title='Defined at 263 in src/log.cpp.'>do_indent</a> = <strong class='reserved'>false</strong>) <strong class='reserved'>const</strong>;
+<a id='L122' name='L122'></a> 122 
+<a id='L123' name='L123'></a> 123         <strong class='reserved'>bool</strong> <a href='../R/4991.html' title='Multiple referred from 13 places.'>dont_log</a>(<a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a> <strong class='reserved'>const</strong> &amp;<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>) <strong class='reserved'>const</strong>
+<a id='L124' name='L124'></a> 124         <em class='brace'>{</em>
+<a id='L125' name='L125'></a> 125                 <strong class='reserved'>return</strong> <a href='../S/660.html#L119' title='Defined at 119 in src/log.hpp.'>severity_</a> &gt; <a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>.<a href='../Y/9035.html' title='Multiple used in 13 places.'>domain_</a>-&gt;<a href='../Y/18207.html' title='Multiple used in 1330 places.'>second</a>;
+<a id='L126' name='L126'></a> 126         <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128         <strong class='reserved'>int</strong> <a href='../R/7154.html' title='Multiple referred from 17 places.'>get_severity</a>() <strong class='reserved'>const</strong>
+<a id='L129' name='L129'></a> 129         <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130                 <strong class='reserved'>return</strong> <a href='../S/660.html#L119' title='Defined at 119 in src/log.hpp.'>severity_</a>;
+<a id='L131' name='L131'></a> 131         <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../R/6951.html' title='Multiple referred from 102 places.'>get_name</a>() <strong class='reserved'>const</strong>
+<a id='L134' name='L134'></a> 134         <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135                 <strong class='reserved'>return</strong> <a href='../D/11311.html' title='Multiple defined in 4 places.'>name_</a>;
+<a id='L136' name='L136'></a> 136         <em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137 <em class='brace'>}</em>;
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139 <strong class='reserved'>void</strong> <a href='../S/847.html#L76' title='Defined at 76 in src/log.cpp.'>timestamps</a>(<strong class='reserved'>bool</strong>);
+<a id='L140' name='L140'></a> 140 <strong class='reserved'>void</strong> <a href='../S/847.html#L77' title='Defined at 77 in src/log.cpp.'>precise_timestamps</a>(<strong class='reserved'>bool</strong>);
+<a id='L141' name='L141'></a> 141 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/8089.html' title='Multiple defined in 2 places.'>get_timestamp</a>(<strong class='reserved'>const</strong> <a href='../Y/20322.html' title='Multiple used in 138 places.'>time_t</a>&amp; <a href='../Y/19629.html' title='Multiple used in 1455 places.'>t</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/6475.html' title='Multiple defined in 2 places.'>format</a>="%Y%m%d %H:%M:%S ");
+<a id='L142' name='L142'></a> 142 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/847.html#L182' title='Defined at 182 in src/log.cpp.'>get_timespan</a>(<strong class='reserved'>const</strong> <a href='../Y/20322.html' title='Multiple used in 138 places.'>time_t</a>&amp; <a href='../Y/19629.html' title='Multiple used in 1455 places.'>t</a>);
+<a id='L143' name='L143'></a> 143 
+<a id='L144' name='L144'></a> 144 <a href='../D/10043.html' title='Multiple defined in 4 places.'>logger</a> &amp;<a href='../S/847.html#L79' title='Defined at 79 in src/log.cpp.'>err</a>(), &amp;<a href='../S/847.html#L85' title='Defined at 85 in src/log.cpp.'>warn</a>(), &amp;<a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>(), &amp;<a href='../D/5266.html' title='Multiple defined in 16 places.'>debug</a>();
+<a id='L145' name='L145'></a> 145 <a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a>&amp; <a href='../S/847.html#L105' title='Defined at 105 in src/log.cpp.'>general</a>();
+<a id='L146' name='L146'></a> 146 
+<a id='L147' name='L147'></a> 147 <strong class='reserved'>class</strong> <a href='../R/12195.html' title='Multiple referred from 9 places.'>scope_logger</a>
+<a id='L148' name='L148'></a> 148 <em class='brace'>{</em>
+<a id='L149' name='L149'></a> 149         <a href='../Y/16907.html' title='Multiple used in 2 places.'>ptime</a> <a href='../S/1030.html#L139' title='Defined at 139 in src/events.hpp.'>ticks_</a>;
+<a id='L150' name='L150'></a> 150         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/916.html#L72' title='Defined at 72 in src/campaign_server/fs_commit.hpp.'>ostream</a> *<a href='../Y/15979.html' title='Multiple used in 32 places.'>output_</a>;
+<a id='L151' name='L151'></a> 151         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/19366.html' title='Multiple used in 51 places.'>str_</a>;
+<a id='L152' name='L152'></a> 152 <strong class='reserved'>public</strong>:
+<a id='L153' name='L153'></a> 153         scope_logger(<a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a> <strong class='reserved'>const</strong> &amp;<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <strong class='reserved'>const</strong> <strong class='reserved'>char</strong>* <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>) :
+<a id='L154' name='L154'></a> 154                 <a href='../Y/15979.html' title='Multiple used in 32 places.'>output_</a>(<a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>)
+<a id='L155' name='L155'></a> 155         <em class='brace'>{</em>
+<a id='L156' name='L156'></a> 156                 <strong class='reserved'>if</strong> (!<a href='../D/5266.html' title='Multiple defined in 16 places.'>debug</a>().<a href='../S/660.html#L123' title='Defined at 123 in src/log.hpp.'>dont_log</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)) <a href='../S/847.html#L240' title='Defined at 240 in src/log.cpp.'>do_log_entry</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>);
+<a id='L157' name='L157'></a> 157         <em class='brace'>}</em>
+<a id='L158' name='L158'></a> 158         scope_logger(<a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a> <strong class='reserved'>const</strong> &amp;<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>) :
+<a id='L159' name='L159'></a> 159                 <a href='../Y/15979.html' title='Multiple used in 32 places.'>output_</a>(<a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>)
+<a id='L160' name='L160'></a> 160         <em class='brace'>{</em>
+<a id='L161' name='L161'></a> 161                 <strong class='reserved'>if</strong> (!<a href='../D/5266.html' title='Multiple defined in 16 places.'>debug</a>().<a href='../S/660.html#L123' title='Defined at 123 in src/log.hpp.'>dont_log</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)) <a href='../S/847.html#L240' title='Defined at 240 in src/log.cpp.'>do_log_entry</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>);
+<a id='L162' name='L162'></a> 162         <em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163         ~scope_logger()
+<a id='L164' name='L164'></a> 164         <em class='brace'>{</em>
+<a id='L165' name='L165'></a> 165                 <strong class='reserved'>if</strong> (<a href='../Y/15979.html' title='Multiple used in 32 places.'>output_</a>) <a href='../S/847.html#L251' title='Defined at 251 in src/log.cpp.'>do_log_exit</a>();
+<a id='L166' name='L166'></a> 166         <em class='brace'>}</em>
+<a id='L167' name='L167'></a> 167         <strong class='reserved'>void</strong> <a href='../S/847.html#L263' title='Defined at 263 in src/log.cpp.'>do_indent</a>() <strong class='reserved'>const</strong>;
+<a id='L168' name='L168'></a> 168 <strong class='reserved'>private</strong>:
+<a id='L169' name='L169'></a> 169         <strong class='reserved'>void</strong> <a href='../S/847.html#L240' title='Defined at 240 in src/log.cpp.'>do_log_entry</a>(<a href='../D/10019.html' title='Multiple defined in 2 places.'>log_domain</a> <strong class='reserved'>const</strong> &amp;<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>) <a href='../D/1548.html' title='Multiple defined in 5 places.'>NOEXCEPT</a>;
+<a id='L170' name='L170'></a> 170         <strong class='reserved'>void</strong> <a href='../S/847.html#L251' title='Defined at 251 in src/log.cpp.'>do_log_exit</a>() <a href='../D/1548.html' title='Multiple defined in 5 places.'>NOEXCEPT</a>;
+<a id='L171' name='L171'></a> 171 <em class='brace'>}</em>;
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173 <em class='comment'>/**</em>
+<a id='L174' name='L174'></a> 174 <em class='comment'> * Use this logger to send errors due to deprecated WML.</em>
+<a id='L175' name='L175'></a> 175 <em class='comment'> * The preferred format is:</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'> * xxx is deprecated; support will be removed in version X. or</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'> * xxx is deprecated; support has been removed in version X.</em>
+<a id='L178' name='L178'></a> 178 <em class='comment'> *</em>
+<a id='L179' name='L179'></a> 179 <em class='comment'> * After every wml-event the errors are shown to the user,</em>
+<a id='L180' name='L180'></a> 180 <em class='comment'> * so they can inform the campaign maintainer.</em>
+<a id='L181' name='L181'></a> 181 <em class='comment'> */</em>
+<a id='L182' name='L182'></a> 182 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/19430.html' title='Multiple used in 264 places.'>stringstream</a>&amp; <a href='../D/16523.html' title='Multiple defined in 2 places.'>wml_error</a>();
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184 <em class='brace'>}</em> <em class='comment'>// namespace lg</em>
+<a id='L185' name='L185'></a> 185 
+<a id='L186' name='L186'></a> 186 <em class='sharp'>#define</em> <a href='../R/9096.html' title='Multiple referred from 19 places.'>log_scope</a>(<a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>) <a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/660.html#L147' title='Defined at 147 in src/log.hpp.'>scope_logger</a> <a href='../Y/18074.html' title='Multiple used in 2 places.'>scope_logging_object__</a>(<a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/847.html#L105' title='Defined at 105 in src/log.cpp.'>general</a>(), <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>);
+<a id='L187' name='L187'></a> 187 <em class='sharp'>#define</em> <a href='../R/9097.html' title='Multiple referred from 32 places.'>log_scope2</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>,<a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>) <a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../S/660.html#L147' title='Defined at 147 in src/log.hpp.'>scope_logger</a> <a href='../Y/18074.html' title='Multiple used in 2 places.'>scope_logging_object__</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>);
+<a id='L188' name='L188'></a> 188 
+<a id='L189' name='L189'></a> 189 <em class='sharp'>#define</em> <a href='../R/1011.html' title='Multiple referred from 690 places.'>LOG_STREAM</a>(<a href='../D/9793.html' title='Multiple defined in 11 places.'>level</a>, <a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>) <strong class='reserved'>if</strong> (<a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/9793.html' title='Multiple defined in 11 places.'>level</a>().<a href='../S/660.html#L123' title='Defined at 123 in src/log.hpp.'>dont_log</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)) ; <strong class='reserved'>else</strong> <a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/9793.html' title='Multiple defined in 11 places.'>level</a>()(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)
+<a id='L190' name='L190'></a> 190 
+<a id='L191' name='L191'></a> 191 <em class='comment'>// When using log_scope/log_scope2 it is nice to have all output indented.</em>
+<a id='L192' name='L192'></a> 192 <em class='sharp'>#define</em> <a href='../R/1012.html' title='Multiple referred from 35 places.'>LOG_STREAM_INDENT</a>(<a href='../D/9793.html' title='Multiple defined in 11 places.'>level</a>,<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>) <strong class='reserved'>if</strong> (<a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/9793.html' title='Multiple defined in 11 places.'>level</a>().<a href='../S/660.html#L123' title='Defined at 123 in src/log.hpp.'>dont_log</a>(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>)) ; <strong class='reserved'>else</strong> <a href='../D/9809.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/9793.html' title='Multiple defined in 11 places.'>level</a>()(<a href='../S/849.html#L198' title='Defined at 198 in src/gettext_boost.cpp.'>domain</a>, <strong class='reserved'>true</strong>, <strong class='reserved'>true</strong>)
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L119'>[^]</a><a href='#L133'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

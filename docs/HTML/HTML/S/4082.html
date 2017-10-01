@@ -1,0 +1,371 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>data/tools/addon_manager/html.py</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5641.html'>data</a>/<a href='../files/5804.html'>tools</a>/<a href='../files/5805.html'>addon_manager</a>/html.py</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L171'>[^]</a><a href='#L303'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'>DEFINITIONS</h2>
+This source file includes following definitions.
+<ol>
+<li><a href='#L171' title='Defined at 171.'>htmlescape</a></li>
+<li><a href='#L177' title='Defined at 177.'>urlencode</a></li>
+<li><a href='#L186' title='Defined at 186.'>output</a></li>
+<li><a href='#L195' title='Defined at 195.'>w</a></li>
+<li><a href='#L303' title='Defined at 303.'>make_icon_button</a></li>
+</ol>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 # encoding: utf-8
+<a id='L2' name='L2'></a>   2 
+<a id='L3' name='L3'></a>   3 import <a href='../Y/11759.html' title='Multiple used in 23 places.'>html</a>
+<a id='L4' name='L4'></a>   4 import <a href='../Y/11091.html' title='Multiple used in 35 places.'>glob</a>
+<a id='L5' name='L5'></a>   5 import <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>
+<a id='L6' name='L6'></a>   6 import <a href='../Y/19612.html' title='Multiple used in 228 places.'>sys</a>
+<a id='L7' name='L7'></a>   7 import <a href='../D/15224.html' title='Multiple defined in 4 places.'>time</a>
+<a id='L8' name='L8'></a>   8 import urllib.parse
+<a id='L9' name='L9'></a>   9 from <a href='../Y/19508.html' title='Multiple used in 36 places.'>subprocess</a> import <a href='../Y/2228.html' title='Multiple used in 15 places.'>Popen</a>
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11 <em class='sharp'>#</em>
+<a id='L12' name='L12'></a>  12 # HTML template bits
+<a id='L13' name='L13'></a>  13 <em class='sharp'>#</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 # HTML assets that need to be copied to the destination dir.
+<a id='L16' name='L16'></a>  16 <a href='../S/4082.html#L203' title='Referred from 203 in data/tools/addon_manager/html.py.'>HTML_RESOURCES</a> = (
+<a id='L17' name='L17'></a>  17     "style.css", "jquery.js", "tablesorter.js",
+<a id='L18' name='L18'></a>  18     "asc.gif", "bg.gif", "desc.gif" # Used by style.css:
+<a id='L19' name='L19'></a>  19 )
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <a href='../R/2149.html' title='Multiple referred from 2 places.'>WESMERE_CSS_VERSION</a> = "1.1.1"
+<a id='L22' name='L22'></a>  22 <a href='../R/2148.html' title='Multiple referred from 2 places.'>WESMERE_CSS_PREFIX</a> = "https://www.wesnoth.org"
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <a href='../Y/3114.html' title='Multiple used in 4 places.'>WESMERE_HEADER</a> = '''\
+<a id='L25' name='L25'></a>  25 &lt;!DOCTYPE html&gt;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 &lt;html class="no-js addonsweb" lang="en"&gt;
+<a id='L28' name='L28'></a>  28 &lt;head&gt;
+<a id='L29' name='L29'></a>  29     &lt;meta charset="utf-8" /&gt;
+<a id='L30' name='L30'></a>  30     &lt;meta name="viewport" content="width=device-width,initial-scale=1" /&gt;
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32     &lt;link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montaga%%7COpen+Sans:400,400i,700,700i" type="text/css" /&gt;
+<a id='L33' name='L33'></a>  33     &lt;link rel="icon" type="image/png" href="%(css_prefix)s/wesmere/img/favicon-32.png" sizes="32x32" /&gt;
+<a id='L34' name='L34'></a>  34     &lt;link rel="icon" type="image/png" href="%(css_prefix)s/wesmere/img/favicon-16.png" sizes="16x16" /&gt;
+<a id='L35' name='L35'></a>  35     &lt;link rel="stylesheet" type="text/css" href="%(css_prefix)s/wesmere/css/wesmere-%(css_version)s.css" /&gt;
+<a id='L36' name='L36'></a>  36     &lt;link rel="stylesheet" type="text/css" href="style.css" /&gt;
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38     &lt;title&gt;Wesnoth %(server_name)s Add-ons List - The Battle <strong class='reserved'>for</strong> Wesnoth&lt;/title&gt;
+<a id='L39' name='L39'></a>  39 
+<a id='L40' name='L40'></a>  40     &lt;script src="%(css_prefix)s/wesmere/js/modernizr.js"&gt;&lt;/script&gt;
+<a id='L41' name='L41'></a>  41     &lt;script src="jquery.js"&gt;&lt;/script&gt;
+<a id='L42' name='L42'></a>  42     &lt;script src="tablesorter.js"&gt;&lt;/script&gt;
+<a id='L43' name='L43'></a>  43     &lt;script&gt;
+<a id='L44' name='L44'></a>  44     $(document).ready(function() <em class='brace'>{</em>
+<a id='L45' name='L45'></a>  45         $("#campaigns").tablesorter(<em class='brace'>{</em>
+<a id='L46' name='L46'></a>  46             headers: <em class='brace'>{</em> 1: <em class='brace'>{</em> sorter: false <em class='brace'>}</em>, 2: <em class='brace'>{</em> sortInitialOrder: "asc" <em class='brace'>}</em> <em class='brace'>}</em>,
+<a id='L47' name='L47'></a>  47         <em class='brace'>}</em>);
+<a id='L48' name='L48'></a>  48     <em class='brace'>}</em>);
+<a id='L49' name='L49'></a>  49     &lt;/script&gt;
+<a id='L50' name='L50'></a>  50 &lt;/head&gt;
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 &lt;body&gt;
+<a id='L53' name='L53'></a>  53 
+<a id='L54' name='L54'></a>  54 &lt;div id="main"&gt;
+<a id='L55' name='L55'></a>  55 
+<a id='L56' name='L56'></a>  56 &lt;div id="nav" role="banner"&gt;
+<a id='L57' name='L57'></a>  57 &lt;div class="centerbox"&gt;
+<a id='L58' name='L58'></a>  58 
+<a id='L59' name='L59'></a>  59     &lt;div id="logo"&gt;
+<a id='L60' name='L60'></a>  60         &lt;a href="https://www.wesnoth.org/" aria-label="Wesnoth logo"&gt;&lt;/a&gt;
+<a id='L61' name='L61'></a>  61     &lt;/div&gt;
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63     &lt;ul id="navlinks"&gt;
+<a id='L64' name='L64'></a>  64         &lt;li&gt;&lt;a href="https://addons.wesnoth.org/"&gt;Add-ons&lt;/a&gt;&lt;/li&gt;
+<a id='L65' name='L65'></a>  65         &lt;li&gt;&lt;a href="https://www.wesnoth.org/"&gt;Home&lt;/a&gt;&lt;/li&gt;
+<a id='L66' name='L66'></a>  66         &lt;li&gt;&lt;a href="https://forums.wesnoth.org/viewforum.php?f=62"&gt;News&lt;/a&gt;&lt;/li&gt;
+<a id='L67' name='L67'></a>  67         &lt;li&gt;&lt;a href="https://wiki.wesnoth.org/Play"&gt;Play&lt;/a&gt;&lt;/li&gt;
+<a id='L68' name='L68'></a>  68         &lt;li&gt;&lt;a href="https://wiki.wesnoth.org/Create"&gt;Create&lt;/a&gt;&lt;/li&gt;
+<a id='L69' name='L69'></a>  69         &lt;li&gt;&lt;a href="https://forums.wesnoth.org/"&gt;Forums&lt;/a&gt;&lt;/li&gt;
+<a id='L70' name='L70'></a>  70         &lt;li&gt;&lt;a href="https://wiki.wesnoth.org/Project"&gt;About&lt;/a&gt;&lt;/li&gt;
+<a id='L71' name='L71'></a>  71     &lt;/ul&gt;
+<a id='L72' name='L72'></a>  72 
+<a id='L73' name='L73'></a>  73     &lt;div id="sitesearch" role="search"&gt;
+<a id='L74' name='L74'></a>  74         &lt;form method="get" action="https://wiki.wesnoth.org/"&gt;
+<a id='L75' name='L75'></a>  75             &lt;input id="searchbox" type="search" name="search" placeholder="Search" title="Search the wiki [Alt+Shift+f]" accesskey="f" /&gt;
+<a id='L76' name='L76'></a>  76             &lt;span id="searchbox-controls"&gt;
+<a id='L77' name='L77'></a>  77                 &lt;button id="search-go" class="search-button" type="submit" title="Search"&gt;
+<a id='L78' name='L78'></a>  78                     &lt;i class="search-icon" aria-hidden="true"&gt;&lt;/i&gt;
+<a id='L79' name='L79'></a>  79                     &lt;span class="sr-label"&gt;Search the wiki&lt;/span&gt;
+<a id='L80' name='L80'></a>  80                 &lt;/button&gt;
+<a id='L81' name='L81'></a>  81             &lt;/span&gt;
+<a id='L82' name='L82'></a>  82         &lt;/form&gt;
+<a id='L83' name='L83'></a>  83     &lt;/div&gt;
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85     &lt;div class="reset"&gt;&lt;/div&gt;
+<a id='L86' name='L86'></a>  86 &lt;/div&gt;
+<a id='L87' name='L87'></a>  87 &lt;/div&gt;
+<a id='L88' name='L88'></a>  88 
+<a id='L89' name='L89'></a>  89 &lt;div id="content"&gt;
+<a id='L90' name='L90'></a>  90     &lt;h1&gt;Wesnoth %(server_name)s Add-ons List&lt;/h1&gt;
+<a id='L91' name='L91'></a>  91 
+<a id='L92' name='L92'></a>  92     &lt;p&gt;To install add-ons using the in-game client, choose “Add-ons” from the main menu, and click “Connect” to connect to the add-ons server. Pick the add-on you want to install from the list and click “OK” — the download will commence immediately and the add-on will be automatically installed once finished. Bear in mind that not all add-ons are singleplayer campaigns!&lt;/p&gt;
+<a id='L93' name='L93'></a>  93 '''
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95 <a href='../Y/3112.html' title='Multiple used in 2 places.'>WESMERE_DOWNLOAD_HELP</a> = '''\
+<a id='L96' name='L96'></a>  96     &lt;p&gt;&lt;strong&gt;If&lt;/strong&gt; you really need or would prefer to download add-ons from this web page instead of using the built-in client, use a compatible program to uncompress the full contents of the &lt;code class="noframe"&gt;tar.bz2&lt;/code&gt; file — including the subfolder named after the add-on — to the &lt;code class="noframe"&gt;data/add-ons/&lt;/code&gt; folder in your game’s &lt;a href="https://wiki.wesnoth.org/EditingWesnoth#The_user_data_directory"&gt;user data folder&lt;/a&gt;. The add-on will be recognized next time you launch Wesnoth or press F5 on the main menu.&lt;/p&gt;
+<a id='L97' name='L97'></a>  97 
+<a id='L98' name='L98'></a>  98     &lt;p&gt;&lt;b&gt;Tip:&lt;/b&gt; Hover over the type field to see an explanation of the add-on type and over an icon to see a description <strong class='reserved'>for</strong> the add-on.&lt;/p&gt;
+<a id='L99' name='L99'></a>  99 '''
+<a id='L100' name='L100'></a> 100 
+<a id='L101' name='L101'></a> 101 <a href='../Y/3113.html' title='Multiple used in 4 places.'>WESMERE_FOOTER</a> = '''\
+<a id='L102' name='L102'></a> 102 &lt;/div&gt; &lt;!-- end content --&gt;
+<a id='L103' name='L103'></a> 103 
+<a id='L104' name='L104'></a> 104 &lt;/div&gt; &lt;!-- end main --&gt;
+<a id='L105' name='L105'></a> 105 
+<a id='L106' name='L106'></a> 106 &lt;div id="footer-sep"&gt;&lt;/div&gt;
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108 &lt;div id="footer"&gt;&lt;div id="footer-content"&gt;&lt;div&gt;
+<a id='L109' name='L109'></a> 109         &lt;a href="https://wiki.wesnoth.org/StartingPoints"&gt;Site Map&lt;/a&gt; &amp;#8226; &lt;a href="https://status.wesnoth.org/"&gt;Site Status&lt;/a&gt;&lt;br /&gt;
+<a id='L110' name='L110'></a> 110         Copyright &amp;copy; 2003&amp;ndash;2017 by &lt;a rel="author" href="https://wiki.wesnoth.org/Project"&gt;The Battle <strong class='reserved'>for</strong> Wesnoth Project&lt;/a&gt;.&lt;br /&gt;
+<a id='L111' name='L111'></a> 111         Site design Copyright &amp;copy; 2017 by Ignacio R. Morelle.
+<a id='L112' name='L112'></a> 112 &lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+<a id='L113' name='L113'></a> 113 &lt;/body&gt;
+<a id='L114' name='L114'></a> 114 &lt;/html&gt;
+<a id='L115' name='L115'></a> 115 '''
+<a id='L116' name='L116'></a> 116 
+<a id='L117' name='L117'></a> 117 <a href='../R/36.html' title='Multiple referred from 2 places.'>ADDON_TYPES_INFO</a> = <em class='brace'>{</em>
+<a id='L118' name='L118'></a> 118     "scenario": <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119         "short": "Scenario",
+<a id='L120' name='L120'></a> 120         "long": "Singleplayer scenario",
+<a id='L121' name='L121'></a> 121         "help": "After install the scenario will show up in the list you get when choosing “Campaign” in the main menu. (Basically it is just a campaign with only one scenario.)",
+<a id='L122' name='L122'></a> 122     <em class='brace'>}</em>,
+<a id='L123' name='L123'></a> 123     "campaign": <em class='brace'>{</em>
+<a id='L124' name='L124'></a> 124         "short": "Campaign",
+<a id='L125' name='L125'></a> 125         "long": "Singleplayer campaign",
+<a id='L126' name='L126'></a> 126         "help": "After install the campaign will show up in the list you get when choosing “Campaign” in the main menu.",
+<a id='L127' name='L127'></a> 127     <em class='brace'>}</em>,
+<a id='L128' name='L128'></a> 128     "campaign_sp_mp": <em class='brace'>{</em>
+<a id='L129' name='L129'></a> 129         "short": "SP/MP Campaign",
+<a id='L130' name='L130'></a> 130         "long": "Single/multiplayer campaign",
+<a id='L131' name='L131'></a> 131         "help": "After install the campaign will show up both in the list you get when choosing “Campaign” in the main menu, and in the map list in the multiplayer “Create Game” dialog.",
+<a id='L132' name='L132'></a> 132     <em class='brace'>}</em>,
+<a id='L133' name='L133'></a> 133     "campaign_mp": <em class='brace'>{</em>
+<a id='L134' name='L134'></a> 134         "short": "MP Campaign",
+<a id='L135' name='L135'></a> 135         "long": "Multiplayer campaign",
+<a id='L136' name='L136'></a> 136         "help": "After install the first scenario of the campaign will be available in the map list in the multiplayer “Create Game” dialog.",
+<a id='L137' name='L137'></a> 137     <em class='brace'>}</em>,
+<a id='L138' name='L138'></a> 138     "scenario_mp": <em class='brace'>{</em>
+<a id='L139' name='L139'></a> 139         "short": "MP Scenario",
+<a id='L140' name='L140'></a> 140         "long": "Multiplayer scenario",
+<a id='L141' name='L141'></a> 141         "help": "After install the scenario will be available in the map list in the multiplayer “Create Game” dialog.",
+<a id='L142' name='L142'></a> 142     <em class='brace'>}</em>,
+<a id='L143' name='L143'></a> 143     "map_pack": <em class='brace'>{</em>
+<a id='L144' name='L144'></a> 144         "short": "MP Map Pack",
+<a id='L145' name='L145'></a> 145         "long": "Multiplayer map pack",
+<a id='L146' name='L146'></a> 146         "help": "After install the maps/scenarios will be available in the map list in the multiplayer “Create Game” dialog.",
+<a id='L147' name='L147'></a> 147     <em class='brace'>}</em>,
+<a id='L148' name='L148'></a> 148     "era": <em class='brace'>{</em>
+<a id='L149' name='L149'></a> 149         "short": "MP Era",
+<a id='L150' name='L150'></a> 150         "long": "Multiplayer era",
+<a id='L151' name='L151'></a> 151         "help": "After install the included era(s) will be available in the multiplayer “Create Game” dialog.",
+<a id='L152' name='L152'></a> 152     <em class='brace'>}</em>,
+<a id='L153' name='L153'></a> 153     "faction": <em class='brace'>{</em>
+<a id='L154' name='L154'></a> 154         "short": "MP Faction",
+<a id='L155' name='L155'></a> 155         "long": "Multiplayer faction",
+<a id='L156' name='L156'></a> 156         "help": "Usually comes with an era or is a dependency of another add-on.",
+<a id='L157' name='L157'></a> 157     <em class='brace'>}</em>,
+<a id='L158' name='L158'></a> 158     "mod_mp": <em class='brace'>{</em>
+<a id='L159' name='L159'></a> 159         "short": "MP Modification",
+<a id='L160' name='L160'></a> 160         "long": "Multiplayer modification",
+<a id='L161' name='L161'></a> 161         "help": "After install the included MP gameplay modification(s) will be available in the multiplayer “Create Game” dialog.",
+<a id='L162' name='L162'></a> 162     <em class='brace'>}</em>,
+<a id='L163' name='L163'></a> 163     "media": <em class='brace'>{</em>
+<a id='L164' name='L164'></a> 164         "short": "Resources",
+<a id='L165' name='L165'></a> 165         "long": "Miscellaneous content/media",
+<a id='L166' name='L166'></a> 166         "help": "Unit packs, terrain packs, music packs, etc. Usually a (perhaps optional) dependency of another add-on.",
+<a id='L167' name='L167'></a> 167     <em class='brace'>}</em>,
+<a id='L168' name='L168'></a> 168 <em class='brace'>}</em>
+<a id='L169' name='L169'></a> 169 
+<a id='L170' name='L170'></a> 170 
+<a id='L171' name='L171'></a> 171 def <a href='../R/7787.html' title='Multiple referred from 8 places.'>htmlescape</a>(<a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>, <a href='../S/122.html#L273' title='Defined at 273 in src/serialization/string_utils.hpp.'>quote</a>=<a href='../Y/3026.html' title='Multiple used in 245 places.'>True</a>):
+<a id='L172' name='L172'></a> 172     """Escape any HTML special characters in the given string."""
+<a id='L173' name='L173'></a> 173     <strong class='reserved'>if</strong> <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a> is <a href='../Y/2068.html' title='Multiple used in 435 places.'>None</a>:
+<a id='L174' name='L174'></a> 174         <strong class='reserved'>return</strong> <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>
+<a id='L175' name='L175'></a> 175     <strong class='reserved'>return</strong> <a href='../Y/11759.html' title='Multiple used in 23 places.'>html</a>.<a href='../D/5990.html' title='Multiple defined in 4 places.'>escape</a>(<a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>, <a href='../S/122.html#L273' title='Defined at 273 in src/serialization/string_utils.hpp.'>quote</a>)
+<a id='L176' name='L176'></a> 176 
+<a id='L177' name='L177'></a> 177 def <a href='../R/14587.html' title='Multiple referred from 3 places.'>urlencode</a>(<a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>):
+<a id='L178' name='L178'></a> 178     """
+<a id='L179' name='L179'></a> 179     Encode the given string to ensure it only contains valid URL characters
+<a id='L180' name='L180'></a> 180     (also known as percent-encoding).
+<a id='L181' name='L181'></a> 181     """
+<a id='L182' name='L182'></a> 182     <strong class='reserved'>if</strong> <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a> is <a href='../Y/2068.html' title='Multiple used in 435 places.'>None</a>:
+<a id='L183' name='L183'></a> 183         <strong class='reserved'>return</strong> <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>
+<a id='L184' name='L184'></a> 184     <strong class='reserved'>return</strong> <a href='../Y/21346.html' title='Multiple used in 4 places.'>urllib</a>.<a href='../D/11745.html' title='Multiple defined in 6 places.'>parse</a>.<a href='../S/122.html#L273' title='Defined at 273 in src/serialization/string_utils.hpp.'>quote</a>(<a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>, <a href='../Y/9352.html' title='Multiple used in 19 places.'>encoding</a>='utf-8')
+<a id='L185' name='L185'></a> 185 
+<a id='L186' name='L186'></a> 186 def <a href='../R/10615.html' title='Multiple referred from 145 places.'>output</a>(<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>, <a href='../Y/21340.html' title='Multiple used in 46 places.'>url</a>, <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>):
+<a id='L187' name='L187'></a> 187     """Write the HTML index of add-ons into the specified directory."""
+<a id='L188' name='L188'></a> 188     try:
+<a id='L189' name='L189'></a> 189         <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../Y/14334.html' title='Multiple used in 7 places.'>mkdir</a>(<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>)
+<a id='L190' name='L190'></a> 190     except <a href='../Y/2095.html' title='Multiple used in 15 places.'>OSError</a>:
+<a id='L191' name='L191'></a> 191         pass
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193     <a href='../Y/15969.html' title='Multiple used in 7 places.'>outfile</a> = <a href='../D/11609.html' title='Multiple defined in 3 places.'>open</a>(<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a> + "/index.html", "w")
+<a id='L194' name='L194'></a> 194 
+<a id='L195' name='L195'></a> 195     def <a href='../R/14820.html' title='Multiple referred from 1517 places.'>w</a>(<a href='../D/9825.html' title='Multiple defined in 3 places.'>line</a>):
+<a id='L196' name='L196'></a> 196         <a href='../Y/15969.html' title='Multiple used in 7 places.'>outfile</a>.<a href='../D/16565.html' title='Multiple defined in 55 places.'>write</a>(<a href='../D/9825.html' title='Multiple defined in 3 places.'>line</a> + "\n")
+<a id='L197' name='L197'></a> 197 
+<a id='L198' name='L198'></a> 198     <a href='../Y/5680.html' title='Multiple used in 4 places.'>am_dir</a> = <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../Y/8876.html' title='Multiple used in 43 places.'>dirname</a>(<a href='../Y/4887.html' title='Multiple used in 6 places.'>__file__</a>) + "/"
+<a id='L199' name='L199'></a> 199     <a href='../Y/17815.html' title='Multiple used in 6 places.'>root_dir</a> = <a href='../Y/5680.html' title='Multiple used in 4 places.'>am_dir</a> + "../../../"
+<a id='L200' name='L200'></a> 200     <a href='../Y/11959.html' title='Multiple used in 4 places.'>images_to_tc</a> = []
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202     # Copy required HTML assets into the destination dir.
+<a id='L203' name='L203'></a> 203     <strong class='reserved'>for</strong> <a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a> in <a href='../S/4082.html#L16' title='Defined at 16 in data/tools/addon_manager/html.py.'>HTML_RESOURCES</a>:
+<a id='L204' name='L204'></a> 204         <a href='../Y/2228.html' title='Multiple used in 15 places.'>Popen</a>(["cp", "-u", <a href='../Y/5680.html' title='Multiple used in 4 places.'>am_dir</a> + <a href='../D/6216.html' title='Multiple defined in 4 places.'>filename</a>, <a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>])
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206     <a href='../Y/18414.html' title='Multiple used in 6 places.'>server_name</a> = <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../S/4066.html#L107' title='Defined at 107 in data/tools/expand-terrain-macros.py.'>basename</a>(path)
+<a id='L207' name='L207'></a> 207     <strong class='reserved'>if</strong> <a href='../Y/18414.html' title='Multiple used in 6 places.'>server_name</a> == "1.9":
+<a id='L208' name='L208'></a> 208 <em class='sharp'>        #</em> 1.9 became the 1.10 add-ons server. Reflect that here.
+<a id='L209' name='L209'></a> 209         <a href='../Y/18414.html' title='Multiple used in 6 places.'>server_name</a> = "1.10"
+<a id='L210' name='L210'></a> 210     elif <a href='../Y/18414.html' title='Multiple used in 6 places.'>server_name</a> == "trunk":
+<a id='L211' name='L211'></a> 211         <a href='../Y/18414.html' title='Multiple used in 6 places.'>server_name</a> = "Testing (Trunk)"
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213     <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>(<a href='../Y/3114.html' title='Multiple used in 4 places.'>WESMERE_HEADER</a> % <em class='brace'>{</em>
+<a id='L214' name='L214'></a> 214         "css_version": <a href='../D/2340.html' title='Multiple defined in 2 places.'>WESMERE_CSS_VERSION</a>,
+<a id='L215' name='L215'></a> 215         "css_prefix": <a href='../D/2339.html' title='Multiple defined in 2 places.'>WESMERE_CSS_PREFIX</a>,
+<a id='L216' name='L216'></a> 216         "server_name": <a href='../Y/18414.html' title='Multiple used in 6 places.'>server_name</a>,
+<a id='L217' name='L217'></a> 217     <em class='brace'>}</em>)
+<a id='L218' name='L218'></a> 218     <strong class='reserved'>if</strong> <a href='../Y/21340.html' title='Multiple used in 46 places.'>url</a>:
+<a id='L219' name='L219'></a> 219         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>(<a href='../Y/3112.html' title='Multiple used in 2 places.'>WESMERE_DOWNLOAD_HELP</a>)
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221     <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;table class="tablesorter" id="campaigns"&gt;\n&lt;thead&gt;\n&lt;tr&gt;')
+<a id='L222' name='L222'></a> 222     <a href='../Y/19688.html' title='Multiple used in 2 places.'>table_headers</a> = [
+<a id='L223' name='L223'></a> 223         ("type", "Type"),
+<a id='L224' name='L224'></a> 224         ("icon", "Icon"),
+<a id='L225' name='L225'></a> 225         ("name", "Addon"),
+<a id='L226' name='L226'></a> 226         ("size", "Size"),
+<a id='L227' name='L227'></a> 227         ("stats", "Traffic"),
+<a id='L228' name='L228'></a> 228         ("date", "Date"),
+<a id='L229' name='L229'></a> 229         ("locales", "Translations")
+<a id='L230' name='L230'></a> 230     ]
+<a id='L231' name='L231'></a> 231     <strong class='reserved'>for</strong> <a href='../Y/11469.html' title='Multiple used in 2 places.'>header_class</a>, <a href='../Y/11472.html' title='Multiple used in 2 places.'>header_label</a> in <a href='../Y/19688.html' title='Multiple used in 2 places.'>table_headers</a>:
+<a id='L232' name='L232'></a> 232         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;th class="addon-%s"&gt;%s&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/th&gt;' % (<a href='../Y/11469.html' title='Multiple used in 2 places.'>header_class</a>, <a href='../Y/11472.html' title='Multiple used in 2 places.'>header_label</a>))
+<a id='L233' name='L233'></a> 233     <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;/tr&gt;\n&lt;/thead&gt;\n&lt;tbody&gt;')
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235     <a href='../D/3051.html' title='Multiple defined in 2 places.'>addons</a> = <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../D/7298.html' title='Multiple defined in 5 places.'>get_all</a>(<a href='../Y/19692.html' title='Multiple used in 338 places.'>tag</a>="campaigns")[0]
+<a id='L236' name='L236'></a> 236     <strong class='reserved'>for</strong> <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a> in <a href='../D/3051.html' title='Multiple defined in 2 places.'>addons</a>.<a href='../D/7298.html' title='Multiple defined in 5 places.'>get_all</a>(<a href='../Y/19692.html' title='Multiple used in 338 places.'>tag</a>="campaign"):
+<a id='L237' name='L237'></a> 237         <a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a> = <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../D/8071.html' title='Multiple defined in 5 places.'>get_text_val</a>
+<a id='L238' name='L238'></a> 238 
+<a id='L239' name='L239'></a> 239         <a href='../Y/5351.html' title='Multiple used in 33 places.'>addon_id</a> = <a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("name") # Escaped as part of a path composition later on.
+<a id='L240' name='L240'></a> 240         <a href='../D/15244.html' title='Multiple defined in 10 places.'>title</a> = <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("title", "unknown"))
+<a id='L241' name='L241'></a> 241         <a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a> = <strong class='reserved'>float</strong>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("size", "0")) # bytes
+<a id='L242' name='L242'></a> 242         <a href='../Y/8920.html' title='Multiple used in 2 places.'>display_size</a> = <a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a> / (1024 * 1024) # MiB
+<a id='L243' name='L243'></a> 243         <a href='../Y/5360.html' title='Multiple used in 4 places.'>addon_type</a> = <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("type", "none"))
+<a id='L244' name='L244'></a> 244         <a href='../D/16040.html' title='Multiple defined in 2 places.'>version</a> = <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("version", "unknown"))
+<a id='L245' name='L245'></a> 245         <a href='../Y/6096.html' title='Multiple used in 16 places.'>author</a> = <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("author", "unknown"))
+<a id='L246' name='L246'></a> 246         <a href='../Y/9965.html' title='Multiple used in 13 places.'>feedback_url</a> = <a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("feedback_url", <a href='../Y/2068.html' title='Multiple used in 435 places.'>None</a>) # Escaped by a function call.
+<a id='L247' name='L247'></a> 247 
+<a id='L248' name='L248'></a> 248         <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a> = <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("icon", ""))
+<a id='L249' name='L249'></a> 249         <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a> = <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>('description', '(no description)'))
+<a id='L250' name='L250'></a> 250         <a href='../Y/11978.html' title='Multiple used in 5 places.'>imgurl</a> = ""
+<a id='L251' name='L251'></a> 251 
+<a id='L252' name='L252'></a> 252         <a href='../Y/9067.html' title='Multiple used in 13 places.'>downloads</a> = <strong class='reserved'>int</strong>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("downloads", "0"))
+<a id='L253' name='L253'></a> 253         <a href='../Y/21323.html' title='Multiple used in 11 places.'>uploads</a> = <strong class='reserved'>int</strong>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("uploads", "0"))
+<a id='L254' name='L254'></a> 254         <a href='../Y/20343.html' title='Multiple used in 24 places.'>timestamp</a> = <strong class='reserved'>int</strong>(<a href='../Y/21465.html' title='Multiple used in 1417 places.'>v</a>("timestamp", "0"))
+<a id='L255' name='L255'></a> 255         <a href='../Y/8922.html' title='Multiple used in 2 places.'>display_ts</a> = <a href='../D/15224.html' title='Multiple defined in 4 places.'>time</a>.<a href='../S/849.html#L435' title='Defined at 435 in src/gettext_boost.cpp.'>strftime</a>("%b %d %Y", time.<a href='../Y/13408.html' title='Multiple used in 12 places.'>localtime</a>(<a href='../Y/20343.html' title='Multiple used in 24 places.'>timestamp</a>))
+<a id='L256' name='L256'></a> 256 
+<a id='L257' name='L257'></a> 257         <a href='../Y/20737.html' title='Multiple used in 12 places.'>translations</a> = <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../D/7298.html' title='Multiple defined in 5 places.'>get_all</a>(<a href='../Y/19692.html' title='Multiple used in 338 places.'>tag</a>="translation")
+<a id='L258' name='L258'></a> 258         <a href='../Y/12878.html' title='Multiple used in 19 places.'>languages</a> = [<a href='../D/16628.html' title='Multiple defined in 2 places.'>x</a>.<a href='../D/8071.html' title='Multiple defined in 5 places.'>get_text_val</a>("language") <strong class='reserved'>for</strong> x in <a href='../Y/20737.html' title='Multiple used in 12 places.'>translations</a>]
+<a id='L259' name='L259'></a> 259 
+<a id='L260' name='L260'></a> 260         <strong class='reserved'>if</strong> <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>:
+<a id='L261' name='L261'></a> 261             <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a> = icon.<a href='../Y/19433.html' title='Multiple used in 128 places.'>strip</a>()
+<a id='L262' name='L262'></a> 262             <a href='../Y/20279.html' title='Multiple used in 10 places.'>tilde</a> = <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>.<a href='../D/6279.html' title='Multiple defined in 39 places.'>find</a>("~")
+<a id='L263' name='L263'></a> 263             <strong class='reserved'>if</strong> <a href='../Y/20279.html' title='Multiple used in 10 places.'>tilde</a> &gt;= 0:
+<a id='L264' name='L264'></a> 264                 <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a> = icon[:<a href='../Y/20279.html' title='Multiple used in 10 places.'>tilde</a>]
+<a id='L265' name='L265'></a> 265             <strong class='reserved'>if</strong> "\\" in <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>:
+<a id='L266' name='L266'></a> 266                 <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a> = icon.<a href='../D/12790.html' title='Multiple defined in 3 places.'>replace</a>("\\", "/")
+<a id='L267' name='L267'></a> 267             try:
+<a id='L268' name='L268'></a> 268                 <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../Y/14334.html' title='Multiple used in 7 places.'>mkdir</a>(<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a> + "/icons")
+<a id='L269' name='L269'></a> 269             except <a href='../Y/2095.html' title='Multiple used in 15 places.'>OSError</a>:
+<a id='L270' name='L270'></a> 270                 pass
+<a id='L271' name='L271'></a> 271             <strong class='reserved'>if</strong> "." not in <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>:
+<a id='L272' name='L272'></a> 272                 <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a> += ".png"
+<a id='L273' name='L273'></a> 273             <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a> = <a href='../Y/17815.html' title='Multiple used in 6 places.'>root_dir</a> + <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>
+<a id='L274' name='L274'></a> 274             <a href='../Y/11978.html' title='Multiple used in 5 places.'>imgurl</a> = "icons/" + <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../S/4066.html#L107' title='Defined at 107 in data/tools/expand-terrain-macros.py.'>basename</a>(<a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>)
+<a id='L275' name='L275'></a> 275             <strong class='reserved'>if</strong> not <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/6055.html' title='Multiple defined in 9 places.'>exists</a>(<a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a>):
+<a id='L276' name='L276'></a> 276                 <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a> = <a href='../Y/17815.html' title='Multiple used in 6 places.'>root_dir</a> + "data/core/images/" + <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>
+<a id='L277' name='L277'></a> 277             <strong class='reserved'>if</strong> not <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/6055.html' title='Multiple defined in 9 places.'>exists</a>(<a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a>):
+<a id='L278' name='L278'></a> 278                 <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a> = <a href='../Y/17815.html' title='Multiple used in 6 places.'>root_dir</a> + "images/" + <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>
+<a id='L279' name='L279'></a> 279             <strong class='reserved'>if</strong> not <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/6055.html' title='Multiple defined in 9 places.'>exists</a>(<a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a>):
+<a id='L280' name='L280'></a> 280                 <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a> = <a href='../Y/11091.html' title='Multiple used in 35 places.'>glob</a>.glob(<a href='../Y/17815.html' title='Multiple used in 6 places.'>root_dir</a> + "data/campaigns/*/images/" + <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>)
+<a id='L281' name='L281'></a> 281                 <strong class='reserved'>if</strong> <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a>:
+<a id='L282' name='L282'></a> 282                     <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a> = src[0]
+<a id='L283' name='L283'></a> 283                 <strong class='reserved'>if</strong> not <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a> or not <a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/6055.html' title='Multiple defined in 9 places.'>exists</a>(src):
+<a id='L284' name='L284'></a> 284                     <a href='../Y/19612.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19293.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/16565.html' title='Multiple defined in 55 places.'>write</a>("Cannot find icon " + <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a> + "\n")
+<a id='L285' name='L285'></a> 285                     <a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a> = <a href='../Y/17815.html' title='Multiple used in 6 places.'>root_dir</a> + "images/misc/missing-image.png"
+<a id='L286' name='L286'></a> 286                     <a href='../Y/11978.html' title='Multiple used in 5 places.'>imgurl</a> = "icons/missing-image.png"
+<a id='L287' name='L287'></a> 287             <a href='../Y/11959.html' title='Multiple used in 4 places.'>images_to_tc</a>.<a href='../D/3323.html' title='Multiple defined in 8 places.'>append</a>((<a href='../D/14693.html' title='Multiple defined in 3 places.'>src</a>, <a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a> + "/" + <a href='../Y/11978.html' title='Multiple used in 5 places.'>imgurl</a>))
+<a id='L288' name='L288'></a> 288 
+<a id='L289' name='L289'></a> 289         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;tr&gt;')
+<a id='L290' name='L290'></a> 290 
+<a id='L291' name='L291'></a> 291         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;td class="addon-type"&gt;')
+<a id='L292' name='L292'></a> 292         <strong class='reserved'>if</strong> <a href='../Y/5360.html' title='Multiple used in 4 places.'>addon_type</a> in <a href='../S/4082.html#L117' title='Defined at 117 in data/tools/addon_manager/html.py.'>ADDON_TYPES_INFO</a>:
+<a id='L293' name='L293'></a> 293             <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('%(short)s&lt;div class="type-tooltip"&gt;&lt;b&gt;%(long)s&lt;/b&gt;&lt;br/&gt;%(help)s&lt;/div&gt;' \
+<a id='L294' name='L294'></a> 294                 % <a href='../S/4082.html#L117' title='Defined at 117 in data/tools/addon_manager/html.py.'>ADDON_TYPES_INFO</a>[<a href='../Y/5360.html' title='Multiple used in 4 places.'>addon_type</a>])
+<a id='L295' name='L295'></a> 295         <strong class='reserved'>else</strong>:
+<a id='L296' name='L296'></a> 296             <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>(<a href='../Y/5360.html' title='Multiple used in 4 places.'>addon_type</a>)
+<a id='L297' name='L297'></a> 297         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;/td&gt;')
+<a id='L298' name='L298'></a> 298 
+<a id='L299' name='L299'></a> 299         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>(('&lt;td class="addon-icon"&gt;&lt;img alt="" src="%s"/&gt;'
+<a id='L300' name='L300'></a> 300            '&lt;div class="desc-tooltip"&gt;&lt;b&gt;%s&lt;/b&gt;&lt;pre&gt;%s&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;') % (
+<a id='L301' name='L301'></a> 301                <a href='../Y/11978.html' title='Multiple used in 5 places.'>imgurl</a>, <a href='../D/15244.html' title='Multiple defined in 10 places.'>title</a>, <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>))
+<a id='L302' name='L302'></a> 302 
+<a id='L303' name='L303'></a> 303         def <a href='../R/9758.html' title='Multiple referred from 2 places.'>make_icon_button</a>(<a href='../Y/21340.html' title='Multiple used in 46 places.'>url</a>, <a href='../D/9697.html' title='Multiple defined in 5 places.'>label</a>, <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>):
+<a id='L304' name='L304'></a> 304             <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>(('&lt;a href="{0}" title="{1}"&gt;'
+<a id='L305' name='L305'></a> 305                '&lt;i class="fa fa-fw fa-2x fa-{2}" aria-hidden="true"&gt;&lt;/i&gt;'
+<a id='L306' name='L306'></a> 306                '&lt;span class="sr-only"&gt;{1}&lt;/span&gt;&lt;/a&gt;').<a href='../D/6475.html' title='Multiple defined in 2 places.'>format</a>(
+<a id='L307' name='L307'></a> 307                     <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(<a href='../Y/21340.html' title='Multiple used in 46 places.'>url</a>), htmlescape(<a href='../D/9697.html' title='Multiple defined in 5 places.'>label</a>), <a href='../D/8666.html' title='Multiple defined in 5 places.'>icon</a>))
+<a id='L308' name='L308'></a> 308 
+<a id='L309' name='L309'></a> 309         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;td class="addon"&gt;&lt;span hidden&gt;%s&lt;/span&gt;' % <a href='../D/15244.html' title='Multiple defined in 10 places.'>title</a>)
+<a id='L310' name='L310'></a> 310         <strong class='reserved'>if</strong> <a href='../Y/21340.html' title='Multiple used in 46 places.'>url</a> or <a href='../Y/9965.html' title='Multiple used in 13 places.'>feedback_url</a>:
+<a id='L311' name='L311'></a> 311             <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;span class="addon-download"&gt;')
+<a id='L312' name='L312'></a> 312             <strong class='reserved'>if</strong> <a href='../Y/9965.html' title='Multiple used in 13 places.'>feedback_url</a>:
+<a id='L313' name='L313'></a> 313                 <a href='../S/4082.html#L303' title='Defined at 303 in data/tools/addon_manager/html.py.'>make_icon_button</a>(<a href='../Y/9965.html' title='Multiple used in 13 places.'>feedback_url</a>, "Forum topic", "comment")
+<a id='L314' name='L314'></a> 314             <strong class='reserved'>if</strong> <a href='../Y/21340.html' title='Multiple used in 46 places.'>url</a>:
+<a id='L315' name='L315'></a> 315                 <a href='../D/9833.html' title='Multiple defined in 2 places.'>link</a> = <a href='../Y/21340.html' title='Multiple used in 46 places.'>url</a>.<a href='../Y/17886.html' title='Multiple used in 20 places.'>rstrip</a>("/") + "/" + <a href='../D/15861.html' title='Multiple defined in 2 places.'>urlencode</a>(<a href='../Y/5351.html' title='Multiple used in 33 places.'>addon_id</a>) + ".tar.bz2"
+<a id='L316' name='L316'></a> 316                 <a href='../S/4082.html#L303' title='Defined at 303 in data/tools/addon_manager/html.py.'>make_icon_button</a>(<a href='../D/9833.html' title='Multiple defined in 2 places.'>link</a>, "Download", "download")
+<a id='L317' name='L317'></a> 317             <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;/span&gt;')
+<a id='L318' name='L318'></a> 318         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>(('&lt;b&gt;%s&lt;/b&gt;&lt;br/&gt;'
+<a id='L319' name='L319'></a> 319            '&lt;span class="addon-meta"&gt;&lt;span class="addon-meta-label"&gt;Version:&lt;/span&gt; %s&lt;br/&gt;'
+<a id='L320' name='L320'></a> 320            '&lt;span class="addon-meta-label"&gt;Author:&lt;/span&gt; %s&lt;/span&gt;&lt;/td&gt;') % (
+<a id='L321' name='L321'></a> 321                <a href='../D/15244.html' title='Multiple defined in 10 places.'>title</a>, <a href='../D/16040.html' title='Multiple defined in 2 places.'>version</a>, <a href='../Y/6096.html' title='Multiple used in 16 places.'>author</a>))
+<a id='L322' name='L322'></a> 322 
+<a id='L323' name='L323'></a> 323         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>("&lt;td&gt;&lt;span hidden&gt;%d&lt;/span&gt;&lt;b&gt;%.2f&lt;/b&gt;&amp;nbsp;MiB&lt;/td&gt;" % (<a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a>, <a href='../Y/8920.html' title='Multiple used in 2 places.'>display_size</a>))
+<a id='L324' name='L324'></a> 324 
+<a id='L325' name='L325'></a> 325         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>("&lt;td&gt;&lt;b&gt;%d&lt;/b&gt; down&lt;br/&gt;%s up&lt;/td&gt;" % (<a href='../Y/9067.html' title='Multiple used in 13 places.'>downloads</a>, <a href='../Y/21323.html' title='Multiple used in 11 places.'>uploads</a>))
+<a id='L326' name='L326'></a> 326 
+<a id='L327' name='L327'></a> 327         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;td&gt;&lt;span hidden&gt;%d&lt;/span&gt;%s&lt;/td&gt;' % (<a href='../Y/20343.html' title='Multiple used in 24 places.'>timestamp</a>, <a href='../Y/8922.html' title='Multiple used in 2 places.'>display_ts</a>))
+<a id='L328' name='L328'></a> 328 
+<a id='L329' name='L329'></a> 329         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>("&lt;td&gt;%s&lt;/td&gt;" % <a href='../S/4082.html#L171' title='Defined at 171 in data/tools/addon_manager/html.py.'>htmlescape</a>(", ".<a href='../D/9568.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/12878.html' title='Multiple used in 19 places.'>languages</a>), <a href='../S/122.html#L273' title='Defined at 273 in src/serialization/string_utils.hpp.'>quote</a>=<a href='../Y/1183.html' title='Multiple used in 288 places.'>False</a>))
+<a id='L330' name='L330'></a> 330 
+<a id='L331' name='L331'></a> 331         <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>("&lt;/tr&gt;")
+<a id='L332' name='L332'></a> 332 
+<a id='L333' name='L333'></a> 333     <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>('&lt;/tbody&gt;\n&lt;/table&gt;')
+<a id='L334' name='L334'></a> 334     <a href='../D/16115.html' title='Multiple defined in 6 places.'>w</a>(<a href='../Y/3113.html' title='Multiple used in 4 places.'>WESMERE_FOOTER</a>)
+<a id='L335' name='L335'></a> 335 
+<a id='L336' name='L336'></a> 336     <a href='../Y/19612.html' title='Multiple used in 228 places.'>sys</a>.<a href='../Y/19293.html' title='Multiple used in 124 places.'>stderr</a>.<a href='../D/16565.html' title='Multiple defined in 55 places.'>write</a>("Done outputting html, now generating %d TC'ed images\n" % <a href='../Y/13153.html' title='Multiple used in 361 places.'>len</a>(<a href='../Y/11959.html' title='Multiple used in 4 places.'>images_to_tc</a>))
+<a id='L337' name='L337'></a> 337     <strong class='reserved'>for</strong> <a href='../Y/16108.html' title='Multiple used in 438 places.'>pair</a> in <a href='../Y/11959.html' title='Multiple used in 4 places.'>images_to_tc</a>:
+<a id='L338' name='L338'></a> 338         # wait() to ensure only one process exists at any time
+<a id='L339' name='L339'></a> 339         <a href='../Y/2228.html' title='Multiple used in 15 places.'>Popen</a>([<a href='../Y/15899.html' title='Multiple used in 442 places.'>os</a>.<a href='../D/11848.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/9568.html' title='Multiple defined in 3 places.'>join</a>(<a href='../Y/5680.html' title='Multiple used in 4 places.'>am_dir</a>, "../unit_tree/TeamColorizer"), <a href='../Y/16108.html' title='Multiple used in 438 places.'>pair</a>[0], pair[1]]).<a href='../Y/21836.html' title='Multiple used in 7 places.'>wait</a>()
+<a id='L340' name='L340'></a> 340 
+<a id='L341' name='L341'></a> 341 # kate: indent-mode normal; encoding utf-8; space-indent on;
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L171'>[^]</a><a href='#L303'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>src/gui/core/placer.hpp</title>
+<meta name='robots' content='noindex,nofollow' />
+<meta name='generator' content='GLOBAL-6.5.6' />
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<link rel='stylesheet' type='text/css' href='../style.css' />
+</head>
+<body>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5853.html'>gui</a>/<a href='../files/5856.html'>core</a>/placer.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2033.html' title='Multiple included from 4 places.'>INCLUDED FROM</a></h2>
+<hr />
+<pre>
+<a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2012 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * Base class for the placement helper.</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> *</em>
+<a id='L19' name='L19'></a>  19 <em class='comment'> * Some items can create new child items and these items are placed in some way</em>
+<a id='L20' name='L20'></a>  20 <em class='comment'> * this code contains helpers for the placement by calculating the positions</em>
+<a id='L21' name='L21'></a>  21 <em class='comment'> * for the items and the best size for the children.</em>
+<a id='L22' name='L22'></a>  22 <em class='comment'> */</em>
+<a id='L23' name='L23'></a>  23 
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#pragma</em> once
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='866.html'>utils/make_enum.hpp</a>"
+<a id='L27' name='L27'></a>  27 
+<a id='L28' name='L28'></a>  28 <strong class='reserved'>namespace</strong> <a href='../R/7462.html' title='Multiple referred from 719 places.'>gui2</a>
+<a id='L29' name='L29'></a>  29 <em class='brace'>{</em>
+<a id='L30' name='L30'></a>  30 
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>struct</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>;
+<a id='L32' name='L32'></a>  32 
+<a id='L33' name='L33'></a>  33 <em class='comment'>/**</em>
+<a id='L34' name='L34'></a>  34 <em class='comment'> * Base class for the placement helper.</em>
+<a id='L35' name='L35'></a>  35 <em class='comment'> *</em>
+<a id='L36' name='L36'></a>  36 <em class='comment'> * The normal operation for the usage of the class is:</em>
+<a id='L37' name='L37'></a>  37 <em class='comment'> * * Call @ref initialize().</em>
+<a id='L38' name='L38'></a>  38 <em class='comment'> * * For every visible child item call @ref add_item() with the wanted size of</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> *   the widget.</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> * Once this is done the required size for all children can be retrieved with</em>
+<a id='L41' name='L41'></a>  41 <em class='comment'> * @ref get_size(). It is also possible to place all children now. In order to</em>
+<a id='L42' name='L42'></a>  42 <em class='comment'> * do so loop again over all children in the same order as @ref add_item() and</em>
+<a id='L43' name='L43'></a>  43 <em class='comment'> * call @ref get_origin(). The @p index parameter is an increasing counter.</em>
+<a id='L44' name='L44'></a>  44 <em class='comment'> *</em>
+<a id='L45' name='L45'></a>  45 <em class='comment'> * @note The origins can only be retrieved after all items are added since the</em>
+<a id='L46' name='L46'></a>  46 <em class='comment'> * adding of a later item may influence a previous item. E.g. in a vertical</em>
+<a id='L47' name='L47'></a>  47 <em class='comment'> * list with two columns the position of the second column depends on the width</em>
+<a id='L48' name='L48'></a>  48 <em class='comment'> * of the first and a later row may have a wider column 1 as an earlier row.</em>
+<a id='L49' name='L49'></a>  49 <em class='comment'> */</em>
+<a id='L50' name='L50'></a>  50 <strong class='reserved'>class</strong> <a href='../R/10849.html' title='Multiple referred from 11 places.'>placer_base</a>
+<a id='L51' name='L51'></a>  51 <em class='brace'>{</em>
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>public</strong>:
+<a id='L53' name='L53'></a>  53         <em class='comment'>/***** ***** Types. ***** *****/</em>
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55         <em class='comment'>/** The direction the placer should grow towards. */</em>
+<a id='L56' name='L56'></a>  56         <a href='../D/1411.html' title='Multiple defined in 6 places.'>MAKE_ENUM</a>(<a href='../Y/20167.html' title='Multiple used in 8 places.'>tgrow_direction</a>,
+<a id='L57' name='L57'></a>  57                 (<a href='../Y/11685.html' title='Multiple used in 2 places.'>horizontal</a>, "horizontal")
+<a id='L58' name='L58'></a>  58                 (<a href='../Y/21653.html' title='Multiple used in 3 places.'>vertical</a>, "vertical")
+<a id='L59' name='L59'></a>  59         )
+<a id='L60' name='L60'></a>  60 
+<a id='L61' name='L61'></a>  61 
+<a id='L62' name='L62'></a>  62         <em class='comment'>/***** ***** Constructor, destructor, assignment. ***** *****/</em>
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64 <strong class='reserved'>public</strong>:
+<a id='L65' name='L65'></a>  65         <em class='comment'>/**</em>
+<a id='L66' name='L66'></a>  66 <em class='comment'>         * Builder function.</em>
+<a id='L67' name='L67'></a>  67 <em class='comment'>         *</em>
+<a id='L68' name='L68'></a>  68 <em class='comment'>         * @pre                       @p parallel_items &gt; 0</em>
+<a id='L69' name='L69'></a>  69 <em class='comment'>         *</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'>         * @param grow_direction      The direction in which the items will be</em>
+<a id='L71' name='L71'></a>  71 <em class='comment'>         *                            added.</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'>         * @param parallel_items      The direction perpendicular towards the grow</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'>         *                            direction has a fixed number of items. This</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'>         *                            value sets that limit. For a list containing</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'>         *                            only horizontally or vertically placed items</em>
+<a id='L76' name='L76'></a>  76 <em class='comment'>         *                            the value should be 1.</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'>         */</em>
+<a id='L78' name='L78'></a>  78         <strong class='reserved'>static</strong> <a href='../D/11930.html' title='Multiple defined in 2 places.'>placer_base</a>* <a href='../D/3779.html' title='Multiple defined in 55 places.'>build</a>(<strong class='reserved'>const</strong> <a href='../Y/20167.html' title='Multiple used in 8 places.'>tgrow_direction</a> <a href='../Y/11248.html' title='Multiple used in 7 places.'>grow_direction</a>,
+<a id='L79' name='L79'></a>  79                                                    <strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/16180.html' title='Multiple used in 9 places.'>parallel_items</a>);
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81         <strong class='reserved'>virtual</strong> ~<a href='../D/11930.html' title='Multiple defined in 2 places.'>placer_base</a>();
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83 
+<a id='L84' name='L84'></a>  84         <em class='comment'>/***** ***** Operations. ***** *****/</em>
+<a id='L85' name='L85'></a>  85 
+<a id='L86' name='L86'></a>  86         <em class='comment'>/**</em>
+<a id='L87' name='L87'></a>  87 <em class='comment'>         * Initialises the placer.</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'>         *</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>         * When the placement needs to be calculated the state often needs to be</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>         * reset, items are placed, removed or changed visibility causing the old</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>         * placement to be invalid.</em>
+<a id='L92' name='L92'></a>  92 <em class='comment'>         */</em>
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/8937.html' title='Multiple defined in 8 places.'>initialize</a>() = 0;
+<a id='L94' name='L94'></a>  94 
+<a id='L95' name='L95'></a>  95         <em class='comment'>/**</em>
+<a id='L96' name='L96'></a>  96 <em class='comment'>         * Adds a item to be placed.</em>
+<a id='L97' name='L97'></a>  97 <em class='comment'>         *</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>         * @param size                The required size for the item.</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>         */</em>
+<a id='L100' name='L100'></a> 100         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/2902.html' title='Multiple defined in 4 places.'>add_item</a>(<strong class='reserved'>const</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a>&amp; <a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a>) = 0;
+<a id='L101' name='L101'></a> 101 
+<a id='L102' name='L102'></a> 102         <em class='comment'>/**</em>
+<a id='L103' name='L103'></a> 103 <em class='comment'>         * Gets the required size of all items.</em>
+<a id='L104' name='L104'></a> 104 <em class='comment'>         *</em>
+<a id='L105' name='L105'></a> 105 <em class='comment'>         * @returns                   The required size.</em>
+<a id='L106' name='L106'></a> 106 <em class='comment'>         */</em>
+<a id='L107' name='L107'></a> 107         <strong class='reserved'>virtual</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../D/8005.html' title='Multiple defined in 5 places.'>get_size</a>() <strong class='reserved'>const</strong> = 0;
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109         <em class='comment'>/**</em>
+<a id='L110' name='L110'></a> 110 <em class='comment'>         * Gets the origin for an item.</em>
+<a id='L111' name='L111'></a> 111 <em class='comment'>         *</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'>         * @param index               The index of the item whose origin to return.</em>
+<a id='L113' name='L113'></a> 113 <em class='comment'>         *                            The index is the index of the call to</em>
+<a id='L114' name='L114'></a> 114 <em class='comment'>         *                            @ref add_item().</em>
+<a id='L115' name='L115'></a> 115 <em class='comment'>         *</em>
+<a id='L116' name='L116'></a> 116 <em class='comment'>         * @returns                   The origin where to place the widget.</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'>         */</em>
+<a id='L118' name='L118'></a> 118         <strong class='reserved'>virtual</strong> <a href='../S/519.html#L23' title='Defined at 23 in src/gui/core/point.hpp.'>point</a> <a href='../D/7816.html' title='Multiple defined in 3 places.'>get_origin</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../D/8854.html' title='Multiple defined in 6 places.'>index</a>) <strong class='reserved'>const</strong> = 0;
+<a id='L119' name='L119'></a> 119 <em class='brace'>}</em>;
+<a id='L120' name='L120'></a> 120 
+<a id='L121' name='L121'></a> 121 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+</pre>
+<hr />
+<a id='BOTTOM' name='BOTTOM'></a>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+</body>
+</html>
