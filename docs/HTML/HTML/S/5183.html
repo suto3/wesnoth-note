@@ -1,360 +1,1495 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>data/campaigns/Under_the_Burning_Suns/utils/dehydration-utils.cfg</title>
+<title>data/campaigns/Under_the_Burning_Suns/scenarios/12_The_Final_Confrontation.cfg</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5641.html'>data</a>/<a href='../files/5655.html'>campaigns</a>/<a href='../files/5732.html'>Under_the_Burning_Suns</a>/<a href='../files/5744.html'>utils</a>/dehydration-utils.cfg</h2>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5666.html'>data</a>/<a href='../files/5680.html'>campaigns</a>/<a href='../files/5757.html'>Under_the_Burning_Suns</a>/<a href='../files/5759.html'>scenarios</a>/12_The_Final_Confrontation.cfg</h2>
 <em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 #textdomain wesnoth-utbs
 <a id='L2' name='L2'></a>   2 
-<a id='L3' name='L3'></a>   3 <em class='sharp'>#define</em> HYDRATING_TILES
-<a id='L4' name='L4'></a>   4 Ww*, *^V* #enddef
-<a id='L5' name='L5'></a>   5 
-<a id='L6' name='L6'></a>   6 <em class='sharp'>#define</em> DEHYDRATING_TILES
-<a id='L7' name='L7'></a>   7 Hd, Dd*, Dd^E*, Rd #enddef
-<a id='L8' name='L8'></a>   8 
-<a id='L9' name='L9'></a>   9 <em class='sharp'>#define</em> DEHYDRATABLE_UNITS_FILTER
-<a id='L10' name='L10'></a>  10     [not]
-<a id='L11' name='L11'></a>  11         <a href='../D/12338.html' title='Multiple defined in 2 places.'>race</a>=undead
-<a id='L12' name='L12'></a>  12     [/not]
-<a id='L13' name='L13'></a>  13     [not]
-<a id='L14' name='L14'></a>  14         <a href='../D/15484.html' title='Multiple defined in 27 places.'>type</a>=Giant Scorpion
-<a id='L15' name='L15'></a>  15     [/not]
-<a id='L16' name='L16'></a>  16     [not]
-<a id='L17' name='L17'></a>  17         <a href='../D/15484.html' title='Multiple defined in 27 places.'>type</a>=Dust Devil
-<a id='L18' name='L18'></a>  18     [/not]
-<a id='L19' name='L19'></a>  19     [not]
-<a id='L20' name='L20'></a>  20         # traveller's ring
-<a id='L21' name='L21'></a>  21         <a href='../Y/17804.html' title='Multiple used in 623 places.'>role</a>=immune
-<a id='L22' name='L22'></a>  22     [/not]
-<a id='L23' name='L23'></a>  23     [and]
-<a id='L24' name='L24'></a>  24         # Prevent unseen AI guardians from being depleted by dehydration
-<a id='L25' name='L25'></a>  25         [filter_vision]
-<a id='L26' name='L26'></a>  26             <a href='../D/14472.html' title='Multiple defined in 3 places.'>side</a>=1
-<a id='L27' name='L27'></a>  27         [/filter_vision]
-<a id='L28' name='L28'></a>  28         [or]
-<a id='L29' name='L29'></a>  29             [not]
-<a id='L30' name='L30'></a>  30                 <a href='../Y/5489.html' title='Multiple used in 278 places.'>ai_special</a>=guardian
-<a id='L31' name='L31'></a>  31             [/not]
-<a id='L32' name='L32'></a>  32         [/or]
-<a id='L33' name='L33'></a>  33     [/and]
-<a id='L34' name='L34'></a>  34 #enddef
-<a id='L35' name='L35'></a>  35 
-<a id='L36' name='L36'></a>  36 # This dehydrates the given units. However, <strong class='reserved'>if</strong> the unit is adjacent to a
-<a id='L37' name='L37'></a>  37 # friendly healer, the dehydration will be delayed instead: the unit suffers no
-<a id='L38' name='L38'></a>  38 # ill effects, but it cannot receive any healing on this turn either. Basically,
-<a id='L39' name='L39'></a>  39 # dehydration works just like poison.
-<a id='L40' name='L40'></a>  40 <em class='sharp'>#</em>
-<a id='L41' name='L41'></a>  41 # Each turn of dehydration lowers the unit’s attack damage by 1 point and
-<a id='L42' name='L42'></a>  42 # decreases hitpoints by -$dehydration_loss.
-<a id='L43' name='L43'></a>  43 
-<a id='L44' name='L44'></a>  44 <em class='sharp'>#define</em> APPLY_DEHYDRATION_EFFECT FILTER
-<a id='L45' name='L45'></a>  45     [store_unit]
-<a id='L46' name='L46'></a>  46         [filter]
-<a id='L47' name='L47'></a>  47             <em class='brace'>{</em>FILTER<em class='brace'>}</em>
-<a id='L48' name='L48'></a>  48         [/filter]
-<a id='L49' name='L49'></a>  49 
-<a id='L50' name='L50'></a>  50         <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>=no
-<a id='L51' name='L51'></a>  51         <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=dehydrating_units
-<a id='L52' name='L52'></a>  52     [/store_unit]
-<a id='L53' name='L53'></a>  53 
-<a id='L54' name='L54'></a>  54     [<strong class='reserved'>for</strong>]
-<a id='L55' name='L55'></a>  55         <a href='../Y/5830.html' title='Multiple used in 180 places.'>array</a>=dehydrating_units
-<a id='L56' name='L56'></a>  56         [<strong class='reserved'>do</strong>]
-<a id='L57' name='L57'></a>  57             <em class='brace'>{</em>VARIABLE dehydrating_units[$i].resting no<em class='brace'>}</em>
-<a id='L58' name='L58'></a>  58 
-<a id='L59' name='L59'></a>  59             [<strong class='reserved'>if</strong>]
-<a id='L60' name='L60'></a>  60                 [have_unit]
-<a id='L61' name='L61'></a>  61                     <a href='../D/16628.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16643.html' title='Multiple defined in 8 places.'>y</a>=$dehydrating_units[$i].x,$dehydrating_units[$i].y
+<a id='L3' name='L3'></a>   3 [scenario]
+<a id='L4' name='L4'></a>   4     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=12_The_Final_Confrontation
+<a id='L5' name='L5'></a>   5     <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "The Final Confrontation"
+<a id='L6' name='L6'></a>   6     <a href='../D/11409.html' title='Multiple defined in 2 places.'>next_scenario</a>=13_Epilogue
+<a id='L7' name='L7'></a>   7 
+<a id='L8' name='L8'></a>   8     <em class='brace'>{</em>UTBS_MAP 12_The_Final_Confrontation.map<em class='brace'>}</em>
+<a id='L9' name='L9'></a>   9 
+<a id='L10' name='L10'></a>  10     <em class='brace'>{</em>STORY_THE_FINAL_CONFRONTATION<em class='brace'>}</em>
+<a id='L11' name='L11'></a>  11 
+<a id='L12' name='L12'></a>  12     <em class='brace'>{</em>SCENARIO_MUSIC "the_deep_path.ogg"<em class='brace'>}</em>
+<a id='L13' name='L13'></a>  13     <em class='brace'>{</em>EXTRA_SCENARIO_MUSIC "revelation.ogg"<em class='brace'>}</em>
+<a id='L14' name='L14'></a>  14     <em class='brace'>{</em>EXTRA_SCENARIO_MUSIC "the_city_falls.ogg"<em class='brace'>}</em>
+<a id='L15' name='L15'></a>  15 
+<a id='L16' name='L16'></a>  16     <a href='../Y/21719.html' title='Multiple used in 175 places.'>victory_when_enemies_defeated</a>=no
+<a id='L17' name='L17'></a>  17     <a href='../S/794.html#L560' title='Defined at 560 in src/preferences/game.cpp.'>turns</a>="-1"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19     <em class='brace'>{</em>UNDERGROUND<em class='brace'>}</em>
+<a id='L20' name='L20'></a>  20 
+<a id='L21' name='L21'></a>  21 <em class='sharp'>    #</em>########################################################################################################
+<a id='L22' name='L22'></a>  22     #                   Events table (stuff that can be triggered with 'fire')                              #
+<a id='L23' name='L23'></a>  23 <em class='sharp'>    #</em>########################################################################################################
+<a id='L24' name='L24'></a>  24     # eloh_death : causes the post-Eloh events to occur                                                     #
+<a id='L25' name='L25'></a>  25     # create_minion : spawns one of Yechnagoth's minions                                                   #
+<a id='L26' name='L26'></a>  26     # yechnagoth_regenerate : causes Yechnagoth to fully heal                                               #
+<a id='L27' name='L27'></a>  27     # yechnagoth_special_attack : trigger Yechnagoth's special slowing attack                               #
+<a id='L28' name='L28'></a>  28     # yechnagoth_vulnerate : vulnerates Yechnagoth                                                          #
+<a id='L29' name='L29'></a>  29     # yechnagoth_death : triggers Yechnagoth's death event                                                  #
+<a id='L30' name='L30'></a>  30 <em class='sharp'>    #</em>########################################################################################################
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32     # Side 1: elves
+<a id='L33' name='L33'></a>  33     [side]
+<a id='L34' name='L34'></a>  34         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L35' name='L35'></a>  35         <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Kaleh
+<a id='L36' name='L36'></a>  36         <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Quenoth Youth
+<a id='L37' name='L37'></a>  37         <a href='../Y/7127.html' title='Multiple used in 1413 places.'>canrecruit</a>=yes
+<a id='L38' name='L38'></a>  38         <a href='../D/8279.html' title='Multiple defined in 3 places.'>gold</a>=0
+<a id='L39' name='L39'></a>  39         <em class='brace'>{</em>NO_INCOME<em class='brace'>}</em>
+<a id='L40' name='L40'></a>  40         <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=human
+<a id='L41' name='L41'></a>  41         <a href='../S/794.html#L550' title='Defined at 550 in src/preferences/game.cpp.'>shroud</a>=no
+<a id='L42' name='L42'></a>  42         <a href='../S/794.html#L540' title='Defined at 540 in src/preferences/game.cpp.'>fog</a>=no
+<a id='L43' name='L43'></a>  43         <em class='brace'>{</em>FLAG_VARIANT <strong class='reserved'>long</strong><em class='brace'>}</em>
+<a id='L44' name='L44'></a>  44         <a href='../D/15920.html' title='Multiple defined in 2 places.'>user_team_name</a>= _ "team_name^Quenoth Elves"
+<a id='L45' name='L45'></a>  45     [/side]
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47     # Side 2: Eloh
+<a id='L48' name='L48'></a>  48     [side]
+<a id='L49' name='L49'></a>  49         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L50' name='L50'></a>  50         <a href='../S/1083.html#L335' title='Defined at 335 in src/team.hpp.'>no_leader</a>=yes
+<a id='L51' name='L51'></a>  51         <a href='../D/8279.html' title='Multiple defined in 3 places.'>gold</a>=0
+<a id='L52' name='L52'></a>  52         <a href='../S/1130.html#L204' title='Defined at 204 in src/game_initialization/connect_engine.hpp.'>income</a>=0
+<a id='L53' name='L53'></a>  53         <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=ai
+<a id='L54' name='L54'></a>  54         <a href='../S/794.html#L550' title='Defined at 550 in src/preferences/game.cpp.'>shroud</a>=no
+<a id='L55' name='L55'></a>  55         <a href='../S/794.html#L540' title='Defined at 540 in src/preferences/game.cpp.'>fog</a>=no
+<a id='L56' name='L56'></a>  56         <a href='../D/15040.html' title='Multiple defined in 4 places.'>team_name</a>=eloh
+<a id='L57' name='L57'></a>  57         <a href='../D/15920.html' title='Multiple defined in 2 places.'>user_team_name</a>=_"Eloh"
+<a id='L58' name='L58'></a>  58         <em class='brace'>{</em>FLAG_VARIANT undead<em class='brace'>}</em>
+<a id='L59' name='L59'></a>  59         [ai]
+<a id='L60' name='L60'></a>  60             <a href='../Y/5472.html' title='Multiple used in 352 places.'>aggression</a>=0.95
+<a id='L61' name='L61'></a>  61             <a href='../Y/7174.html' title='Multiple used in 213 places.'>caution</a>=0.1
 <a id='L62' name='L62'></a>  62 
-<a id='L63' name='L63'></a>  63                     [filter_adjacent]
-<a id='L64' name='L64'></a>  64                         <a href='../S/1083.html#L241' title='Defined at 241 in src/team.hpp.'>is_enemy</a>=no
-<a id='L65' name='L65'></a>  65                         [and]
-<a id='L66' name='L66'></a>  66                             <a href='../Y/5145.html' title='Multiple used in 110 places.'>ability</a>=healing
-<a id='L67' name='L67'></a>  67                             [or]
-<a id='L68' name='L68'></a>  68                                 <a href='../Y/5145.html' title='Multiple used in 110 places.'>ability</a>=curing
-<a id='L69' name='L69'></a>  69                             [/or]
-<a id='L70' name='L70'></a>  70                         [/and]
-<a id='L71' name='L71'></a>  71                     [/filter_adjacent]
-<a id='L72' name='L72'></a>  72                 [/have_unit]
-<a id='L73' name='L73'></a>  73 
-<a id='L74' name='L74'></a>  74                 [then]
-<a id='L75' name='L75'></a>  75                     <em class='brace'>{</em>VARIABLE dehydrating_units[$i].status.dehydration_slowed_by_healer yes<em class='brace'>}</em>
-<a id='L76' name='L76'></a>  76 
-<a id='L77' name='L77'></a>  77                     [unstore_unit]
-<a id='L78' name='L78'></a>  78                         <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=dehydrating_units[$i]
-<a id='L79' name='L79'></a>  79                         <a href='../Y/10166.html' title='Multiple used in 106 places.'>find_vacant</a>=no
-<a id='L80' name='L80'></a>  80                     [/unstore_unit]
-<a id='L81' name='L81'></a>  81                 [/then]
-<a id='L82' name='L82'></a>  82 
-<a id='L83' name='L83'></a>  83                 [<strong class='reserved'>else</strong>]
-<a id='L84' name='L84'></a>  84                     [<strong class='reserved'>for</strong>]
-<a id='L85' name='L85'></a>  85                         <a href='../Y/5830.html' title='Multiple used in 180 places.'>array</a>=dehydrating_units[$i].attack
-<a id='L86' name='L86'></a>  86                         <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=j
-<a id='L87' name='L87'></a>  87                         [<strong class='reserved'>do</strong>]
-<a id='L88' name='L88'></a>  88 <em class='sharp'>                            # if</em> dehydrating <strong class='reserved'>for</strong> the first time, store the original attack stats
-<a id='L89' name='L89'></a>  89                             [<strong class='reserved'>if</strong>]
-<a id='L90' name='L90'></a>  90                                 [variable]
-<a id='L91' name='L91'></a>  91                                     <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=dehydrating_units[$i].status.dehydrated
-<a id='L92' name='L92'></a>  92                                     <a href='../Y/15303.html' title='Multiple used in 86 places.'>not_equals</a>=yes
-<a id='L93' name='L93'></a>  93                                 [/variable]
-<a id='L94' name='L94'></a>  94 
-<a id='L95' name='L95'></a>  95                                 [then]
-<a id='L96' name='L96'></a>  96                                     <em class='brace'>{</em>VARIABLE dehydrating_units[$i].variables.original_attack[$j].damage $dehydrating_units[$i].attack[$j].damage<em class='brace'>}</em>
-<a id='L97' name='L97'></a>  97                                 [/then]
-<a id='L98' name='L98'></a>  98                             [/<strong class='reserved'>if</strong>]
+<a id='L63' name='L63'></a>  63             # change AI so that enemies target Kaleh's friends
+<a id='L64' name='L64'></a>  64             # more than Kaleh himself. I want to threaten
+<a id='L65' name='L65'></a>  65             # other units more, since Kaleh's death leads to
+<a id='L66' name='L66'></a>  66             # immediate defeat
+<a id='L67' name='L67'></a>  67 
+<a id='L68' name='L68'></a>  68             [goal]
+<a id='L69' name='L69'></a>  69                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L70' name='L70'></a>  70                 [criteria]
+<a id='L71' name='L71'></a>  71                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Kaleh
+<a id='L72' name='L72'></a>  72                 [/criteria]
+<a id='L73' name='L73'></a>  73                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=1
+<a id='L74' name='L74'></a>  74             [/goal]
+<a id='L75' name='L75'></a>  75             [goal]
+<a id='L76' name='L76'></a>  76                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L77' name='L77'></a>  77                 [criteria]
+<a id='L78' name='L78'></a>  78                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Nym
+<a id='L79' name='L79'></a>  79                 [/criteria]
+<a id='L80' name='L80'></a>  80                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L81' name='L81'></a>  81             [/goal]
+<a id='L82' name='L82'></a>  82             [goal]
+<a id='L83' name='L83'></a>  83                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L84' name='L84'></a>  84                 [criteria]
+<a id='L85' name='L85'></a>  85                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Zhul
+<a id='L86' name='L86'></a>  86                 [/criteria]
+<a id='L87' name='L87'></a>  87                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L88' name='L88'></a>  88             [/goal]
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90             [goal]
+<a id='L91' name='L91'></a>  91                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L92' name='L92'></a>  92                 [criteria]
+<a id='L93' name='L93'></a>  93                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$ally_name
+<a id='L94' name='L94'></a>  94                 [/criteria]
+<a id='L95' name='L95'></a>  95                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L96' name='L96'></a>  96             [/goal]
+<a id='L97' name='L97'></a>  97         [/ai]
+<a id='L98' name='L98'></a>  98     [/side]
 <a id='L99' name='L99'></a>  99 
-<a id='L100' name='L100'></a> 100                             # the attack's damage drops by 1 point, but cannot drop to zero
-<a id='L101' name='L101'></a> 101                             [<strong class='reserved'>if</strong>]
-<a id='L102' name='L102'></a> 102                                 [variable]
-<a id='L103' name='L103'></a> 103                                     <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=dehydrating_units[$i].attack[$j].damage
-<a id='L104' name='L104'></a> 104                                     <a href='../Y/11199.html' title='Multiple used in 125 places.'>greater_than</a>=1
-<a id='L105' name='L105'></a> 105                                 [/variable]
-<a id='L106' name='L106'></a> 106 
-<a id='L107' name='L107'></a> 107                                 [then]
-<a id='L108' name='L108'></a> 108                                     <em class='brace'>{</em>VARIABLE_OP dehydrating_units[$i].attack[$j].damage sub 1<em class='brace'>}</em>
-<a id='L109' name='L109'></a> 109                                 [/then]
-<a id='L110' name='L110'></a> 110                             [/<strong class='reserved'>if</strong>]
-<a id='L111' name='L111'></a> 111                         [/<strong class='reserved'>do</strong>]
-<a id='L112' name='L112'></a> 112                     [/<strong class='reserved'>for</strong>]
-<a id='L113' name='L113'></a> 113 
-<a id='L114' name='L114'></a> 114                     # unit’s hitpoints drop by $dehydration_loss, but cannot kill it
-<a id='L115' name='L115'></a> 115                     [<strong class='reserved'>if</strong>]
-<a id='L116' name='L116'></a> 116                         [variable]
-<a id='L117' name='L117'></a> 117                             <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=dehydrating_units[$i].hitpoints
-<a id='L118' name='L118'></a> 118                             <a href='../Y/11199.html' title='Multiple used in 125 places.'>greater_than</a>=$dehydration_loss
-<a id='L119' name='L119'></a> 119                         [/variable]
-<a id='L120' name='L120'></a> 120 
-<a id='L121' name='L121'></a> 121                         [then]
-<a id='L122' name='L122'></a> 122                             <em class='brace'>{</em>VARIABLE_OP dehydrating_units[$i].hitpoints sub $dehydration_loss<em class='brace'>}</em>
-<a id='L123' name='L123'></a> 123                         [/then]
-<a id='L124' name='L124'></a> 124 
-<a id='L125' name='L125'></a> 125                         [<strong class='reserved'>else</strong>]
-<a id='L126' name='L126'></a> 126                             <em class='brace'>{</em>VARIABLE dehydrating_units[$i].hitpoints 1<em class='brace'>}</em>
-<a id='L127' name='L127'></a> 127                         [/<strong class='reserved'>else</strong>]
-<a id='L128' name='L128'></a> 128                     [/<strong class='reserved'>if</strong>]
-<a id='L129' name='L129'></a> 129 
-<a id='L130' name='L130'></a> 130                     <em class='brace'>{</em>VARIABLE dehydrating_units[$i].status.dehydrated yes<em class='brace'>}</em>
-<a id='L131' name='L131'></a> 131 
-<a id='L132' name='L132'></a> 132                     [unstore_unit]
-<a id='L133' name='L133'></a> 133                         <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=dehydrating_units[$i]
-<a id='L134' name='L134'></a> 134                         <a href='../Y/10166.html' title='Multiple used in 106 places.'>find_vacant</a>=no
-<a id='L135' name='L135'></a> 135                         <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>= _ "thirst"
-<a id='L136' name='L136'></a> 136                         <em class='brace'>{</em>COLOR_HARM<em class='brace'>}</em>
-<a id='L137' name='L137'></a> 137                     [/unstore_unit]
-<a id='L138' name='L138'></a> 138 
-<a id='L139' name='L139'></a> 139                     [unit_overlay]
-<a id='L140' name='L140'></a> 140                         <a href='../D/16628.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16643.html' title='Multiple defined in 8 places.'>y</a>=$dehydrating_units[$i].x,$dehydrating_units[$i].y
-<a id='L141' name='L141'></a> 141                         <a href='../D/8702.html' title='Multiple defined in 19 places.'>image</a>=misc/dehydration-icon.png
-<a id='L142' name='L142'></a> 142                     [/unit_overlay]
-<a id='L143' name='L143'></a> 143                 [/<strong class='reserved'>else</strong>]
-<a id='L144' name='L144'></a> 144             [/<strong class='reserved'>if</strong>]
-<a id='L145' name='L145'></a> 145         [/<strong class='reserved'>do</strong>]
-<a id='L146' name='L146'></a> 146     [/<strong class='reserved'>for</strong>]
-<a id='L147' name='L147'></a> 147 
-<a id='L148' name='L148'></a> 148     <em class='brace'>{</em>CLEAR_VARIABLE dehydrating_units<em class='brace'>}</em>
-<a id='L149' name='L149'></a> 149 #enddef
-<a id='L150' name='L150'></a> 150 
-<a id='L151' name='L151'></a> 151 # This rehydrates the given units. The units gain back their full attack damage.
-<a id='L152' name='L152'></a> 152 <em class='sharp'>#define</em> APPLY_HYDRATION_EFFECT FILTER
-<a id='L153' name='L153'></a> 153     [store_unit]
-<a id='L154' name='L154'></a> 154         [filter]
-<a id='L155' name='L155'></a> 155             <em class='brace'>{</em>FILTER<em class='brace'>}</em>
-<a id='L156' name='L156'></a> 156         [/filter]
-<a id='L157' name='L157'></a> 157 
-<a id='L158' name='L158'></a> 158         <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>=no
-<a id='L159' name='L159'></a> 159         <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=hydrating_units
-<a id='L160' name='L160'></a> 160     [/store_unit]
+<a id='L100' name='L100'></a> 100     # Side 3: Brainwashed Elves
+<a id='L101' name='L101'></a> 101     [side]
+<a id='L102' name='L102'></a> 102         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L103' name='L103'></a> 103         <a href='../S/1083.html#L335' title='Defined at 335 in src/team.hpp.'>no_leader</a>=yes
+<a id='L104' name='L104'></a> 104         <a href='../D/8279.html' title='Multiple defined in 3 places.'>gold</a>=0
+<a id='L105' name='L105'></a> 105         <a href='../S/1130.html#L204' title='Defined at 204 in src/game_initialization/connect_engine.hpp.'>income</a>=0
+<a id='L106' name='L106'></a> 106         <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=ai
+<a id='L107' name='L107'></a> 107         <a href='../S/794.html#L550' title='Defined at 550 in src/preferences/game.cpp.'>shroud</a>=no
+<a id='L108' name='L108'></a> 108         <a href='../S/794.html#L540' title='Defined at 540 in src/preferences/game.cpp.'>fog</a>=no
+<a id='L109' name='L109'></a> 109         <a href='../D/15040.html' title='Multiple defined in 4 places.'>team_name</a>=eloh
+<a id='L110' name='L110'></a> 110         <a href='../D/15920.html' title='Multiple defined in 2 places.'>user_team_name</a>=_"Eloh"
+<a id='L111' name='L111'></a> 111 
+<a id='L112' name='L112'></a> 112         [ai]
+<a id='L113' name='L113'></a> 113             <a href='../Y/5472.html' title='Multiple used in 352 places.'>aggression</a>=0.95
+<a id='L114' name='L114'></a> 114             <a href='../Y/7174.html' title='Multiple used in 213 places.'>caution</a>=0.1
+<a id='L115' name='L115'></a> 115 
+<a id='L116' name='L116'></a> 116             [goal]
+<a id='L117' name='L117'></a> 117                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L118' name='L118'></a> 118                 [criteria]
+<a id='L119' name='L119'></a> 119                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Kaleh
+<a id='L120' name='L120'></a> 120                 [/criteria]
+<a id='L121' name='L121'></a> 121                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=1
+<a id='L122' name='L122'></a> 122             [/goal]
+<a id='L123' name='L123'></a> 123             [goal]
+<a id='L124' name='L124'></a> 124                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L125' name='L125'></a> 125                 [criteria]
+<a id='L126' name='L126'></a> 126                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Nym
+<a id='L127' name='L127'></a> 127                 [/criteria]
+<a id='L128' name='L128'></a> 128                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L129' name='L129'></a> 129             [/goal]
+<a id='L130' name='L130'></a> 130             [goal]
+<a id='L131' name='L131'></a> 131                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L132' name='L132'></a> 132                 [criteria]
+<a id='L133' name='L133'></a> 133                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Zhul
+<a id='L134' name='L134'></a> 134                 [/criteria]
+<a id='L135' name='L135'></a> 135                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L136' name='L136'></a> 136             [/goal]
+<a id='L137' name='L137'></a> 137 
+<a id='L138' name='L138'></a> 138             [goal]
+<a id='L139' name='L139'></a> 139                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L140' name='L140'></a> 140                 [criteria]
+<a id='L141' name='L141'></a> 141                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$ally_name
+<a id='L142' name='L142'></a> 142                 [/criteria]
+<a id='L143' name='L143'></a> 143                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L144' name='L144'></a> 144             [/goal]
+<a id='L145' name='L145'></a> 145         [/ai]
+<a id='L146' name='L146'></a> 146         <em class='brace'>{</em>FLAG_VARIANT <strong class='reserved'>long</strong><em class='brace'>}</em>
+<a id='L147' name='L147'></a> 147     [/side]
+<a id='L148' name='L148'></a> 148 
+<a id='L149' name='L149'></a> 149     # Side 4: Pulsing Spires
+<a id='L150' name='L150'></a> 150     [side]
+<a id='L151' name='L151'></a> 151         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=4
+<a id='L152' name='L152'></a> 152         <a href='../S/1083.html#L335' title='Defined at 335 in src/team.hpp.'>no_leader</a>=yes
+<a id='L153' name='L153'></a> 153         <a href='../D/8279.html' title='Multiple defined in 3 places.'>gold</a>=0
+<a id='L154' name='L154'></a> 154         <a href='../S/1130.html#L204' title='Defined at 204 in src/game_initialization/connect_engine.hpp.'>income</a>=0
+<a id='L155' name='L155'></a> 155         <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=ai
+<a id='L156' name='L156'></a> 156         <a href='../S/794.html#L550' title='Defined at 550 in src/preferences/game.cpp.'>shroud</a>=no
+<a id='L157' name='L157'></a> 157         <a href='../S/794.html#L540' title='Defined at 540 in src/preferences/game.cpp.'>fog</a>=no
+<a id='L158' name='L158'></a> 158         <a href='../D/15040.html' title='Multiple defined in 4 places.'>team_name</a>=eloh
+<a id='L159' name='L159'></a> 159         <a href='../D/15920.html' title='Multiple defined in 2 places.'>user_team_name</a>=_"Eloh"
+<a id='L160' name='L160'></a> 160         <em class='brace'>{</em>FLAG_VARIANT undead<em class='brace'>}</em>
 <a id='L161' name='L161'></a> 161 
-<a id='L162' name='L162'></a> 162     [<strong class='reserved'>for</strong>]
-<a id='L163' name='L163'></a> 163         <a href='../Y/5830.html' title='Multiple used in 180 places.'>array</a>=hydrating_units
-<a id='L164' name='L164'></a> 164         [<strong class='reserved'>do</strong>]
-<a id='L165' name='L165'></a> 165             [<strong class='reserved'>if</strong>]
-<a id='L166' name='L166'></a> 166                 [variable]
-<a id='L167' name='L167'></a> 167                     <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=hydrating_units[$i].status.dehydrated
-<a id='L168' name='L168'></a> 168                     <a href='../D/5967.html' title='Multiple defined in 10 places.'>equals</a>=yes
-<a id='L169' name='L169'></a> 169                 [/variable]
-<a id='L170' name='L170'></a> 170 
-<a id='L171' name='L171'></a> 171                 [then]
-<a id='L172' name='L172'></a> 172                     [<strong class='reserved'>for</strong>]
-<a id='L173' name='L173'></a> 173                         <a href='../Y/5830.html' title='Multiple used in 180 places.'>array</a>=hydrating_units[$i].attack
-<a id='L174' name='L174'></a> 174                         <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=j
-<a id='L175' name='L175'></a> 175                         [<strong class='reserved'>do</strong>]
-<a id='L176' name='L176'></a> 176                             <em class='brace'>{</em>VARIABLE hydrating_units[$i].attack[$j].damage $hydrating_units[$i].variables.original_attack[$j].damage<em class='brace'>}</em>
-<a id='L177' name='L177'></a> 177                         [/<strong class='reserved'>do</strong>]
-<a id='L178' name='L178'></a> 178                     [/<strong class='reserved'>for</strong>]
-<a id='L179' name='L179'></a> 179                 [/then]
-<a id='L180' name='L180'></a> 180             [/<strong class='reserved'>if</strong>]
-<a id='L181' name='L181'></a> 181 
-<a id='L182' name='L182'></a> 182             <em class='brace'>{</em>VARIABLE hydrating_units[$i].status.dehydrated no<em class='brace'>}</em>
-<a id='L183' name='L183'></a> 183 
-<a id='L184' name='L184'></a> 184             [unstore_unit]
-<a id='L185' name='L185'></a> 185                 <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=hydrating_units[$i]
-<a id='L186' name='L186'></a> 186                 <a href='../Y/10166.html' title='Multiple used in 106 places.'>find_vacant</a>=no
-<a id='L187' name='L187'></a> 187                 <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>= _ "refreshed"
-<a id='L188' name='L188'></a> 188                 <em class='brace'>{</em>COLOR_HEAL<em class='brace'>}</em>
-<a id='L189' name='L189'></a> 189             [/unstore_unit]
-<a id='L190' name='L190'></a> 190 
-<a id='L191' name='L191'></a> 191             [remove_unit_overlay]
-<a id='L192' name='L192'></a> 192                 <a href='../D/16628.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16643.html' title='Multiple defined in 8 places.'>y</a>=$hydrating_units[$i].x,$hydrating_units[$i].y
-<a id='L193' name='L193'></a> 193                 <a href='../D/8702.html' title='Multiple defined in 19 places.'>image</a>=misc/dehydration-icon.png
-<a id='L194' name='L194'></a> 194             [/remove_unit_overlay]
-<a id='L195' name='L195'></a> 195         [/<strong class='reserved'>do</strong>]
-<a id='L196' name='L196'></a> 196     [/<strong class='reserved'>for</strong>]
+<a id='L162' name='L162'></a> 162         [ai]
+<a id='L163' name='L163'></a> 163             <a href='../Y/5472.html' title='Multiple used in 352 places.'>aggression</a>=-1.0
+<a id='L164' name='L164'></a> 164             <a href='../Y/7174.html' title='Multiple used in 213 places.'>caution</a>=1.0
+<a id='L165' name='L165'></a> 165 
+<a id='L166' name='L166'></a> 166             [goal]
+<a id='L167' name='L167'></a> 167                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L168' name='L168'></a> 168                 [criteria]
+<a id='L169' name='L169'></a> 169                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Kaleh
+<a id='L170' name='L170'></a> 170                 [/criteria]
+<a id='L171' name='L171'></a> 171                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=1
+<a id='L172' name='L172'></a> 172             [/goal]
+<a id='L173' name='L173'></a> 173             [goal]
+<a id='L174' name='L174'></a> 174                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L175' name='L175'></a> 175                 [criteria]
+<a id='L176' name='L176'></a> 176                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Nym
+<a id='L177' name='L177'></a> 177                 [/criteria]
+<a id='L178' name='L178'></a> 178                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L179' name='L179'></a> 179             [/goal]
+<a id='L180' name='L180'></a> 180             [goal]
+<a id='L181' name='L181'></a> 181                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L182' name='L182'></a> 182                 [criteria]
+<a id='L183' name='L183'></a> 183                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Zhul
+<a id='L184' name='L184'></a> 184                 [/criteria]
+<a id='L185' name='L185'></a> 185                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L186' name='L186'></a> 186             [/goal]
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188             [goal]
+<a id='L189' name='L189'></a> 189                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=target
+<a id='L190' name='L190'></a> 190                 [criteria]
+<a id='L191' name='L191'></a> 191                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$ally_name
+<a id='L192' name='L192'></a> 192                 [/criteria]
+<a id='L193' name='L193'></a> 193                 <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=3
+<a id='L194' name='L194'></a> 194             [/goal]
+<a id='L195' name='L195'></a> 195         [/ai]
+<a id='L196' name='L196'></a> 196     [/side]
 <a id='L197' name='L197'></a> 197 
-<a id='L198' name='L198'></a> 198     <em class='brace'>{</em>CLEAR_VARIABLE hydrating_units<em class='brace'>}</em>
-<a id='L199' name='L199'></a> 199 #enddef
-<a id='L200' name='L200'></a> 200 
-<a id='L201' name='L201'></a> 201 <em class='sharp'>#</em>
-<a id='L202' name='L202'></a> 202 # Events
-<a id='L203' name='L203'></a> 203 <em class='sharp'>#</em>
-<a id='L204' name='L204'></a> 204 <em class='sharp'>#define</em> DEHYDRATION_EVENTS
-<a id='L205' name='L205'></a> 205     [event]
-<a id='L206' name='L206'></a> 206         <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=prestart
-<a id='L207' name='L207'></a> 207 
-<a id='L208' name='L208'></a> 208         # dehydration loss - a variable <strong class='reserved'>for</strong> the dialogue
-<a id='L209' name='L209'></a> 209         <em class='brace'>{</em>VARIABLE dehydration_loss 4<em class='brace'>}</em>
-<a id='L210' name='L210'></a> 210     [/event]
-<a id='L211' name='L211'></a> 211 
-<a id='L212' name='L212'></a> 212     [event]
-<a id='L213' name='L213'></a> 213         <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=side turn
-<a id='L214' name='L214'></a> 214         <a href='../Y/10217.html' title='Multiple used in 594 places.'>first_time_only</a>=no
-<a id='L215' name='L215'></a> 215 
-<a id='L216' name='L216'></a> 216         # dehydration:
-<a id='L217' name='L217'></a> 217         # only at dawn, morning, mid-day, afternoon and dusk
-<a id='L218' name='L218'></a> 218         <em class='brace'>{</em>APPLY_DEHYDRATION_EFFECT (
-<a id='L219' name='L219'></a> 219             <a href='../D/14472.html' title='Multiple defined in 3 places.'>side</a>=$side_number
-<a id='L220' name='L220'></a> 220             <em class='brace'>{</em>DEHYDRATABLE_UNITS_FILTER<em class='brace'>}</em>
-<a id='L221' name='L221'></a> 221 
-<a id='L222' name='L222'></a> 222             [filter_location]
-<a id='L223' name='L223'></a> 223                 <a href='../S/68.html#L32' title='Defined at 32 in src/editor/map/map_fragment.hpp.'>terrain</a>=<em class='brace'>{</em>DEHYDRATING_TILES<em class='brace'>}</em>
-<a id='L224' name='L224'></a> 224                 [not]
-<a id='L225' name='L225'></a> 225                     <a href='../S/929.html#L57' title='Defined at 57 in src/time_of_day.hpp.'>time_of_day</a>=chaotic
-<a id='L226' name='L226'></a> 226                 [/not]
-<a id='L227' name='L227'></a> 227             [/filter_location]
-<a id='L228' name='L228'></a> 228         )<em class='brace'>}</em>
-<a id='L229' name='L229'></a> 229     [/event]
+<a id='L198' name='L198'></a> 198     # Prestart functions:
+<a id='L199' name='L199'></a> 199     # insert items onto map
+<a id='L200' name='L200'></a> 200     # place item images on map
+<a id='L201' name='L201'></a> 201     # recall main heroes
+<a id='L202' name='L202'></a> 202     # store/remove kaleh
+<a id='L203' name='L203'></a> 203     # initialize starting variables
+<a id='L204' name='L204'></a> 204     # set starting scenario objectives
+<a id='L205' name='L205'></a> 205 
+<a id='L206' name='L206'></a> 206     [event]
+<a id='L207' name='L207'></a> 207         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=prestart
+<a id='L208' name='L208'></a> 208 
+<a id='L209' name='L209'></a> 209         # add items to map
+<a id='L210' name='L210'></a> 210 
+<a id='L211' name='L211'></a> 211         <em class='brace'>{</em>PLACE_IMAGE items/kaleh-dead.png 10 13<em class='brace'>}</em>
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213         # recall heroes
+<a id='L214' name='L214'></a> 214         [recall]
+<a id='L215' name='L215'></a> 215             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Nym
+<a id='L216' name='L216'></a> 216             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,16
+<a id='L217' name='L217'></a> 217         [/recall]
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219         [recall]
+<a id='L220' name='L220'></a> 220             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Zhul
+<a id='L221' name='L221'></a> 221             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=11,17
+<a id='L222' name='L222'></a> 222         [/recall]
+<a id='L223' name='L223'></a> 223         # wmllint: unwho ALL
+<a id='L224' name='L224'></a> 224 
+<a id='L225' name='L225'></a> 225         # recall dwarf/troll
+<a id='L226' name='L226'></a> 226         [recall]
+<a id='L227' name='L227'></a> 227             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$ally_name
+<a id='L228' name='L228'></a> 228             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=9,17
+<a id='L229' name='L229'></a> 229         [/recall]
 <a id='L230' name='L230'></a> 230 
-<a id='L231' name='L231'></a> 231     [event]
-<a id='L232' name='L232'></a> 232         <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=side turn
-<a id='L233' name='L233'></a> 233         <a href='../Y/10217.html' title='Multiple used in 594 places.'>first_time_only</a>=no
-<a id='L234' name='L234'></a> 234 
-<a id='L235' name='L235'></a> 235         # rehydration in water, villages or when next to healers
-<a id='L236' name='L236'></a> 236         <em class='brace'>{</em>APPLY_HYDRATION_EFFECT (
-<a id='L237' name='L237'></a> 237             <a href='../D/14472.html' title='Multiple defined in 3 places.'>side</a>=$side_number
-<a id='L238' name='L238'></a> 238             <a href='../D/14770.html' title='Multiple defined in 5 places.'>status</a>=dehydrated
-<a id='L239' name='L239'></a> 239 
-<a id='L240' name='L240'></a> 240             [and]
-<a id='L241' name='L241'></a> 241                 [filter_location]
-<a id='L242' name='L242'></a> 242                     <a href='../S/68.html#L32' title='Defined at 32 in src/editor/map/map_fragment.hpp.'>terrain</a>=<em class='brace'>{</em>HYDRATING_TILES<em class='brace'>}</em>
-<a id='L243' name='L243'></a> 243                 [/filter_location]
-<a id='L244' name='L244'></a> 244             [/and]
-<a id='L245' name='L245'></a> 245         )<em class='brace'>}</em>
-<a id='L246' name='L246'></a> 246     [/event]
+<a id='L231' name='L231'></a> 231         # wmllint: recognize Grog
+<a id='L232' name='L232'></a> 232         # wmllint: recognize Nog
+<a id='L233' name='L233'></a> 233         # wmllint: recognize Rogrimir
+<a id='L234' name='L234'></a> 234         # wmllint: recognize Jarl
+<a id='L235' name='L235'></a> 235 
+<a id='L236' name='L236'></a> 236         # store/remove kaleh
+<a id='L237' name='L237'></a> 237 
+<a id='L238' name='L238'></a> 238         [store_unit]
+<a id='L239' name='L239'></a> 239             [filter]
+<a id='L240' name='L240'></a> 240                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Kaleh
+<a id='L241' name='L241'></a> 241             [/filter]
+<a id='L242' name='L242'></a> 242             <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>=yes
+<a id='L243' name='L243'></a> 243             <a href='../Y/21620.html' title='Multiple used in 991 places.'>variable</a>=stored_kaleh
+<a id='L244' name='L244'></a> 244         [/store_unit]
+<a id='L245' name='L245'></a> 245 
+<a id='L246' name='L246'></a> 246         #initialize starting variables
 <a id='L247' name='L247'></a> 247 
-<a id='L248' name='L248'></a> 248     [event]
-<a id='L249' name='L249'></a> 249         <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=turn refresh
-<a id='L250' name='L250'></a> 250         <a href='../Y/10217.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L248' name='L248'></a> 248         <em class='brace'>{</em>VARIABLE allies_killed 0<em class='brace'>}</em>
+<a id='L249' name='L249'></a> 249         <em class='brace'>{</em>VARIABLE ally_died_in_final_fight no<em class='brace'>}</em>
+<a id='L250' name='L250'></a> 250         <em class='brace'>{</em>VARIABLE number_minions_to_spawn 0<em class='brace'>}</em>
 <a id='L251' name='L251'></a> 251 
-<a id='L252' name='L252'></a> 252         [<strong class='reserved'>if</strong>]
-<a id='L253' name='L253'></a> 253             [variable]
-<a id='L254' name='L254'></a> 254                 <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=side_number
-<a id='L255' name='L255'></a> 255                 <a href='../D/5967.html' title='Multiple defined in 10 places.'>equals</a>=1
-<a id='L256' name='L256'></a> 256             [/variable]
-<a id='L257' name='L257'></a> 257 
-<a id='L258' name='L258'></a> 258             [then]
-<a id='L259' name='L259'></a> 259                 <em class='brace'>{</em>MODIFY_UNIT (
-<a id='L260' name='L260'></a> 260                     <a href='../D/14472.html' title='Multiple defined in 3 places.'>side</a>=1
-<a id='L261' name='L261'></a> 261                     <a href='../D/14770.html' title='Multiple defined in 5 places.'>status</a>=dehydration_slowed_by_healer
-<a id='L262' name='L262'></a> 262                 ) status.dehydration_slowed_by_healer no<em class='brace'>}</em>
-<a id='L263' name='L263'></a> 263             [/then]
-<a id='L264' name='L264'></a> 264         [/<strong class='reserved'>if</strong>]
-<a id='L265' name='L265'></a> 265     [/event]
-<a id='L266' name='L266'></a> 266 
-<a id='L267' name='L267'></a> 267     [event]
-<a id='L268' name='L268'></a> 268         <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=advance
-<a id='L269' name='L269'></a> 269         <a href='../Y/10217.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L252' name='L252'></a> 252         # set starting scenario objectives
+<a id='L253' name='L253'></a> 253 
+<a id='L254' name='L254'></a> 254         [objectives]
+<a id='L255' name='L255'></a> 255             <a href='../S/936.html#L188' title='Defined at 188 in src/save_index.cpp.'>summary</a>= _ "Starting Objectives:"
+<a id='L256' name='L256'></a> 256             [objective]
+<a id='L257' name='L257'></a> 257                 <a href='../D/5414.html' title='Multiple defined in 14 places.'>description</a>= _ "Defeat the false Eloh"
+<a id='L258' name='L258'></a> 258                 <a href='../Y/7833.html' title='Multiple used in 1335 places.'>condition</a>=win
+<a id='L259' name='L259'></a> 259             [/objective]
+<a id='L260' name='L260'></a> 260             [objective]
+<a id='L261' name='L261'></a> 261                 <a href='../D/5414.html' title='Multiple defined in 14 places.'>description</a>= _ "Death of Kaleh"
+<a id='L262' name='L262'></a> 262                 <a href='../Y/7833.html' title='Multiple used in 1335 places.'>condition</a>=lose
+<a id='L263' name='L263'></a> 263             [/objective]
+<a id='L264' name='L264'></a> 264 
+<a id='L265' name='L265'></a> 265             <em class='brace'>{</em>IS_LAST_SCENARIO<em class='brace'>}</em>
+<a id='L266' name='L266'></a> 266         [/objectives]
+<a id='L267' name='L267'></a> 267     [/event]
+<a id='L268' name='L268'></a> 268 
+<a id='L269' name='L269'></a> 269     # Event 1: Starting dialogue
 <a id='L270' name='L270'></a> 270 
-<a id='L271' name='L271'></a> 271         [filter]
-<a id='L272' name='L272'></a> 272             <a href='../D/14770.html' title='Multiple defined in 5 places.'>status</a>=dehydrated
-<a id='L273' name='L273'></a> 273         [/filter]
-<a id='L274' name='L274'></a> 274 
-<a id='L275' name='L275'></a> 275         <em class='brace'>{</em>VARIABLE unit.status.dehydrated no<em class='brace'>}</em>
-<a id='L276' name='L276'></a> 276 
-<a id='L277' name='L277'></a> 277         [unstore_unit]
-<a id='L278' name='L278'></a> 278             <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=unit
-<a id='L279' name='L279'></a> 279             <a href='../Y/10166.html' title='Multiple used in 106 places.'>find_vacant</a>=no
-<a id='L280' name='L280'></a> 280             <a href='../D/15164.html' title='Multiple defined in 14 places.'>text</a>= _ "refreshed"
-<a id='L281' name='L281'></a> 281             <em class='brace'>{</em>COLOR_HEAL<em class='brace'>}</em>
-<a id='L282' name='L282'></a> 282             <a href='../S/863.html#L781' title='Defined at 781 in src/utils/smart_list.hpp.'>advance</a>=no
-<a id='L283' name='L283'></a> 283         [/unstore_unit]
+<a id='L271' name='L271'></a> 271     [event]
+<a id='L272' name='L272'></a> 272         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=start
+<a id='L273' name='L273'></a> 273 
+<a id='L274' name='L274'></a> 274         [scroll_to]
+<a id='L275' name='L275'></a> 275             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,13
+<a id='L276' name='L276'></a> 276         [/scroll_to]
+<a id='L277' name='L277'></a> 277 
+<a id='L278' name='L278'></a> 278         [redraw]
+<a id='L279' name='L279'></a> 279         [/redraw]
+<a id='L280' name='L280'></a> 280 
+<a id='L281' name='L281'></a> 281         [delay]
+<a id='L282' name='L282'></a> 282             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=750
+<a id='L283' name='L283'></a> 283         [/delay]
 <a id='L284' name='L284'></a> 284 
-<a id='L285' name='L285'></a> 285         [remove_unit_overlay]
-<a id='L286' name='L286'></a> 286             <a href='../D/16628.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16643.html' title='Multiple defined in 8 places.'>y</a>=$unit.x,$unit.y
-<a id='L287' name='L287'></a> 287             <a href='../D/8702.html' title='Multiple defined in 19 places.'>image</a>=misc/dehydration-icon.png
-<a id='L288' name='L288'></a> 288         [/remove_unit_overlay]
-<a id='L289' name='L289'></a> 289     [/event]
-<a id='L290' name='L290'></a> 290 
-<a id='L291' name='L291'></a> 291     [event]
-<a id='L292' name='L292'></a> 292         <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=victory
-<a id='L293' name='L293'></a> 293 
-<a id='L294' name='L294'></a> 294         # Rehydrate all units <strong class='reserved'>for</strong> the next scenario
-<a id='L295' name='L295'></a> 295         # Do this more quietly than usual...
-<a id='L296' name='L296'></a> 296         [store_unit]
-<a id='L297' name='L297'></a> 297             [filter]
-<a id='L298' name='L298'></a> 298                 <a href='../D/14472.html' title='Multiple defined in 3 places.'>side</a>=1
-<a id='L299' name='L299'></a> 299             [/filter]
+<a id='L285' name='L285'></a> 285         [message]
+<a id='L286' name='L286'></a> 286             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L287' name='L287'></a> 287             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Kaleh! No!"
+<a id='L288' name='L288'></a> 288         [/message]
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290         [redraw]
+<a id='L291' name='L291'></a> 291         [/redraw]
+<a id='L292' name='L292'></a> 292 
+<a id='L293' name='L293'></a> 293         [delay]
+<a id='L294' name='L294'></a> 294             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=500
+<a id='L295' name='L295'></a> 295         [/delay]
+<a id='L296' name='L296'></a> 296 
+<a id='L297' name='L297'></a> 297         # Nym runs to Kaleh's side
+<a id='L298' name='L298'></a> 298 
+<a id='L299' name='L299'></a> 299         <em class='brace'>{</em>MOVE_UNIT <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Nym 10 14<em class='brace'>}</em>
 <a id='L300' name='L300'></a> 300 
-<a id='L301' name='L301'></a> 301             <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>=no
-<a id='L302' name='L302'></a> 302             <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=hydrating_units
-<a id='L303' name='L303'></a> 303         [/store_unit]
+<a id='L301' name='L301'></a> 301         [delay]
+<a id='L302' name='L302'></a> 302             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L303' name='L303'></a> 303         [/delay]
 <a id='L304' name='L304'></a> 304 
-<a id='L305' name='L305'></a> 305         [<strong class='reserved'>for</strong>]
-<a id='L306' name='L306'></a> 306             <a href='../Y/5830.html' title='Multiple used in 180 places.'>array</a>=hydrating_units
-<a id='L307' name='L307'></a> 307             [<strong class='reserved'>do</strong>]
-<a id='L308' name='L308'></a> 308                 [<strong class='reserved'>if</strong>]
-<a id='L309' name='L309'></a> 309                     [variable]
-<a id='L310' name='L310'></a> 310                         <a href='../D/11310.html' title='Multiple defined in 24 places.'>name</a>=hydrating_units[$i].status.dehydrated
-<a id='L311' name='L311'></a> 311                         <a href='../D/5967.html' title='Multiple defined in 10 places.'>equals</a>=yes
-<a id='L312' name='L312'></a> 312                     [/variable]
+<a id='L305' name='L305'></a> 305         # Zhul runs to Kaleh's side
+<a id='L306' name='L306'></a> 306 
+<a id='L307' name='L307'></a> 307         <em class='brace'>{</em>MOVE_UNIT <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Zhul 11 14<em class='brace'>}</em>
+<a id='L308' name='L308'></a> 308 
+<a id='L309' name='L309'></a> 309         [message]
+<a id='L310' name='L310'></a> 310             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Zhul
+<a id='L311' name='L311'></a> 311             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "He’s still breathing. Eloh, what grace I have, give unto him."
+<a id='L312' name='L312'></a> 312         [/message]
 <a id='L313' name='L313'></a> 313 
-<a id='L314' name='L314'></a> 314                     [then]
-<a id='L315' name='L315'></a> 315                         [<strong class='reserved'>for</strong>]
-<a id='L316' name='L316'></a> 316                             <a href='../Y/5830.html' title='Multiple used in 180 places.'>array</a>=hydrating_units[$i].attack
-<a id='L317' name='L317'></a> 317                             <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=j
-<a id='L318' name='L318'></a> 318                             [<strong class='reserved'>do</strong>]
-<a id='L319' name='L319'></a> 319                                 <em class='brace'>{</em>VARIABLE hydrating_units[$i].attack[$j].damage $hydrating_units[$i].variables.original_attack[$j].damage<em class='brace'>}</em>
-<a id='L320' name='L320'></a> 320                             [/<strong class='reserved'>do</strong>]
-<a id='L321' name='L321'></a> 321                         [/<strong class='reserved'>for</strong>]
-<a id='L322' name='L322'></a> 322                     [/then]
-<a id='L323' name='L323'></a> 323                 [/<strong class='reserved'>if</strong>]
+<a id='L314' name='L314'></a> 314         [delay]
+<a id='L315' name='L315'></a> 315             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L316' name='L316'></a> 316         [/delay]
+<a id='L317' name='L317'></a> 317 
+<a id='L318' name='L318'></a> 318         [message]
+<a id='L319' name='L319'></a> 319             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L320' name='L320'></a> 320             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "He’s stirring."
+<a id='L321' name='L321'></a> 321         [/message]
+<a id='L322' name='L322'></a> 322 
+<a id='L323' name='L323'></a> 323         # Ally runs to Kaleh's side
 <a id='L324' name='L324'></a> 324 
-<a id='L325' name='L325'></a> 325                 <em class='brace'>{</em>VARIABLE hydrating_units[$i].status.dehydrated no<em class='brace'>}</em>
+<a id='L325' name='L325'></a> 325         <em class='brace'>{</em>MOVE_UNIT <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$ally_name 9 14<em class='brace'>}</em>
 <a id='L326' name='L326'></a> 326 
-<a id='L327' name='L327'></a> 327                 [unstore_unit]
-<a id='L328' name='L328'></a> 328                     <a href='../Y/21581.html' title='Multiple used in 992 places.'>variable</a>=hydrating_units[$i]
-<a id='L329' name='L329'></a> 329                     <a href='../Y/10166.html' title='Multiple used in 106 places.'>find_vacant</a>=no
-<a id='L330' name='L330'></a> 330                 [/unstore_unit]
-<a id='L331' name='L331'></a> 331 
-<a id='L332' name='L332'></a> 332                 [remove_unit_overlay]
-<a id='L333' name='L333'></a> 333                     <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>=$hydrating_units[$i].id
-<a id='L334' name='L334'></a> 334                     <a href='../D/8702.html' title='Multiple defined in 19 places.'>image</a>=misc/dehydration-icon.png
-<a id='L335' name='L335'></a> 335                 [/remove_unit_overlay]
-<a id='L336' name='L336'></a> 336             [/<strong class='reserved'>do</strong>]
-<a id='L337' name='L337'></a> 337         [/<strong class='reserved'>for</strong>]
-<a id='L338' name='L338'></a> 338 
-<a id='L339' name='L339'></a> 339         # Clear related variables
-<a id='L340' name='L340'></a> 340         <em class='brace'>{</em>CLEAR_VARIABLE hydrating_units<em class='brace'>}</em>
-<a id='L341' name='L341'></a> 341         <em class='brace'>{</em>CLEAR_VARIABLE dehydration_loss<em class='brace'>}</em>
-<a id='L342' name='L342'></a> 342     [/event]
-<a id='L343' name='L343'></a> 343 #enddef
+<a id='L327' name='L327'></a> 327         [delay]
+<a id='L328' name='L328'></a> 328             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L329' name='L329'></a> 329         [/delay]
+<a id='L330' name='L330'></a> 330 
+<a id='L331' name='L331'></a> 331         [<strong class='reserved'>if</strong>]
+<a id='L332' name='L332'></a> 332             [variable]
+<a id='L333' name='L333'></a> 333                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=ally_race
+<a id='L334' name='L334'></a> 334                 <a href='../D/5974.html' title='Multiple defined in 10 places.'>equals</a>=dwarf
+<a id='L335' name='L335'></a> 335             [/variable]
+<a id='L336' name='L336'></a> 336 
+<a id='L337' name='L337'></a> 337             [then]
+<a id='L338' name='L338'></a> 338                 [message]
+<a id='L339' name='L339'></a> 339                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=$ally_name
+<a id='L340' name='L340'></a> 340                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Aye, there’s still life in the boy. But where is the foul creature that did this to him?"
+<a id='L341' name='L341'></a> 341                 [/message]
+<a id='L342' name='L342'></a> 342             [/then]
+<a id='L343' name='L343'></a> 343 
+<a id='L344' name='L344'></a> 344             [<strong class='reserved'>else</strong>]
+<a id='L345' name='L345'></a> 345                 [message]
+<a id='L346' name='L346'></a> 346                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=$ally_name
+<a id='L347' name='L347'></a> 347                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "The little one is not dead yet. But where is evil lady that did this to him?"
+<a id='L348' name='L348'></a> 348                 [/message]
+<a id='L349' name='L349'></a> 349             [/<strong class='reserved'>else</strong>]
+<a id='L350' name='L350'></a> 350         [/<strong class='reserved'>if</strong>]
+<a id='L351' name='L351'></a> 351 
+<a id='L352' name='L352'></a> 352         [redraw]
+<a id='L353' name='L353'></a> 353         [/redraw]
+<a id='L354' name='L354'></a> 354 
+<a id='L355' name='L355'></a> 355         [delay]
+<a id='L356' name='L356'></a> 356             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L357' name='L357'></a> 357         [/delay]
+<a id='L358' name='L358'></a> 358 
+<a id='L359' name='L359'></a> 359         [unit]
+<a id='L360' name='L360'></a> 360             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Divine Incarnation
+<a id='L361' name='L361'></a> 361             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Eloh
+<a id='L362' name='L362'></a> 362             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Eloh"
+<a id='L363' name='L363'></a> 363             <a href='../Y/16875.html' title='Multiple used in 595 places.'>profile</a>=portraits/eloh.png
+<a id='L364' name='L364'></a> 364             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,11
+<a id='L365' name='L365'></a> 365             <a href='../S/1016.html#L1520' title='Defined at 1520 in src/units/unit.cpp.'>upkeep</a>=free
+<a id='L366' name='L366'></a> 366             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L367' name='L367'></a> 367             [modifications]
+<a id='L368' name='L368'></a> 368                 <em class='brace'>{</em>TRAIT_INTELLIGENT<em class='brace'>}</em>
+<a id='L369' name='L369'></a> 369                 <em class='brace'>{</em>TRAIT_QUICK<em class='brace'>}</em>
+<a id='L370' name='L370'></a> 370             [/modifications]
+<a id='L371' name='L371'></a> 371         [/unit]
+<a id='L372' name='L372'></a> 372 
+<a id='L373' name='L373'></a> 373         [delay]
+<a id='L374' name='L374'></a> 374             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=500
+<a id='L375' name='L375'></a> 375         [/delay]
+<a id='L376' name='L376'></a> 376 
+<a id='L377' name='L377'></a> 377         [message]
+<a id='L378' name='L378'></a> 378             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L379' name='L379'></a> 379             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "So, the elf’s puny friends think they can save him. But you are too late. He is already mine!"
+<a id='L380' name='L380'></a> 380         [/message]
+<a id='L381' name='L381'></a> 381 
+<a id='L382' name='L382'></a> 382         [remove_item]
+<a id='L383' name='L383'></a> 383             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,13
+<a id='L384' name='L384'></a> 384         [/remove_item]
+<a id='L385' name='L385'></a> 385 
+<a id='L386' name='L386'></a> 386         <em class='brace'>{</em>VARIABLE_OP stored_kaleh.hitpoints sub 10<em class='brace'>}</em>
+<a id='L387' name='L387'></a> 387         <em class='brace'>{</em>VARIABLE stored_kaleh.facing n<em class='brace'>}</em>
+<a id='L388' name='L388'></a> 388 
+<a id='L389' name='L389'></a> 389         [unstore_unit]
+<a id='L390' name='L390'></a> 390             <a href='../Y/21620.html' title='Multiple used in 991 places.'>variable</a>=stored_kaleh
+<a id='L391' name='L391'></a> 391             <a href='../Y/10198.html' title='Multiple used in 105 places.'>find_vacant</a>=yes
+<a id='L392' name='L392'></a> 392         [/unstore_unit]
+<a id='L393' name='L393'></a> 393 
+<a id='L394' name='L394'></a> 394         [<strong class='reserved'>if</strong>]
+<a id='L395' name='L395'></a> 395             [have_unit]
+<a id='L396' name='L396'></a> 396                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$ally_name
+<a id='L397' name='L397'></a> 397             [/have_unit]
+<a id='L398' name='L398'></a> 398 
+<a id='L399' name='L399'></a> 399             [then]
+<a id='L400' name='L400'></a> 400                 <em class='brace'>{</em>MESSAGE_DEPEND_ON_ALLY
+<a id='L401' name='L401'></a> 401                 (
+<a id='L402' name='L402'></a> 402                     [message]
+<a id='L403' name='L403'></a> 403                         <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L404' name='L404'></a> 404                         <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Nym, Zhul, Grog, you shouldn’t have."
+<a id='L405' name='L405'></a> 405                     [/message]
+<a id='L406' name='L406'></a> 406                 )
+<a id='L407' name='L407'></a> 407                 (
+<a id='L408' name='L408'></a> 408                     [message]
+<a id='L409' name='L409'></a> 409                         <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L410' name='L410'></a> 410                         <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Nym, Zhul, Nog, you shouldn’t have."
+<a id='L411' name='L411'></a> 411                     [/message]
+<a id='L412' name='L412'></a> 412                 )
+<a id='L413' name='L413'></a> 413                 (
+<a id='L414' name='L414'></a> 414                     [message]
+<a id='L415' name='L415'></a> 415                         <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L416' name='L416'></a> 416                         <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Nym, Zhul, Rogrimir, you shouldn’t have."
+<a id='L417' name='L417'></a> 417                     [/message]
+<a id='L418' name='L418'></a> 418                 )
+<a id='L419' name='L419'></a> 419 
+<a id='L420' name='L420'></a> 420                 (
+<a id='L421' name='L421'></a> 421                     [message]
+<a id='L422' name='L422'></a> 422                         <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L423' name='L423'></a> 423                         <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Nym, Zhul, Jarl, you shouldn’t have."
+<a id='L424' name='L424'></a> 424                     [/message]
+<a id='L425' name='L425'></a> 425                 )<em class='brace'>}</em>
+<a id='L426' name='L426'></a> 426             [/then]
+<a id='L427' name='L427'></a> 427 
+<a id='L428' name='L428'></a> 428             [<strong class='reserved'>else</strong>]
+<a id='L429' name='L429'></a> 429                 [message]
+<a id='L430' name='L430'></a> 430                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L431' name='L431'></a> 431                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Nym, Zhul, you shouldn’t have."
+<a id='L432' name='L432'></a> 432                 [/message]
+<a id='L433' name='L433'></a> 433             [/<strong class='reserved'>else</strong>]
+<a id='L434' name='L434'></a> 434         [/<strong class='reserved'>if</strong>]
+<a id='L435' name='L435'></a> 435 
+<a id='L436' name='L436'></a> 436         [message]
+<a id='L437' name='L437'></a> 437             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L438' name='L438'></a> 438             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Your struggles were mildly entertaining, but futile in the end. For I am powerful beyond your imagining, and this is the seat of my power!"
+<a id='L439' name='L439'></a> 439         [/message]
+<a id='L440' name='L440'></a> 440 
+<a id='L441' name='L441'></a> 441         [message]
+<a id='L442' name='L442'></a> 442             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Zhul
+<a id='L443' name='L443'></a> 443             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "You are not Eloh. You are but a pitiful mockery of her power and glory!"
+<a id='L444' name='L444'></a> 444         [/message]
+<a id='L445' name='L445'></a> 445 
+<a id='L446' name='L446'></a> 446         [message]
+<a id='L447' name='L447'></a> 447             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L448' name='L448'></a> 448             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Is that what you think? I shall prove you wrong. Look out upon your people and despair!"
+<a id='L449' name='L449'></a> 449         [/message]
+<a id='L450' name='L450'></a> 450 
+<a id='L451' name='L451'></a> 451         [move_unit_fake]
+<a id='L452' name='L452'></a> 452             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Quenoth Fighter
+<a id='L453' name='L453'></a> 453             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L454' name='L454'></a> 454             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=9,8
+<a id='L455' name='L455'></a> 455             <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=20,16
+<a id='L456' name='L456'></a> 456         [/move_unit_fake]
+<a id='L457' name='L457'></a> 457 
+<a id='L458' name='L458'></a> 458         [unit]
+<a id='L459' name='L459'></a> 459             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Quenoth Fighter
+<a id='L460' name='L460'></a> 460             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Anarion
+<a id='L461' name='L461'></a> 461             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Anarion"
+<a id='L462' name='L462'></a> 462             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=8
+<a id='L463' name='L463'></a> 463             <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=16
+<a id='L464' name='L464'></a> 464             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L465' name='L465'></a> 465             [modifications]
+<a id='L466' name='L466'></a> 466                 <em class='brace'>{</em>TRAIT_QUICK<em class='brace'>}</em>
+<a id='L467' name='L467'></a> 467                 <em class='brace'>{</em>TRAIT_STRONG<em class='brace'>}</em>
+<a id='L468' name='L468'></a> 468             [/modifications]
+<a id='L469' name='L469'></a> 469         [/unit]
+<a id='L470' name='L470'></a> 470 
+<a id='L471' name='L471'></a> 471         [redraw]
+<a id='L472' name='L472'></a> 472         [/redraw]
+<a id='L473' name='L473'></a> 473 
+<a id='L474' name='L474'></a> 474         [delay]
+<a id='L475' name='L475'></a> 475             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=100
+<a id='L476' name='L476'></a> 476         [/delay]
+<a id='L477' name='L477'></a> 477 
+<a id='L478' name='L478'></a> 478         [move_unit_fake]
+<a id='L479' name='L479'></a> 479             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Tauroch Rider
+<a id='L480' name='L480'></a> 480             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L481' name='L481'></a> 481             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=11,12
+<a id='L482' name='L482'></a> 482             <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=20,16
+<a id='L483' name='L483'></a> 483         [/move_unit_fake]
+<a id='L484' name='L484'></a> 484 
+<a id='L485' name='L485'></a> 485         [unit]
+<a id='L486' name='L486'></a> 486             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Tauroch Rider
+<a id='L487' name='L487'></a> 487             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Zylea
+<a id='L488' name='L488'></a> 488             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Zylea"
+<a id='L489' name='L489'></a> 489             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=12
+<a id='L490' name='L490'></a> 490             <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=16
+<a id='L491' name='L491'></a> 491             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L492' name='L492'></a> 492             [modifications]
+<a id='L493' name='L493'></a> 493                 <em class='brace'>{</em>TRAIT_DEXTROUS<em class='brace'>}</em>
+<a id='L494' name='L494'></a> 494                 <em class='brace'>{</em>TRAIT_RESILIENT<em class='brace'>}</em>
+<a id='L495' name='L495'></a> 495             [/modifications]
+<a id='L496' name='L496'></a> 496         [/unit]
+<a id='L497' name='L497'></a> 497 
+<a id='L498' name='L498'></a> 498         [message]
+<a id='L499' name='L499'></a> 499             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Anarion
+<a id='L500' name='L500'></a> 500             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "All hail Eloh!"
+<a id='L501' name='L501'></a> 501         [/message]
+<a id='L502' name='L502'></a> 502 
+<a id='L503' name='L503'></a> 503         [message]
+<a id='L504' name='L504'></a> 504             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Zylea
+<a id='L505' name='L505'></a> 505             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Death to the heretics!"
+<a id='L506' name='L506'></a> 506         [/message]
+<a id='L507' name='L507'></a> 507 
+<a id='L508' name='L508'></a> 508         [message]
+<a id='L509' name='L509'></a> 509             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L510' name='L510'></a> 510             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "They worship their true god."
+<a id='L511' name='L511'></a> 511         [/message]
+<a id='L512' name='L512'></a> 512 
+<a id='L513' name='L513'></a> 513         [message]
+<a id='L514' name='L514'></a> 514             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L515' name='L515'></a> 515             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Come and bow down before your true master, boy."
+<a id='L516' name='L516'></a> 516         [/message]
+<a id='L517' name='L517'></a> 517 
+<a id='L518' name='L518'></a> 518         [message]
+<a id='L519' name='L519'></a> 519             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L520' name='L520'></a> 520             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Your wish is my command."
+<a id='L521' name='L521'></a> 521         [/message]
+<a id='L522' name='L522'></a> 522 
+<a id='L523' name='L523'></a> 523         [redraw]
+<a id='L524' name='L524'></a> 524         [/redraw]
+<a id='L525' name='L525'></a> 525 
+<a id='L526' name='L526'></a> 526         [delay]
+<a id='L527' name='L527'></a> 527             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L528' name='L528'></a> 528         [/delay]
+<a id='L529' name='L529'></a> 529 
+<a id='L530' name='L530'></a> 530         # Kaleh moves over to Eloh
+<a id='L531' name='L531'></a> 531 
+<a id='L532' name='L532'></a> 532         <em class='brace'>{</em>MOVE_UNIT <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Kaleh 10 12<em class='brace'>}</em>
+<a id='L533' name='L533'></a> 533 
+<a id='L534' name='L534'></a> 534         [harm_unit]
+<a id='L535' name='L535'></a> 535             [filter]
+<a id='L536' name='L536'></a> 536                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Eloh
+<a id='L537' name='L537'></a> 537             [/filter]
+<a id='L538' name='L538'></a> 538 
+<a id='L539' name='L539'></a> 539             [filter_second]
+<a id='L540' name='L540'></a> 540                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Kaleh
+<a id='L541' name='L541'></a> 541             [/filter_second]
+<a id='L542' name='L542'></a> 542 
+<a id='L543' name='L543'></a> 543             [primary_attack]
+<a id='L544' name='L544'></a> 544                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=sword
+<a id='L545' name='L545'></a> 545             [/primary_attack]
+<a id='L546' name='L546'></a> 546             <a href='../S/892.html#L46' title='Defined at 46 in src/actions/advancement.hpp.'>animate</a>=yes
+<a id='L547' name='L547'></a> 547             # Do damage according to Kaleh's first, sword attack
+<a id='L548' name='L548'></a> 548             <a href='../Y/5721.html' title='Multiple used in 256 places.'>amount</a>=$stored_kaleh.attack[0].damage
+<a id='L549' name='L549'></a> 549             <a href='../S/997.html#L371' title='Defined at 371 in src/units/unit.hpp.'>alignment</a>=lawful
+<a id='L550' name='L550'></a> 550             <a href='../Y/8368.html' title='Multiple used in 14 places.'>damage_type</a>=blade
+<a id='L551' name='L551'></a> 551         [/harm_unit]
+<a id='L552' name='L552'></a> 552 
+<a id='L553' name='L553'></a> 553         <em class='brace'>{</em>CLEAR_VARIABLE stored_kaleh<em class='brace'>}</em>
+<a id='L554' name='L554'></a> 554 
+<a id='L555' name='L555'></a> 555         [redraw]
+<a id='L556' name='L556'></a> 556         [/redraw]
+<a id='L557' name='L557'></a> 557 
+<a id='L558' name='L558'></a> 558         [delay]
+<a id='L559' name='L559'></a> 559             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=500
+<a id='L560' name='L560'></a> 560         [/delay]
+<a id='L561' name='L561'></a> 561 
+<a id='L562' name='L562'></a> 562         [message]
+<a id='L563' name='L563'></a> 563             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L564' name='L564'></a> 564             <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>=portraits/eloh_rage.png
+<a id='L565' name='L565'></a> 565             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Argh, you stabbed me!"
+<a id='L566' name='L566'></a> 566         [/message]
+<a id='L567' name='L567'></a> 567 
+<a id='L568' name='L568'></a> 568         [message]
+<a id='L569' name='L569'></a> 569             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L570' name='L570'></a> 570             # wmllint: local spelling Kalehssar
+<a id='L571' name='L571'></a> 571             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "I have crossed deserts, mountains, and oceans and watched my people bleed every step of the way. I did not come all this way to give up now. I am tired of being called boy; I am Kalehssar, the leader of my people and I will fight you until my dying breath!"
+<a id='L572' name='L572'></a> 572         [/message]
+<a id='L573' name='L573'></a> 573 
+<a id='L574' name='L574'></a> 574         [message]
+<a id='L575' name='L575'></a> 575             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L576' name='L576'></a> 576             <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>=portraits/eloh_rage.png
+<a id='L577' name='L577'></a> 577             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "I command you to stop this foolishness!"
+<a id='L578' name='L578'></a> 578         [/message]
+<a id='L579' name='L579'></a> 579 
+<a id='L580' name='L580'></a> 580         [message]
+<a id='L581' name='L581'></a> 581             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L582' name='L582'></a> 582             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Never!"
+<a id='L583' name='L583'></a> 583         [/message]
+<a id='L584' name='L584'></a> 584 
+<a id='L585' name='L585'></a> 585         [message]
+<a id='L586' name='L586'></a> 586             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L587' name='L587'></a> 587             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "The shell brooches Melusand gave us, they’re glowing!"
+<a id='L588' name='L588'></a> 588         [/message]
+<a id='L589' name='L589'></a> 589 
+<a id='L590' name='L590'></a> 590         [message]
+<a id='L591' name='L591'></a> 591             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L592' name='L592'></a> 592             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "You will never dominate us, not while hope survives!"
+<a id='L593' name='L593'></a> 593         [/message]
+<a id='L594' name='L594'></a> 594 
+<a id='L595' name='L595'></a> 595         [message]
+<a id='L596' name='L596'></a> 596             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L597' name='L597'></a> 597             <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>=portraits/eloh_rage.png
+<a id='L598' name='L598'></a> 598             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "So be it. You choose death? Then you shall receive it from those you hold most dear. Kill the unbelievers, let none survive!"
+<a id='L599' name='L599'></a> 599         [/message]
+<a id='L600' name='L600'></a> 600 
+<a id='L601' name='L601'></a> 601         [message]
+<a id='L602' name='L602'></a> 602             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Anarion
+<a id='L603' name='L603'></a> 603             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Yes mistress."
+<a id='L604' name='L604'></a> 604         [/message]
+<a id='L605' name='L605'></a> 605 
+<a id='L606' name='L606'></a> 606         [message]
+<a id='L607' name='L607'></a> 607             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L608' name='L608'></a> 608             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Ignore our brethren, we must destroy her!"
+<a id='L609' name='L609'></a> 609         [/message]
+<a id='L610' name='L610'></a> 610     [/event]
+<a id='L611' name='L611'></a> 611 
+<a id='L612' name='L612'></a> 612     # Create an alien minion
+<a id='L613' name='L613'></a> 613     [event]
+<a id='L614' name='L614'></a> 614         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=create_minion
+<a id='L615' name='L615'></a> 615         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L616' name='L616'></a> 616         <em class='brace'>{</em>SCATTER_UNITS 1 (Crawling Horror) 0 (
+<a id='L617' name='L617'></a> 617             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=6-14
+<a id='L618' name='L618'></a> 618             <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=7-14
+<a id='L619' name='L619'></a> 619             <a href='../S/68.html#L32' title='Defined at 32 in src/editor/map/map_fragment.hpp.'>terrain</a>=Rr,Uu
+<a id='L620' name='L620'></a> 620 
+<a id='L621' name='L621'></a> 621             [not]
+<a id='L622' name='L622'></a> 622                 [filter]
+<a id='L623' name='L623'></a> 623                 [/filter]
+<a id='L624' name='L624'></a> 624             [/not]
+<a id='L625' name='L625'></a> 625         ) (
+<a id='L626' name='L626'></a> 626             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L627' name='L627'></a> 627             <a href='../S/1016.html#L1520' title='Defined at 1520 in src/units/unit.cpp.'>upkeep</a>=free
+<a id='L628' name='L628'></a> 628         )<em class='brace'>}</em>
+<a id='L629' name='L629'></a> 629     [/event]
+<a id='L630' name='L630'></a> 630 
+<a id='L631' name='L631'></a> 631     # Event 1: The Death of Eloh and the revealing of the true monster
+<a id='L632' name='L632'></a> 632 
+<a id='L633' name='L633'></a> 633     [event]
+<a id='L634' name='L634'></a> 634         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=last breath
+<a id='L635' name='L635'></a> 635 
+<a id='L636' name='L636'></a> 636         [filter]
+<a id='L637' name='L637'></a> 637             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Eloh
+<a id='L638' name='L638'></a> 638         [/filter]
+<a id='L639' name='L639'></a> 639 
+<a id='L640' name='L640'></a> 640         [fire_event]
+<a id='L641' name='L641'></a> 641             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=eloh_death
+<a id='L642' name='L642'></a> 642         [/fire_event]
+<a id='L643' name='L643'></a> 643     [/event]
+<a id='L644' name='L644'></a> 644 
+<a id='L645' name='L645'></a> 645     [event]
+<a id='L646' name='L646'></a> 646         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=eloh_death
+<a id='L647' name='L647'></a> 647 
+<a id='L648' name='L648'></a> 648         [message]
+<a id='L649' name='L649'></a> 649             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L650' name='L650'></a> 650             <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>=portraits/eloh_rage.png
+<a id='L651' name='L651'></a> 651             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "You think you killed me? You have no idea what you are facing."
+<a id='L652' name='L652'></a> 652         [/message]
+<a id='L653' name='L653'></a> 653 
+<a id='L654' name='L654'></a> 654         [message]
+<a id='L655' name='L655'></a> 655             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L656' name='L656'></a> 656             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Who is she really? Could it be Zhangor, back to avenge his imprisonment?"
+<a id='L657' name='L657'></a> 657         [/message]
+<a id='L658' name='L658'></a> 658 
+<a id='L659' name='L659'></a> 659         [message]
+<a id='L660' name='L660'></a> 660             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Eloh
+<a id='L661' name='L661'></a> 661             <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>=portraits/eloh_rage.png
+<a id='L662' name='L662'></a> 662             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Nonsense. Unlike that fool, I do not care about petty things like revenge. Nor do I depend on mortals to enact my will. No, I shall destroy you myself!"
+<a id='L663' name='L663'></a> 663         [/message]
+<a id='L664' name='L664'></a> 664 
+<a id='L665' name='L665'></a> 665         [kill]
+<a id='L666' name='L666'></a> 666             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Eloh
+<a id='L667' name='L667'></a> 667             <a href='../S/892.html#L46' title='Defined at 46 in src/actions/advancement.hpp.'>animate</a>=no
+<a id='L668' name='L668'></a> 668             <a href='../D/6384.html' title='Multiple defined in 4 places.'>fire_event</a>=no
+<a id='L669' name='L669'></a> 669         [/kill]
+<a id='L670' name='L670'></a> 670 
+<a id='L671' name='L671'></a> 671         [modify_unit]
+<a id='L672' name='L672'></a> 672             [filter]
+<a id='L673' name='L673'></a> 673                 <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L674' name='L674'></a> 674             [/filter]
+<a id='L675' name='L675'></a> 675             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L676' name='L676'></a> 676         [/modify_unit]
+<a id='L677' name='L677'></a> 677 
+<a id='L678' name='L678'></a> 678         [message]
+<a id='L679' name='L679'></a> 679             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Quenoth Fighter, Tauroch Rider
+<a id='L680' name='L680'></a> 680             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Huh? What happened?"
+<a id='L681' name='L681'></a> 681         [/message]
+<a id='L682' name='L682'></a> 682 
+<a id='L683' name='L683'></a> 683         [message]
+<a id='L684' name='L684'></a> 684             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Zhul
+<a id='L685' name='L685'></a> 685             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Her spell has been broken. But I don’t think we have won yet. Come aid us!"
+<a id='L686' name='L686'></a> 686         [/message]
+<a id='L687' name='L687'></a> 687 
+<a id='L688' name='L688'></a> 688         [message]
+<a id='L689' name='L689'></a> 689             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Quenoth Fighter, Tauroch Rider
+<a id='L690' name='L690'></a> 690             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Yes priestess."
+<a id='L691' name='L691'></a> 691         [/message]
+<a id='L692' name='L692'></a> 692 
+<a id='L693' name='L693'></a> 693         [scroll]
+<a id='L694' name='L694'></a> 694             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=25
+<a id='L695' name='L695'></a> 695         [/scroll]
+<a id='L696' name='L696'></a> 696         [scroll]
+<a id='L697' name='L697'></a> 697             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-25
+<a id='L698' name='L698'></a> 698         [/scroll]
+<a id='L699' name='L699'></a> 699         [scroll]
+<a id='L700' name='L700'></a> 700             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=25
+<a id='L701' name='L701'></a> 701         [/scroll]
+<a id='L702' name='L702'></a> 702         [scroll]
+<a id='L703' name='L703'></a> 703             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-25
+<a id='L704' name='L704'></a> 704         [/scroll]
+<a id='L705' name='L705'></a> 705         [scroll]
+<a id='L706' name='L706'></a> 706             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=25
+<a id='L707' name='L707'></a> 707         [/scroll]
+<a id='L708' name='L708'></a> 708         [scroll]
+<a id='L709' name='L709'></a> 709             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-25
+<a id='L710' name='L710'></a> 710         [/scroll]
+<a id='L711' name='L711'></a> 711 
+<a id='L712' name='L712'></a> 712         [redraw]
+<a id='L713' name='L713'></a> 713         [/redraw]
+<a id='L714' name='L714'></a> 714 
+<a id='L715' name='L715'></a> 715         [delay]
+<a id='L716' name='L716'></a> 716             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=400
+<a id='L717' name='L717'></a> 717         [/delay]
+<a id='L718' name='L718'></a> 718 
+<a id='L719' name='L719'></a> 719         [color_adjust]
+<a id='L720' name='L720'></a> 720             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=40,0,100
+<a id='L721' name='L721'></a> 721         [/color_adjust]
+<a id='L722' name='L722'></a> 722 
+<a id='L723' name='L723'></a> 723         [redraw]
+<a id='L724' name='L724'></a> 724         [/redraw]
+<a id='L725' name='L725'></a> 725 
+<a id='L726' name='L726'></a> 726         [delay]
+<a id='L727' name='L727'></a> 727             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=250
+<a id='L728' name='L728'></a> 728         [/delay]
+<a id='L729' name='L729'></a> 729 
+<a id='L730' name='L730'></a> 730         [color_adjust]
+<a id='L731' name='L731'></a> 731             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=0,0,0
+<a id='L732' name='L732'></a> 732         [/color_adjust]
+<a id='L733' name='L733'></a> 733 
+<a id='L734' name='L734'></a> 734         [redraw]
+<a id='L735' name='L735'></a> 735         [/redraw]
+<a id='L736' name='L736'></a> 736 
+<a id='L737' name='L737'></a> 737         # main body appears
+<a id='L738' name='L738'></a> 738 
+<a id='L739' name='L739'></a> 739         [terrain]
+<a id='L740' name='L740'></a> 740             <a href='../S/68.html#L32' title='Defined at 32 in src/editor/map/map_fragment.hpp.'>terrain</a>=Urb # wmllint: ignore
+<a id='L741' name='L741'></a> 741             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,10
+<a id='L742' name='L742'></a> 742         [/terrain]
+<a id='L743' name='L743'></a> 743 
+<a id='L744' name='L744'></a> 744         # create main body unit here
+<a id='L745' name='L745'></a> 745 
+<a id='L746' name='L746'></a> 746         [unit]
+<a id='L747' name='L747'></a> 747             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body
+<a id='L748' name='L748'></a> 748             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Yechnagoth
+<a id='L749' name='L749'></a> 749             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Yechnagoth"
+<a id='L750' name='L750'></a> 750             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L751' name='L751'></a> 751             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,10
+<a id='L752' name='L752'></a> 752         [/unit]
+<a id='L753' name='L753'></a> 753 
+<a id='L754' name='L754'></a> 754         # add roots around central body
+<a id='L755' name='L755'></a> 755 
+<a id='L756' name='L756'></a> 756 <em class='sharp'>        #</em><em class='brace'>{</em>PLACE_IMAGE scenery/castle-ruins.png 9 11<em class='brace'>}</em>
+<a id='L757' name='L757'></a> 757 <em class='sharp'>        #</em><em class='brace'>{</em>PLACE_IMAGE scenery/castle-ruins.png 10 11<em class='brace'>}</em>
+<a id='L758' name='L758'></a> 758 <em class='sharp'>        #</em><em class='brace'>{</em>PLACE_IMAGE scenery/castle-ruins.png 11 11<em class='brace'>}</em>
+<a id='L759' name='L759'></a> 759 <em class='sharp'>        #</em><em class='brace'>{</em>PLACE_IMAGE scenery/castle-ruins.png 9 10<em class='brace'>}</em>
+<a id='L760' name='L760'></a> 760 <em class='sharp'>        #</em><em class='brace'>{</em>PLACE_IMAGE scenery/castle-ruins.png 10 9<em class='brace'>}</em>
+<a id='L761' name='L761'></a> 761 <em class='sharp'>        #</em><em class='brace'>{</em>PLACE_IMAGE scenery/castle-ruins.png 11 10<em class='brace'>}</em>
+<a id='L762' name='L762'></a> 762 
+<a id='L763' name='L763'></a> 763         # Pulsing Spires appear
+<a id='L764' name='L764'></a> 764 
+<a id='L765' name='L765'></a> 765         <em class='brace'>{</em>RANDOM 0..1<em class='brace'>}</em>
+<a id='L766' name='L766'></a> 766 
+<a id='L767' name='L767'></a> 767         [<strong class='reserved'>if</strong>]
+<a id='L768' name='L768'></a> 768             [variable]
+<a id='L769' name='L769'></a> 769                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=random
+<a id='L770' name='L770'></a> 770                 <a href='../Y/15471.html' title='Multiple used in 140 places.'>numerical_equals</a>=1
+<a id='L771' name='L771'></a> 771             [/variable]
+<a id='L772' name='L772'></a> 772 
+<a id='L773' name='L773'></a> 773             [then]
+<a id='L774' name='L774'></a> 774                 [terrain]
+<a id='L775' name='L775'></a> 775                     <a href='../S/68.html#L32' title='Defined at 32 in src/editor/map/map_fragment.hpp.'>terrain</a>=Uu
+<a id='L776' name='L776'></a> 776                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=8,8,14
+<a id='L777' name='L777'></a> 777                     <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=7,13,10
+<a id='L778' name='L778'></a> 778                 [/terrain]
+<a id='L779' name='L779'></a> 779 
+<a id='L780' name='L780'></a> 780                 # create Pulsing Spires at:
+<a id='L781' name='L781'></a> 781 <em class='sharp'>                #</em> (8,7) (8,13) (14,10)
+<a id='L782' name='L782'></a> 782 
+<a id='L783' name='L783'></a> 783                 [unit]
+<a id='L784' name='L784'></a> 784                     <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L785' name='L785'></a> 785                     <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=4
+<a id='L786' name='L786'></a> 786                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=8,7
+<a id='L787' name='L787'></a> 787                 [/unit]
+<a id='L788' name='L788'></a> 788 
+<a id='L789' name='L789'></a> 789                 [unit]
+<a id='L790' name='L790'></a> 790                     <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L791' name='L791'></a> 791                     <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=4
+<a id='L792' name='L792'></a> 792                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=8,13
+<a id='L793' name='L793'></a> 793                 [/unit]
+<a id='L794' name='L794'></a> 794 
+<a id='L795' name='L795'></a> 795                 [unit]
+<a id='L796' name='L796'></a> 796                     <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L797' name='L797'></a> 797                     <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=4
+<a id='L798' name='L798'></a> 798                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=14,10
+<a id='L799' name='L799'></a> 799                 [/unit]
+<a id='L800' name='L800'></a> 800             [/then]
+<a id='L801' name='L801'></a> 801 
+<a id='L802' name='L802'></a> 802             [<strong class='reserved'>else</strong>]
+<a id='L803' name='L803'></a> 803                 [terrain]
+<a id='L804' name='L804'></a> 804                     <a href='../S/68.html#L32' title='Defined at 32 in src/editor/map/map_fragment.hpp.'>terrain</a>=Uu
+<a id='L805' name='L805'></a> 805                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=6,12,12
+<a id='L806' name='L806'></a> 806                     <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,7,13
+<a id='L807' name='L807'></a> 807                 [/terrain]
+<a id='L808' name='L808'></a> 808 
+<a id='L809' name='L809'></a> 809                 # create Pulsing Spires at:
+<a id='L810' name='L810'></a> 810 <em class='sharp'>                #</em> (6,10) (12,7) (12,13)
+<a id='L811' name='L811'></a> 811 
+<a id='L812' name='L812'></a> 812                 [unit]
+<a id='L813' name='L813'></a> 813                     <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L814' name='L814'></a> 814                     <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=4
+<a id='L815' name='L815'></a> 815                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=6,10
+<a id='L816' name='L816'></a> 816                 [/unit]
+<a id='L817' name='L817'></a> 817 
+<a id='L818' name='L818'></a> 818                 [unit]
+<a id='L819' name='L819'></a> 819                     <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L820' name='L820'></a> 820                     <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=4
+<a id='L821' name='L821'></a> 821                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=12,7
+<a id='L822' name='L822'></a> 822                 [/unit]
+<a id='L823' name='L823'></a> 823 
+<a id='L824' name='L824'></a> 824                 [unit]
+<a id='L825' name='L825'></a> 825                     <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L826' name='L826'></a> 826                     <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=4
+<a id='L827' name='L827'></a> 827                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=12,13
+<a id='L828' name='L828'></a> 828                 [/unit]
+<a id='L829' name='L829'></a> 829             [/<strong class='reserved'>else</strong>]
+<a id='L830' name='L830'></a> 830         [/<strong class='reserved'>if</strong>]
+<a id='L831' name='L831'></a> 831 
+<a id='L832' name='L832'></a> 832         [redraw]
+<a id='L833' name='L833'></a> 833         [/redraw]
+<a id='L834' name='L834'></a> 834 
+<a id='L835' name='L835'></a> 835         [message]
+<a id='L836' name='L836'></a> 836             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L837' name='L837'></a> 837             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "What is that thing?!"
+<a id='L838' name='L838'></a> 838         [/message]
+<a id='L839' name='L839'></a> 839 
+<a id='L840' name='L840'></a> 840         [message]
+<a id='L841' name='L841'></a> 841             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Zhul
+<a id='L842' name='L842'></a> 842             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Eloh protect us!"
+<a id='L843' name='L843'></a> 843         [/message]
+<a id='L844' name='L844'></a> 844 
+<a id='L845' name='L845'></a> 845         [color_adjust]
+<a id='L846' name='L846'></a> 846             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=33,181,140
+<a id='L847' name='L847'></a> 847         [/color_adjust]
+<a id='L848' name='L848'></a> 848 
+<a id='L849' name='L849'></a> 849         [redraw]
+<a id='L850' name='L850'></a> 850         [/redraw]
+<a id='L851' name='L851'></a> 851 
+<a id='L852' name='L852'></a> 852         [delay]
+<a id='L853' name='L853'></a> 853             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=250
+<a id='L854' name='L854'></a> 854         [/delay]
+<a id='L855' name='L855'></a> 855 
+<a id='L856' name='L856'></a> 856         [color_adjust]
+<a id='L857' name='L857'></a> 857             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=0,0,0
+<a id='L858' name='L858'></a> 858         [/color_adjust]
+<a id='L859' name='L859'></a> 859 
+<a id='L860' name='L860'></a> 860         [redraw]
+<a id='L861' name='L861'></a> 861         [/redraw]
+<a id='L862' name='L862'></a> 862 
+<a id='L863' name='L863'></a> 863         # create 3 bugs
+<a id='L864' name='L864'></a> 864         [fire_event]
+<a id='L865' name='L865'></a> 865             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=create_minion
+<a id='L866' name='L866'></a> 866         [/fire_event]
+<a id='L867' name='L867'></a> 867         [fire_event]
+<a id='L868' name='L868'></a> 868             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=create_minion
+<a id='L869' name='L869'></a> 869         [/fire_event]
+<a id='L870' name='L870'></a> 870         [fire_event]
+<a id='L871' name='L871'></a> 871             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=create_minion
+<a id='L872' name='L872'></a> 872         [/fire_event]
+<a id='L873' name='L873'></a> 873 
+<a id='L874' name='L874'></a> 874         [redraw]
+<a id='L875' name='L875'></a> 875         [/redraw]
+<a id='L876' name='L876'></a> 876 
+<a id='L877' name='L877'></a> 877         [delay]
+<a id='L878' name='L878'></a> 878             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=500
+<a id='L879' name='L879'></a> 879         [/delay]
+<a id='L880' name='L880'></a> 880 
+<a id='L881' name='L881'></a> 881         [message]
+<a id='L882' name='L882'></a> 882             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Zhul
+<a id='L883' name='L883'></a> 883             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Curse Uria, more abominations!"
+<a id='L884' name='L884'></a> 884         [/message]
+<a id='L885' name='L885'></a> 885 
+<a id='L886' name='L886'></a> 886         [message]
+<a id='L887' name='L887'></a> 887             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L888' name='L888'></a> 888             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Is it even possible to kill this thing? It’s huge!"
+<a id='L889' name='L889'></a> 889         [/message]
+<a id='L890' name='L890'></a> 890 
+<a id='L891' name='L891'></a> 891         [message]
+<a id='L892' name='L892'></a> 892             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L893' name='L893'></a> 893             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "It must have some sort of weak point. Look at those pulsing spires, I thought they were stone, but they seem to be alive. Maybe if we destroy them it will weaken the creature. No matter what horrors appear, we must keep attacking it. We can’t stop now!"
+<a id='L894' name='L894'></a> 894         [/message]
+<a id='L895' name='L895'></a> 895 
+<a id='L896' name='L896'></a> 896         [objectives]
+<a id='L897' name='L897'></a> 897             <a href='../S/936.html#L188' title='Defined at 188 in src/save_index.cpp.'>summary</a>= _ "New Objectives:"
+<a id='L898' name='L898'></a> 898             [objective]
+<a id='L899' name='L899'></a> 899                 <a href='../D/5414.html' title='Multiple defined in 14 places.'>description</a>= _ "Defeat Yechnagoth"
+<a id='L900' name='L900'></a> 900                 <a href='../Y/7833.html' title='Multiple used in 1335 places.'>condition</a>=win
+<a id='L901' name='L901'></a> 901             [/objective]
+<a id='L902' name='L902'></a> 902             [objective]
+<a id='L903' name='L903'></a> 903                 <a href='../D/5414.html' title='Multiple defined in 14 places.'>description</a>= _ "Death of Kaleh"
+<a id='L904' name='L904'></a> 904                 <a href='../Y/7833.html' title='Multiple used in 1335 places.'>condition</a>=lose
+<a id='L905' name='L905'></a> 905             [/objective]
+<a id='L906' name='L906'></a> 906 
+<a id='L907' name='L907'></a> 907             <em class='brace'>{</em>IS_LAST_SCENARIO<em class='brace'>}</em>
+<a id='L908' name='L908'></a> 908         [/objectives]
+<a id='L909' name='L909'></a> 909 
+<a id='L910' name='L910'></a> 910         # Start spawning minions, increasing the number each turn.
+<a id='L911' name='L911'></a> 911         <em class='brace'>{</em>VARIABLE number_minions_to_spawn 1<em class='brace'>}</em>
+<a id='L912' name='L912'></a> 912         [event]
+<a id='L913' name='L913'></a> 913             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>="turn $($turn_number+{ON_DIFFICULTY 2 2 1})"
+<a id='L914' name='L914'></a> 914             <a href='../Y/8711.html' title='Multiple used in 46 places.'>delayed_variable_substitution</a>=no
+<a id='L915' name='L915'></a> 915             <em class='brace'>{</em>VARIABLE number_minions_to_spawn 2<em class='brace'>}</em>
+<a id='L916' name='L916'></a> 916         [/event]
+<a id='L917' name='L917'></a> 917         [event]
+<a id='L918' name='L918'></a> 918             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>="turn $($turn_number+{ON_DIFFICULTY 4 3 3})"
+<a id='L919' name='L919'></a> 919             <a href='../Y/8711.html' title='Multiple used in 46 places.'>delayed_variable_substitution</a>=no
+<a id='L920' name='L920'></a> 920             <em class='brace'>{</em>VARIABLE number_minions_to_spawn 3<em class='brace'>}</em>
+<a id='L921' name='L921'></a> 921         [/event]
+<a id='L922' name='L922'></a> 922         [event]
+<a id='L923' name='L923'></a> 923             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>="turn $($turn_number+{ON_DIFFICULTY 6 5 5})"
+<a id='L924' name='L924'></a> 924             <a href='../Y/8711.html' title='Multiple used in 46 places.'>delayed_variable_substitution</a>=no
+<a id='L925' name='L925'></a> 925             <em class='brace'>{</em>VARIABLE number_minions_to_spawn 4<em class='brace'>}</em>
+<a id='L926' name='L926'></a> 926         [/event]
+<a id='L927' name='L927'></a> 927     [/event]
+<a id='L928' name='L928'></a> 928 
+<a id='L929' name='L929'></a> 929     [event]
+<a id='L930' name='L930'></a> 930         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=new turn
+<a id='L931' name='L931'></a> 931         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L932' name='L932'></a> 932 
+<a id='L933' name='L933'></a> 933         [filter_condition]
+<a id='L934' name='L934'></a> 934             [have_unit]
+<a id='L935' name='L935'></a> 935                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Yechnagoth
+<a id='L936' name='L936'></a> 936             [/have_unit]
+<a id='L937' name='L937'></a> 937         [/filter_condition]
+<a id='L938' name='L938'></a> 938 
+<a id='L939' name='L939'></a> 939         <em class='brace'>{</em>VARIABLE helper_level 4<em class='brace'>}</em>
+<a id='L940' name='L940'></a> 940         [<strong class='reserved'>while</strong>]
+<a id='L941' name='L941'></a> 941             [variable]
+<a id='L942' name='L942'></a> 942                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=helper_level
+<a id='L943' name='L943'></a> 943                 <a href='../Y/11231.html' title='Multiple used in 125 places.'>greater_than</a>=0
+<a id='L944' name='L944'></a> 944             [/variable]
+<a id='L945' name='L945'></a> 945             [variable]
+<a id='L946' name='L946'></a> 946                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=possible_helpers.length
+<a id='L947' name='L947'></a> 947                 <a href='../D/5974.html' title='Multiple defined in 10 places.'>equals</a>=0
+<a id='L948' name='L948'></a> 948             [/variable]
+<a id='L949' name='L949'></a> 949             [<strong class='reserved'>do</strong>]
+<a id='L950' name='L950'></a> 950                 [store_unit]
+<a id='L951' name='L951'></a> 951                     [filter]
+<a id='L952' name='L952'></a> 952                         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L953' name='L953'></a> 953                         <a href='../D/9807.html' title='Multiple defined in 11 places.'>level</a>=$helper_level
+<a id='L954' name='L954'></a> 954                         <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=recall,recall
+<a id='L955' name='L955'></a> 955                     [/filter]
+<a id='L956' name='L956'></a> 956 
+<a id='L957' name='L957'></a> 957                     <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>=no
+<a id='L958' name='L958'></a> 958                     <a href='../Y/21620.html' title='Multiple used in 991 places.'>variable</a>=possible_helpers
+<a id='L959' name='L959'></a> 959                 [/store_unit]
+<a id='L960' name='L960'></a> 960                 <em class='brace'>{</em>VARIABLE_OP helper_level sub 1<em class='brace'>}</em>
+<a id='L961' name='L961'></a> 961             [/<strong class='reserved'>do</strong>]
+<a id='L962' name='L962'></a> 962         [/<strong class='reserved'>while</strong>]
+<a id='L963' name='L963'></a> 963         <em class='brace'>{</em>CLEAR_VARIABLE helper_level<em class='brace'>}</em>
+<a id='L964' name='L964'></a> 964 
+<a id='L965' name='L965'></a> 965         [<strong class='reserved'>if</strong>]
+<a id='L966' name='L966'></a> 966             [variable]
+<a id='L967' name='L967'></a> 967                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=possible_helpers.length
+<a id='L968' name='L968'></a> 968                 <a href='../Y/11231.html' title='Multiple used in 125 places.'>greater_than</a>=0
+<a id='L969' name='L969'></a> 969             [/variable]
+<a id='L970' name='L970'></a> 970 
+<a id='L971' name='L971'></a> 971             [then]
+<a id='L972' name='L972'></a> 972                 <em class='brace'>{</em>VARIABLE_OP random_helper_i rand "1..$possible_helpers.length"<em class='brace'>}</em>
+<a id='L973' name='L973'></a> 973                 <em class='brace'>{</em>VARIABLE_OP random_helper_i sub 1<em class='brace'>}</em>
+<a id='L974' name='L974'></a> 974 
+<a id='L975' name='L975'></a> 975                 [move_unit_fake]
+<a id='L976' name='L976'></a> 976                     <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=$possible_helpers[$random_helper_i].type
+<a id='L977' name='L977'></a> 977                     <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L978' name='L978'></a> 978                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=10,10
+<a id='L979' name='L979'></a> 979                     <a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=20,18
+<a id='L980' name='L980'></a> 980                 [/move_unit_fake]
+<a id='L981' name='L981'></a> 981 
+<a id='L982' name='L982'></a> 982                 [recall]
+<a id='L983' name='L983'></a> 983                     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$possible_helpers[$random_helper_i].id
+<a id='L984' name='L984'></a> 984                     <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,18
+<a id='L985' name='L985'></a> 985                     <a href='../D/14384.html' title='Multiple defined in 12 places.'>show</a>=no
+<a id='L986' name='L986'></a> 986                 [/recall]
+<a id='L987' name='L987'></a> 987 
+<a id='L988' name='L988'></a> 988                 <em class='brace'>{</em>CLEAR_VARIABLE random_helper_i<em class='brace'>}</em>
+<a id='L989' name='L989'></a> 989             [/then]
+<a id='L990' name='L990'></a> 990         [/<strong class='reserved'>if</strong>]
+<a id='L991' name='L991'></a> 991         <em class='brace'>{</em>CLEAR_VARIABLE possible_helpers<em class='brace'>}</em>
+<a id='L992' name='L992'></a> 992     [/event]
+<a id='L993' name='L993'></a> 993 
+<a id='L994' name='L994'></a> 994     # Event 2: New minions are created each turn
+<a id='L995' name='L995'></a> 995     [event]
+<a id='L996' name='L996'></a> 996         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=new turn
+<a id='L997' name='L997'></a> 997         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L998' name='L998'></a> 998 
+<a id='L999' name='L999'></a> 999         <em class='brace'>{</em>VARIABLE i 0<em class='brace'>}</em>
+<a id='L1000' name='L1000'></a>1000         [<strong class='reserved'>while</strong>]
+<a id='L1001' name='L1001'></a>1001             [variable]
+<a id='L1002' name='L1002'></a>1002                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=i
+<a id='L1003' name='L1003'></a>1003                 <a href='../D/9806.html' title='Multiple defined in 6 places.'>less_than</a>=$number_minions_to_spawn
+<a id='L1004' name='L1004'></a>1004             [/variable]
+<a id='L1005' name='L1005'></a>1005             [<strong class='reserved'>do</strong>]
+<a id='L1006' name='L1006'></a>1006                 [fire_event]
+<a id='L1007' name='L1007'></a>1007                     <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=create_minion
+<a id='L1008' name='L1008'></a>1008                 [/fire_event]
+<a id='L1009' name='L1009'></a>1009                 <em class='brace'>{</em>VARIABLE_OP i add 1<em class='brace'>}</em>
+<a id='L1010' name='L1010'></a>1010             [/<strong class='reserved'>do</strong>]
+<a id='L1011' name='L1011'></a>1011         [/<strong class='reserved'>while</strong>]
+<a id='L1012' name='L1012'></a>1012         <em class='brace'>{</em>CLEAR_VARIABLE i<em class='brace'>}</em>
+<a id='L1013' name='L1013'></a>1013     [/event]
+<a id='L1014' name='L1014'></a>1014 
+<a id='L1015' name='L1015'></a>1015     # Event 3: Central Body heals fully each turn
+<a id='L1016' name='L1016'></a>1016 
+<a id='L1017' name='L1017'></a>1017     [event]
+<a id='L1018' name='L1018'></a>1018         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=new turn
+<a id='L1019' name='L1019'></a>1019         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L1020' name='L1020'></a>1020 
+<a id='L1021' name='L1021'></a>1021         [filter_condition]
+<a id='L1022' name='L1022'></a>1022             [have_unit]
+<a id='L1023' name='L1023'></a>1023                 <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body
+<a id='L1024' name='L1024'></a>1024             [/have_unit]
+<a id='L1025' name='L1025'></a>1025         [/filter_condition]
+<a id='L1026' name='L1026'></a>1026 
+<a id='L1027' name='L1027'></a>1027         [fire_event]
+<a id='L1028' name='L1028'></a>1028             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_regenerate
+<a id='L1029' name='L1029'></a>1029         [/fire_event]
+<a id='L1030' name='L1030'></a>1030     [/event]
+<a id='L1031' name='L1031'></a>1031 
+<a id='L1032' name='L1032'></a>1032     [event]
+<a id='L1033' name='L1033'></a>1033         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_regenerate
+<a id='L1034' name='L1034'></a>1034         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L1035' name='L1035'></a>1035 
+<a id='L1036' name='L1036'></a>1036         [store_unit]
+<a id='L1037' name='L1037'></a>1037             [filter]
+<a id='L1038' name='L1038'></a>1038                 <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body
+<a id='L1039' name='L1039'></a>1039             [/filter]
+<a id='L1040' name='L1040'></a>1040             <a href='../Y/21620.html' title='Multiple used in 991 places.'>variable</a>=stored_alien
+<a id='L1041' name='L1041'></a>1041         [/store_unit]
+<a id='L1042' name='L1042'></a>1042 
+<a id='L1043' name='L1043'></a>1043         [set_variable]
+<a id='L1044' name='L1044'></a>1044             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=temp
+<a id='L1045' name='L1045'></a>1045             <a href='../D/15983.html' title='Multiple defined in 19 places.'>value</a>=$stored_alien.hitpoints
+<a id='L1046' name='L1046'></a>1046         [/set_variable]
+<a id='L1047' name='L1047'></a>1047 
+<a id='L1048' name='L1048'></a>1048         [modify_unit]
+<a id='L1049' name='L1049'></a>1049             [filter]
+<a id='L1050' name='L1050'></a>1050                 <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body
+<a id='L1051' name='L1051'></a>1051             [/filter]
+<a id='L1052' name='L1052'></a>1052             <a href='../D/8623.html' title='Multiple defined in 2 places.'>hitpoints</a>=$this_unit.max_hitpoints
+<a id='L1053' name='L1053'></a>1053         [/modify_unit]
+<a id='L1054' name='L1054'></a>1054 
+<a id='L1055' name='L1055'></a>1055         [<strong class='reserved'>if</strong>]
+<a id='L1056' name='L1056'></a>1056             [variable]
+<a id='L1057' name='L1057'></a>1057                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=temp
+<a id='L1058' name='L1058'></a>1058                 <a href='../D/9806.html' title='Multiple defined in 6 places.'>less_than</a>=$stored_alien.max_hitpoints
+<a id='L1059' name='L1059'></a>1059             [/variable]
+<a id='L1060' name='L1060'></a>1060 
+<a id='L1061' name='L1061'></a>1061             [then]
+<a id='L1062' name='L1062'></a>1062                 [fire_event]
+<a id='L1063' name='L1063'></a>1063                     <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=invulnerable_comment
+<a id='L1064' name='L1064'></a>1064                 [/fire_event]
+<a id='L1065' name='L1065'></a>1065             [/then]
+<a id='L1066' name='L1066'></a>1066         [/<strong class='reserved'>if</strong>]
+<a id='L1067' name='L1067'></a>1067 
+<a id='L1068' name='L1068'></a>1068         <em class='brace'>{</em>CLEAR_VARIABLE (temp,stored_alien)<em class='brace'>}</em>
+<a id='L1069' name='L1069'></a>1069     [/event]
+<a id='L1070' name='L1070'></a>1070 
+<a id='L1071' name='L1071'></a>1071     [event]
+<a id='L1072' name='L1072'></a>1072         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=invulnerable_comment
+<a id='L1073' name='L1073'></a>1073 
+<a id='L1074' name='L1074'></a>1074         [message]
+<a id='L1075' name='L1075'></a>1075             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L1076' name='L1076'></a>1076             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "That central body is healing faster than we can damage it. It’s almost as if our attacks are doing no damage at all. We got to try another tactic, and fast!"
+<a id='L1077' name='L1077'></a>1077         [/message]
+<a id='L1078' name='L1078'></a>1078     [/event]
+<a id='L1079' name='L1079'></a>1079 
+<a id='L1080' name='L1080'></a>1080     # Event 4: Special attack by Central Body each turn
+<a id='L1081' name='L1081'></a>1081 
+<a id='L1082' name='L1082'></a>1082     [event]
+<a id='L1083' name='L1083'></a>1083         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=new turn
+<a id='L1084' name='L1084'></a>1084         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L1085' name='L1085'></a>1085 
+<a id='L1086' name='L1086'></a>1086         [filter_condition]
+<a id='L1087' name='L1087'></a>1087             [have_unit]
+<a id='L1088' name='L1088'></a>1088                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Yechnagoth
+<a id='L1089' name='L1089'></a>1089             [/have_unit]
+<a id='L1090' name='L1090'></a>1090         [/filter_condition]
+<a id='L1091' name='L1091'></a>1091 
+<a id='L1092' name='L1092'></a>1092         [fire_event]
+<a id='L1093' name='L1093'></a>1093             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_special_attack
+<a id='L1094' name='L1094'></a>1094         [/fire_event]
+<a id='L1095' name='L1095'></a>1095     [/event]
+<a id='L1096' name='L1096'></a>1096 
+<a id='L1097' name='L1097'></a>1097     [event]
+<a id='L1098' name='L1098'></a>1098         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_special_attack
+<a id='L1099' name='L1099'></a>1099         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L1100' name='L1100'></a>1100 
+<a id='L1101' name='L1101'></a>1101         [store_unit]
+<a id='L1102' name='L1102'></a>1102             [filter]
+<a id='L1103' name='L1103'></a>1103                 <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L1104' name='L1104'></a>1104                 <em class='brace'>{</em>EVERYWHERE<em class='brace'>}</em>
+<a id='L1105' name='L1105'></a>1105             [/filter]
+<a id='L1106' name='L1106'></a>1106 
+<a id='L1107' name='L1107'></a>1107             <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>=no
+<a id='L1108' name='L1108'></a>1108             <a href='../Y/21620.html' title='Multiple used in 991 places.'>variable</a>=elf_list
+<a id='L1109' name='L1109'></a>1109         [/store_unit]
+<a id='L1110' name='L1110'></a>1110 
+<a id='L1111' name='L1111'></a>1111         <em class='brace'>{</em>VARIABLE_OP victim_i rand "1..$elf_list.length"<em class='brace'>}</em>
+<a id='L1112' name='L1112'></a>1112         <em class='brace'>{</em>VARIABLE_OP victim_i sub 1<em class='brace'>}</em>
+<a id='L1113' name='L1113'></a>1113 
+<a id='L1114' name='L1114'></a>1114         <em class='brace'>{</em>VARIABLE victim_id $elf_list[$victim_i].id<em class='brace'>}</em>
+<a id='L1115' name='L1115'></a>1115         <em class='brace'>{</em>CLEAR_VARIABLE (elf_list,victim_i)<em class='brace'>}</em>
+<a id='L1116' name='L1116'></a>1116 
+<a id='L1117' name='L1117'></a>1117         #used to be 140,255,247
+<a id='L1118' name='L1118'></a>1118 
+<a id='L1119' name='L1119'></a>1119         [color_adjust]
+<a id='L1120' name='L1120'></a>1120             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=40,0,100
+<a id='L1121' name='L1121'></a>1121         [/color_adjust]
+<a id='L1122' name='L1122'></a>1122 
+<a id='L1123' name='L1123'></a>1123         [redraw]
+<a id='L1124' name='L1124'></a>1124         [/redraw]
+<a id='L1125' name='L1125'></a>1125 
+<a id='L1126' name='L1126'></a>1126         [delay]
+<a id='L1127' name='L1127'></a>1127             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=250
+<a id='L1128' name='L1128'></a>1128         [/delay]
+<a id='L1129' name='L1129'></a>1129 
+<a id='L1130' name='L1130'></a>1130         [color_adjust]
+<a id='L1131' name='L1131'></a>1131             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=0,0,0
+<a id='L1132' name='L1132'></a>1132         [/color_adjust]
+<a id='L1133' name='L1133'></a>1133 
+<a id='L1134' name='L1134'></a>1134         [redraw]
+<a id='L1135' name='L1135'></a>1135         [/redraw]
+<a id='L1136' name='L1136'></a>1136 
+<a id='L1137' name='L1137'></a>1137         [delay]
+<a id='L1138' name='L1138'></a>1138             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=100
+<a id='L1139' name='L1139'></a>1139         [/delay]
+<a id='L1140' name='L1140'></a>1140 
+<a id='L1141' name='L1141'></a>1141         # Add two effects slow unit and damage it
+<a id='L1142' name='L1142'></a>1142 <em class='sharp'>        #</em> 1: <strong class='reserved'>do</strong> damage to unit (8/9/10 based on difficulty?-stops healing)
+<a id='L1143' name='L1143'></a>1143 <em class='sharp'>        #</em> 2: slow unit
+<a id='L1144' name='L1144'></a>1144         [sound]
+<a id='L1145' name='L1145'></a>1145             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=squishy-strike.wav
+<a id='L1146' name='L1146'></a>1146         [/sound]
+<a id='L1147' name='L1147'></a>1147 
+<a id='L1148' name='L1148'></a>1148         [harm_unit]
+<a id='L1149' name='L1149'></a>1149             [filter]
+<a id='L1150' name='L1150'></a>1150                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=$victim_id
+<a id='L1151' name='L1151'></a>1151             [/filter]
+<a id='L1152' name='L1152'></a>1152 
+<a id='L1153' name='L1153'></a>1153             <a href='../Y/5721.html' title='Multiple used in 256 places.'>amount</a>=<em class='brace'>{</em>ON_DIFFICULTY 10 11 12<em class='brace'>}</em>
+<a id='L1154' name='L1154'></a>1154             <a href='../S/997.html#L371' title='Defined at 371 in src/units/unit.hpp.'>alignment</a>=chaotic
+<a id='L1155' name='L1155'></a>1155             <a href='../Y/8368.html' title='Multiple used in 14 places.'>damage_type</a>=fire
+<a id='L1156' name='L1156'></a>1156             <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a>=yes
+<a id='L1157' name='L1157'></a>1157             <a href='../S/997.html#L773' title='Defined at 773 in src/units/unit.hpp.'>slowed</a>=yes
+<a id='L1158' name='L1158'></a>1158         [/harm_unit]
+<a id='L1159' name='L1159'></a>1159 
+<a id='L1160' name='L1160'></a>1160         [<strong class='reserved'>if</strong>]
+<a id='L1161' name='L1161'></a>1161             [variable]
+<a id='L1162' name='L1162'></a>1162                 <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=hit_by_special_attack
+<a id='L1163' name='L1163'></a>1163                 <a href='../Y/15334.html' title='Multiple used in 86 places.'>not_equals</a>=yes
+<a id='L1164' name='L1164'></a>1164             [/variable]
+<a id='L1165' name='L1165'></a>1165 
+<a id='L1166' name='L1166'></a>1166             [then]
+<a id='L1167' name='L1167'></a>1167                 <em class='brace'>{</em>VARIABLE hit_by_special_attack yes<em class='brace'>}</em>
+<a id='L1168' name='L1168'></a>1168 
+<a id='L1169' name='L1169'></a>1169                 [message]
+<a id='L1170' name='L1170'></a>1170                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=$victim_id
+<a id='L1171' name='L1171'></a>1171                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "What the heck? That central creature just hit me with some sort of slime. It hurts and I— I’m stuck!"
+<a id='L1172' name='L1172'></a>1172                 [/message]
+<a id='L1173' name='L1173'></a>1173             [/then]
+<a id='L1174' name='L1174'></a>1174 
+<a id='L1175' name='L1175'></a>1175             [<strong class='reserved'>else</strong>]
+<a id='L1176' name='L1176'></a>1176                 [message]
+<a id='L1177' name='L1177'></a>1177                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=$victim_id
+<a id='L1178' name='L1178'></a>1178                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Ow, I’m stuck!"
+<a id='L1179' name='L1179'></a>1179                 [/message]
+<a id='L1180' name='L1180'></a>1180             [/<strong class='reserved'>else</strong>]
+<a id='L1181' name='L1181'></a>1181         [/<strong class='reserved'>if</strong>]
+<a id='L1182' name='L1182'></a>1182 
+<a id='L1183' name='L1183'></a>1183         <em class='brace'>{</em>CLEAR_VARIABLE victim_id<em class='brace'>}</em>
+<a id='L1184' name='L1184'></a>1184     [/event]
+<a id='L1185' name='L1185'></a>1185 
+<a id='L1186' name='L1186'></a>1186     # Event 5: When player destroys all 3 Pulsing Spires, Central Body is weakened
+<a id='L1187' name='L1187'></a>1187 
+<a id='L1188' name='L1188'></a>1188     [event]
+<a id='L1189' name='L1189'></a>1189         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=die
+<a id='L1190' name='L1190'></a>1190         <a href='../Y/10249.html' title='Multiple used in 594 places.'>first_time_only</a>=no
+<a id='L1191' name='L1191'></a>1191 
+<a id='L1192' name='L1192'></a>1192         [filter]
+<a id='L1193' name='L1193'></a>1193             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L1194' name='L1194'></a>1194         [/filter]
+<a id='L1195' name='L1195'></a>1195 
+<a id='L1196' name='L1196'></a>1196         [filter_condition]
+<a id='L1197' name='L1197'></a>1197             [have_unit]
+<a id='L1198' name='L1198'></a>1198                 <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L1199' name='L1199'></a>1199                 <a href='../D/4966.html' title='Multiple defined in 4 places.'>count</a>=0
+<a id='L1200' name='L1200'></a>1200             [/have_unit]
+<a id='L1201' name='L1201'></a>1201         [/filter_condition]
+<a id='L1202' name='L1202'></a>1202 
+<a id='L1203' name='L1203'></a>1203         [fire_event]
+<a id='L1204' name='L1204'></a>1204             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_vulnerate
+<a id='L1205' name='L1205'></a>1205         [/fire_event]
+<a id='L1206' name='L1206'></a>1206     [/event]
+<a id='L1207' name='L1207'></a>1207 
+<a id='L1208' name='L1208'></a>1208     [event]
+<a id='L1209' name='L1209'></a>1209         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_vulnerate
+<a id='L1210' name='L1210'></a>1210 
+<a id='L1211' name='L1211'></a>1211         # when all 3 spires are destroyed, weaken main body
+<a id='L1212' name='L1212'></a>1212         [kill]
+<a id='L1213' name='L1213'></a>1213             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Pulsing Spire
+<a id='L1214' name='L1214'></a>1214             <a href='../D/6384.html' title='Multiple defined in 4 places.'>fire_event</a>=no
+<a id='L1215' name='L1215'></a>1215             <a href='../S/892.html#L46' title='Defined at 46 in src/actions/advancement.hpp.'>animate</a>=no
+<a id='L1216' name='L1216'></a>1216         [/kill]
+<a id='L1217' name='L1217'></a>1217 
+<a id='L1218' name='L1218'></a>1218         [scroll]
+<a id='L1219' name='L1219'></a>1219             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=20
+<a id='L1220' name='L1220'></a>1220         [/scroll]
+<a id='L1221' name='L1221'></a>1221         [scroll]
+<a id='L1222' name='L1222'></a>1222             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-20
+<a id='L1223' name='L1223'></a>1223         [/scroll]
+<a id='L1224' name='L1224'></a>1224         [scroll]
+<a id='L1225' name='L1225'></a>1225             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=20
+<a id='L1226' name='L1226'></a>1226         [/scroll]
+<a id='L1227' name='L1227'></a>1227         [scroll]
+<a id='L1228' name='L1228'></a>1228             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-20
+<a id='L1229' name='L1229'></a>1229         [/scroll]
+<a id='L1230' name='L1230'></a>1230         [scroll]
+<a id='L1231' name='L1231'></a>1231             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=20
+<a id='L1232' name='L1232'></a>1232         [/scroll]
+<a id='L1233' name='L1233'></a>1233         [scroll]
+<a id='L1234' name='L1234'></a>1234             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-20
+<a id='L1235' name='L1235'></a>1235         [/scroll]
+<a id='L1236' name='L1236'></a>1236 
+<a id='L1237' name='L1237'></a>1237         [message]
+<a id='L1238' name='L1238'></a>1238             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=narrator
+<a id='L1239' name='L1239'></a>1239             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "&lt;big&gt;&lt;b&gt;Aaaurrgghh!!&lt;/b&gt;&lt;/big&gt;"
+<a id='L1240' name='L1240'></a>1240             <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>= # wmllint: no-icon
+<a id='L1241' name='L1241'></a>1241         [/message]
+<a id='L1242' name='L1242'></a>1242 
+<a id='L1243' name='L1243'></a>1243         [kill]
+<a id='L1244' name='L1244'></a>1244             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body
+<a id='L1245' name='L1245'></a>1245             <a href='../S/892.html#L46' title='Defined at 46 in src/actions/advancement.hpp.'>animate</a>=no
+<a id='L1246' name='L1246'></a>1246             <a href='../D/6384.html' title='Multiple defined in 4 places.'>fire_event</a>=no
+<a id='L1247' name='L1247'></a>1247         [/kill]
+<a id='L1248' name='L1248'></a>1248 
+<a id='L1249' name='L1249'></a>1249         [unit]
+<a id='L1250' name='L1250'></a>1250             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body2
+<a id='L1251' name='L1251'></a>1251             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Yechnagoth
+<a id='L1252' name='L1252'></a>1252             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Yechnagoth"
+<a id='L1253' name='L1253'></a>1253             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L1254' name='L1254'></a>1254             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,10
+<a id='L1255' name='L1255'></a>1255         [/unit]
+<a id='L1256' name='L1256'></a>1256 
+<a id='L1257' name='L1257'></a>1257         [redraw]
+<a id='L1258' name='L1258'></a>1258         [/redraw]
+<a id='L1259' name='L1259'></a>1259 
+<a id='L1260' name='L1260'></a>1260         [message]
+<a id='L1261' name='L1261'></a>1261             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L1262' name='L1262'></a>1262             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "I think we’re finally doing some damage. We must attack the central body, while it remains vulnerable!"
+<a id='L1263' name='L1263'></a>1263         [/message]
+<a id='L1264' name='L1264'></a>1264     [/event]
+<a id='L1265' name='L1265'></a>1265 
+<a id='L1266' name='L1266'></a>1266     # Event 6: Death of weakened Central Body
+<a id='L1267' name='L1267'></a>1267 
+<a id='L1268' name='L1268'></a>1268     [event]
+<a id='L1269' name='L1269'></a>1269         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=last breath
+<a id='L1270' name='L1270'></a>1270 
+<a id='L1271' name='L1271'></a>1271         [filter]
+<a id='L1272' name='L1272'></a>1272             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body2
+<a id='L1273' name='L1273'></a>1273         [/filter]
+<a id='L1274' name='L1274'></a>1274 
+<a id='L1275' name='L1275'></a>1275         # shake cavern
+<a id='L1276' name='L1276'></a>1276 
+<a id='L1277' name='L1277'></a>1277         [scroll]
+<a id='L1278' name='L1278'></a>1278             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=40
+<a id='L1279' name='L1279'></a>1279         [/scroll]
+<a id='L1280' name='L1280'></a>1280         [scroll]
+<a id='L1281' name='L1281'></a>1281             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-40
+<a id='L1282' name='L1282'></a>1282         [/scroll]
+<a id='L1283' name='L1283'></a>1283         [scroll]
+<a id='L1284' name='L1284'></a>1284             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=40
+<a id='L1285' name='L1285'></a>1285         [/scroll]
+<a id='L1286' name='L1286'></a>1286         [scroll]
+<a id='L1287' name='L1287'></a>1287             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-40
+<a id='L1288' name='L1288'></a>1288         [/scroll]
+<a id='L1289' name='L1289'></a>1289         [scroll]
+<a id='L1290' name='L1290'></a>1290             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=40
+<a id='L1291' name='L1291'></a>1291         [/scroll]
+<a id='L1292' name='L1292'></a>1292         [scroll]
+<a id='L1293' name='L1293'></a>1293             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>=-40
+<a id='L1294' name='L1294'></a>1294         [/scroll]
+<a id='L1295' name='L1295'></a>1295 
+<a id='L1296' name='L1296'></a>1296         # flash dark blue, light blue, very light blue,
+<a id='L1297' name='L1297'></a>1297 
+<a id='L1298' name='L1298'></a>1298         # dark blue
+<a id='L1299' name='L1299'></a>1299 
+<a id='L1300' name='L1300'></a>1300         [color_adjust]
+<a id='L1301' name='L1301'></a>1301             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=40,0,100
+<a id='L1302' name='L1302'></a>1302         [/color_adjust]
+<a id='L1303' name='L1303'></a>1303 
+<a id='L1304' name='L1304'></a>1304         [redraw]
+<a id='L1305' name='L1305'></a>1305         [/redraw]
+<a id='L1306' name='L1306'></a>1306 
+<a id='L1307' name='L1307'></a>1307         [delay]
+<a id='L1308' name='L1308'></a>1308             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L1309' name='L1309'></a>1309         [/delay]
+<a id='L1310' name='L1310'></a>1310 
+<a id='L1311' name='L1311'></a>1311         #light blue
+<a id='L1312' name='L1312'></a>1312 
+<a id='L1313' name='L1313'></a>1313         [color_adjust]
+<a id='L1314' name='L1314'></a>1314             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=33,181,140
+<a id='L1315' name='L1315'></a>1315         [/color_adjust]
+<a id='L1316' name='L1316'></a>1316 
+<a id='L1317' name='L1317'></a>1317         [redraw]
+<a id='L1318' name='L1318'></a>1318         [/redraw]
+<a id='L1319' name='L1319'></a>1319 
+<a id='L1320' name='L1320'></a>1320         [delay]
+<a id='L1321' name='L1321'></a>1321             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L1322' name='L1322'></a>1322         [/delay]
+<a id='L1323' name='L1323'></a>1323 
+<a id='L1324' name='L1324'></a>1324         # very light blue
+<a id='L1325' name='L1325'></a>1325 
+<a id='L1326' name='L1326'></a>1326         [color_adjust]
+<a id='L1327' name='L1327'></a>1327             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=140,255,247
+<a id='L1328' name='L1328'></a>1328         [/color_adjust]
+<a id='L1329' name='L1329'></a>1329 
+<a id='L1330' name='L1330'></a>1330         [redraw]
+<a id='L1331' name='L1331'></a>1331         [/redraw]
+<a id='L1332' name='L1332'></a>1332 
+<a id='L1333' name='L1333'></a>1333         [delay]
+<a id='L1334' name='L1334'></a>1334             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=300
+<a id='L1335' name='L1335'></a>1335         [/delay]
+<a id='L1336' name='L1336'></a>1336 
+<a id='L1337' name='L1337'></a>1337         # back to normal
+<a id='L1338' name='L1338'></a>1338 
+<a id='L1339' name='L1339'></a>1339         [color_adjust]
+<a id='L1340' name='L1340'></a>1340             <a href='../Y/17348.html' title='Multiple used in 237 places.'>red</a>,<a href='../Y/11235.html' title='Multiple used in 237 places.'>green</a>,<a href='../Y/6585.html' title='Multiple used in 236 places.'>blue</a>=0,0,0
+<a id='L1341' name='L1341'></a>1341         [/color_adjust]
+<a id='L1342' name='L1342'></a>1342 
+<a id='L1343' name='L1343'></a>1343         [redraw]
+<a id='L1344' name='L1344'></a>1344         [/redraw]
+<a id='L1345' name='L1345'></a>1345     [/event]
+<a id='L1346' name='L1346'></a>1346 
+<a id='L1347' name='L1347'></a>1347     [event]
+<a id='L1348' name='L1348'></a>1348         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=die
+<a id='L1349' name='L1349'></a>1349 
+<a id='L1350' name='L1350'></a>1350         [filter]
+<a id='L1351' name='L1351'></a>1351             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Central Body2
+<a id='L1352' name='L1352'></a>1352         [/filter]
+<a id='L1353' name='L1353'></a>1353 
+<a id='L1354' name='L1354'></a>1354         [fire_event]
+<a id='L1355' name='L1355'></a>1355             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_death
+<a id='L1356' name='L1356'></a>1356         [/fire_event]
+<a id='L1357' name='L1357'></a>1357     [/event]
+<a id='L1358' name='L1358'></a>1358 
+<a id='L1359' name='L1359'></a>1359     [event]
+<a id='L1360' name='L1360'></a>1360         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=yechnagoth_death
+<a id='L1361' name='L1361'></a>1361 
+<a id='L1362' name='L1362'></a>1362         # have a minion scream
+<a id='L1363' name='L1363'></a>1363 
+<a id='L1364' name='L1364'></a>1364         [message]
+<a id='L1365' name='L1365'></a>1365             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Crawling Horror
+<a id='L1366' name='L1366'></a>1366             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Aiiee!!"    # wmllint: no spellcheck
+<a id='L1367' name='L1367'></a>1367         [/message]
+<a id='L1368' name='L1368'></a>1368 
+<a id='L1369' name='L1369'></a>1369         [redraw]
+<a id='L1370' name='L1370'></a>1370         [/redraw]
+<a id='L1371' name='L1371'></a>1371 
+<a id='L1372' name='L1372'></a>1372         # kill minions
+<a id='L1373' name='L1373'></a>1373 
+<a id='L1374' name='L1374'></a>1374         [kill]
+<a id='L1375' name='L1375'></a>1375             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Crawling Horror,Pulsing Spire
+<a id='L1376' name='L1376'></a>1376             <a href='../S/892.html#L46' title='Defined at 46 in src/actions/advancement.hpp.'>animate</a>=yes
+<a id='L1377' name='L1377'></a>1377             <a href='../D/6384.html' title='Multiple defined in 4 places.'>fire_event</a>=no
+<a id='L1378' name='L1378'></a>1378         [/kill]
+<a id='L1379' name='L1379'></a>1379 
+<a id='L1380' name='L1380'></a>1380         [redraw]
+<a id='L1381' name='L1381'></a>1381         [/redraw]
+<a id='L1382' name='L1382'></a>1382 
+<a id='L1383' name='L1383'></a>1383         # wait
+<a id='L1384' name='L1384'></a>1384         [delay]
+<a id='L1385' name='L1385'></a>1385             <a href='../D/15240.html' title='Multiple defined in 4 places.'>time</a>=2500
+<a id='L1386' name='L1386'></a>1386         [/delay]
+<a id='L1387' name='L1387'></a>1387 
+<a id='L1388' name='L1388'></a>1388         #ending conversation
+<a id='L1389' name='L1389'></a>1389 
+<a id='L1390' name='L1390'></a>1390         [message]
+<a id='L1391' name='L1391'></a>1391             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L1392' name='L1392'></a>1392             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "At last. It is finished."
+<a id='L1393' name='L1393'></a>1393         [/message]
+<a id='L1394' name='L1394'></a>1394 
+<a id='L1395' name='L1395'></a>1395         [<strong class='reserved'>if</strong>]
+<a id='L1396' name='L1396'></a>1396             [have_unit]
+<a id='L1397' name='L1397'></a>1397                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Nym
+<a id='L1398' name='L1398'></a>1398             [/have_unit]
+<a id='L1399' name='L1399'></a>1399 
+<a id='L1400' name='L1400'></a>1400             [then]
+<a id='L1401' name='L1401'></a>1401                 [message]
+<a id='L1402' name='L1402'></a>1402                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L1403' name='L1403'></a>1403                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Is Yechnagoth really dead?"
+<a id='L1404' name='L1404'></a>1404                 [/message]
+<a id='L1405' name='L1405'></a>1405 
+<a id='L1406' name='L1406'></a>1406                 [message]
+<a id='L1407' name='L1407'></a>1407                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L1408' name='L1408'></a>1408                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Yes, she’s dead Nym."
+<a id='L1409' name='L1409'></a>1409                 [/message]
+<a id='L1410' name='L1410'></a>1410 
+<a id='L1411' name='L1411'></a>1411                 [message]
+<a id='L1412' name='L1412'></a>1412                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nym
+<a id='L1413' name='L1413'></a>1413                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "I almost can’t believe it."
+<a id='L1414' name='L1414'></a>1414                 [/message]
+<a id='L1415' name='L1415'></a>1415             [/then]
+<a id='L1416' name='L1416'></a>1416         [/<strong class='reserved'>if</strong>]
+<a id='L1417' name='L1417'></a>1417 
+<a id='L1418' name='L1418'></a>1418         [message]
+<a id='L1419' name='L1419'></a>1419             <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Zhul
+<a id='L1420' name='L1420'></a>1420             <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Behold, the pretender has been defeated. Eloh’s might has prevailed."
+<a id='L1421' name='L1421'></a>1421         [/message]
+<a id='L1422' name='L1422'></a>1422 
+<a id='L1423' name='L1423'></a>1423         <em class='brace'>{</em>MESSAGE_DEPEND_ON_ALLY
+<a id='L1424' name='L1424'></a>1424         (
+<a id='L1425' name='L1425'></a>1425             [message]
+<a id='L1426' name='L1426'></a>1426                 <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Grog
+<a id='L1427' name='L1427'></a>1427                 <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Ugh. Grog is covered in blood and guts and nasty blue goo. Whatever creature was, she doesn’t smell any better dead than she did alive."
+<a id='L1428' name='L1428'></a>1428             [/message]
+<a id='L1429' name='L1429'></a>1429         )
+<a id='L1430' name='L1430'></a>1430         (
+<a id='L1431' name='L1431'></a>1431             [message]
+<a id='L1432' name='L1432'></a>1432                 <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Nog
+<a id='L1433' name='L1433'></a>1433                 <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Ugh. Nog is covered in blood and guts and nasty blue goo. Whatever creature was, she doesn’t smell any better dead than she did alive."
+<a id='L1434' name='L1434'></a>1434             [/message]
+<a id='L1435' name='L1435'></a>1435         )
+<a id='L1436' name='L1436'></a>1436         (
+<a id='L1437' name='L1437'></a>1437             [message]
+<a id='L1438' name='L1438'></a>1438                 <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Rogrimir
+<a id='L1439' name='L1439'></a>1439                 <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Ugh. I’m covered in blood and guts, and this nasty blue stuff. I don’t know what in the nine hells we were fighting, but she doesn’t smell any better dead than she did alive."
+<a id='L1440' name='L1440'></a>1440             [/message]
+<a id='L1441' name='L1441'></a>1441         )
+<a id='L1442' name='L1442'></a>1442         (
+<a id='L1443' name='L1443'></a>1443             [message]
+<a id='L1444' name='L1444'></a>1444                 <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Jarl
+<a id='L1445' name='L1445'></a>1445                 <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Ugh. I’m covered in blood and guts, and this nasty blue stuff. I don’t know what in the nine hells we were fighting, but she doesn’t smell any better dead than she did alive."
+<a id='L1446' name='L1446'></a>1446             [/message]
+<a id='L1447' name='L1447'></a>1447         )<em class='brace'>}</em>
+<a id='L1448' name='L1448'></a>1448 
+<a id='L1449' name='L1449'></a>1449         [<strong class='reserved'>if</strong>]
+<a id='L1450' name='L1450'></a>1450             [have_unit]
+<a id='L1451' name='L1451'></a>1451                 <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Nym,Zhul,$ally_name
+<a id='L1452' name='L1452'></a>1452             [/have_unit]
+<a id='L1453' name='L1453'></a>1453 
+<a id='L1454' name='L1454'></a>1454             [then]
+<a id='L1455' name='L1455'></a>1455                 [message]
+<a id='L1456' name='L1456'></a>1456                     <a href='../Y/19092.html' title='Multiple used in 8919 places.'>speaker</a>=Kaleh
+<a id='L1457' name='L1457'></a>1457                     <a href='../D/10986.html' title='Multiple defined in 7 places.'>message</a>= _ "Let’s get out of here."
+<a id='L1458' name='L1458'></a>1458                 [/message]
+<a id='L1459' name='L1459'></a>1459             [/then]
+<a id='L1460' name='L1460'></a>1460         [/<strong class='reserved'>if</strong>]
+<a id='L1461' name='L1461'></a>1461 
+<a id='L1462' name='L1462'></a>1462         <em class='brace'>{</em>CLEAR_VARIABLE number_minions_to_spawn<em class='brace'>}</em>
+<a id='L1463' name='L1463'></a>1463         <em class='brace'>{</em>CLEAR_VARIABLE hit_by_special_attack<em class='brace'>}</em>
+<a id='L1464' name='L1464'></a>1464 
+<a id='L1465' name='L1465'></a>1465         [endlevel]
+<a id='L1466' name='L1466'></a>1466             <a href='../D/12976.html' title='Multiple defined in 10 places.'>result</a>=victory
+<a id='L1467' name='L1467'></a>1467             <a href='../Y/6598.html' title='Multiple used in 668 places.'>bonus</a>=no
+<a id='L1468' name='L1468'></a>1468             <a href='../Y/7145.html' title='Multiple used in 128 places.'>carryover_report</a>=no
+<a id='L1469' name='L1469'></a>1469             <a href='../Y/13274.html' title='Multiple used in 111 places.'>linger_mode</a>=no
+<a id='L1470' name='L1470'></a>1470             <em class='brace'>{</em>NEW_GOLD_CARRYOVER 0<em class='brace'>}</em>
+<a id='L1471' name='L1471'></a>1471         [/endlevel]
+<a id='L1472' name='L1472'></a>1472     [/event]
+<a id='L1473' name='L1473'></a>1473 
+<a id='L1474' name='L1474'></a>1474 <em class='sharp'>#define</em> UTBS_IN_FINAL_FIGHT
+<a id='L1475' name='L1475'></a>1475 #enddef
+<a id='L1476' name='L1476'></a>1476     <em class='brace'>{</em>UTBS_INCLUDE utils/deaths.cfg<em class='brace'>}</em>
+<a id='L1477' name='L1477'></a>1477 <em class='sharp'>#undef</em> UTBS_IN_FINAL_FIGHT
+<a id='L1478' name='L1478'></a>1478 [/scenario]
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>

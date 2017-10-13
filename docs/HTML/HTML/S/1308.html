@@ -8,31 +8,82 @@
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5889.html'>utils</a>/<a href='../files/5898.html'>travis</a>/mp_test_executor.sh</h2>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5914.html'>utils</a>/<a href='../files/5923.html'>travis</a>/mp_test_executor.sh</h2>
 <em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='sharp'>#</em>!/bin/bash
-<a id='L2' name='L2'></a>   2 <a href='../D/13534.html' title='Multiple defined in 12 places.'>set</a> -e #Error <strong class='reserved'>if</strong> any line errors
-<a id='L3' name='L3'></a>   3 <a href='../D/13534.html' title='Multiple defined in 12 places.'>set</a> -m #Enable job control
-<a id='L4' name='L4'></a>   4 <a href='../D/13534.html' title='Multiple defined in 12 places.'>set</a> -v #Print shell commands as they are read
+<a id='L2' name='L2'></a>   2 <a href='../D/13551.html' title='Multiple defined in 12 places.'>set</a> -e #Error <strong class='reserved'>if</strong> any line errors
+<a id='L3' name='L3'></a>   3 <a href='../D/13551.html' title='Multiple defined in 12 places.'>set</a> -m #Enable job control
+<a id='L4' name='L4'></a>   4 <a href='../D/13551.html' title='Multiple defined in 12 places.'>set</a> -v #Print shell commands as they are read
 <a id='L5' name='L5'></a>   5 
-<a id='L6' name='L6'></a>   6 ./wesnothd --port 12345 --log-debug=server --log-warning=config &amp;
-<a id='L7' name='L7'></a>   7 serverpid=$!
-<a id='L8' name='L8'></a>   8 
-<a id='L9' name='L9'></a>   9 ./wesnoth --plugin=host.lua --server=localhost:12345 --username=host --mp-test --noaddons --nogui &amp;
-<a id='L10' name='L10'></a>  10 hostpid=$!
-<a id='L11' name='L11'></a>  11 
-<a id='L12' name='L12'></a>  12 ./wesnoth --plugin=join.lua --server=localhost:12345 --username=join --mp-test --noaddons --nogui &amp;
-<a id='L13' name='L13'></a>  13 joinpid=$!
-<a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <a href='../Y/21836.html' title='Multiple used in 7 places.'>wait</a> $hostpid
+<a id='L6' name='L6'></a>   6 TIMEOUT_TIME=300
+<a id='L7' name='L7'></a>   7 LOOP_TIME=6
+<a id='L8' name='L8'></a>   8 HOSTLOG=/tmp/host.log
+<a id='L9' name='L9'></a>   9 JOINLOG=/tmp/join.log
+<a id='L10' name='L10'></a>  10 
+<a id='L11' name='L11'></a>  11 ./wesnothd --port 12345 --log-debug=server --log-warning=config &amp;
+<a id='L12' name='L12'></a>  12 serverpid=$!
+<a id='L13' name='L13'></a>  13 
+<a id='L14' name='L14'></a>  14 ./wesnoth --plugin=host.lua --server=localhost:12345 --username=host --mp-test --noaddons --nogui 2&gt; &gt;(tee $HOSTLOG &gt;&amp;2) &amp;
+<a id='L15' name='L15'></a>  15 hostpid=$!
 <a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <a href='../Y/21836.html' title='Multiple used in 7 places.'>wait</a> $joinpid
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19 <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> $serverpid
-<a id='L20' name='L20'></a>  20 
-<a id='L21' name='L21'></a>  21 <a href='../Y/9749.html' title='Multiple used in 110 places.'>exit</a> 0
+<a id='L17' name='L17'></a>  17 ./wesnoth --plugin=join.lua --server=localhost:12345 --username=join --mp-test --noaddons --nogui 2&gt; &gt;(tee $JOINLOG &gt;&amp;2) &amp;
+<a id='L18' name='L18'></a>  18 joinpid=$!
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 START_TIME=$SECONDS
+<a id='L21' name='L21'></a>  21 <a href='../Y/1351.html' title='Multiple used in 2 places.'>HOST_RUNNING</a>=yes
+<a id='L22' name='L22'></a>  22 <a href='../Y/1686.html' title='Multiple used in 2 places.'>JOIN_RUNNING</a>=yes
+<a id='L23' name='L23'></a>  23 <strong class='reserved'>while</strong> true; <strong class='reserved'>do</strong>
+<a id='L24' name='L24'></a>  24     # Timeout
+<a id='L25' name='L25'></a>  25     EXEC_TIME=$(($SECONDS - $START_TIME))
+<a id='L26' name='L26'></a>  26     <strong class='reserved'>if</strong> [ $EXEC_TIME -gt $TIMEOUT_TIME ]; then
+<a id='L27' name='L27'></a>  27         <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> $hostpid 2&gt;/dev/null
+<a id='L28' name='L28'></a>  28         <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> $joinpid 2&gt;/dev/null
+<a id='L29' name='L29'></a>  29         <strong class='reserved'>break</strong>
+<a id='L30' name='L30'></a>  30     fi
+<a id='L31' name='L31'></a>  31     # Check <strong class='reserved'>if</strong> clients still running
+<a id='L32' name='L32'></a>  32     <strong class='reserved'>if</strong> ! <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> -0 $hostpid 2&gt;/dev/null; then
+<a id='L33' name='L33'></a>  33         <a href='../Y/1351.html' title='Multiple used in 2 places.'>HOST_RUNNING</a>=no
+<a id='L34' name='L34'></a>  34     fi
+<a id='L35' name='L35'></a>  35     <strong class='reserved'>if</strong> ! <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> -0 $joinpid 2&gt;/dev/null; then
+<a id='L36' name='L36'></a>  36         <a href='../Y/1686.html' title='Multiple used in 2 places.'>JOIN_RUNNING</a>=no
+<a id='L37' name='L37'></a>  37     fi
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39     sleep $LOOP_TIME
+<a id='L40' name='L40'></a>  40 
+<a id='L41' name='L41'></a>  41     # If both are finished, we're done
+<a id='L42' name='L42'></a>  42     <strong class='reserved'>if</strong> ! (<a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> -0 $hostpid 2&gt;/dev/null || kill -0 $joinpid 2&gt;/dev/null); then
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>break</strong>
+<a id='L44' name='L44'></a>  44     fi
+<a id='L45' name='L45'></a>  45     # If one has finished previously, kill the other
+<a id='L46' name='L46'></a>  46     <strong class='reserved'>if</strong> [ $HOST_RUNNING = "no" ]; then
+<a id='L47' name='L47'></a>  47         <a href='../Y/9264.html' title='Multiple used in 133 places.'>echo</a> "Host finished at least $LOOP_TIME seconds ago. Killing join"
+<a id='L48' name='L48'></a>  48         <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> $joinpid 2&gt;/dev/null
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>break</strong>
+<a id='L50' name='L50'></a>  50     fi
+<a id='L51' name='L51'></a>  51     <strong class='reserved'>if</strong> [ $JOIN_RUNNING = "no" ]; then
+<a id='L52' name='L52'></a>  52         <a href='../Y/9264.html' title='Multiple used in 133 places.'>echo</a> "Join finished at least $LOOP_TIME seconds ago. Killing host"
+<a id='L53' name='L53'></a>  53         <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> $hostpid 2&gt;/dev/null
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>break</strong>
+<a id='L55' name='L55'></a>  55     fi
+<a id='L56' name='L56'></a>  56 done
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58 <a href='../S/168.html#L29' title='Defined at 29 in src/server/player.hpp.'>STATUS</a>=0
+<a id='L59' name='L59'></a>  59 
+<a id='L60' name='L60'></a>  60 <a href='../Y/21875.html' title='Multiple used in 7 places.'>wait</a> $hostpid || (
+<a id='L61' name='L61'></a>  61     grep "Could not initialize SDL_video" $HOSTLOG &amp;&amp; \
+<a id='L62' name='L62'></a>  62     <a href='../Y/9264.html' title='Multiple used in 133 places.'>echo</a> -e "\nFailed to initialize video.\nThis is a common CI issue.\nTreating the test as successful.\n"
+<a id='L63' name='L63'></a>  63 ) || <a href='../S/168.html#L29' title='Defined at 29 in src/server/player.hpp.'>STATUS</a>=1
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65 <a href='../Y/21875.html' title='Multiple used in 7 places.'>wait</a> $joinpid || (
+<a id='L66' name='L66'></a>  66     grep "Could not initialize SDL_video" $JOINLOG &amp;&amp; \
+<a id='L67' name='L67'></a>  67     <a href='../Y/9264.html' title='Multiple used in 133 places.'>echo</a> -e "\nFailed to initialize video.\nThis is a common CI issue.\nTreating the test as successful.\n"
+<a id='L68' name='L68'></a>  68 ) || <a href='../S/168.html#L29' title='Defined at 29 in src/server/player.hpp.'>STATUS</a>=1
+<a id='L69' name='L69'></a>  69 
+<a id='L70' name='L70'></a>  70 <a href='../S/1449.html#L364' title='Defined at 364 in utils/umc_dev/org.wesnoth/src/org/wesnoth/utils/ExternalToolInvoker.java.'>kill</a> $serverpid
+<a id='L71' name='L71'></a>  71 
+<a id='L72' name='L72'></a>  72 <a href='../Y/9781.html' title='Multiple used in 110 places.'>exit</a> $STATUS
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>

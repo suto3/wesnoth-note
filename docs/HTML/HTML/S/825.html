@@ -1,26 +1,40 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/key.cpp</title>
+<title>src/arrow.cpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/key.cpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L27'>[^]</a>[v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5851.html'>src</a>/arrow.cpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L41'>[^]</a><a href='#L296'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L27' title='Defined at 27.'>is_uncomposable</a></li>
+<li><a href='#L41' title='Defined at 41.'>hidden_</a></li>
+<li><a href='#L52' title='Defined at 52.'>hide</a></li>
+<li><a href='#L65' title='Defined at 65.'>show</a></li>
+<li><a href='#L75' title='Defined at 75.'>set_path</a></li>
+<li><a href='#L90' title='Defined at 90.'>reset</a></li>
+<li><a href='#L100' title='Defined at 100.'>set_color</a></li>
+<li><a href='#L114' title='Defined at 114.'>set_style</a></li>
+<li><a href='#L123' title='Defined at 123.'>get_path</a></li>
+<li><a href='#L128' title='Defined at 128.'>get_previous_path</a></li>
+<li><a href='#L133' title='Defined at 133.'>path_contains</a></li>
+<li><a href='#L139' title='Defined at 139.'>draw_hex</a></li>
+<li><a href='#L148' title='Defined at 148.'>valid_path</a></li>
+<li><a href='#L156' title='Defined at 156.'>update_symbols</a></li>
+<li><a href='#L286' title='Defined at 286.'>invalidate_arrow_path</a></li>
+<li><a href='#L296' title='Defined at 296.'>notify_arrow_changed</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2003 - 2017 by David White &lt;dave@whitevine.net&gt;</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2010 - 2017 by Gabriel Morin &lt;gabrielmorin (at) gmail (dot) com&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
 <a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
@@ -32,133 +46,296 @@ This source file includes following definitions.
 <a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
 <a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
 <a id='L14' name='L14'></a>  14 
-<a id='L15' name='L15'></a>  15 <em class='sharp'>#include</em> "<a href='975.html'>key.hpp</a>"
-<a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <a href='../R/166.html' title='Multiple referred from 37 places.'>CKey</a>::<a href='../D/187.html' title='Multiple defined in 2 places.'>CKey</a>() :
-<a id='L18' name='L18'></a>  18         <a href='../Y/12739.html' title='Multiple used in 3 places.'>key_list</a>(SDL_GetKeyboardState(<a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>))
-<a id='L19' name='L19'></a>  19 <em class='brace'>{</em>
-<a id='L20' name='L20'></a>  20 <em class='brace'>}</em>
+<a id='L15' name='L15'></a>  15 <em class='comment'>/**</em>
+<a id='L16' name='L16'></a>  16 <em class='comment'> * @file</em>
+<a id='L17' name='L17'></a>  17 <em class='comment'> * Method bodies for the arrow class.</em>
+<a id='L18' name='L18'></a>  18 <em class='comment'> */</em>
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='859.html'>arrow.hpp</a>"
 <a id='L21' name='L21'></a>  21 
-<a id='L22' name='L22'></a>  22 <strong class='reserved'>bool</strong> <a href='../D/187.html' title='Multiple defined in 2 places.'>CKey</a>::<strong class='reserved'>operator</strong>[](<strong class='reserved'>int</strong> <a href='../Y/12703.html' title='Multiple used in 408 places.'>k</a>) <strong class='reserved'>const</strong>
-<a id='L23' name='L23'></a>  23 <em class='brace'>{</em>
-<a id='L24' name='L24'></a>  24         <strong class='reserved'>return</strong> <a href='../Y/12739.html' title='Multiple used in 3 places.'>key_list</a>[SDL_GetScancodeFromKey(<a href='../Y/12703.html' title='Multiple used in 408 places.'>k</a>)] &gt; 0;
-<a id='L25' name='L25'></a>  25 <em class='brace'>}</em>
-<a id='L26' name='L26'></a>  26 
-<a id='L27' name='L27'></a>  27 <strong class='reserved'>bool</strong> <a href='../D/187.html' title='Multiple defined in 2 places.'>CKey</a>::<a href='../R/8578.html' title='Multiple referred from 3 places.'>is_uncomposable</a>(<strong class='reserved'>const</strong> <a href='../Y/2617.html' title='Multiple used in 3 places.'>SDL_KeyboardEvent</a> &amp;<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>) <em class='brace'>{</em>
-<a id='L28' name='L28'></a>  28 
-<a id='L29' name='L29'></a>  29         <strong class='reserved'>switch</strong> (<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>.<a href='../Y/12753.html' title='Multiple used in 27 places.'>keysym</a>.<a href='../Y/19594.html' title='Multiple used in 40 places.'>sym</a>) <em class='brace'>{</em>
-<a id='L30' name='L30'></a>  30                 <strong class='reserved'>case</strong> <a href='../Y/2500.html' title='Multiple used in 8 places.'>SDLK_RETURN</a>:
-<a id='L31' name='L31'></a>  31                 <strong class='reserved'>case</strong> <a href='../Y/2403.html' title='Multiple used in 6 places.'>SDLK_ESCAPE</a>:
-<a id='L32' name='L32'></a>  32                 <strong class='reserved'>case</strong> <a href='../Y/2399.html' title='Multiple used in 6 places.'>SDLK_BACKSPACE</a>:
-<a id='L33' name='L33'></a>  33                 <strong class='reserved'>case</strong> <a href='../Y/2505.html' title='Multiple used in 9 places.'>SDLK_TAB</a>:
-<a id='L34' name='L34'></a>  34                 <em class='comment'>// Function keys</em>
-<a id='L35' name='L35'></a>  35                 <strong class='reserved'>case</strong> SDLK_F1:
-<a id='L36' name='L36'></a>  36                 <strong class='reserved'>case</strong> SDLK_F2:
-<a id='L37' name='L37'></a>  37                 <strong class='reserved'>case</strong> SDLK_F3:
-<a id='L38' name='L38'></a>  38                 <strong class='reserved'>case</strong> <a href='../Y/2422.html' title='Multiple used in 2 places.'>SDLK_F4</a>:
-<a id='L39' name='L39'></a>  39                 <strong class='reserved'>case</strong> SDLK_F5:
-<a id='L40' name='L40'></a>  40                 <strong class='reserved'>case</strong> SDLK_F6:
-<a id='L41' name='L41'></a>  41                 <strong class='reserved'>case</strong> SDLK_F7:
-<a id='L42' name='L42'></a>  42                 <strong class='reserved'>case</strong> SDLK_F8:
-<a id='L43' name='L43'></a>  43                 <strong class='reserved'>case</strong> SDLK_F9:
-<a id='L44' name='L44'></a>  44                 <strong class='reserved'>case</strong> SDLK_F10:
-<a id='L45' name='L45'></a>  45                 <strong class='reserved'>case</strong> SDLK_F11:
-<a id='L46' name='L46'></a>  46                 <strong class='reserved'>case</strong> <a href='../Y/2407.html' title='Multiple used in 2 places.'>SDLK_F12</a>:
-<a id='L47' name='L47'></a>  47                 <strong class='reserved'>case</strong> SDLK_F13:
-<a id='L48' name='L48'></a>  48                 <strong class='reserved'>case</strong> SDLK_F14:
-<a id='L49' name='L49'></a>  49                 <strong class='reserved'>case</strong> SDLK_F15:
-<a id='L50' name='L50'></a>  50                 <strong class='reserved'>case</strong> SDLK_F16:
-<a id='L51' name='L51'></a>  51                 <strong class='reserved'>case</strong> SDLK_F17:
-<a id='L52' name='L52'></a>  52                 <strong class='reserved'>case</strong> SDLK_F18:
-<a id='L53' name='L53'></a>  53                 <strong class='reserved'>case</strong> SDLK_F19:
-<a id='L54' name='L54'></a>  54                 <strong class='reserved'>case</strong> SDLK_F20:
-<a id='L55' name='L55'></a>  55                 <strong class='reserved'>case</strong> SDLK_F21:
-<a id='L56' name='L56'></a>  56                 <strong class='reserved'>case</strong> SDLK_F22:
-<a id='L57' name='L57'></a>  57                 <strong class='reserved'>case</strong> SDLK_F23:
-<a id='L58' name='L58'></a>  58                 <strong class='reserved'>case</strong> SDLK_F24:
-<a id='L59' name='L59'></a>  59                 <em class='comment'>// Keypad keys</em>
-<a id='L60' name='L60'></a>  60                 <strong class='reserved'>case</strong> SDLK_KP_0:
-<a id='L61' name='L61'></a>  61                 <strong class='reserved'>case</strong> SDLK_KP_1:
-<a id='L62' name='L62'></a>  62                 <strong class='reserved'>case</strong> SDLK_KP_2:
-<a id='L63' name='L63'></a>  63                 <strong class='reserved'>case</strong> SDLK_KP_3:
-<a id='L64' name='L64'></a>  64                 <strong class='reserved'>case</strong> SDLK_KP_4:
-<a id='L65' name='L65'></a>  65                 <strong class='reserved'>case</strong> SDLK_KP_5:
-<a id='L66' name='L66'></a>  66                 <strong class='reserved'>case</strong> SDLK_KP_6:
-<a id='L67' name='L67'></a>  67                 <strong class='reserved'>case</strong> SDLK_KP_7:
-<a id='L68' name='L68'></a>  68                 <strong class='reserved'>case</strong> SDLK_KP_8:
-<a id='L69' name='L69'></a>  69                 <strong class='reserved'>case</strong> SDLK_KP_9:
-<a id='L70' name='L70'></a>  70                 <strong class='reserved'>case</strong> SDLK_KP_00:
-<a id='L71' name='L71'></a>  71                 <strong class='reserved'>case</strong> SDLK_KP_000:
-<a id='L72' name='L72'></a>  72                 <strong class='reserved'>case</strong> SDLK_KP_A:
-<a id='L73' name='L73'></a>  73                 <strong class='reserved'>case</strong> SDLK_KP_B:
-<a id='L74' name='L74'></a>  74                 <strong class='reserved'>case</strong> SDLK_KP_C:
-<a id='L75' name='L75'></a>  75                 <strong class='reserved'>case</strong> SDLK_KP_D:
-<a id='L76' name='L76'></a>  76                 <strong class='reserved'>case</strong> SDLK_KP_E:
-<a id='L77' name='L77'></a>  77                 <strong class='reserved'>case</strong> SDLK_KP_F:
-<a id='L78' name='L78'></a>  78                 <strong class='reserved'>case</strong> SDLK_KP_AMPERSAND:
-<a id='L79' name='L79'></a>  79                 <strong class='reserved'>case</strong> SDLK_KP_AT:
-<a id='L80' name='L80'></a>  80                 <strong class='reserved'>case</strong> SDLK_KP_BACKSPACE:
-<a id='L81' name='L81'></a>  81                 <strong class='reserved'>case</strong> SDLK_KP_BINARY:
-<a id='L82' name='L82'></a>  82                 <strong class='reserved'>case</strong> SDLK_KP_CLEAR:
-<a id='L83' name='L83'></a>  83                 <strong class='reserved'>case</strong> SDLK_KP_CLEARENTRY:
-<a id='L84' name='L84'></a>  84                 <strong class='reserved'>case</strong> SDLK_KP_COLON:
-<a id='L85' name='L85'></a>  85                 <strong class='reserved'>case</strong> SDLK_KP_COMMA:
-<a id='L86' name='L86'></a>  86                 <strong class='reserved'>case</strong> SDLK_KP_DBLAMPERSAND:
-<a id='L87' name='L87'></a>  87                 <strong class='reserved'>case</strong> SDLK_KP_DBLVERTICALBAR:
-<a id='L88' name='L88'></a>  88                 <strong class='reserved'>case</strong> SDLK_KP_DECIMAL:
-<a id='L89' name='L89'></a>  89                 <strong class='reserved'>case</strong> SDLK_KP_DIVIDE:
-<a id='L90' name='L90'></a>  90                 <strong class='reserved'>case</strong> <a href='../Y/2459.html' title='Multiple used in 8 places.'>SDLK_KP_ENTER</a>:
-<a id='L91' name='L91'></a>  91                 <strong class='reserved'>case</strong> SDLK_KP_EQUALS:
-<a id='L92' name='L92'></a>  92                 <strong class='reserved'>case</strong> SDLK_KP_EQUALSAS400:
-<a id='L93' name='L93'></a>  93                 <strong class='reserved'>case</strong> SDLK_KP_EXCLAM:
-<a id='L94' name='L94'></a>  94                 <strong class='reserved'>case</strong> SDLK_KP_GREATER:
-<a id='L95' name='L95'></a>  95                 <strong class='reserved'>case</strong> SDLK_KP_HASH:
-<a id='L96' name='L96'></a>  96                 <strong class='reserved'>case</strong> SDLK_KP_HEXADECIMAL:
-<a id='L97' name='L97'></a>  97                 <strong class='reserved'>case</strong> SDLK_KP_LEFTBRACE:
-<a id='L98' name='L98'></a>  98                 <strong class='reserved'>case</strong> SDLK_KP_LEFTPAREN:
-<a id='L99' name='L99'></a>  99                 <strong class='reserved'>case</strong> SDLK_KP_LESS:
-<a id='L100' name='L100'></a> 100                 <strong class='reserved'>case</strong> SDLK_KP_MEMADD:
-<a id='L101' name='L101'></a> 101                 <strong class='reserved'>case</strong> SDLK_KP_MEMCLEAR:
-<a id='L102' name='L102'></a> 102                 <strong class='reserved'>case</strong> SDLK_KP_MEMDIVIDE:
-<a id='L103' name='L103'></a> 103                 <strong class='reserved'>case</strong> SDLK_KP_MEMMULTIPLY:
-<a id='L104' name='L104'></a> 104                 <strong class='reserved'>case</strong> SDLK_KP_MEMRECALL:
-<a id='L105' name='L105'></a> 105                 <strong class='reserved'>case</strong> SDLK_KP_MEMSTORE:
-<a id='L106' name='L106'></a> 106                 <strong class='reserved'>case</strong> SDLK_KP_MEMSUBTRACT:
-<a id='L107' name='L107'></a> 107                 <strong class='reserved'>case</strong> SDLK_KP_MINUS:
-<a id='L108' name='L108'></a> 108                 <strong class='reserved'>case</strong> SDLK_KP_MULTIPLY:
-<a id='L109' name='L109'></a> 109                 <strong class='reserved'>case</strong> SDLK_KP_OCTAL:
-<a id='L110' name='L110'></a> 110                 <strong class='reserved'>case</strong> SDLK_KP_PERCENT:
-<a id='L111' name='L111'></a> 111                 <strong class='reserved'>case</strong> SDLK_KP_PERIOD:
-<a id='L112' name='L112'></a> 112                 <strong class='reserved'>case</strong> SDLK_KP_PLUS:
-<a id='L113' name='L113'></a> 113                 <strong class='reserved'>case</strong> SDLK_KP_PLUSMINUS:
-<a id='L114' name='L114'></a> 114                 <strong class='reserved'>case</strong> SDLK_KP_POWER:
-<a id='L115' name='L115'></a> 115                 <strong class='reserved'>case</strong> SDLK_KP_RIGHTBRACE:
-<a id='L116' name='L116'></a> 116                 <strong class='reserved'>case</strong> SDLK_KP_RIGHTPAREN:
-<a id='L117' name='L117'></a> 117                 <strong class='reserved'>case</strong> SDLK_KP_SPACE:
-<a id='L118' name='L118'></a> 118                 <strong class='reserved'>case</strong> SDLK_KP_TAB:
-<a id='L119' name='L119'></a> 119                 <strong class='reserved'>case</strong> SDLK_KP_VERTICALBAR:
-<a id='L120' name='L120'></a> 120                 <strong class='reserved'>case</strong> SDLK_KP_XOR:
-<a id='L121' name='L121'></a> 121                 <em class='comment'>// Homepad keys</em>
-<a id='L122' name='L122'></a> 122                 <strong class='reserved'>case</strong> SDLK_INSERT:
-<a id='L123' name='L123'></a> 123                 <strong class='reserved'>case</strong> <a href='../Y/2428.html' title='Multiple used in 8 places.'>SDLK_HOME</a>:
-<a id='L124' name='L124'></a> 124                 <strong class='reserved'>case</strong> <a href='../Y/2497.html' title='Multiple used in 8 places.'>SDLK_PAGEUP</a>:
-<a id='L125' name='L125'></a> 125                 <strong class='reserved'>case</strong> <a href='../Y/2496.html' title='Multiple used in 8 places.'>SDLK_PAGEDOWN</a>:
-<a id='L126' name='L126'></a> 126                 <strong class='reserved'>case</strong> <a href='../Y/2400.html' title='Multiple used in 8 places.'>SDLK_DELETE</a>:
-<a id='L127' name='L127'></a> 127                 <strong class='reserved'>case</strong> <a href='../Y/2402.html' title='Multiple used in 8 places.'>SDLK_END</a>:
-<a id='L128' name='L128'></a> 128                 <em class='comment'>// Arrow keys</em>
-<a id='L129' name='L129'></a> 129                 <strong class='reserved'>case</strong> <a href='../Y/2507.html' title='Multiple used in 11 places.'>SDLK_UP</a>:
-<a id='L130' name='L130'></a> 130                 <strong class='reserved'>case</strong> <a href='../Y/2401.html' title='Multiple used in 11 places.'>SDLK_DOWN</a>:
-<a id='L131' name='L131'></a> 131                 <strong class='reserved'>case</strong> <a href='../Y/2493.html' title='Multiple used in 9 places.'>SDLK_LEFT</a>:
-<a id='L132' name='L132'></a> 132                 <strong class='reserved'>case</strong> <a href='../Y/2502.html' title='Multiple used in 9 places.'>SDLK_RIGHT</a>:
-<a id='L133' name='L133'></a> 133                 <strong class='reserved'>case</strong> <a href='../Y/2504.html' title='Multiple used in 3 places.'>SDLK_SPACE</a>:
-<a id='L134' name='L134'></a> 134 
-<a id='L135' name='L135'></a> 135                         <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
-<a id='L136' name='L136'></a> 136                 <strong class='reserved'>default</strong>:
-<a id='L137' name='L137'></a> 137                         <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
-<a id='L138' name='L138'></a> 138         <em class='brace'>}</em>
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='744.html'>game_display.hpp</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='../I/2029.html'>log.hpp</a>"
+<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='677.html'>resources.hpp</a>"
+<a id='L25' name='L25'></a>  25 
+<a id='L26' name='L26'></a>  26 <strong class='reserved'>static</strong> <a href='../D/9823.html' title='Multiple defined in 5 places.'>lg</a>::<a href='../D/10033.html' title='Multiple defined in 2 places.'>log_domain</a> <a href='../Y/13509.html' title='Multiple used in 5 places.'>log_arrows</a>("arrows");
+<a id='L27' name='L27'></a>  27 <em class='sharp'>#define</em> <a href='../S/825.html#L279' title='Referred from 279 in src/arrow.cpp.'>ERR_ARR</a> <a href='../S/659.html#L189' title='Defined at 189 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/847.html#L79' title='Defined at 79 in src/log.cpp.'>err</a>, <a href='../Y/13509.html' title='Multiple used in 5 places.'>log_arrows</a>)
+<a id='L28' name='L28'></a>  28 <em class='sharp'>#define</em> <a href='../S/825.html#L160' title='Referred from 160 in src/arrow.cpp.'>WRN_ARR</a> <a href='../S/659.html#L189' title='Defined at 189 in src/log.hpp.'>LOG_STREAM</a>(<a href='../S/847.html#L85' title='Defined at 85 in src/log.cpp.'>warn</a>, <a href='../Y/13509.html' title='Multiple used in 5 places.'>log_arrows</a>)
+<a id='L29' name='L29'></a>  29 <em class='sharp'>#define</em> LOG_ARR <a href='../S/659.html#L189' title='Defined at 189 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/8872.html' title='Multiple defined in 2 places.'>info</a>, <a href='../Y/13509.html' title='Multiple used in 5 places.'>log_arrows</a>)
+<a id='L30' name='L30'></a>  30 <em class='sharp'>#define</em> DBG_ARR <a href='../S/659.html#L189' title='Defined at 189 in src/log.hpp.'>LOG_STREAM</a>(<a href='../D/5271.html' title='Multiple defined in 16 places.'>debug</a>, <a href='../Y/13509.html' title='Multiple used in 5 places.'>log_arrows</a>)
+<a id='L31' name='L31'></a>  31 
+<a id='L32' name='L32'></a>  32 <em class='sharp'>#define</em> <a href='../R/1739.html' title='Multiple referred from 9 places.'>SCREEN</a> (<strong class='reserved'>static_cast</strong>&lt;<a href='../D/5495.html' title='Multiple defined in 23 places.'>display</a>*&gt;(<a href='../D/12961.html' title='Multiple defined in 2 places.'>resources</a>::<a href='../S/1167.html#L55' title='Defined at 55 in src/reports.hpp.'>screen</a>))
+<a id='L33' name='L33'></a>  33 
+<a id='L34' name='L34'></a>  34 <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>(<strong class='reserved'>bool</strong> <a href='../D/8586.html' title='Multiple defined in 7 places.'>hidden</a>)
+<a id='L35' name='L35'></a>  35         : <a href='../Y/13017.html' title='Multiple used in 4 places.'>layer_</a>(<a href='../D/5495.html' title='Multiple defined in 23 places.'>display</a>::<a href='../S/966.html#L819' title='Defined at 819 in src/display.hpp.'>LAYER_ARROWS</a>)
+<a id='L36' name='L36'></a>  36         , <a href='../S/674.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a>("red")
+<a id='L37' name='L37'></a>  37         , <a href='../Y/19506.html' title='Multiple used in 27 places.'>style_</a>(<a href='../Y/2841.html' title='Multiple used in 6 places.'>STYLE_STANDARD</a>)
+<a id='L38' name='L38'></a>  38         , <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>()
+<a id='L39' name='L39'></a>  39         , <a href='../Y/16796.html' title='Multiple used in 7 places.'>previous_path_</a>()
+<a id='L40' name='L40'></a>  40         , <a href='../Y/19639.html' title='Multiple used in 7 places.'>symbols_map_</a>()
+<a id='L41' name='L41'></a>  41         , <a href='../R/7723.html' title='Multiple referred from 34 places.'>hidden_</a>(<strong class='reserved'>true</strong>)
+<a id='L42' name='L42'></a>  42 <em class='brace'>{</em>
+<a id='L43' name='L43'></a>  43         <strong class='reserved'>if</strong>(!<a href='../D/8586.html' title='Multiple defined in 7 places.'>hidden</a>)
+<a id='L44' name='L44'></a>  44                 <a href='../D/14384.html' title='Multiple defined in 12 places.'>show</a>();
+<a id='L45' name='L45'></a>  45 <em class='brace'>}</em>
+<a id='L46' name='L46'></a>  46 
+<a id='L47' name='L47'></a>  47 <a href='../R/3029.html' title='Multiple referred from 69 places.'>arrow</a>::~<a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>()
+<a id='L48' name='L48'></a>  48 <em class='brace'>{</em>
+<a id='L49' name='L49'></a>  49         <a href='../D/8591.html' title='Multiple defined in 10 places.'>hide</a>();
+<a id='L50' name='L50'></a>  50 <em class='brace'>}</em>
+<a id='L51' name='L51'></a>  51 
+<a id='L52' name='L52'></a>  52 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/7727.html' title='Multiple referred from 51 places.'>hide</a>()
+<a id='L53' name='L53'></a>  53 <em class='brace'>{</em>
+<a id='L54' name='L54'></a>  54         <strong class='reserved'>if</strong>(<a href='../D/8587.html' title='Multiple defined in 5 places.'>hidden_</a>)
+<a id='L55' name='L55'></a>  55                 <strong class='reserved'>return</strong>;
+<a id='L56' name='L56'></a>  56         <a href='../D/8587.html' title='Multiple defined in 5 places.'>hidden_</a> = <strong class='reserved'>true</strong>;
+<a id='L57' name='L57'></a>  57 
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>if</strong> (<a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>)
+<a id='L59' name='L59'></a>  59         <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60                 <a href='../S/825.html#L286' title='Defined at 286 in src/arrow.cpp.'>invalidate_arrow_path</a>(<a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>);
+<a id='L61' name='L61'></a>  61                 <a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>-&gt;<a href='../S/682.html#L3143' title='Defined at 3143 in src/display.cpp.'>remove_arrow</a>(*<strong class='reserved'>this</strong>);
+<a id='L62' name='L62'></a>  62         <em class='brace'>}</em>
+<a id='L63' name='L63'></a>  63 <em class='brace'>}</em>
+<a id='L64' name='L64'></a>  64 
+<a id='L65' name='L65'></a>  65 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/13198.html' title='Multiple referred from 273 places.'>show</a>()
+<a id='L66' name='L66'></a>  66 <em class='brace'>{</em>
+<a id='L67' name='L67'></a>  67         <strong class='reserved'>if</strong>(!<a href='../D/8587.html' title='Multiple defined in 5 places.'>hidden_</a>)
+<a id='L68' name='L68'></a>  68                 <strong class='reserved'>return</strong>;
+<a id='L69' name='L69'></a>  69         <a href='../D/8587.html' title='Multiple defined in 5 places.'>hidden_</a> = <strong class='reserved'>false</strong>;
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>if</strong>(<a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>)
+<a id='L72' name='L72'></a>  72                 <a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>-&gt;<a href='../S/682.html#L3134' title='Defined at 3134 in src/display.cpp.'>add_arrow</a>(*<strong class='reserved'>this</strong>);
+<a id='L73' name='L73'></a>  73 <em class='brace'>}</em>
+<a id='L74' name='L74'></a>  74 
+<a id='L75' name='L75'></a>  75 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/12865.html' title='Multiple referred from 15 places.'>set_path</a>(<a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a> <strong class='reserved'>const</strong>&amp; <a href='../D/11863.html' title='Multiple defined in 6 places.'>path</a>)
+<a id='L76' name='L76'></a>  76 <em class='brace'>{</em>
+<a id='L77' name='L77'></a>  77         <strong class='reserved'>if</strong> (<a href='../S/825.html#L148' title='Defined at 148 in src/arrow.cpp.'>valid_path</a>(<a href='../D/11863.html' title='Multiple defined in 6 places.'>path</a>))
+<a id='L78' name='L78'></a>  78         <em class='brace'>{</em>
+<a id='L79' name='L79'></a>  79                 <a href='../Y/16796.html' title='Multiple used in 7 places.'>previous_path_</a> = <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>;
+<a id='L80' name='L80'></a>  80                 <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a> = <a href='../D/11863.html' title='Multiple defined in 6 places.'>path</a>;
+<a id='L81' name='L81'></a>  81                 <a href='../S/825.html#L156' title='Defined at 156 in src/arrow.cpp.'>update_symbols</a>();
+<a id='L82' name='L82'></a>  82                 <strong class='reserved'>if</strong>(!<a href='../D/8587.html' title='Multiple defined in 5 places.'>hidden_</a>)
+<a id='L83' name='L83'></a>  83                 <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84                         <a href='../S/825.html#L286' title='Defined at 286 in src/arrow.cpp.'>invalidate_arrow_path</a>(<a href='../Y/16796.html' title='Multiple used in 7 places.'>previous_path_</a>);
+<a id='L85' name='L85'></a>  85                         <a href='../S/825.html#L296' title='Defined at 296 in src/arrow.cpp.'>notify_arrow_changed</a>();
+<a id='L86' name='L86'></a>  86                 <em class='brace'>}</em>
+<a id='L87' name='L87'></a>  87         <em class='brace'>}</em>
+<a id='L88' name='L88'></a>  88 <em class='brace'>}</em>
+<a id='L89' name='L89'></a>  89 
+<a id='L90' name='L90'></a>  90 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/11770.html' title='Multiple referred from 332 places.'>reset</a>()
+<a id='L91' name='L91'></a>  91 <em class='brace'>{</em>
+<a id='L92' name='L92'></a>  92         <a href='../S/825.html#L286' title='Defined at 286 in src/arrow.cpp.'>invalidate_arrow_path</a>(<a href='../Y/16796.html' title='Multiple used in 7 places.'>previous_path_</a>);
+<a id='L93' name='L93'></a>  93         <a href='../S/825.html#L286' title='Defined at 286 in src/arrow.cpp.'>invalidate_arrow_path</a>(<a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>);
+<a id='L94' name='L94'></a>  94         <a href='../Y/16796.html' title='Multiple used in 7 places.'>previous_path_</a>.<a href='../D/4481.html' title='Multiple defined in 39 places.'>clear</a>();
+<a id='L95' name='L95'></a>  95         <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>.<a href='../D/4481.html' title='Multiple defined in 39 places.'>clear</a>();
+<a id='L96' name='L96'></a>  96         <a href='../Y/19639.html' title='Multiple used in 7 places.'>symbols_map_</a>.<a href='../D/4481.html' title='Multiple defined in 39 places.'>clear</a>();
+<a id='L97' name='L97'></a>  97         <a href='../S/825.html#L296' title='Defined at 296 in src/arrow.cpp.'>notify_arrow_changed</a>();
+<a id='L98' name='L98'></a>  98 <em class='brace'>}</em>
+<a id='L99' name='L99'></a>  99 
+<a id='L100' name='L100'></a> 100 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/12552.html' title='Multiple referred from 19 places.'>set_color</a>(<strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/4618.html' title='Multiple defined in 5 places.'>color</a>)
+<a id='L101' name='L101'></a> 101 <em class='brace'>{</em>
+<a id='L102' name='L102'></a> 102         <a href='../S/674.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a> = <a href='../D/4618.html' title='Multiple defined in 5 places.'>color</a>;
+<a id='L103' name='L103'></a> 103         <strong class='reserved'>if</strong> (<a href='../S/825.html#L148' title='Defined at 148 in src/arrow.cpp.'>valid_path</a>(<a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>))
+<a id='L104' name='L104'></a> 104         <em class='brace'>{</em>
+<a id='L105' name='L105'></a> 105                 <a href='../S/825.html#L156' title='Defined at 156 in src/arrow.cpp.'>update_symbols</a>();
+<a id='L106' name='L106'></a> 106         <em class='brace'>}</em>
+<a id='L107' name='L107'></a> 107 <em class='brace'>}</em>
+<a id='L108' name='L108'></a> 108 
+<a id='L109' name='L109'></a> 109 <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../Y/2841.html' title='Multiple used in 6 places.'>STYLE_STANDARD</a> = "standard";
+<a id='L110' name='L110'></a> 110 <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../Y/2839.html' title='Multiple used in 5 places.'>STYLE_HIGHLIGHTED</a> = "highlighted";
+<a id='L111' name='L111'></a> 111 <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../Y/2837.html' title='Multiple used in 4 places.'>STYLE_FOCUS</a> = "focus";
+<a id='L112' name='L112'></a> 112 <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../Y/2838.html' title='Multiple used in 4 places.'>STYLE_FOCUS_INVALID</a> = "focus_invalid";
+<a id='L113' name='L113'></a> 113 
+<a id='L114' name='L114'></a> 114 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/13001.html' title='Multiple referred from 7 places.'>set_style</a>(<strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14887.html' title='Multiple defined in 5 places.'>style</a>)
+<a id='L115' name='L115'></a> 115 <em class='brace'>{</em>
+<a id='L116' name='L116'></a> 116         <a href='../Y/19506.html' title='Multiple used in 27 places.'>style_</a> = <a href='../D/14887.html' title='Multiple defined in 5 places.'>style</a>;
+<a id='L117' name='L117'></a> 117         <strong class='reserved'>if</strong> (<a href='../S/825.html#L148' title='Defined at 148 in src/arrow.cpp.'>valid_path</a>(<a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>))
+<a id='L118' name='L118'></a> 118         <em class='brace'>{</em>
+<a id='L119' name='L119'></a> 119                 <a href='../S/825.html#L156' title='Defined at 156 in src/arrow.cpp.'>update_symbols</a>();
+<a id='L120' name='L120'></a> 120         <em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121 <em class='brace'>}</em>
+<a id='L122' name='L122'></a> 122 
+<a id='L123' name='L123'></a> 123 <a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a> <strong class='reserved'>const</strong>&amp; <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/7021.html' title='Multiple referred from 7 places.'>get_path</a>() <strong class='reserved'>const</strong>
+<a id='L124' name='L124'></a> 124 <em class='brace'>{</em>
+<a id='L125' name='L125'></a> 125         <strong class='reserved'>return</strong> <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>;
+<a id='L126' name='L126'></a> 126 <em class='brace'>}</em>
+<a id='L127' name='L127'></a> 127 
+<a id='L128' name='L128'></a> 128 <a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a> <strong class='reserved'>const</strong>&amp; <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/7044.html' title='Multiple referred from 2 places.'>get_previous_path</a>() <strong class='reserved'>const</strong>
+<a id='L129' name='L129'></a> 129 <em class='brace'>{</em>
+<a id='L130' name='L130'></a> 130         <strong class='reserved'>return</strong> <a href='../Y/16796.html' title='Multiple used in 7 places.'>previous_path_</a>;
+<a id='L131' name='L131'></a> 131 <em class='brace'>}</em>
+<a id='L132' name='L132'></a> 132 
+<a id='L133' name='L133'></a> 133 <strong class='reserved'>bool</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/10798.html' title='Multiple referred from 2 places.'>path_contains</a>(<a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <strong class='reserved'>const</strong>&amp; <a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>) <strong class='reserved'>const</strong>
+<a id='L134' name='L134'></a> 134 <em class='brace'>{</em>
+<a id='L135' name='L135'></a> 135         <strong class='reserved'>bool</strong> <a href='../D/4880.html' title='Multiple defined in 6 places.'>contains</a> = <a href='../Y/19639.html' title='Multiple used in 7 places.'>symbols_map_</a>.<a href='../D/6286.html' title='Multiple defined in 39 places.'>find</a>(<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>) != <a href='../Y/19639.html' title='Multiple used in 7 places.'>symbols_map_</a>.<a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a>();
+<a id='L136' name='L136'></a> 136         <strong class='reserved'>return</strong> <a href='../D/4880.html' title='Multiple defined in 6 places.'>contains</a>;
+<a id='L137' name='L137'></a> 137 <em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138 
+<a id='L139' name='L139'></a> 139 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/5032.html' title='Multiple referred from 17 places.'>draw_hex</a>(<a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <strong class='reserved'>const</strong>&amp; <a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>)
+<a id='L140' name='L140'></a> 140 <em class='brace'>{</em>
+<a id='L141' name='L141'></a> 141         <strong class='reserved'>if</strong>(<a href='../S/825.html#L133' title='Defined at 133 in src/arrow.cpp.'>path_contains</a>(<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>))
+<a id='L142' name='L142'></a> 142         <em class='brace'>{</em>
+<a id='L143' name='L143'></a> 143                 <a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>-&gt;<a href='../S/682.html#L1549' title='Defined at 1549 in src/display.cpp.'>render_image</a>(<a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>-&gt;<a href='../S/682.html#L736' title='Defined at 736 in src/display.cpp.'>get_location_x</a>(<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>), <a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>-&gt;<a href='../S/682.html#L741' title='Defined at 741 in src/display.cpp.'>get_location_y</a>(<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>), <a href='../Y/13017.html' title='Multiple used in 4 places.'>layer_</a>,
+<a id='L144' name='L144'></a> 144                                         <a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>, <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>::<a href='../D/7635.html' title='Multiple defined in 4 places.'>get_image</a>(<a href='../Y/19639.html' title='Multiple used in 7 places.'>symbols_map_</a>[<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>], <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>::<a href='../S/756.html#L189' title='Defined at 189 in src/image.hpp.'>SCALED_TO_ZOOM</a>));
+<a id='L145' name='L145'></a> 145         <em class='brace'>}</em>
+<a id='L146' name='L146'></a> 146 <em class='brace'>}</em>
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148 <strong class='reserved'>bool</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/14672.html' title='Multiple referred from 6 places.'>valid_path</a>(<a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a> <strong class='reserved'>const</strong>&amp; <a href='../D/11863.html' title='Multiple defined in 6 places.'>path</a>)
+<a id='L149' name='L149'></a> 149 <em class='brace'>{</em>
+<a id='L150' name='L150'></a> 150         <strong class='reserved'>if</strong> (<a href='../D/11863.html' title='Multiple defined in 6 places.'>path</a>.<a href='../D/14594.html' title='Multiple defined in 18 places.'>size</a>() &gt;= 2)
+<a id='L151' name='L151'></a> 151                 <strong class='reserved'>return</strong> <strong class='reserved'>true</strong>;
+<a id='L152' name='L152'></a> 152         <strong class='reserved'>else</strong>
+<a id='L153' name='L153'></a> 153                 <strong class='reserved'>return</strong> <strong class='reserved'>false</strong>;
+<a id='L154' name='L154'></a> 154 <em class='brace'>}</em>
+<a id='L155' name='L155'></a> 155 
+<a id='L156' name='L156'></a> 156 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/14572.html' title='Multiple referred from 4 places.'>update_symbols</a>()
+<a id='L157' name='L157'></a> 157 <em class='brace'>{</em>
+<a id='L158' name='L158'></a> 158         <strong class='reserved'>if</strong> (!<a href='../S/825.html#L148' title='Defined at 148 in src/arrow.cpp.'>valid_path</a>(<a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>))
+<a id='L159' name='L159'></a> 159         <em class='brace'>{</em>
+<a id='L160' name='L160'></a> 160                 <a href='../S/825.html#L28' title='Defined at 28 in src/arrow.cpp.'>WRN_ARR</a> &lt;&lt; "arrow::update_symbols called with invalid path" &lt;&lt; <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/9438.html' title='Multiple used in 929 places.'>endl</a>;
+<a id='L161' name='L161'></a> 161                 <strong class='reserved'>return</strong>;
+<a id='L162' name='L162'></a> 162         <em class='brace'>}</em>
+<a id='L163' name='L163'></a> 163 
+<a id='L164' name='L164'></a> 164         <a href='../Y/19639.html' title='Multiple used in 7 places.'>symbols_map_</a>.<a href='../D/4481.html' title='Multiple defined in 39 places.'>clear</a>();
+<a id='L165' name='L165'></a> 165         <a href='../S/825.html#L286' title='Defined at 286 in src/arrow.cpp.'>invalidate_arrow_path</a>(<a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>);
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167         <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/14445.html' title='Multiple used in 100 places.'>mods</a> = "~RC(FF00FF&gt;"+ <a href='../S/674.html#L24' title='Defined at 24 in src/widgets/label.cpp.'>color_</a> + ")"; <em class='comment'>//magenta to current color</em>
+<a id='L168' name='L168'></a> 168 
+<a id='L169' name='L169'></a> 169         <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/8906.html' title='Multiple used in 46 places.'>dirname</a> = "arrows/";
+<a id='L170' name='L170'></a> 170         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = "";
+<a id='L171' name='L171'></a> 171         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = "";
+<a id='L172' name='L172'></a> 172         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a> = "";
+<a id='L173' name='L173'></a> 173         <a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a>::<a href='../D/4861.html' title='Multiple defined in 13 places.'>const_iterator</a> <strong class='reserved'>const</strong> <a href='../Y/5868.html' title='Multiple used in 2 places.'>arrow_start_hex</a> = <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>.<a href='../D/3622.html' title='Multiple defined in 28 places.'>begin</a>();
+<a id='L174' name='L174'></a> 174         <a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a>::<a href='../D/4861.html' title='Multiple defined in 13 places.'>const_iterator</a> <strong class='reserved'>const</strong> <a href='../Y/5867.html' title='Multiple used in 2 places.'>arrow_pre_end_hex</a> = <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>.<a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a>() - 2;
+<a id='L175' name='L175'></a> 175         <a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a>::<a href='../D/4861.html' title='Multiple defined in 13 places.'>const_iterator</a> <strong class='reserved'>const</strong> <a href='../Y/5865.html' title='Multiple used in 3 places.'>arrow_end_hex</a> = <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>.<a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a>() - 1;
+<a id='L176' name='L176'></a> 176         <strong class='reserved'>bool</strong> <a href='../Y/19879.html' title='Multiple used in 6 places.'>teleport_out</a> = <strong class='reserved'>false</strong>;
+<a id='L177' name='L177'></a> 177 
+<a id='L178' name='L178'></a> 178         <a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a>::<a href='../D/9562.html' title='Multiple defined in 17 places.'>iterator</a> <a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>;
+<a id='L179' name='L179'></a> 179         <strong class='reserved'>for</strong> (<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a> = <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>.<a href='../D/3622.html' title='Multiple defined in 28 places.'>begin</a>(); <a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a> != <a href='../Y/16322.html' title='Multiple used in 50 places.'>path_</a>.<a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a>(); ++<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>)
+<a id='L180' name='L180'></a> 180         <em class='brace'>{</em>
+<a id='L181' name='L181'></a> 181                 <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = "";
+<a id='L182' name='L182'></a> 182                 <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = "";
+<a id='L183' name='L183'></a> 183                 <a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a> = "";
+<a id='L184' name='L184'></a> 184                 <strong class='reserved'>bool</strong> <a href='../D/14730.html' title='Multiple defined in 5 places.'>start</a> = <strong class='reserved'>false</strong>;
+<a id='L185' name='L185'></a> 185                 <strong class='reserved'>bool</strong> <a href='../Y/16641.html' title='Multiple used in 4 places.'>pre_end</a> = <strong class='reserved'>false</strong>;
+<a id='L186' name='L186'></a> 186                 <strong class='reserved'>bool</strong> <a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a> = <strong class='reserved'>false</strong>;
+<a id='L187' name='L187'></a> 187 
+<a id='L188' name='L188'></a> 188                 <em class='comment'>// teleport in if we teleported out last hex</em>
+<a id='L189' name='L189'></a> 189                 <strong class='reserved'>bool</strong> <a href='../Y/19876.html' title='Multiple used in 3 places.'>teleport_in</a> = <a href='../Y/19879.html' title='Multiple used in 6 places.'>teleport_out</a>;
+<a id='L190' name='L190'></a> 190                 <a href='../Y/19879.html' title='Multiple used in 6 places.'>teleport_out</a> = <strong class='reserved'>false</strong>;
+<a id='L191' name='L191'></a> 191 
+<a id='L192' name='L192'></a> 192                 <em class='comment'>// Determine some special cases</em>
+<a id='L193' name='L193'></a> 193                 <strong class='reserved'>if</strong> (<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a> == <a href='../Y/5868.html' title='Multiple used in 2 places.'>arrow_start_hex</a>)
+<a id='L194' name='L194'></a> 194                         <a href='../D/14730.html' title='Multiple defined in 5 places.'>start</a> = <strong class='reserved'>true</strong>;
+<a id='L195' name='L195'></a> 195                 <strong class='reserved'>if</strong> (<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a> == <a href='../Y/5867.html' title='Multiple used in 2 places.'>arrow_pre_end_hex</a>)
+<a id='L196' name='L196'></a> 196                         <a href='../Y/16641.html' title='Multiple used in 4 places.'>pre_end</a> = <strong class='reserved'>true</strong>;
+<a id='L197' name='L197'></a> 197                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a> == <a href='../Y/5865.html' title='Multiple used in 3 places.'>arrow_end_hex</a>)
+<a id='L198' name='L198'></a> 198                         <a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a> = <strong class='reserved'>true</strong>;
+<a id='L199' name='L199'></a> 199                 <strong class='reserved'>if</strong> (<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a> != <a href='../Y/5865.html' title='Multiple used in 3 places.'>arrow_end_hex</a> &amp;&amp; !<a href='../S/1099.html#L339' title='Defined at 339 in src/map/location.hpp.'>tiles_adjacent</a>(*<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>, *(<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a> + 1)))
+<a id='L200' name='L200'></a> 200                         <a href='../Y/19879.html' title='Multiple used in 6 places.'>teleport_out</a> = <strong class='reserved'>true</strong>;
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202                 <em class='comment'>// calculate enter and exit directions, if available</em>
+<a id='L203' name='L203'></a> 203                 <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/347.html' title='Multiple defined in 2 places.'>DIRECTION</a> <a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/1535.html' title='Multiple defined in 2 places.'>NDIRECTIONS</a>;
+<a id='L204' name='L204'></a> 204                 <strong class='reserved'>if</strong> (!<a href='../D/14730.html' title='Multiple defined in 5 places.'>start</a> &amp;&amp; !<a href='../Y/19876.html' title='Multiple used in 3 places.'>teleport_in</a>)
+<a id='L205' name='L205'></a> 205                 <em class='brace'>{</em>
+<a id='L206' name='L206'></a> 206                         <a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a> = <a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>-&gt;<a href='../D/7915.html' title='Multiple defined in 2 places.'>get_relative_dir</a>(*(<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>-1));
+<a id='L207' name='L207'></a> 207                 <em class='brace'>}</em>
+<a id='L208' name='L208'></a> 208                 <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/347.html' title='Multiple defined in 2 places.'>DIRECTION</a> <a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/1535.html' title='Multiple defined in 2 places.'>NDIRECTIONS</a>;
+<a id='L209' name='L209'></a> 209                 <strong class='reserved'>if</strong> (!<a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a> &amp;&amp; !<a href='../Y/19879.html' title='Multiple used in 6 places.'>teleport_out</a>)
+<a id='L210' name='L210'></a> 210                 <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211                         <a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a> = <a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>-&gt;<a href='../D/7915.html' title='Multiple defined in 2 places.'>get_relative_dir</a>(*(<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>+1));
+<a id='L212' name='L212'></a> 212                 <em class='brace'>}</em>
+<a id='L213' name='L213'></a> 213 
+<a id='L214' name='L214'></a> 214                 <em class='comment'>// Now figure out the actual images</em>
+<a id='L215' name='L215'></a> 215                 <strong class='reserved'>if</strong> (<a href='../Y/19879.html' title='Multiple used in 6 places.'>teleport_out</a>)
+<a id='L216' name='L216'></a> 216                 <em class='brace'>{</em>
+<a id='L217' name='L217'></a> 217                         <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = "teleport-out";
+<a id='L218' name='L218'></a> 218                         <strong class='reserved'>if</strong> (<a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a> != <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/1535.html' title='Multiple defined in 2 places.'>NDIRECTIONS</a>)
+<a id='L219' name='L219'></a> 219                         <em class='brace'>{</em>
+<a id='L220' name='L220'></a> 220                                 <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../S/1097.html#L139' title='Defined at 139 in src/map/location.cpp.'>write_direction</a>(<a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a>);
+<a id='L221' name='L221'></a> 221                         <em class='brace'>}</em>
+<a id='L222' name='L222'></a> 222                 <em class='brace'>}</em>
+<a id='L223' name='L223'></a> 223                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../Y/19876.html' title='Multiple used in 3 places.'>teleport_in</a>)
+<a id='L224' name='L224'></a> 224                 <em class='brace'>{</em>
+<a id='L225' name='L225'></a> 225                         <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = "teleport-in";
+<a id='L226' name='L226'></a> 226                         <strong class='reserved'>if</strong> (<a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a> != <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../D/1535.html' title='Multiple defined in 2 places.'>NDIRECTIONS</a>)
+<a id='L227' name='L227'></a> 227                         <em class='brace'>{</em>
+<a id='L228' name='L228'></a> 228                                 <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../S/1097.html#L139' title='Defined at 139 in src/map/location.cpp.'>write_direction</a>(<a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a>);
+<a id='L229' name='L229'></a> 229                         <em class='brace'>}</em>
+<a id='L230' name='L230'></a> 230                 <em class='brace'>}</em>
+<a id='L231' name='L231'></a> 231                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/14730.html' title='Multiple defined in 5 places.'>start</a>)
+<a id='L232' name='L232'></a> 232                 <em class='brace'>{</em>
+<a id='L233' name='L233'></a> 233                         <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = "start";
+<a id='L234' name='L234'></a> 234                         <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../S/1097.html#L139' title='Defined at 139 in src/map/location.cpp.'>write_direction</a>(<a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a>);
+<a id='L235' name='L235'></a> 235                         <strong class='reserved'>if</strong> (<a href='../Y/16641.html' title='Multiple used in 4 places.'>pre_end</a>)
+<a id='L236' name='L236'></a> 236                         <em class='brace'>{</em>
+<a id='L237' name='L237'></a> 237                                 <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> + "_ending";
+<a id='L238' name='L238'></a> 238                         <em class='brace'>}</em>
+<a id='L239' name='L239'></a> 239                 <em class='brace'>}</em>
+<a id='L240' name='L240'></a> 240                 <strong class='reserved'>else</strong> <strong class='reserved'>if</strong> (<a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a>)
+<a id='L241' name='L241'></a> 241                 <em class='brace'>{</em>
+<a id='L242' name='L242'></a> 242                         <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = "end";
+<a id='L243' name='L243'></a> 243                         <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../S/1097.html#L139' title='Defined at 139 in src/map/location.cpp.'>write_direction</a>(<a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a>);
+<a id='L244' name='L244'></a> 244                 <em class='brace'>}</em>
+<a id='L245' name='L245'></a> 245                 <strong class='reserved'>else</strong>
+<a id='L246' name='L246'></a> 246                 <em class='brace'>{</em>
+<a id='L247' name='L247'></a> 247                         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/9546.html' title='Multiple used in 4 places.'>enter</a>, <a href='../Y/9781.html' title='Multiple used in 110 places.'>exit</a>;
+<a id='L248' name='L248'></a> 248                         <a href='../Y/9546.html' title='Multiple used in 4 places.'>enter</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../S/1097.html#L139' title='Defined at 139 in src/map/location.cpp.'>write_direction</a>(<a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a>);
+<a id='L249' name='L249'></a> 249                         <a href='../Y/9781.html' title='Multiple used in 110 places.'>exit</a> = <a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a>::<a href='../S/1097.html#L139' title='Defined at 139 in src/map/location.cpp.'>write_direction</a>(<a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a>);
+<a id='L250' name='L250'></a> 250                         <strong class='reserved'>if</strong> (<a href='../Y/16641.html' title='Multiple used in 4 places.'>pre_end</a>)
+<a id='L251' name='L251'></a> 251                         <em class='brace'>{</em>
+<a id='L252' name='L252'></a> 252                                 <a href='../Y/9781.html' title='Multiple used in 110 places.'>exit</a> = <a href='../Y/9781.html' title='Multiple used in 110 places.'>exit</a> + "_ending";
+<a id='L253' name='L253'></a> 253                         <em class='brace'>}</em>
+<a id='L254' name='L254'></a> 254 
+<a id='L255' name='L255'></a> 255                         <a href='../Y/5905.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../S/1090.html#L62' title='Defined at 62 in src/xBRZ/xbrz.cpp.'>abs</a>(<a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a> - <a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a>) &gt; 1); <em class='comment'>//impossible turn?</em>
+<a id='L256' name='L256'></a> 256                         <strong class='reserved'>if</strong> (<a href='../Y/9548.html' title='Multiple used in 8 places.'>enter_dir</a> &lt; <a href='../Y/9785.html' title='Multiple used in 8 places.'>exit_dir</a>)
+<a id='L257' name='L257'></a> 257                         <em class='brace'>{</em>
+<a id='L258' name='L258'></a> 258                                 <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = <a href='../Y/9546.html' title='Multiple used in 4 places.'>enter</a>;
+<a id='L259' name='L259'></a> 259                                 <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = <a href='../Y/9781.html' title='Multiple used in 110 places.'>exit</a>;
+<a id='L260' name='L260'></a> 260                         <em class='brace'>}</em>
+<a id='L261' name='L261'></a> 261                         <strong class='reserved'>else</strong> <em class='comment'>//(enter_dir &gt; exit_dir)</em>
+<a id='L262' name='L262'></a> 262                         <em class='brace'>{</em>
+<a id='L263' name='L263'></a> 263                                 <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a> = <a href='../Y/9781.html' title='Multiple used in 110 places.'>exit</a>;
+<a id='L264' name='L264'></a> 264                                 <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a> = <a href='../Y/9546.html' title='Multiple used in 4 places.'>enter</a>;
+<a id='L265' name='L265'></a> 265                         <em class='brace'>}</em>
+<a id='L266' name='L266'></a> 266                 <em class='brace'>}</em>
+<a id='L267' name='L267'></a> 267 
+<a id='L268' name='L268'></a> 268                 <a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a> = <a href='../Y/8906.html' title='Multiple used in 46 places.'>dirname</a> + <a href='../Y/19506.html' title='Multiple used in 27 places.'>style_</a> + "/" + <a href='../S/1256.html#L124' title='Defined at 124 in src/theme.hpp.'>prefix</a>;
+<a id='L269' name='L269'></a> 269                 <strong class='reserved'>if</strong> (!<a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a>.<a href='../D/5871.html' title='Multiple defined in 31 places.'>empty</a>())
+<a id='L270' name='L270'></a> 270                 <em class='brace'>{</em>
+<a id='L271' name='L271'></a> 271                         <a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a> += ("-" + <a href='../D/14907.html' title='Multiple defined in 3 places.'>suffix</a>);
+<a id='L272' name='L272'></a> 272                 <em class='brace'>}</em>
+<a id='L273' name='L273'></a> 273                 <a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a> += ".png";
+<a id='L274' name='L274'></a> 274                 <a href='../Y/5905.html' title='Multiple used in 1200 places.'>assert</a>(!<a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a>.<a href='../D/5871.html' title='Multiple defined in 31 places.'>empty</a>());
+<a id='L275' name='L275'></a> 275 
+<a id='L276' name='L276'></a> 276                 <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>::<a href='../S/756.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a> <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a> = <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>::<a href='../S/756.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>(<a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a>, <a href='../Y/14445.html' title='Multiple used in 100 places.'>mods</a>);
+<a id='L277' name='L277'></a> 277                 <strong class='reserved'>if</strong> (!<a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>.<a href='../D/6211.html' title='Multiple defined in 3 places.'>file_exists</a>())
+<a id='L278' name='L278'></a> 278                 <em class='brace'>{</em>
+<a id='L279' name='L279'></a> 279                         <a href='../S/825.html#L27' title='Defined at 27 in src/arrow.cpp.'>ERR_ARR</a> &lt;&lt; "Image " &lt;&lt; <a href='../Y/11958.html' title='Multiple used in 8 places.'>image_filename</a> &lt;&lt; " not found." &lt;&lt; <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/9438.html' title='Multiple used in 929 places.'>endl</a>;
+<a id='L280' name='L280'></a> 280                         <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a> = <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>::<a href='../S/756.html#L34' title='Defined at 34 in src/image.hpp.'>locator</a>(<a href='../D/6627.html' title='Multiple defined in 7 places.'>game_config</a>::<a href='../D/8733.html' title='Multiple defined in 8 places.'>images</a>::<a href='../Y/14360.html' title='Multiple used in 21 places.'>missing</a>);
+<a id='L281' name='L281'></a> 281                 <em class='brace'>}</em>
+<a id='L282' name='L282'></a> 282                 <a href='../Y/19639.html' title='Multiple used in 7 places.'>symbols_map_</a>[*<a href='../Y/11601.html' title='Multiple used in 417 places.'>hex</a>] = <a href='../D/8714.html' title='Multiple defined in 19 places.'>image</a>;
+<a id='L283' name='L283'></a> 283         <em class='brace'>}</em>
+<a id='L284' name='L284'></a> 284 <em class='brace'>}</em>
+<a id='L285' name='L285'></a> 285 
+<a id='L286' name='L286'></a> 286 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/8326.html' title='Multiple referred from 6 places.'>invalidate_arrow_path</a>(<a href='../S/859.html#L24' title='Defined at 24 in src/arrow.hpp.'>arrow_path_t</a> <strong class='reserved'>const</strong>&amp; <a href='../D/11863.html' title='Multiple defined in 6 places.'>path</a>)
+<a id='L287' name='L287'></a> 287 <em class='brace'>{</em>
+<a id='L288' name='L288'></a> 288         <strong class='reserved'>if</strong>(!<a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>) <strong class='reserved'>return</strong>;
+<a id='L289' name='L289'></a> 289 
+<a id='L290' name='L290'></a> 290         <strong class='reserved'>for</strong> (<a href='../S/1099.html#L40' title='Defined at 40 in src/map/location.hpp.'>map_location</a> <strong class='reserved'>const</strong>&amp; <a href='../D/9986.html' title='Multiple defined in 7 places.'>loc</a> : <a href='../D/11863.html' title='Multiple defined in 6 places.'>path</a>)
+<a id='L291' name='L291'></a> 291         <em class='brace'>{</em>
+<a id='L292' name='L292'></a> 292                 <a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>-&gt;<a href='../D/9207.html' title='Multiple defined in 6 places.'>invalidate</a>(<a href='../D/9986.html' title='Multiple defined in 7 places.'>loc</a>);
+<a id='L293' name='L293'></a> 293         <em class='brace'>}</em>
+<a id='L294' name='L294'></a> 294 <em class='brace'>}</em>
+<a id='L295' name='L295'></a> 295 
+<a id='L296' name='L296'></a> 296 <strong class='reserved'>void</strong> <a href='../D/3389.html' title='Multiple defined in 2 places.'>arrow</a>::<a href='../R/10420.html' title='Multiple referred from 3 places.'>notify_arrow_changed</a>()
+<a id='L297' name='L297'></a> 297 <em class='brace'>{</em>
+<a id='L298' name='L298'></a> 298         <strong class='reserved'>if</strong>(!<a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>) <strong class='reserved'>return</strong>;
+<a id='L299' name='L299'></a> 299 
+<a id='L300' name='L300'></a> 300         <a href='../S/825.html#L32' title='Defined at 32 in src/arrow.cpp.'>SCREEN</a>-&gt;<a href='../S/682.html#L3152' title='Defined at 3152 in src/display.cpp.'>update_arrow</a>(*<strong class='reserved'>this</strong>);
+<a id='L301' name='L301'></a> 301 <em class='brace'>}</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;][^]<a href='#L27'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L41'>[^]</a><a href='#L296'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

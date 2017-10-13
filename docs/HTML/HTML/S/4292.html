@@ -1,144 +1,221 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>data/ai/micro_ais/cas/ca_messenger_attack.lua</title>
+<title>data/ai/micro_ais/scenarios/messenger_escort.cfg</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5637.html'>data</a>/<a href='../files/5638.html'>ai</a>/<a href='../files/5643.html'>micro_ais</a>/<a href='../files/5644.html'>cas</a>/ca_messenger_attack.lua</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L7'>[^]</a><a href='#L110'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
-<hr />
-<h2 class='header'>DEFINITIONS</h2>
-This source file includes following definitions.
-<ol>
-<li><a href='#L7' title='Defined at 7.'>messenger_find_enemies_in_way</a></li>
-<li><a href='#L38' title='Defined at 38.'>messenger_find_clearing_attack</a></li>
-<li><a href='#L95' title='Defined at 95.'>ca_messenger_attack:evaluation</a></li>
-<li><a href='#L110' title='Defined at 110.'>ca_messenger_attack:execution</a></li>
-</ol>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5666.html'>data</a>/<a href='../files/5667.html'>ai</a>/<a href='../files/5672.html'>micro_ais</a>/<a href='../files/5676.html'>scenarios</a>/messenger_escort.cfg</h2>
+<em class='comment'>/* [&lt;][&gt;][^][v][top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
 <pre>
-<a id='L1' name='L1'></a>   1 local <a href='../Y/1282.html' title='Multiple used in 255 places.'>H</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/17383.html' title='Multiple used in 267 places.'>require</a> "helper"
-<a id='L2' name='L2'></a>   2 local <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/17383.html' title='Multiple used in 267 places.'>require</a> "ai/lua/ai_helper.lua"
-<a id='L3' name='L3'></a>   3 
-<a id='L4' name='L4'></a>   4 local <a href='../Y/14021.html' title='Multiple used in 8 places.'>messenger_next_waypoint</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../Y/17383.html' title='Multiple used in 267 places.'>require</a> "ai/micro_ais/cas/ca_messenger_f_next_waypoint.lua"
-<a id='L5' name='L5'></a>   5 local <a href='../Y/6287.html' title='Multiple used in 44 places.'>best_attack</a>
-<a id='L6' name='L6'></a>   6 
-<a id='L7' name='L7'></a>   7 local function <a href='../S/4292.html#L45' title='Referred from 45 in data/ai/micro_ais/cas/ca_messenger_attack.lua.'>messenger_find_enemies_in_way</a>(<a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>, <a href='../Y/10982.html' title='Multiple used in 26 places.'>goal_x</a>, <a href='../Y/10983.html' title='Multiple used in 23 places.'>goal_y</a>)
-<a id='L8' name='L8'></a>   8     -- Returns the first unit on or next to the path of the messenger
-<a id='L9' name='L9'></a>   9     -- @messenger: proxy table <strong class='reserved'>for</strong> the messenger unit
-<a id='L10' name='L10'></a>  10     -- @goal_x,@goal_y: coordinates of the goal toward which the messenger moves
-<a id='L11' name='L11'></a>  11     -- Returns proxy table <strong class='reserved'>for</strong> the first unit found, or nil <strong class='reserved'>if</strong> none was found
-<a id='L12' name='L12'></a>  12 
-<a id='L13' name='L13'></a>  13     local <a href='../D/11780.html' title='Multiple defined in 6 places.'>path</a>, <a href='../D/4925.html' title='Multiple defined in 12 places.'>cost</a> = <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a>.<a href='../Y/10023.html' title='Multiple used in 24 places.'>find_path_with_shroud</a>(<a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>, <a href='../Y/10982.html' title='Multiple used in 26 places.'>goal_x</a>, <a href='../Y/10983.html' title='Multiple used in 23 places.'>goal_y</a>, <em class='brace'>{</em> <a href='../Y/11740.html' title='Multiple used in 62 places.'>ignore_units</a> = true <em class='brace'>}</em>)
-<a id='L14' name='L14'></a>  14     <strong class='reserved'>if</strong> <a href='../D/4925.html' title='Multiple defined in 12 places.'>cost</a> &gt;= 42424242 then <strong class='reserved'>return</strong> end
-<a id='L15' name='L15'></a>  15 
-<a id='L16' name='L16'></a>  16     -- The second path hex is the first that is important <strong class='reserved'>for</strong> the following analysis
-<a id='L17' name='L17'></a>  17     <strong class='reserved'>if</strong> (not <a href='../D/11780.html' title='Multiple defined in 6 places.'>path</a>[2]) then <strong class='reserved'>return</strong> end
-<a id='L18' name='L18'></a>  18 
-<a id='L19' name='L19'></a>  19     -- Is there an enemy unit on the second path hex?
-<a id='L20' name='L20'></a>  20     -- This would be caught by the adjacent hex check later, but not in the right order
-<a id='L21' name='L21'></a>  21     local <a href='../Y/9294.html' title='Multiple used in 153 places.'>enemy</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/8067.html' title='Multiple defined in 12 places.'>get_unit</a>(<a href='../D/11780.html' title='Multiple defined in 6 places.'>path</a>[2][1], path[2][2])
-<a id='L22' name='L22'></a>  22     <strong class='reserved'>if</strong> <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a>.<a href='../Y/12213.html' title='Multiple used in 10 places.'>is_attackable_enemy</a>(<a href='../Y/9294.html' title='Multiple used in 153 places.'>enemy</a>) then <strong class='reserved'>return</strong> enemy end
-<a id='L23' name='L23'></a>  23 
-<a id='L24' name='L24'></a>  24     -- After that, go through adjacent hexes of all the other path hexes
-<a id='L25' name='L25'></a>  25     <strong class='reserved'>for</strong> <a href='../D/8610.html' title='Multiple defined in 5 places.'>i</a> = 2,#<a href='../D/11780.html' title='Multiple defined in 6 places.'>path</a> <strong class='reserved'>do</strong>
-<a id='L26' name='L26'></a>  26         local <a href='../Y/19264.html' title='Multiple used in 6 places.'>sub_path</a>, <a href='../Y/19258.html' title='Multiple used in 18 places.'>sub_cost</a> = <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a>.<a href='../Y/10023.html' title='Multiple used in 24 places.'>find_path_with_shroud</a>(<a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>, <a href='../D/11780.html' title='Multiple defined in 6 places.'>path</a>[<a href='../D/8610.html' title='Multiple defined in 5 places.'>i</a>][1], path[i][2], <em class='brace'>{</em> <a href='../Y/11740.html' title='Multiple used in 62 places.'>ignore_units</a> = true <em class='brace'>}</em>)
-<a id='L27' name='L27'></a>  27         <strong class='reserved'>if</strong> (<a href='../Y/19258.html' title='Multiple used in 18 places.'>sub_cost</a> &lt;= <a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>.<a href='../Y/14371.html' title='Multiple used in 231 places.'>moves</a>) then
-<a id='L28' name='L28'></a>  28             <strong class='reserved'>for</strong> <a href='../Y/22026.html' title='Multiple used in 99 places.'>xa</a>,<a href='../Y/22141.html' title='Multiple used in 99 places.'>ya</a> in <a href='../Y/1282.html' title='Multiple used in 255 places.'>H</a>.<a href='../Y/5297.html' title='Multiple used in 37 places.'>adjacent_tiles</a>(<a href='../D/11780.html' title='Multiple defined in 6 places.'>path</a>[<a href='../D/8610.html' title='Multiple defined in 5 places.'>i</a>][1], path[i][2]) <strong class='reserved'>do</strong>
-<a id='L29' name='L29'></a>  29                 local <a href='../Y/9294.html' title='Multiple used in 153 places.'>enemy</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/8067.html' title='Multiple defined in 12 places.'>get_unit</a>(<a href='../Y/22026.html' title='Multiple used in 99 places.'>xa</a>, <a href='../Y/22141.html' title='Multiple used in 99 places.'>ya</a>)
-<a id='L30' name='L30'></a>  30                 <strong class='reserved'>if</strong> <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a>.<a href='../Y/12213.html' title='Multiple used in 10 places.'>is_attackable_enemy</a>(<a href='../Y/9294.html' title='Multiple used in 153 places.'>enemy</a>) then <strong class='reserved'>return</strong> enemy end
-<a id='L31' name='L31'></a>  31             end
-<a id='L32' name='L32'></a>  32         <strong class='reserved'>else</strong>  -- If we've reached the end of the path for this turn
-<a id='L33' name='L33'></a>  33             <strong class='reserved'>return</strong>
-<a id='L34' name='L34'></a>  34         end
-<a id='L35' name='L35'></a>  35     end
-<a id='L36' name='L36'></a>  36 end
-<a id='L37' name='L37'></a>  37 
-<a id='L38' name='L38'></a>  38 local function <a href='../S/4292.html#L101' title='Referred from 101 in data/ai/micro_ais/cas/ca_messenger_attack.lua.'>messenger_find_clearing_attack</a>(<a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>, <a href='../Y/10982.html' title='Multiple used in 26 places.'>goal_x</a>, <a href='../Y/10983.html' title='Multiple used in 23 places.'>goal_y</a>, <a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L39' name='L39'></a>  39     -- Check <strong class='reserved'>if</strong> an enemy is in the way of the messenger
-<a id='L40' name='L40'></a>  40     -- If so, find attack that would clear that enemy out of the way
-<a id='L41' name='L41'></a>  41     -- @messenger: proxy table <strong class='reserved'>for</strong> the messenger unit
-<a id='L42' name='L42'></a>  42     -- @goal_x,@goal_y: coordinates of the goal toward which the messenger moves
-<a id='L43' name='L43'></a>  43     -- Returns proxy table containing the attack, or nil <strong class='reserved'>if</strong> none was found
-<a id='L44' name='L44'></a>  44 
-<a id='L45' name='L45'></a>  45     local <a href='../Y/9324.html' title='Multiple used in 4 places.'>enemy_in_way</a> = <a href='../S/4292.html#L7' title='Defined at 7 in data/ai/micro_ais/cas/ca_messenger_attack.lua.'>messenger_find_enemies_in_way</a>(<a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>, <a href='../Y/10982.html' title='Multiple used in 26 places.'>goal_x</a>, <a href='../Y/10983.html' title='Multiple used in 23 places.'>goal_y</a>)
-<a id='L46' name='L46'></a>  46     <strong class='reserved'>if</strong> (not <a href='../Y/9324.html' title='Multiple used in 4 places.'>enemy_in_way</a>) then <strong class='reserved'>return</strong> end
-<a id='L47' name='L47'></a>  47 
-<a id='L48' name='L48'></a>  48     local <a href='../D/6210.html' title='Multiple defined in 4 places.'>filter</a> = <a href='../Y/1282.html' title='Multiple used in 255 places.'>H</a>.<a href='../D/7357.html' title='Multiple defined in 6 places.'>get_child</a>(<a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>, "filter") or <em class='brace'>{</em> <a href='../D/8621.html' title='Multiple defined in 22 places.'>id</a> = cfg.id <em class='brace'>}</em>
-<a id='L49' name='L49'></a>  49     local <a href='../D/15605.html' title='Multiple defined in 8 places.'>units</a> = <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a>.<a href='../Y/10875.html' title='Multiple used in 9 places.'>get_units_with_attacks</a> <em class='brace'>{</em>
-<a id='L50' name='L50'></a>  50         <a href='../D/14400.html' title='Multiple defined in 3 places.'>side</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/5131.html' title='Multiple defined in 4 places.'>current</a>.side,
-<a id='L51' name='L51'></a>  51         <em class='brace'>{</em> "not", <a href='../D/6210.html' title='Multiple defined in 4 places.'>filter</a> <em class='brace'>}</em>,
-<a id='L52' name='L52'></a>  52         <em class='brace'>{</em> "and", <a href='../Y/1282.html' title='Multiple used in 255 places.'>H</a>.<a href='../D/7357.html' title='Multiple defined in 6 places.'>get_child</a>(<a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>, "filter_second") <em class='brace'>}</em>
-<a id='L53' name='L53'></a>  53     <em class='brace'>}</em>
-<a id='L54' name='L54'></a>  54     <strong class='reserved'>if</strong> (not <a href='../D/15605.html' title='Multiple defined in 8 places.'>units</a>[1]) then <strong class='reserved'>return</strong> end
-<a id='L55' name='L55'></a>  55 
-<a id='L56' name='L56'></a>  56     local <a href='../D/3455.html' title='Multiple defined in 4 places.'>attacks</a> = <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a>.<a href='../D/7286.html' title='Multiple defined in 2 places.'>get_attacks</a>(<a href='../D/15605.html' title='Multiple defined in 8 places.'>units</a>, <em class='brace'>{</em> <a href='../Y/18615.html' title='Multiple used in 14 places.'>simulate_combat</a> = true <em class='brace'>}</em>)
-<a id='L57' name='L57'></a>  57 
-<a id='L58' name='L58'></a>  58     local <a href='../S/237.html#L191' title='Defined at 191 in src/ai/default/ca_move_to_targets.cpp.'>max_rating</a> = -9e99
-<a id='L59' name='L59'></a>  59     <strong class='reserved'>for</strong> <a href='../D/2624.html' title='Multiple defined in 3 places.'>_</a>,<a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a> in <a href='../Y/12170.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../D/3455.html' title='Multiple defined in 4 places.'>attacks</a>) <strong class='reserved'>do</strong>
-<a id='L60' name='L60'></a>  60         <strong class='reserved'>if</strong> (<a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a>.<a href='../D/14924.html' title='Multiple defined in 2 places.'>target</a>.<a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a> == <a href='../Y/9324.html' title='Multiple used in 4 places.'>enemy_in_way</a>.x) and (attack.target.<a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a> == enemy_in_way.y) then
+<a id='L1' name='L1'></a>   1 #textdomain wesnoth-ai
+<a id='L2' name='L2'></a>   2 
+<a id='L3' name='L3'></a>   3 [test]
+<a id='L4' name='L4'></a>   4     <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=messenger_escort
+<a id='L5' name='L5'></a>   5     <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Messenger Escort"
+<a id='L6' name='L6'></a>   6     <a href='../D/11409.html' title='Multiple defined in 2 places.'>next_scenario</a>=micro_ai_test
+<a id='L7' name='L7'></a>   7 
+<a id='L8' name='L8'></a>   8     <a href='../D/10794.html' title='Multiple defined in 2 places.'>map_data</a>="{ai/micro_ais/maps/messenger_escort.map}"
+<a id='L9' name='L9'></a>   9 
+<a id='L10' name='L10'></a>  10     <em class='brace'>{</em>DEFAULT_SCHEDULE<em class='brace'>}</em>
+<a id='L11' name='L11'></a>  11     <a href='../S/794.html#L560' title='Defined at 560 in src/preferences/game.cpp.'>turns</a>=-1
+<a id='L12' name='L12'></a>  12     <a href='../Y/21719.html' title='Multiple used in 175 places.'>victory_when_enemies_defeated</a>=no
+<a id='L13' name='L13'></a>  13 
+<a id='L14' name='L14'></a>  14     [side]
+<a id='L15' name='L15'></a>  15         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L16' name='L16'></a>  16         <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=human
+<a id='L17' name='L17'></a>  17         <a href='../Y/19592.html' title='Multiple used in 27 places.'>suppress_end_turn_confirmation</a>=yes
+<a id='L18' name='L18'></a>  18         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Vanak"
+<a id='L19' name='L19'></a>  19         <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Vanak
+<a id='L20' name='L20'></a>  20         <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Orcish Ruler
+<a id='L21' name='L21'></a>  21         <a href='../S/1083.html#L343' title='Defined at 343 in src/team.hpp.'>persistent</a>=no
+<a id='L22' name='L22'></a>  22 
+<a id='L23' name='L23'></a>  23         <a href='../D/15040.html' title='Multiple defined in 4 places.'>team_name</a>=Vanak
+<a id='L24' name='L24'></a>  24         <a href='../D/15920.html' title='Multiple defined in 2 places.'>user_team_name</a>=_"Orcs"
+<a id='L25' name='L25'></a>  25         <a href='../D/12555.html' title='Multiple defined in 5 places.'>recruit</a>=Orcish Grunt,Orcish Archer,Orcish Assassin,Wolf Rider
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27         <a href='../D/8279.html' title='Multiple defined in 3 places.'>gold</a>=100
+<a id='L28' name='L28'></a>  28     [/side]
+<a id='L29' name='L29'></a>  29 
+<a id='L30' name='L30'></a>  30     [side]
+<a id='L31' name='L31'></a>  31         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L32' name='L32'></a>  32         <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=ai
+<a id='L33' name='L33'></a>  33         <a href='../S/1083.html#L335' title='Defined at 335 in src/team.hpp.'>no_leader</a>=yes
+<a id='L34' name='L34'></a>  34         <a href='../S/1083.html#L343' title='Defined at 343 in src/team.hpp.'>persistent</a>=no
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36         <a href='../D/15040.html' title='Multiple defined in 4 places.'>team_name</a>=messenger
+<a id='L37' name='L37'></a>  37         <a href='../D/15920.html' title='Multiple defined in 2 places.'>user_team_name</a>= _ "Messenger"
+<a id='L38' name='L38'></a>  38 
+<a id='L39' name='L39'></a>  39         <a href='../D/8279.html' title='Multiple defined in 3 places.'>gold</a>=0
+<a id='L40' name='L40'></a>  40         <a href='../S/1130.html#L204' title='Defined at 204 in src/game_initialization/connect_engine.hpp.'>income</a>=-2
+<a id='L41' name='L41'></a>  41     [/side]
+<a id='L42' name='L42'></a>  42 
+<a id='L43' name='L43'></a>  43     [side]  # This side is only here because we need one persistent side <strong class='reserved'>for</strong> the game to go on
+<a id='L44' name='L44'></a>  44         <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L45' name='L45'></a>  45         <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=null
+<a id='L46' name='L46'></a>  46         <a href='../S/1083.html#L343' title='Defined at 343 in src/team.hpp.'>persistent</a>=yes
+<a id='L47' name='L47'></a>  47         <a href='../D/13277.html' title='Multiple defined in 4 places.'>save_id</a>=Grnk
+<a id='L48' name='L48'></a>  48         <a href='../D/8586.html' title='Multiple defined in 7 places.'>hidden</a>=yes
+<a id='L49' name='L49'></a>  49     [/side]
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51     # Prestart actions
+<a id='L52' name='L52'></a>  52     [event]
+<a id='L53' name='L53'></a>  53         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=prestart
+<a id='L54' name='L54'></a>  54 
+<a id='L55' name='L55'></a>  55         <em class='brace'>{</em>VARIABLE scenario_name messenger_escort<em class='brace'>}</em>
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57         [micro_ai]
+<a id='L58' name='L58'></a>  58             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L59' name='L59'></a>  59             <a href='../Y/5520.html' title='Multiple used in 74 places.'>ai_type</a>=messenger_escort
+<a id='L60' name='L60'></a>  60             <a href='../D/2765.html' title='Multiple defined in 10 places.'>action</a>=add
 <a id='L61' name='L61'></a>  61 
-<a id='L62' name='L62'></a>  62             -- Rating: expected HP of attacker and defender
-<a id='L63' name='L63'></a>  63             local <a href='../D/12321.html' title='Multiple defined in 3 places.'>rating</a> = <a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a>.<a href='../Y/5840.html' title='Multiple used in 100 places.'>att_stats</a>.<a href='../S/1223.html#L2415' title='Defined at 2415 in src/attack_prediction.cpp.'>average_hp</a> - 2 * attack.<a href='../Y/8366.html' title='Multiple used in 99 places.'>def_stats</a>.average_hp
-<a id='L64' name='L64'></a>  64 
-<a id='L65' name='L65'></a>  65             <strong class='reserved'>if</strong> (<a href='../D/12321.html' title='Multiple defined in 3 places.'>rating</a> &gt; <a href='../S/237.html#L191' title='Defined at 191 in src/ai/default/ca_move_to_targets.cpp.'>max_rating</a>) then
-<a id='L66' name='L66'></a>  66                 <a href='../S/237.html#L191' title='Defined at 191 in src/ai/default/ca_move_to_targets.cpp.'>max_rating</a>, <a href='../Y/6287.html' title='Multiple used in 44 places.'>best_attack</a> = <a href='../D/12321.html' title='Multiple defined in 3 places.'>rating</a>, <a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a>
-<a id='L67' name='L67'></a>  67             end
-<a id='L68' name='L68'></a>  68         end
-<a id='L69' name='L69'></a>  69     end
-<a id='L70' name='L70'></a>  70 
-<a id='L71' name='L71'></a>  71     <strong class='reserved'>if</strong> <a href='../Y/6287.html' title='Multiple used in 44 places.'>best_attack</a> then <strong class='reserved'>return</strong> best_attack end
-<a id='L72' name='L72'></a>  72 
-<a id='L73' name='L73'></a>  73     -- If we got here, that means there's an enemy in the way, but none of the units can reach it
-<a id='L74' name='L74'></a>  74     --&gt; try to fight our way to that enemy
-<a id='L75' name='L75'></a>  75     <strong class='reserved'>for</strong> <a href='../D/2624.html' title='Multiple defined in 3 places.'>_</a>,<a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a> in <a href='../Y/12170.html' title='Multiple used in 429 places.'>ipairs</a>(<a href='../D/3455.html' title='Multiple defined in 4 places.'>attacks</a>) <strong class='reserved'>do</strong>
-<a id='L76' name='L76'></a>  76         -- Rating: expected HP of attacker and defender
-<a id='L77' name='L77'></a>  77         local <a href='../D/12321.html' title='Multiple defined in 3 places.'>rating</a> = <a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a>.<a href='../Y/5840.html' title='Multiple used in 100 places.'>att_stats</a>.<a href='../S/1223.html#L2415' title='Defined at 2415 in src/attack_prediction.cpp.'>average_hp</a> - 2 * attack.<a href='../Y/8366.html' title='Multiple used in 99 places.'>def_stats</a>.average_hp
-<a id='L78' name='L78'></a>  78 
-<a id='L79' name='L79'></a>  79         -- Give a huge bonus <strong class='reserved'>for</strong> closeness to enemy_in_way
-<a id='L80' name='L80'></a>  80         local <a href='../Y/20192.html' title='Multiple used in 2 places.'>tmp_defender</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/8067.html' title='Multiple defined in 12 places.'>get_unit</a>(<a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a>.<a href='../D/14924.html' title='Multiple defined in 2 places.'>target</a>.<a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a>, attack.target.<a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a>)
-<a id='L81' name='L81'></a>  81         local <a href='../Y/8802.html' title='Multiple used in 92 places.'>dist</a> = <a href='../Y/21688.html' title='Multiple used in 2574 places.'>wesnoth</a>.<a href='../D/10716.html' title='Multiple defined in 18 places.'>map</a>.<a href='../S/1092.html#L382' title='Defined at 382 in src/map/location.hpp.'>distance_between</a>(<a href='../Y/9324.html' title='Multiple used in 4 places.'>enemy_in_way</a>.<a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a>, enemy_in_way.<a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a>, <a href='../Y/20192.html' title='Multiple used in 2 places.'>tmp_defender</a>.x, tmp_defender.y)
-<a id='L82' name='L82'></a>  82 
-<a id='L83' name='L83'></a>  83         <a href='../D/12321.html' title='Multiple defined in 3 places.'>rating</a> = rating + 100. / <a href='../Y/8802.html' title='Multiple used in 92 places.'>dist</a>
-<a id='L84' name='L84'></a>  84 
-<a id='L85' name='L85'></a>  85         <strong class='reserved'>if</strong> (<a href='../D/12321.html' title='Multiple defined in 3 places.'>rating</a> &gt; <a href='../S/237.html#L191' title='Defined at 191 in src/ai/default/ca_move_to_targets.cpp.'>max_rating</a>) then
-<a id='L86' name='L86'></a>  86             <a href='../S/237.html#L191' title='Defined at 191 in src/ai/default/ca_move_to_targets.cpp.'>max_rating</a>, <a href='../Y/6287.html' title='Multiple used in 44 places.'>best_attack</a> = <a href='../D/12321.html' title='Multiple defined in 3 places.'>rating</a>, <a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a>
-<a id='L87' name='L87'></a>  87         end
-<a id='L88' name='L88'></a>  88     end
-<a id='L89' name='L89'></a>  89 
-<a id='L90' name='L90'></a>  90     <strong class='reserved'>if</strong> <a href='../Y/6287.html' title='Multiple used in 44 places.'>best_attack</a> then <strong class='reserved'>return</strong> best_attack end
-<a id='L91' name='L91'></a>  91 end
-<a id='L92' name='L92'></a>  92 
-<a id='L93' name='L93'></a>  93 local <a href='../Y/6842.html' title='Multiple used in 4 places.'>ca_messenger_attack</a> = <em class='brace'>{</em><em class='brace'>}</em>
-<a id='L94' name='L94'></a>  94 
-<a id='L95' name='L95'></a>  95 function <a href='../Y/6842.html' title='Multiple used in 4 places.'>ca_messenger_attack</a>:<a href='../Y/9527.html' title='Multiple used in 71 places.'>evaluation</a>(<a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L96' name='L96'></a>  96     -- Attack units in the path of the messengers
-<a id='L97' name='L97'></a>  97 
-<a id='L98' name='L98'></a>  98     local <a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>, <a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a> = <a href='../Y/14021.html' title='Multiple used in 8 places.'>messenger_next_waypoint</a>(<a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L99' name='L99'></a>  99     <strong class='reserved'>if</strong> (not <a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>) then <strong class='reserved'>return</strong> 0 end
-<a id='L100' name='L100'></a> 100 
-<a id='L101' name='L101'></a> 101     local <a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a> = <a href='../S/4292.html#L38' title='Defined at 38 in data/ai/micro_ais/cas/ca_messenger_attack.lua.'>messenger_find_clearing_attack</a>(<a href='../Y/14018.html' title='Multiple used in 51 places.'>messenger</a>, <a href='../D/16536.html' title='Multiple defined in 2 places.'>x</a>, <a href='../D/16551.html' title='Multiple defined in 8 places.'>y</a>, <a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>)
+<a id='L62' name='L62'></a>  62             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=messenger
+<a id='L63' name='L63'></a>  63             <a href='../Y/21936.html' title='Multiple used in 20 places.'>waypoint_x</a>=31,24,27,28
+<a id='L64' name='L64'></a>  64             <a href='../Y/21937.html' title='Multiple used in 17 places.'>waypoint_y</a>=20,14,7,1
+<a id='L65' name='L65'></a>  65         [/micro_ai]
+<a id='L66' name='L66'></a>  66 
+<a id='L67' name='L67'></a>  67         # Put the messenger side units out there
+<a id='L68' name='L68'></a>  68         [unit]
+<a id='L69' name='L69'></a>  69             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Dragoon
+<a id='L70' name='L70'></a>  70             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=messenger
+<a id='L71' name='L71'></a>  71             <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>= _ "Messenger"
+<a id='L72' name='L72'></a>  72             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L73' name='L73'></a>  73             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=30,27
+<a id='L74' name='L74'></a>  74             <a href='../Y/17104.html' title='Multiple used in 377 places.'>random_traits</a>=no
+<a id='L75' name='L75'></a>  75             <a href='../S/997.html#L1384' title='Defined at 1384 in src/units/unit.hpp.'>overlays</a>=misc/hero-icon.png
+<a id='L76' name='L76'></a>  76         [/unit]
+<a id='L77' name='L77'></a>  77         <em class='brace'>{</em>NOTRAIT_UNIT 2 Dragoon 30 26<em class='brace'>}</em>
+<a id='L78' name='L78'></a>  78         [unit]
+<a id='L79' name='L79'></a>  79             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Cavalryman
+<a id='L80' name='L80'></a>  80             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L81' name='L81'></a>  81             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=29,27
+<a id='L82' name='L82'></a>  82             [modifications]
+<a id='L83' name='L83'></a>  83                 <em class='brace'>{</em>TRAIT_QUICK<em class='brace'>}</em>
+<a id='L84' name='L84'></a>  84             [/modifications]
+<a id='L85' name='L85'></a>  85         [/unit]
+<a id='L86' name='L86'></a>  86         [unit]
+<a id='L87' name='L87'></a>  87             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Cavalryman
+<a id='L88' name='L88'></a>  88             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L89' name='L89'></a>  89             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=31,27
+<a id='L90' name='L90'></a>  90             [modifications]
+<a id='L91' name='L91'></a>  91                 <em class='brace'>{</em>TRAIT_QUICK<em class='brace'>}</em>
+<a id='L92' name='L92'></a>  92             [/modifications]
+<a id='L93' name='L93'></a>  93         [/unit]
+<a id='L94' name='L94'></a>  94         [unit]
+<a id='L95' name='L95'></a>  95             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Cavalryman
+<a id='L96' name='L96'></a>  96             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=2
+<a id='L97' name='L97'></a>  97             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=29,28
+<a id='L98' name='L98'></a>  98             [modifications]
+<a id='L99' name='L99'></a>  99                 <em class='brace'>{</em>TRAIT_QUICK<em class='brace'>}</em>
+<a id='L100' name='L100'></a> 100             [/modifications]
+<a id='L101' name='L101'></a> 101         [/unit]
 <a id='L102' name='L102'></a> 102 
-<a id='L103' name='L103'></a> 103     <strong class='reserved'>if</strong> <a href='../D/3423.html' title='Multiple defined in 4 places.'>attack</a> then
-<a id='L104' name='L104'></a> 104         <strong class='reserved'>return</strong> <a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../Y/6854.html' title='Multiple used in 78 places.'>ca_score</a>
-<a id='L105' name='L105'></a> 105     end
-<a id='L106' name='L106'></a> 106 
-<a id='L107' name='L107'></a> 107     <strong class='reserved'>return</strong> 0
-<a id='L108' name='L108'></a> 108 end
-<a id='L109' name='L109'></a> 109 
-<a id='L110' name='L110'></a> 110 function <a href='../Y/6842.html' title='Multiple used in 4 places.'>ca_messenger_attack</a>:<a href='../Y/9603.html' title='Multiple used in 65 places.'>execution</a>(<a href='../D/4165.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L111' name='L111'></a> 111     <a href='../Y/146.html' title='Multiple used in 421 places.'>AH</a>.<a href='../Y/17604.html' title='Multiple used in 20 places.'>robust_move_and_attack</a>(<a href='../D/3086.html' title='Multiple defined in 87 places.'>ai</a>, <a href='../Y/6287.html' title='Multiple used in 44 places.'>best_attack</a>.<a href='../D/14619.html' title='Multiple defined in 3 places.'>src</a>, best_attack.<a href='../D/5716.html' title='Multiple defined in 3 places.'>dst</a>, best_attack.<a href='../D/14924.html' title='Multiple defined in 2 places.'>target</a>)
-<a id='L112' name='L112'></a> 112     <a href='../Y/6287.html' title='Multiple used in 44 places.'>best_attack</a> = nil
-<a id='L113' name='L113'></a> 113 end
-<a id='L114' name='L114'></a> 114 
-<a id='L115' name='L115'></a> 115 <strong class='reserved'>return</strong> <a href='../Y/6842.html' title='Multiple used in 4 places.'>ca_messenger_attack</a>
+<a id='L103' name='L103'></a> 103         # And the orcs
+<a id='L104' name='L104'></a> 104         <em class='brace'>{</em>NOTRAIT_UNIT 1 (Orcish Grunt) 14 18<em class='brace'>}</em>
+<a id='L105' name='L105'></a> 105         <em class='brace'>{</em>NOTRAIT_UNIT 1 (Orcish Archer) 15 19<em class='brace'>}</em>
+<a id='L106' name='L106'></a> 106         <em class='brace'>{</em>NOTRAIT_UNIT 1 (Orcish Grunt) 14 17<em class='brace'>}</em>
+<a id='L107' name='L107'></a> 107 
+<a id='L108' name='L108'></a> 108         <em class='brace'>{</em>NOTRAIT_UNIT 1 (Orcish Archer) 12 19<em class='brace'>}</em>
+<a id='L109' name='L109'></a> 109         <em class='brace'>{</em>NOTRAIT_UNIT 1 (Orcish Archer) 12 20<em class='brace'>}</em>
+<a id='L110' name='L110'></a> 110         [unit]
+<a id='L111' name='L111'></a> 111             <a href='../D/15500.html' title='Multiple defined in 27 places.'>type</a>=Wolf Rider
+<a id='L112' name='L112'></a> 112             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L113' name='L113'></a> 113             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=10,20
+<a id='L114' name='L114'></a> 114             [modifications]
+<a id='L115' name='L115'></a> 115                 <em class='brace'>{</em>TRAIT_QUICK<em class='brace'>}</em>
+<a id='L116' name='L116'></a> 116             [/modifications]
+<a id='L117' name='L117'></a> 117         [/unit]
+<a id='L118' name='L118'></a> 118 
+<a id='L119' name='L119'></a> 119         # waypoints <strong class='reserved'>for</strong> AI
+<a id='L120' name='L120'></a> 120         <em class='brace'>{</em>PLACE_IMAGE "scenery/signpost.png" 31 20<em class='brace'>}</em>
+<a id='L121' name='L121'></a> 121         <em class='brace'>{</em>SET_LABEL 31 20 _"Messanger Waypoint 1"<em class='brace'>}</em>
+<a id='L122' name='L122'></a> 122         <em class='brace'>{</em>PLACE_IMAGE "scenery/signpost.png" 24 14<em class='brace'>}</em>
+<a id='L123' name='L123'></a> 123         <em class='brace'>{</em>SET_LABEL 24 14 _"Messenger Waypoint 2"<em class='brace'>}</em>
+<a id='L124' name='L124'></a> 124         <em class='brace'>{</em>PLACE_IMAGE "scenery/signpost.png" 27 7<em class='brace'>}</em>
+<a id='L125' name='L125'></a> 125         <em class='brace'>{</em>SET_LABEL 27 7 _"Messenger Waypoint 3"<em class='brace'>}</em>
+<a id='L126' name='L126'></a> 126         # Goal signpost <strong class='reserved'>for</strong> AI
+<a id='L127' name='L127'></a> 127         <em class='brace'>{</em>PLACE_IMAGE "scenery/signpost.png" 28 1<em class='brace'>}</em>
+<a id='L128' name='L128'></a> 128         <em class='brace'>{</em>SET_LABEL 28 1 _"AI moves Messenger here"<em class='brace'>}</em>
+<a id='L129' name='L129'></a> 129     [/event]
+<a id='L130' name='L130'></a> 130 
+<a id='L131' name='L131'></a> 131     [event]
+<a id='L132' name='L132'></a> 132         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=start
+<a id='L133' name='L133'></a> 133 
+<a id='L134' name='L134'></a> 134         <em class='brace'>{</em>STORE_UNIT_VAR <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=Vanak profile profile<em class='brace'>}</em>
+<a id='L135' name='L135'></a> 135         <em class='brace'>{</em>MESSAGE Vanak "$profile~FL()~RIGHT()" "" _"They there!  We them get!"<em class='brace'>}</em>
+<a id='L136' name='L136'></a> 136         <em class='brace'>{</em>CLEAR_VARIABLE profile<em class='brace'>}</em>
+<a id='L137' name='L137'></a> 137         <em class='brace'>{</em>MESSAGE messenger "" "" _"Men, I need to get to that signpost in the north, to get the message to our leader. Let's head up there as quickly as we can."<em class='brace'>}</em>
+<a id='L138' name='L138'></a> 138         # wmllint: unbalanced-on
+<a id='L139' name='L139'></a> 139         <em class='brace'>{</em>MESSAGE narrator "wesnoth-icon.png" _"Notes" _"The Messenger Escort AI will try to move the dragoon messenger to the signpost in the north, while protecting him as well as possible with the other units. Vanak's orcs need to stop him.
+<a id='L140' name='L140'></a> 140 
+<a id='L141' name='L141'></a> 141 Note that the messenger route is set up through a series of waypoints here simply to demonstrate how to use waypoints. On this map, using only a single waypoint at the end of the route would work just as well (or probably even better).
+<a id='L142' name='L142'></a> 142 
+<a id='L143' name='L143'></a> 143 Also note that the messenger does not have to get exactly to each signpost (except <strong class='reserved'>for</strong> the last one), getting close is good enough.
+<a id='L144' name='L144'></a> 144 
+<a id='L145' name='L145'></a> 145 The Messenger Escort AI is coded as a Micro AI. A Micro AI can be added and adapted to the need of a scenario easily using only WML and the [micro_ai] tag. Check out the &lt;span <a href='../D/4618.html' title='Multiple defined in 5 places.'>color</a>='#00A000'&gt;Micro AI wiki page&lt;/span&gt; at http:<em class='comment'>//wiki.wesnoth.org/Micro_AIs for more information."}</em>
+<a id='L146' name='L146'></a> 146         # wmllint: unbalanced-off
+<a id='L147' name='L147'></a> 147 
+<a id='L148' name='L148'></a> 148         [objectives]
+<a id='L149' name='L149'></a> 149             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=1
+<a id='L150' name='L150'></a> 150             [objective]
+<a id='L151' name='L151'></a> 151                 <a href='../D/5414.html' title='Multiple defined in 14 places.'>description</a>= _ "Defeat the messenger"
+<a id='L152' name='L152'></a> 152                 <a href='../Y/7833.html' title='Multiple used in 1335 places.'>condition</a>=win
+<a id='L153' name='L153'></a> 153             [/objective]
+<a id='L154' name='L154'></a> 154             [objective]
+<a id='L155' name='L155'></a> 155                 <a href='../D/5414.html' title='Multiple defined in 14 places.'>description</a>= _ "Messenger gets to the signpost"
+<a id='L156' name='L156'></a> 156                 <a href='../Y/7833.html' title='Multiple used in 1335 places.'>condition</a>=lose
+<a id='L157' name='L157'></a> 157             [/objective]
+<a id='L158' name='L158'></a> 158             [objective]
+<a id='L159' name='L159'></a> 159                 <a href='../D/5414.html' title='Multiple defined in 14 places.'>description</a>= _ "Death of Vanak"
+<a id='L160' name='L160'></a> 160                 <a href='../Y/7833.html' title='Multiple used in 1335 places.'>condition</a>=lose
+<a id='L161' name='L161'></a> 161             [/objective]
+<a id='L162' name='L162'></a> 162         [/objectives]
+<a id='L163' name='L163'></a> 163     [/event]
+<a id='L164' name='L164'></a> 164 
+<a id='L165' name='L165'></a> 165     # When Messenger makes it to the signpost: defeat
+<a id='L166' name='L166'></a> 166     [event]
+<a id='L167' name='L167'></a> 167         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=moveto
+<a id='L168' name='L168'></a> 168         [filter]
+<a id='L169' name='L169'></a> 169             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=messenger
+<a id='L170' name='L170'></a> 170             <a href='../D/16644.html' title='Multiple defined in 2 places.'>x</a>,<a href='../D/16659.html' title='Multiple defined in 8 places.'>y</a>=28,1
+<a id='L171' name='L171'></a> 171         [/filter]
+<a id='L172' name='L172'></a> 172 
+<a id='L173' name='L173'></a> 173         <em class='brace'>{</em>MESSAGE messenger "" "" _"I made it!  Now our people will be safe."<em class='brace'>}</em>
+<a id='L174' name='L174'></a> 174         [endlevel]
+<a id='L175' name='L175'></a> 175             <a href='../D/12976.html' title='Multiple defined in 10 places.'>result</a>=defeat
+<a id='L176' name='L176'></a> 176         [/endlevel]
+<a id='L177' name='L177'></a> 177     [/event]
+<a id='L178' name='L178'></a> 178 
+<a id='L179' name='L179'></a> 179     # When Messenger dies: victory
+<a id='L180' name='L180'></a> 180     [event]
+<a id='L181' name='L181'></a> 181         <a href='../D/11323.html' title='Multiple defined in 24 places.'>name</a>=last breath
+<a id='L182' name='L182'></a> 182         [filter]
+<a id='L183' name='L183'></a> 183             <a href='../D/8683.html' title='Multiple defined in 22 places.'>id</a>=messenger
+<a id='L184' name='L184'></a> 184         [/filter]
+<a id='L185' name='L185'></a> 185         <em class='brace'>{</em>MESSAGE messenger "" "" _"Nooo!  All is lost. We will never stop the orcs now!"<em class='brace'>}</em>
+<a id='L186' name='L186'></a> 186 
+<a id='L187' name='L187'></a> 187         # So that game goes on to next scenario
+<a id='L188' name='L188'></a> 188         [modify_side]
+<a id='L189' name='L189'></a> 189             <a href='../D/14488.html' title='Multiple defined in 3 places.'>side</a>=3
+<a id='L190' name='L190'></a> 190             <a href='../D/4912.html' title='Multiple defined in 7 places.'>controller</a>=human
+<a id='L191' name='L191'></a> 191         [/modify_side]
+<a id='L192' name='L192'></a> 192 
+<a id='L193' name='L193'></a> 193         [endlevel]
+<a id='L194' name='L194'></a> 194             <a href='../D/12976.html' title='Multiple defined in 10 places.'>result</a>=victory
+<a id='L195' name='L195'></a> 195             <a href='../Y/6598.html' title='Multiple used in 668 places.'>bonus</a>=no
+<a id='L196' name='L196'></a> 196             <a href='../S/1083.html#L349' title='Defined at 349 in src/team.hpp.'>carryover_percentage</a>=0
+<a id='L197' name='L197'></a> 197             <a href='../Y/7145.html' title='Multiple used in 128 places.'>carryover_report</a>=no
+<a id='L198' name='L198'></a> 198             <a href='../Y/13274.html' title='Multiple used in 111 places.'>linger_mode</a>=no
+<a id='L199' name='L199'></a> 199         [/endlevel]
+<a id='L200' name='L200'></a> 200     [/event]
+<a id='L201' name='L201'></a> 201 [/test]
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L7'>[^]</a><a href='#L110'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;][^][v]<a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

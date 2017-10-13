@@ -1,28 +1,29 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/gui/core/widget_definition.hpp</title>
+<title>src/gui/core/notifier.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5853.html'>gui</a>/<a href='../files/5856.html'>core</a>/widget_definition.hpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L86'>[^]</a><a href='#L98'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5851.html'>src</a>/<a href='../files/5878.html'>gui</a>/<a href='../files/5881.html'>core</a>/notifier.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L60'>[^]</a><a href='#L93'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 <hr />
-<h2 class='header'><a href='../J/1562.html' title='Multiple included from 34 places.'>INCLUDED FROM</a></h2>
+<h2 class='header'><a href='574.html#L17' title='Included from 17 in src/gui/widgets/scrollbar.hpp.'>INCLUDED FROM</a></h2>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L86' title='Defined at 86.'>cast</a></li>
-<li><a href='#L98' title='Defined at 98.'>load_resolutions</a></li>
+<li><a href='#L60' title='Defined at 60.'>connect_notifiee</a></li>
+<li><a href='#L76' title='Defined at 76.'>disconnect_notifiee</a></li>
+<li><a href='#L93' title='Defined at 93.'>notifiees</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2007 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2010 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
 <a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
 <a id='L4' name='L4'></a>   4 <em class='comment'></em>
 <a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
@@ -37,107 +38,96 @@ This source file includes following definitions.
 <a id='L14' name='L14'></a>  14 
 <a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
 <a id='L16' name='L16'></a>  16 
-<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='../I/1754.html'>config.hpp</a>"
-<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='1152.html'>font/font_options.hpp</a>"
-<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1142.html'>font/text.hpp</a>"
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='524.html'>gui/core/canvas.hpp</a>"
-<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='505.html'>gui/core/linked_group_definition.hpp</a>"
-<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> &lt;vector&gt;
-<a id='L23' name='L23'></a>  23 
-<a id='L24' name='L24'></a>  24 <strong class='reserved'>namespace</strong> <a href='../R/7462.html' title='Multiple referred from 719 places.'>gui2</a>
-<a id='L25' name='L25'></a>  25 <em class='brace'>{</em>
-<a id='L26' name='L26'></a>  26 
-<a id='L27' name='L27'></a>  27 <em class='comment'>/**</em>
-<a id='L28' name='L28'></a>  28 <em class='comment'> * Contains the state info for a resolution.</em>
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='534.html'>gui/core/notifiee.hpp</a>"
+<a id='L18' name='L18'></a>  18 
+<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> &lt;cassert&gt;
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> &lt;map&gt;
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <strong class='reserved'>namespace</strong> <a href='../R/7472.html' title='Multiple referred from 721 places.'>gui2</a>
+<a id='L23' name='L23'></a>  23 <em class='brace'>{</em>
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='comment'>/**</em>
+<a id='L26' name='L26'></a>  26 <em class='comment'> * Helper class to implement callbacks with lifetime management.</em>
+<a id='L27' name='L27'></a>  27 <em class='comment'> *</em>
+<a id='L28' name='L28'></a>  28 <em class='comment'> * This part manages the connecting and disconnecting of the callbacks.</em>
 <a id='L29' name='L29'></a>  29 <em class='comment'> *</em>
-<a id='L30' name='L30'></a>  30 <em class='comment'> * At the moment all states are the same so there is no need to use</em>
-<a id='L31' name='L31'></a>  31 <em class='comment'> * inheritance. If that is needed at some point the containers should contain</em>
-<a id='L32' name='L32'></a>  32 <em class='comment'> * pointers</em>
-<a id='L33' name='L33'></a>  33 <em class='comment'> */</em>
-<a id='L34' name='L34'></a>  34 <strong class='reserved'>struct</strong> <a href='../R/13559.html' title='Multiple referred from 3 places.'>state_definition</a>
-<a id='L35' name='L35'></a>  35 <em class='brace'>{</em>
-<a id='L36' name='L36'></a>  36         <strong class='reserved'>explicit</strong> <a href='../D/14754.html' title='Multiple defined in 2 places.'>state_definition</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L30' name='L30'></a>  30 <em class='comment'> * Subclasses should implement a way to call all callback.</em>
+<a id='L31' name='L31'></a>  31 <em class='comment'> */</em>
+<a id='L32' name='L32'></a>  32 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>class</strong> <a href='../Y/1162.html' title='Multiple used in 4 places.'>FUNCTOR</a>&gt;
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>class</strong> <a href='../R/10418.html' title='Multiple referred from 3 places.'>notifier</a>
+<a id='L34' name='L34'></a>  34 <em class='brace'>{</em>
+<a id='L35' name='L35'></a>  35 <strong class='reserved'>public</strong>:
+<a id='L36' name='L36'></a>  36         <strong class='reserved'>typedef</strong> <a href='../Y/1162.html' title='Multiple used in 4 places.'>FUNCTOR</a> <a href='../R/5882.html' title='Multiple referred from 7 places.'>functor_t</a>;
 <a id='L37' name='L37'></a>  37 
-<a id='L38' name='L38'></a>  38         <a href='../D/4132.html' title='Multiple defined in 2 places.'>canvas</a> <a href='../Y/7102.html' title='Multiple used in 20 places.'>canvas_</a>;
-<a id='L39' name='L39'></a>  39 <em class='brace'>}</em>;
-<a id='L40' name='L40'></a>  40 
+<a id='L38' name='L38'></a>  38         notifier() : <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>()
+<a id='L39' name='L39'></a>  39         <em class='brace'>{</em>
+<a id='L40' name='L40'></a>  40         <em class='brace'>}</em>
 <a id='L41' name='L41'></a>  41 
-<a id='L42' name='L42'></a>  42 <em class='comment'>/** Base class of a resolution, contains the common keys for a resolution. */</em>
-<a id='L43' name='L43'></a>  43 <strong class='reserved'>struct</strong> <a href='../R/11804.html' title='Multiple referred from 61 places.'>resolution_definition</a>
-<a id='L44' name='L44'></a>  44 <em class='brace'>{</em>
-<a id='L45' name='L45'></a>  45         <strong class='reserved'>explicit</strong> <a href='../S/522.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>);
-<a id='L46' name='L46'></a>  46 
-<a id='L47' name='L47'></a>  47         <strong class='reserved'>unsigned</strong> <a href='../Y/22041.html' title='Multiple used in 36 places.'>window_width</a>;
-<a id='L48' name='L48'></a>  48         <strong class='reserved'>unsigned</strong> <a href='../Y/22036.html' title='Multiple used in 35 places.'>window_height</a>;
-<a id='L49' name='L49'></a>  49 
-<a id='L50' name='L50'></a>  50         <strong class='reserved'>unsigned</strong> <a href='../Y/14273.html' title='Multiple used in 46 places.'>min_width</a>;
-<a id='L51' name='L51'></a>  51         <strong class='reserved'>unsigned</strong> <a href='../Y/14250.html' title='Multiple used in 53 places.'>min_height</a>;
+<a id='L42' name='L42'></a>  42         ~notifier()
+<a id='L43' name='L43'></a>  43         <em class='brace'>{</em>
+<a id='L44' name='L44'></a>  44                 <strong class='reserved'>for</strong> (<strong class='reserved'>auto</strong> &amp; <a href='../D/9541.html' title='Multiple defined in 7 places.'>item</a> : <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>)
+<a id='L45' name='L45'></a>  45                 <em class='brace'>{</em>
+<a id='L46' name='L46'></a>  46                         <a href='../Y/5905.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../D/9541.html' title='Multiple defined in 7 places.'>item</a>.<a href='../Y/10214.html' title='Multiple used in 920 places.'>first</a>);
+<a id='L47' name='L47'></a>  47                         <a href='../Y/5905.html' title='Multiple used in 1200 places.'>assert</a>((*<a href='../D/9541.html' title='Multiple defined in 7 places.'>item</a>.<a href='../Y/10214.html' title='Multiple used in 920 places.'>first</a>).<a href='../Y/15357.html' title='Multiple used in 10 places.'>notifier_</a> == <strong class='reserved'>this</strong>);
+<a id='L48' name='L48'></a>  48 
+<a id='L49' name='L49'></a>  49                         (*<a href='../D/9541.html' title='Multiple defined in 7 places.'>item</a>.<a href='../Y/10214.html' title='Multiple used in 920 places.'>first</a>).<a href='../Y/15357.html' title='Multiple used in 10 places.'>notifier_</a> = <a href='../Y/15405.html' title='Multiple used in 2009 places.'>nullptr</a>;
+<a id='L50' name='L50'></a>  50                 <em class='brace'>}</em>
+<a id='L51' name='L51'></a>  51         <em class='brace'>}</em>
 <a id='L52' name='L52'></a>  52 
-<a id='L53' name='L53'></a>  53         <strong class='reserved'>unsigned</strong> <a href='../Y/8564.html' title='Multiple used in 49 places.'>default_width</a>;
-<a id='L54' name='L54'></a>  54         <strong class='reserved'>unsigned</strong> <a href='../Y/8522.html' title='Multiple used in 49 places.'>default_height</a>;
-<a id='L55' name='L55'></a>  55 
-<a id='L56' name='L56'></a>  56         <strong class='reserved'>unsigned</strong> <a href='../Y/14055.html' title='Multiple used in 70 places.'>max_width</a>;
-<a id='L57' name='L57'></a>  57         <strong class='reserved'>unsigned</strong> <a href='../Y/13982.html' title='Multiple used in 75 places.'>max_height</a>;
-<a id='L58' name='L58'></a>  58 
-<a id='L59' name='L59'></a>  59         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../S/505.html#L24' title='Defined at 24 in src/gui/core/linked_group_definition.hpp.'>linked_group_definition</a>&gt; <a href='../Y/13259.html' title='Multiple used in 8 places.'>linked_groups</a>;
-<a id='L60' name='L60'></a>  60 
-<a id='L61' name='L61'></a>  61         <strong class='reserved'>unsigned</strong> <a href='../Y/20118.html' title='Multiple used in 18 places.'>text_extra_width</a>;
-<a id='L62' name='L62'></a>  62         <strong class='reserved'>unsigned</strong> <a href='../Y/20117.html' title='Multiple used in 10 places.'>text_extra_height</a>;
-<a id='L63' name='L63'></a>  63         <strong class='reserved'>unsigned</strong> <a href='../Y/20122.html' title='Multiple used in 30 places.'>text_font_size</a>;
-<a id='L64' name='L64'></a>  64         <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../S/1152.html#L25' title='Defined at 25 in src/font/font_options.hpp.'>family_class</a> <a href='../Y/20121.html' title='Multiple used in 6 places.'>text_font_family</a>;
-<a id='L65' name='L65'></a>  65         <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../S/1142.html#L78' title='Defined at 78 in src/font/text.hpp.'>pango_text</a>::<a href='../S/1142.html#L141' title='Defined at 141 in src/font/text.hpp.'>FONT_STYLE</a> <a href='../Y/20123.html' title='Multiple used in 15 places.'>text_font_style</a>;
-<a id='L66' name='L66'></a>  66 
-<a id='L67' name='L67'></a>  67         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../D/14754.html' title='Multiple defined in 2 places.'>state_definition</a>&gt; <a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a>;
-<a id='L68' name='L68'></a>  68 <em class='brace'>}</em>;
-<a id='L69' name='L69'></a>  69 
-<a id='L70' name='L70'></a>  70 <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18613.html' title='Multiple used in 436 places.'>shared_ptr</a>&lt;<a href='../S/522.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>&gt;
-<a id='L71' name='L71'></a>  71 <a href='../R/11806.html' title='Multiple referred from 7 places.'>resolution_definition_ptr</a>;
-<a id='L72' name='L72'></a>  72 
-<a id='L73' name='L73'></a>  73 <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18613.html' title='Multiple used in 436 places.'>shared_ptr</a>&lt;<strong class='reserved'>const</strong> <a href='../S/522.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>&gt;
-<a id='L74' name='L74'></a>  74 <a href='../R/11805.html' title='Multiple referred from 2 places.'>resolution_definition_const_ptr</a>;
-<a id='L75' name='L75'></a>  75 
-<a id='L76' name='L76'></a>  76 <em class='comment'>/**</em>
-<a id='L77' name='L77'></a>  77 <em class='comment'> * Casts a resolution_definition_const_ptr to another type.</em>
-<a id='L78' name='L78'></a>  78 <em class='comment'> *</em>
-<a id='L79' name='L79'></a>  79 <em class='comment'> * @tparam T                      The type to cast to, the non const version.</em>
-<a id='L80' name='L80'></a>  80 <em class='comment'> *</em>
-<a id='L81' name='L81'></a>  81 <em class='comment'> * @param ptr                     The pointer to cast.</em>
-<a id='L82' name='L82'></a>  82 <em class='comment'> *</em>
-<a id='L83' name='L83'></a>  83 <em class='comment'> * @returns                       A reference to type casted to.</em>
-<a id='L84' name='L84'></a>  84 <em class='comment'> */</em>
-<a id='L85' name='L85'></a>  85 <strong class='reserved'>template</strong> &lt;<strong class='reserved'>class</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
-<a id='L86' name='L86'></a>  86 <strong class='reserved'>const</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&amp; <a href='../R/3626.html' title='Multiple referred from 103 places.'>cast</a>(<a href='../S/522.html#L74' title='Defined at 74 in src/gui/core/widget_definition.hpp.'>resolution_definition_const_ptr</a> <a href='../D/12243.html' title='Multiple defined in 3 places.'>ptr</a>)
-<a id='L87' name='L87'></a>  87 <em class='brace'>{</em>
-<a id='L88' name='L88'></a>  88         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18613.html' title='Multiple used in 436 places.'>shared_ptr</a>&lt;<strong class='reserved'>const</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt; <a href='../Y/7809.html' title='Multiple used in 117 places.'>conf</a> = <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13805.html' title='Multiple used in 201 places.'>make_shared</a>&lt;<strong class='reserved'>const</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;(<a href='../D/12243.html' title='Multiple defined in 3 places.'>ptr</a>);
-<a id='L89' name='L89'></a>  89         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../Y/7809.html' title='Multiple used in 117 places.'>conf</a>);
-<a id='L90' name='L90'></a>  90         <strong class='reserved'>return</strong> *<a href='../Y/7809.html' title='Multiple used in 117 places.'>conf</a>;
-<a id='L91' name='L91'></a>  91 <em class='brace'>}</em>
+<a id='L53' name='L53'></a>  53         <em class='comment'>/**</em>
+<a id='L54' name='L54'></a>  54 <em class='comment'>         * Connects a callback.</em>
+<a id='L55' name='L55'></a>  55 <em class='comment'>         *</em>
+<a id='L56' name='L56'></a>  56 <em class='comment'>         * @param target                 The notifiee controlling the lifetime of</em>
+<a id='L57' name='L57'></a>  57 <em class='comment'>         *                               the callback.</em>
+<a id='L58' name='L58'></a>  58 <em class='comment'>         * @param functor                The callback to call.</em>
+<a id='L59' name='L59'></a>  59 <em class='comment'>         */</em>
+<a id='L60' name='L60'></a>  60         <strong class='reserved'>void</strong> connect_notifiee(<a href='../S/534.html#L31' title='Defined at 31 in src/gui/core/notifiee.hpp.'>notifiee</a>&lt;<a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt;&amp; <a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>, <a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a> <a href='../Y/10623.html' title='Multiple used in 13 places.'>functor</a>)
+<a id='L61' name='L61'></a>  61         <em class='brace'>{</em>
+<a id='L62' name='L62'></a>  62                 <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>.<a href='../Y/9349.html' title='Multiple used in 339 places.'>emplace</a>(&amp;<a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>, <a href='../Y/10623.html' title='Multiple used in 13 places.'>functor</a>);
+<a id='L63' name='L63'></a>  63 
+<a id='L64' name='L64'></a>  64                 <a href='../Y/5905.html' title='Multiple used in 1200 places.'>assert</a>(!<a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>.<a href='../Y/15357.html' title='Multiple used in 10 places.'>notifier_</a>);
+<a id='L65' name='L65'></a>  65 
+<a id='L66' name='L66'></a>  66                 <a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>.<a href='../Y/15357.html' title='Multiple used in 10 places.'>notifier_</a> = <strong class='reserved'>this</strong>;
+<a id='L67' name='L67'></a>  67         <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <em class='comment'>/**</em>
+<a id='L70' name='L70'></a>  70 <em class='comment'>         * Disconnects a callback.</em>
+<a id='L71' name='L71'></a>  71 <em class='comment'>         *</em>
+<a id='L72' name='L72'></a>  72 <em class='comment'>         * @param target                 The notifiee controlling the lifetime of</em>
+<a id='L73' name='L73'></a>  73 <em class='comment'>         *                               the callback. Uses since its address is an</em>
+<a id='L74' name='L74'></a>  74 <em class='comment'>         *                               unique key.</em>
+<a id='L75' name='L75'></a>  75 <em class='comment'>         */</em>
+<a id='L76' name='L76'></a>  76         <strong class='reserved'>void</strong> <a href='../S/534.html#L44' title='Referred from 44 in src/gui/core/notifiee.hpp.'>disconnect_notifiee</a>(<a href='../S/534.html#L31' title='Defined at 31 in src/gui/core/notifiee.hpp.'>notifiee</a>&lt;<a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt;&amp; <a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>)
+<a id='L77' name='L77'></a>  77         <em class='brace'>{</em>
+<a id='L78' name='L78'></a>  78                 <strong class='reserved'>typename</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10786.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../S/534.html#L31' title='Defined at 31 in src/gui/core/notifiee.hpp.'>notifiee</a>&lt;<a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt;*, <a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt;::<a href='../D/9562.html' title='Multiple defined in 17 places.'>iterator</a> <a href='../Y/12636.html' title='Multiple used in 506 places.'>itor</a>
+<a id='L79' name='L79'></a>  79                                 = <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>.<a href='../D/6286.html' title='Multiple defined in 39 places.'>find</a>(&amp;<a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>);
+<a id='L80' name='L80'></a>  80 
+<a id='L81' name='L81'></a>  81                 <strong class='reserved'>if</strong>(<a href='../Y/12636.html' title='Multiple used in 506 places.'>itor</a> != <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>.<a href='../D/5906.html' title='Multiple defined in 28 places.'>end</a>()) <em class='brace'>{</em>
+<a id='L82' name='L82'></a>  82 
+<a id='L83' name='L83'></a>  83                         <a href='../Y/5905.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>.<a href='../Y/15357.html' title='Multiple used in 10 places.'>notifier_</a> == <strong class='reserved'>this</strong>);
+<a id='L84' name='L84'></a>  84 
+<a id='L85' name='L85'></a>  85                         <a href='../D/15014.html' title='Multiple defined in 2 places.'>target</a>.<a href='../Y/15357.html' title='Multiple used in 10 places.'>notifier_</a> = <a href='../Y/15405.html' title='Multiple used in 2009 places.'>nullptr</a>;
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87                         <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>.<a href='../D/5976.html' title='Multiple defined in 12 places.'>erase</a>(<a href='../Y/12636.html' title='Multiple used in 506 places.'>itor</a>);
+<a id='L88' name='L88'></a>  88                 <em class='brace'>}</em>
+<a id='L89' name='L89'></a>  89         <em class='brace'>}</em>
+<a id='L90' name='L90'></a>  90 
+<a id='L91' name='L91'></a>  91         <em class='comment'>/***** ***** ***** setters / getters for members ***** ****** *****/</em>
 <a id='L92' name='L92'></a>  92 
-<a id='L93' name='L93'></a>  93 <strong class='reserved'>struct</strong> <a href='../R/13675.html' title='Multiple referred from 61 places.'>styled_widget_definition</a>
-<a id='L94' name='L94'></a>  94 <em class='brace'>{</em>
-<a id='L95' name='L95'></a>  95         <strong class='reserved'>explicit</strong> <a href='../S/522.html#L93' title='Defined at 93 in src/gui/core/widget_definition.hpp.'>styled_widget_definition</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>);
-<a id='L96' name='L96'></a>  96 
-<a id='L97' name='L97'></a>  97         <strong class='reserved'>template</strong> &lt;<strong class='reserved'>class</strong> <a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;
-<a id='L98' name='L98'></a>  98         <strong class='reserved'>void</strong> <a href='../R/9017.html' title='Multiple referred from 30 places.'>load_resolutions</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L99' name='L99'></a>  99         <em class='brace'>{</em>
-<a id='L100' name='L100'></a> 100                 <strong class='reserved'>for</strong> (<strong class='reserved'>const</strong> <strong class='reserved'>auto</strong> &amp; <a href='../D/12920.html' title='Multiple defined in 41 places.'>resolution</a> : <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4431.html' title='Multiple defined in 2 places.'>child_range</a>("resolution"))
-<a id='L101' name='L101'></a> 101                 <em class='brace'>{</em>
-<a id='L102' name='L102'></a> 102                         <a href='../S/500.html#L167' title='Defined at 167 in src/gui/core/widget_definition.cpp.'>resolutions</a>.<a href='../Y/9318.html' title='Multiple used in 463 places.'>emplace_back</a>(<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13805.html' title='Multiple used in 201 places.'>make_shared</a>&lt;<a href='../D/2084.html' title='Multiple defined in 2 places.'>T</a>&gt;(<a href='../D/12920.html' title='Multiple defined in 41 places.'>resolution</a>));
-<a id='L103' name='L103'></a> 103                 <em class='brace'>}</em>
-<a id='L104' name='L104'></a> 104         <em class='brace'>}</em>
-<a id='L105' name='L105'></a> 105 
-<a id='L106' name='L106'></a> 106         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>;
-<a id='L107' name='L107'></a> 107         <a href='../D/14969.html' title='Multiple defined in 9 places.'>t_string</a> <a href='../D/5409.html' title='Multiple defined in 14 places.'>description</a>;
-<a id='L108' name='L108'></a> 108 
-<a id='L109' name='L109'></a> 109         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21616.html' title='Multiple used in 2722 places.'>vector</a>&lt;<a href='../S/522.html#L71' title='Defined at 71 in src/gui/core/widget_definition.hpp.'>resolution_definition_ptr</a>&gt; <a href='../S/500.html#L167' title='Defined at 167 in src/gui/core/widget_definition.cpp.'>resolutions</a>;
-<a id='L110' name='L110'></a> 110 <em class='brace'>}</em>;
-<a id='L111' name='L111'></a> 111 
-<a id='L112' name='L112'></a> 112 <strong class='reserved'>typedef</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/18613.html' title='Multiple used in 436 places.'>shared_ptr</a>&lt;<a href='../S/522.html#L93' title='Defined at 93 in src/gui/core/widget_definition.hpp.'>styled_widget_definition</a>&gt; <a href='../R/13677.html' title='Multiple referred from 7 places.'>styled_widget_definition_ptr</a>;
-<a id='L113' name='L113'></a> 113 
-<a id='L114' name='L114'></a> 114 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
+<a id='L93' name='L93'></a>  93         <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10786.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../S/534.html#L31' title='Defined at 31 in src/gui/core/notifiee.hpp.'>notifiee</a>&lt;<a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt;*, <a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt;&amp; notifiees() <strong class='reserved'>const</strong>
+<a id='L94' name='L94'></a>  94         <em class='brace'>{</em>
+<a id='L95' name='L95'></a>  95                 <strong class='reserved'>return</strong> <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>;
+<a id='L96' name='L96'></a>  96         <em class='brace'>}</em>
+<a id='L97' name='L97'></a>  97 
+<a id='L98' name='L98'></a>  98 <strong class='reserved'>private</strong>:
+<a id='L99' name='L99'></a>  99         <em class='comment'>/** List of registered callbacks. */</em>
+<a id='L100' name='L100'></a> 100         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10786.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../S/534.html#L31' title='Defined at 31 in src/gui/core/notifiee.hpp.'>notifiee</a>&lt;<a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt;*, <a href='../D/6607.html' title='Multiple defined in 2 places.'>functor_t</a>&gt; <a href='../Y/15356.html' title='Multiple used in 8 places.'>notifiees_</a>;
+<a id='L101' name='L101'></a> 101 <em class='brace'>}</em>;
+<a id='L102' name='L102'></a> 102 
+<a id='L103' name='L103'></a> 103 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L86'>[^]</a><a href='#L98'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L60'>[^]</a><a href='#L93'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>

@@ -1,515 +1,279 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml'>
 <head>
-<title>src/gui/widgets/addon_list.cpp</title>
+<title>src/gui/widgets/multimenu_button.hpp</title>
 <meta name='robots' content='noindex,nofollow' />
 <meta name='generator' content='GLOBAL-6.5.6' />
 <meta http-equiv='Content-Style-Type' content='text/css' />
 <link rel='stylesheet' type='text/css' href='../style.css' />
 </head>
 <body>
-<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5826.html'>src</a>/<a href='../files/5853.html'>gui</a>/<a href='../files/5865.html'>widgets</a>/addon_list.cpp</h2>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L50'>[^]</a><a href='#L444'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<a id='TOP' name='TOP'></a><h2 class='header'><a href='../mains.html'>root</a>/<a href='../files/5851.html'>src</a>/<a href='../files/5878.html'>gui</a>/<a href='../files/5890.html'>widgets</a>/multimenu_button.hpp</h2>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L58'>[^]</a><a href='#L134'>[v]</a>[top]<a href='#BOTTOM'>[bottom]</a><a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<hr />
+<h2 class='header'><a href='../J/2264.html' title='Multiple included from 5 places.'>INCLUDED FROM</a></h2>
 <hr />
 <h2 class='header'>DEFINITIONS</h2>
 This source file includes following definitions.
 <ol>
-<li><a href='#L50' title='Defined at 50.'>delete_function_</a></li>
-<li><a href='#L56' title='Defined at 56.'>colorize_addon_state_string</a></li>
-<li><a href='#L89' title='Defined at 89.'>describe_status</a></li>
-<li><a href='#L128' title='Defined at 128.'>set_addons</a></li>
-<li><a href='#L317' title='Defined at 317.'>get_selected_addon</a></li>
-<li><a href='#L329' title='Defined at 329.'>get_remote_addon_id</a></li>
-<li><a href='#L339' title='Defined at 339.'>select_addon</a></li>
-<li><a href='#L362' title='Defined at 362.'>get_listbox</a></li>
-<li><a href='#L367' title='Defined at 367.'>add_list_to_keyboard_chain</a></li>
-<li><a href='#L374' title='Defined at 374.'>finalize_setup</a></li>
-<li><a href='#L388' title='Defined at 388.'>select_first_addon</a></li>
-<li><a href='#L413' title='Defined at 413.'>grid</a></li>
-<li><a href='#L428' title='Defined at 428.'>parse_visibility</a></li>
-<li><a href='#L444' title='Defined at 444.'>install_buttons_visibility_</a></li>
+<li><a href='#L58' title='Defined at 58.'>connect_click_handler</a></li>
+<li><a href='#L64' title='Defined at 64.'>disconnect_click_handler</a></li>
+<li><a href='#L71' title='Defined at 71.'>set_retval</a></li>
+<li><a href='#L82' title='Defined at 82.'>set_max_shown</a></li>
+<li><a href='#L92' title='Defined at 92.'>get_max_shown</a></li>
+<li><a href='#L102' title='Defined at 102.'>num_options</a></li>
+<li><a href='#L134' title='Defined at 134.'>get_toggle_states</a></li>
 </ol>
 <hr />
 <pre>
 <a id='L1' name='L1'></a>   1 <em class='comment'>/*</em>
-<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2016 - 2017 by the Battle for Wesnoth Project http://www.wesnoth.org/</em>
-<a id='L3' name='L3'></a>   3 <em class='comment'></em>
-<a id='L4' name='L4'></a>   4 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
-<a id='L5' name='L5'></a>   5 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
-<a id='L6' name='L6'></a>   6 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
-<a id='L7' name='L7'></a>   7 <em class='comment'>   (at your option) any later version.</em>
-<a id='L8' name='L8'></a>   8 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
-<a id='L9' name='L9'></a>   9 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
-<a id='L10' name='L10'></a>  10 <em class='comment'></em>
-<a id='L11' name='L11'></a>  11 <em class='comment'>   See the COPYING file for more details.</em>
-<a id='L12' name='L12'></a>  12 <em class='comment'>*/</em>
-<a id='L13' name='L13'></a>  13 
-<a id='L14' name='L14'></a>  14 <em class='sharp'>#define</em> <a href='../R/580.html' title='Multiple referred from 20 places.'>GETTEXT_DOMAIN</a> "wesnoth-lib"
-<a id='L15' name='L15'></a>  15 
-<a id='L16' name='L16'></a>  16 <em class='sharp'>#include</em> "<a href='633.html'>gui/widgets/addon_list.hpp</a>"
-<a id='L17' name='L17'></a>  17 
-<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='976.html'>color.hpp</a>"
-<a id='L19' name='L19'></a>  19 <em class='sharp'>#include</em> "<a href='1144.html'>font/text_formatting.hpp</a>"
-<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='82.html'>formatter.hpp</a>"
-<a id='L21' name='L21'></a>  21 <em class='sharp'>#include</em> "<a href='../I/1909.html'>formula/string_utils.hpp</a>"
-<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='93.html'>gettext.hpp</a>"
-<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='644.html'>gui/auxiliary/find_widget.hpp</a>"
-<a id='L24' name='L24'></a>  24 <em class='sharp'>#include</em> "<a href='532.html'>gui/core/event/dispatcher.hpp</a>"
-<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> "<a href='521.html'>gui/core/register_widget.hpp</a>"
-<a id='L26' name='L26'></a>  26 <em class='sharp'>#include</em> "<a href='../I/2224.html'>gui/widgets/button.hpp</a>"
-<a id='L27' name='L27'></a>  27 <em class='sharp'>#include</em> "<a href='../I/2250.html'>gui/widgets/label.hpp</a>"
-<a id='L28' name='L28'></a>  28 <em class='sharp'>#include</em> "<a href='600.html'>gui/widgets/listbox.hpp</a>"
-<a id='L29' name='L29'></a>  29 <em class='sharp'>#include</em> "<a href='../I/2286.html'>gui/widgets/settings.hpp</a>"
-<a id='L30' name='L30'></a>  30 <em class='sharp'>#include</em> "<a href='602.html'>gui/widgets/stacked_widget.hpp</a>"
-<a id='L31' name='L31'></a>  31 <em class='sharp'>#include</em> "<a href='609.html'>gui/widgets/toggle_panel.hpp</a>"
-<a id='L32' name='L32'></a>  32 <em class='sharp'>#include</em> "<a href='../I/2321.html'>gui/widgets/window.hpp</a>"
-<a id='L33' name='L33'></a>  33 <em class='sharp'>#include</em> "<a href='1111.html'>wml_exception.hpp</a>"
-<a id='L34' name='L34'></a>  34 
-<a id='L35' name='L35'></a>  35 <em class='sharp'>#include</em> &lt;algorithm&gt;
-<a id='L36' name='L36'></a>  36 
-<a id='L37' name='L37'></a>  37 <strong class='reserved'>namespace</strong> <a href='../R/7462.html' title='Multiple referred from 719 places.'>gui2</a>
-<a id='L38' name='L38'></a>  38 <em class='brace'>{</em>
-<a id='L39' name='L39'></a>  39 
-<a id='L40' name='L40'></a>  40 <a href='../D/1827.html' title='Multiple defined in 11 places.'>REGISTER_WIDGET</a>(<a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>)
-<a id='L41' name='L41'></a>  41 
-<a id='L42' name='L42'></a>  42 <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>(<strong class='reserved'>const</strong> <a href='../D/8820.html' title='Multiple defined in 115 places.'>implementation</a>::<a href='../S/633.html#L187' title='Defined at 187 in src/gui/widgets/addon_list.hpp.'>builder_addon_list</a>&amp; <a href='../D/3803.html' title='Multiple defined in 2 places.'>builder</a>)
-<a id='L43' name='L43'></a>  43         : <a href='../S/560.html#L35' title='Defined at 35 in src/gui/widgets/container_base.hpp.'>container_base</a>(<a href='../D/3803.html' title='Multiple defined in 2 places.'>builder</a>, <a href='../D/7439.html' title='Multiple defined in 5 places.'>get_control_type</a>())
-<a id='L44' name='L44'></a>  44         , <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>()
-<a id='L45' name='L45'></a>  45         , <a href='../Y/12224.html' title='Multiple used in 8 places.'>install_status_visibility_</a>(<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a>::<a href='../Y/21751.html' title='Multiple used in 124 places.'>visible</a>)
-<a id='L46' name='L46'></a>  46         , <a href='../S/634.html#L444' title='Defined at 444 in src/gui/widgets/addon_list.cpp.'>install_buttons_visibility_</a>(<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a>::<a href='../D/9224.html' title='Multiple defined in 2 places.'>invisible</a>)
-<a id='L47' name='L47'></a>  47         , <a href='../Y/12222.html' title='Multiple used in 5 places.'>install_function_</a>()
-<a id='L48' name='L48'></a>  48         , <a href='../Y/21090.html' title='Multiple used in 5 places.'>uninstall_function_</a>()
-<a id='L49' name='L49'></a>  49         , <a href='../Y/16913.html' title='Multiple used in 5 places.'>publish_function_</a>()
-<a id='L50' name='L50'></a>  50         , <a href='../R/4713.html' title='Multiple referred from 3 places.'>delete_function_</a>()
-<a id='L51' name='L51'></a>  51 <em class='brace'>{</em>
-<a id='L52' name='L52'></a>  52 <em class='brace'>}</em>
+<a id='L2' name='L2'></a>   2 <em class='comment'>   Copyright (C) 2008 - 2017 by Mark de Wever &lt;koraq@xs4all.nl&gt;</em>
+<a id='L3' name='L3'></a>   3 <em class='comment'>   Part of the Battle for Wesnoth Project http://www.wesnoth.org/</em>
+<a id='L4' name='L4'></a>   4 <em class='comment'></em>
+<a id='L5' name='L5'></a>   5 <em class='comment'>   This program is free software; you can redistribute it and/or modify</em>
+<a id='L6' name='L6'></a>   6 <em class='comment'>   it under the terms of the GNU General Public License as published by</em>
+<a id='L7' name='L7'></a>   7 <em class='comment'>   the Free Software Foundation; either version 2 of the License, or</em>
+<a id='L8' name='L8'></a>   8 <em class='comment'>   (at your option) any later version.</em>
+<a id='L9' name='L9'></a>   9 <em class='comment'>   This program is distributed in the hope that it will be useful,</em>
+<a id='L10' name='L10'></a>  10 <em class='comment'>   but WITHOUT ANY WARRANTY.</em>
+<a id='L11' name='L11'></a>  11 <em class='comment'></em>
+<a id='L12' name='L12'></a>  12 <em class='comment'>   See the COPYING file for more details.</em>
+<a id='L13' name='L13'></a>  13 <em class='comment'>*/</em>
+<a id='L14' name='L14'></a>  14 
+<a id='L15' name='L15'></a>  15 <em class='sharp'>#pragma</em> once
+<a id='L16' name='L16'></a>  16 
+<a id='L17' name='L17'></a>  17 <em class='sharp'>#include</em> "<a href='../I/1562.html'>gui/core/widget_definition.hpp</a>"
+<a id='L18' name='L18'></a>  18 <em class='sharp'>#include</em> "<a href='../I/1564.html'>gui/core/window_builder.hpp</a>"
+<a id='L19' name='L19'></a>  19 
+<a id='L20' name='L20'></a>  20 <em class='sharp'>#include</em> "<a href='467.html'>gui/dialogs/drop_down_menu.hpp</a>"
+<a id='L21' name='L21'></a>  21 
+<a id='L22' name='L22'></a>  22 <em class='sharp'>#include</em> "<a href='609.html'>gui/widgets/styled_widget.hpp</a>"
+<a id='L23' name='L23'></a>  23 <em class='sharp'>#include</em> "<a href='584.html'>gui/widgets/selectable_item.hpp</a>"
+<a id='L24' name='L24'></a>  24 
+<a id='L25' name='L25'></a>  25 <em class='sharp'>#include</em> &lt;boost/dynamic_bitset.hpp&gt;
+<a id='L26' name='L26'></a>  26 
+<a id='L27' name='L27'></a>  27 <strong class='reserved'>class</strong> <a href='../D/4773.html' title='Multiple defined in 5 places.'>config</a>;
+<a id='L28' name='L28'></a>  28 
+<a id='L29' name='L29'></a>  29 <strong class='reserved'>namespace</strong> <a href='../R/7472.html' title='Multiple referred from 721 places.'>gui2</a>
+<a id='L30' name='L30'></a>  30 <em class='brace'>{</em>
+<a id='L31' name='L31'></a>  31 <strong class='reserved'>namespace</strong> <a href='../R/7956.html' title='Multiple referred from 136 places.'>implementation</a>
+<a id='L32' name='L32'></a>  32 <em class='brace'>{</em>
+<a id='L33' name='L33'></a>  33 <strong class='reserved'>struct</strong> <a href='../S/634.html#L226' title='Defined at 226 in src/gui/widgets/multimenu_button.hpp.'>builder_multimenu_button</a>;
+<a id='L34' name='L34'></a>  34 <em class='brace'>}</em>
+<a id='L35' name='L35'></a>  35 
+<a id='L36' name='L36'></a>  36 <em class='comment'>// ------------ WIDGET -----------{</em>
+<a id='L37' name='L37'></a>  37 
+<a id='L38' name='L38'></a>  38 <em class='comment'>/**</em>
+<a id='L39' name='L39'></a>  39 <em class='comment'> * Simple push button.</em>
+<a id='L40' name='L40'></a>  40 <em class='comment'> */</em>
+<a id='L41' name='L41'></a>  41 <strong class='reserved'>class</strong> <a href='../R/10247.html' title='Multiple referred from 35 places.'>multimenu_button</a> : <strong class='reserved'>public</strong> <a href='../S/609.html#L33' title='Defined at 33 in src/gui/widgets/styled_widget.hpp.'>styled_widget</a>
+<a id='L42' name='L42'></a>  42 <em class='brace'>{</em>
+<a id='L43' name='L43'></a>  43 <strong class='reserved'>public</strong>:
+<a id='L44' name='L44'></a>  44         <strong class='reserved'>explicit</strong> <a href='../S/634.html#L41' title='Defined at 41 in src/gui/widgets/multimenu_button.hpp.'>multimenu_button</a>(<strong class='reserved'>const</strong> <a href='../D/8832.html' title='Multiple defined in 115 places.'>implementation</a>::<a href='../S/634.html#L226' title='Defined at 226 in src/gui/widgets/multimenu_button.hpp.'>builder_multimenu_button</a>&amp; <a href='../D/3806.html' title='Multiple defined in 2 places.'>builder</a>);
+<a id='L45' name='L45'></a>  45 
+<a id='L46' name='L46'></a>  46         <em class='comment'>/***** ***** ***** ***** Inherited ***** ***** ***** *****/</em>
+<a id='L47' name='L47'></a>  47 
+<a id='L48' name='L48'></a>  48         <em class='comment'>/** See @ref styled_widget::set_active. */</em>
+<a id='L49' name='L49'></a>  49         <strong class='reserved'>virtual</strong> <strong class='reserved'>void</strong> <a href='../D/13614.html' title='Multiple defined in 24 places.'>set_active</a>(<strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../D/2790.html' title='Multiple defined in 5 places.'>active</a>) <a href='../D/11715.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L50' name='L50'></a>  50 
+<a id='L51' name='L51'></a>  51         <em class='comment'>/** See @ref styled_widget::get_active. */</em>
+<a id='L52' name='L52'></a>  52         <strong class='reserved'>virtual</strong> <strong class='reserved'>bool</strong> <a href='../D/7268.html' title='Multiple defined in 29 places.'>get_active</a>() <strong class='reserved'>const</strong> <a href='../D/11715.html' title='Multiple defined in 2 places.'>override</a>;
 <a id='L53' name='L53'></a>  53 
-<a id='L54' name='L54'></a>  54 <strong class='reserved'>static</strong> <a href='../S/976.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../Y/7667.html' title='Multiple used in 2 places.'>color_outdated</a> <em class='brace'>{</em>255, 127, 0<em class='brace'>}</em>;
-<a id='L55' name='L55'></a>  55 
-<a id='L56' name='L56'></a>  56 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/4074.html' title='Multiple referred from 5 places.'>colorize_addon_state_string</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>, <a href='../S/217.html#L21' title='Defined at 21 in src/addon/state.hpp.'>ADDON_STATUS</a> <a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a>, <strong class='reserved'>bool</strong> <a href='../Y/21621.html' title='Multiple used in 73 places.'>verbose</a>)
-<a id='L57' name='L57'></a>  57 <em class='brace'>{</em>
-<a id='L58' name='L58'></a>  58         <a href='../S/976.html#L50' title='Defined at 50 in src/color.hpp.'>color_t</a> <a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a> = <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/2012.html' title='Multiple used in 36 places.'>NORMAL_COLOR</a>;
-<a id='L59' name='L59'></a>  59 
-<a id='L60' name='L60'></a>  60         <strong class='reserved'>switch</strong>(<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a>) <em class='brace'>{</em>
-<a id='L61' name='L61'></a>  61         <strong class='reserved'>case</strong> <a href='../S/217.html#L23' title='Defined at 23 in src/addon/state.hpp.'>ADDON_NONE</a>:
-<a id='L62' name='L62'></a>  62                 <strong class='reserved'>if</strong>(!<a href='../Y/21621.html' title='Multiple used in 73 places.'>verbose</a>) <em class='brace'>{</em>
-<a id='L63' name='L63'></a>  63                         <strong class='reserved'>return</strong> <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>;
-<a id='L64' name='L64'></a>  64                 <em class='brace'>}</em>
-<a id='L65' name='L65'></a>  65                 <a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a> = <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/21922.html' title='Multiple used in 10 places.'>weapon_details_color</a>;
-<a id='L66' name='L66'></a>  66                 <strong class='reserved'>break</strong>;
-<a id='L67' name='L67'></a>  67         <strong class='reserved'>case</strong> <a href='../S/217.html#L25' title='Defined at 25 in src/addon/state.hpp.'>ADDON_INSTALLED</a>:
-<a id='L68' name='L68'></a>  68         <strong class='reserved'>case</strong> <a href='../S/217.html#L31' title='Defined at 31 in src/addon/state.hpp.'>ADDON_INSTALLED_LOCAL_ONLY</a>:
-<a id='L69' name='L69'></a>  69         <strong class='reserved'>case</strong> <a href='../S/217.html#L36' title='Defined at 36 in src/addon/state.hpp.'>ADDON_NOT_TRACKED</a>:
-<a id='L70' name='L70'></a>  70                 <a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a> = <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/1238.html' title='Multiple used in 7 places.'>GOOD_COLOR</a>;
-<a id='L71' name='L71'></a>  71                 <strong class='reserved'>break</strong>;
-<a id='L72' name='L72'></a>  72         <strong class='reserved'>case</strong> <a href='../S/217.html#L27' title='Defined at 27 in src/addon/state.hpp.'>ADDON_INSTALLED_UPGRADABLE</a>:
-<a id='L73' name='L73'></a>  73                 <a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a> = <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/3461.html' title='Multiple used in 8 places.'>YELLOW_COLOR</a>;
-<a id='L74' name='L74'></a>  74                 <strong class='reserved'>break</strong>;
-<a id='L75' name='L75'></a>  75         <strong class='reserved'>case</strong> <a href='../S/217.html#L29' title='Defined at 29 in src/addon/state.hpp.'>ADDON_INSTALLED_OUTDATED</a>:
-<a id='L76' name='L76'></a>  76                 <a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a> = <a href='../Y/7667.html' title='Multiple used in 2 places.'>color_outdated</a>;
-<a id='L77' name='L77'></a>  77                 <strong class='reserved'>break</strong>;
-<a id='L78' name='L78'></a>  78         <strong class='reserved'>case</strong> <a href='../S/217.html#L34' title='Defined at 34 in src/addon/state.hpp.'>ADDON_INSTALLED_BROKEN</a>:
-<a id='L79' name='L79'></a>  79                 <a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a> = <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/266.html' title='Multiple used in 14 places.'>BAD_COLOR</a>;
-<a id='L80' name='L80'></a>  80                 <strong class='reserved'>break</strong>;
-<a id='L81' name='L81'></a>  81         <strong class='reserved'>default</strong>:
-<a id='L82' name='L82'></a>  82                 <a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a> = <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../Y/1245.html' title='Multiple used in 10 places.'>GRAY_COLOR</a>;
-<a id='L83' name='L83'></a>  83                 <strong class='reserved'>break</strong>;
-<a id='L84' name='L84'></a>  84         <em class='brace'>}</em>
-<a id='L85' name='L85'></a>  85 
-<a id='L86' name='L86'></a>  86         <strong class='reserved'>return</strong> <a href='../D/6445.html' title='Multiple defined in 29 places.'>font</a>::<a href='../S/1162.html#L25' title='Defined at 25 in src/font/text_formatting.cpp.'>span_color</a>(<a href='../Y/7675.html' title='Multiple used in 8 places.'>colorname</a>) + <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a> + "&lt;/span&gt;";
-<a id='L87' name='L87'></a>  87 <em class='brace'>}</em>
-<a id='L88' name='L88'></a>  88 
-<a id='L89' name='L89'></a>  89 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/4744.html' title='Multiple referred from 2 places.'>describe_status</a>(<strong class='reserved'>const</strong> <a href='../S/217.html#L45' title='Defined at 45 in src/addon/state.hpp.'>addon_tracking_info</a>&amp; <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>)
-<a id='L90' name='L90'></a>  90 <em class='brace'>{</em>
-<a id='L91' name='L91'></a>  91         <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/19774.html' title='Multiple used in 25 places.'>tc</a>, <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a>;
-<a id='L92' name='L92'></a>  92 
-<a id='L93' name='L93'></a>  93         <strong class='reserved'>switch</strong>(<a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a>) <em class='brace'>{</em>
-<a id='L94' name='L94'></a>  94         <strong class='reserved'>case</strong> <a href='../S/217.html#L23' title='Defined at 23 in src/addon/state.hpp.'>ADDON_NONE</a>:
-<a id='L95' name='L95'></a>  95                 <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a> = <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a> ? <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Published, not installed") : <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Not installed");
-<a id='L96' name='L96'></a>  96                 <strong class='reserved'>break</strong>;
-<a id='L97' name='L97'></a>  97 
-<a id='L98' name='L98'></a>  98         <strong class='reserved'>case</strong> <a href='../S/217.html#L25' title='Defined at 25 in src/addon/state.hpp.'>ADDON_INSTALLED</a>:
-<a id='L99' name='L99'></a>  99         <strong class='reserved'>case</strong> <a href='../S/217.html#L36' title='Defined at 36 in src/addon/state.hpp.'>ADDON_NOT_TRACKED</a>:
-<a id='L100' name='L100'></a> 100                 <em class='comment'>// Consider add-ons without version information as installed</em>
-<a id='L101' name='L101'></a> 101                 <em class='comment'>// for the main display. Their Description info should elaborate</em>
-<a id='L102' name='L102'></a> 102                 <em class='comment'>// on their status.</em>
-<a id='L103' name='L103'></a> 103                 <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a> = <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a> ? <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Published") : <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Installed");
-<a id='L104' name='L104'></a> 104                 <strong class='reserved'>break</strong>;
-<a id='L105' name='L105'></a> 105         <strong class='reserved'>case</strong> <a href='../S/217.html#L31' title='Defined at 31 in src/addon/state.hpp.'>ADDON_INSTALLED_LOCAL_ONLY</a>:
-<a id='L106' name='L106'></a> 106                 <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a> = <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a> ? <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Ready to publish") : <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Installed, not ready to publish");
-<a id='L107' name='L107'></a> 107                 <strong class='reserved'>break</strong>;
-<a id='L108' name='L108'></a> 108 
-<a id='L109' name='L109'></a> 109         <strong class='reserved'>case</strong> <a href='../S/217.html#L27' title='Defined at 27 in src/addon/state.hpp.'>ADDON_INSTALLED_UPGRADABLE</a>:
-<a id='L110' name='L110'></a> 110                 <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a> = <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a> ? <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Published, upgradable") : <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Installed, upgradable");
-<a id='L111' name='L111'></a> 111                 <strong class='reserved'>break</strong>;
-<a id='L112' name='L112'></a> 112 
-<a id='L113' name='L113'></a> 113         <strong class='reserved'>case</strong> <a href='../S/217.html#L29' title='Defined at 29 in src/addon/state.hpp.'>ADDON_INSTALLED_OUTDATED</a>:
-<a id='L114' name='L114'></a> 114                 <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a> = <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a> ? <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Published, outdated on server") : <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Installed, outdated on server");
-<a id='L115' name='L115'></a> 115                 <strong class='reserved'>break</strong>;
-<a id='L116' name='L116'></a> 116 
-<a id='L117' name='L117'></a> 117         <strong class='reserved'>case</strong> <a href='../S/217.html#L34' title='Defined at 34 in src/addon/state.hpp.'>ADDON_INSTALLED_BROKEN</a>:
-<a id='L118' name='L118'></a> 118                 <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a> = <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a> ? <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Published, broken") : <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Installed, broken");
-<a id='L119' name='L119'></a> 119                 <strong class='reserved'>break</strong>;
-<a id='L120' name='L120'></a> 120 
-<a id='L121' name='L121'></a> 121         <strong class='reserved'>default</strong>:
-<a id='L122' name='L122'></a> 122                 <a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a> = <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("addon_state^Unknown");
-<a id='L123' name='L123'></a> 123         <em class='brace'>}</em>
-<a id='L124' name='L124'></a> 124 
-<a id='L125' name='L125'></a> 125         <strong class='reserved'>return</strong> <a href='../S/634.html#L56' title='Defined at 56 in src/gui/widgets/addon_list.cpp.'>colorize_addon_state_string</a>(<a href='../Y/20863.html' title='Multiple used in 9 places.'>tx</a>, <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a>, <strong class='reserved'>true</strong>);
-<a id='L126' name='L126'></a> 126 <em class='brace'>}</em>
-<a id='L127' name='L127'></a> 127 
-<a id='L128' name='L128'></a> 128 <strong class='reserved'>void</strong> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/12463.html' title='Multiple referred from 3 places.'>set_addons</a>(<strong class='reserved'>const</strong> <a href='../S/216.html#L27' title='Defined at 27 in src/addon/info.hpp.'>addons_list</a>&amp; <a href='../D/3051.html' title='Multiple defined in 2 places.'>addons</a>)
-<a id='L129' name='L129'></a> 129 <em class='brace'>{</em>
-<a id='L130' name='L130'></a> 130         <a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>&amp; <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a> = <a href='../S/634.html#L362' title='Defined at 362 in src/gui/widgets/addon_list.cpp.'>get_listbox</a>();
-<a id='L131' name='L131'></a> 131         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../D/4477.html' title='Multiple defined in 39 places.'>clear</a>();
-<a id='L132' name='L132'></a> 132 
-<a id='L133' name='L133'></a> 133         <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/4477.html' title='Multiple defined in 39 places.'>clear</a>();
-<a id='L134' name='L134'></a> 134 
-<a id='L135' name='L135'></a> 135         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <strong class='reserved'>auto</strong>&amp; <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a> : <a href='../D/3051.html' title='Multiple defined in 2 places.'>addons</a>) <em class='brace'>{</em>
-<a id='L136' name='L136'></a> 136                 <strong class='reserved'>const</strong> <a href='../S/216.html#L29' title='Defined at 29 in src/addon/info.hpp.'>addon_info</a>&amp; <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a> = <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>.<a href='../Y/18207.html' title='Multiple used in 1330 places.'>second</a>;
-<a id='L137' name='L137'></a> 137                 <a href='../S/217.html#L45' title='Defined at 45 in src/addon/state.hpp.'>addon_tracking_info</a> <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a> = <a href='../S/224.html#L24' title='Defined at 24 in src/addon/state.cpp.'>get_addon_tracking_info</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
+<a id='L54' name='L54'></a>  54         <em class='comment'>/** See @ref styled_widget::get_state. */</em>
+<a id='L55' name='L55'></a>  55         <strong class='reserved'>virtual</strong> <strong class='reserved'>unsigned</strong> <a href='../D/8032.html' title='Multiple defined in 33 places.'>get_state</a>() <strong class='reserved'>const</strong> <a href='../D/11715.html' title='Multiple defined in 2 places.'>override</a>;
+<a id='L56' name='L56'></a>  56 
+<a id='L57' name='L57'></a>  57         <em class='comment'>/** Inherited from clickable_item. */</em>
+<a id='L58' name='L58'></a>  58         <strong class='reserved'>void</strong> <a href='../R/4194.html' title='Multiple referred from 19 places.'>connect_click_handler</a>(<strong class='reserved'>const</strong> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L56' title='Defined at 56 in src/gui/core/event/dispatcher.hpp.'>signal_function</a>&amp; <a href='../Y/18825.html' title='Multiple used in 88 places.'>signal</a>)
+<a id='L59' name='L59'></a>  59         <em class='brace'>{</em>
+<a id='L60' name='L60'></a>  60                 <a href='../S/530.html#L209' title='Defined at 209 in src/gui/core/event/dispatcher.cpp.'>connect_signal_mouse_left_click</a>(*<strong class='reserved'>this</strong>, <a href='../Y/18825.html' title='Multiple used in 88 places.'>signal</a>);
+<a id='L61' name='L61'></a>  61         <em class='brace'>}</em>
+<a id='L62' name='L62'></a>  62 
+<a id='L63' name='L63'></a>  63         <em class='comment'>/** Inherited from clickable_item. */</em>
+<a id='L64' name='L64'></a>  64         <strong class='reserved'>void</strong> <a href='../S/620.html#L63' title='Referred from 63 in src/gui/widgets/clickable_item.hpp.'>disconnect_click_handler</a>(<strong class='reserved'>const</strong> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L56' title='Defined at 56 in src/gui/core/event/dispatcher.hpp.'>signal_function</a>&amp; <a href='../Y/18825.html' title='Multiple used in 88 places.'>signal</a>)
+<a id='L65' name='L65'></a>  65         <em class='brace'>{</em>
+<a id='L66' name='L66'></a>  66                 <a href='../S/530.html#L214' title='Defined at 214 in src/gui/core/event/dispatcher.cpp.'>disconnect_signal_mouse_left_click</a>(*<strong class='reserved'>this</strong>, <a href='../Y/18825.html' title='Multiple used in 88 places.'>signal</a>);
+<a id='L67' name='L67'></a>  67         <em class='brace'>}</em>
+<a id='L68' name='L68'></a>  68 
+<a id='L69' name='L69'></a>  69         <em class='comment'>/***** ***** ***** setters / getters for members ***** ****** *****/</em>
+<a id='L70' name='L70'></a>  70 
+<a id='L71' name='L71'></a>  71         <strong class='reserved'>void</strong> <a href='../R/12908.html' title='Multiple referred from 75 places.'>set_retval</a>(<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/13008.html' title='Multiple defined in 2 places.'>retval</a>)
+<a id='L72' name='L72'></a>  72         <em class='brace'>{</em>
+<a id='L73' name='L73'></a>  73                 <a href='../D/13009.html' title='Multiple defined in 5 places.'>retval_</a> = <a href='../D/13008.html' title='Multiple defined in 2 places.'>retval</a>;
+<a id='L74' name='L74'></a>  74         <em class='brace'>}</em>
+<a id='L75' name='L75'></a>  75 
+<a id='L76' name='L76'></a>  76         <em class='comment'>/**</em>
+<a id='L77' name='L77'></a>  77 <em class='comment'>         * Sets the maximum number of selected elements shown on the label.</em>
+<a id='L78' name='L78'></a>  78 <em class='comment'>         * If more are selected, the label will say "and N others".</em>
+<a id='L79' name='L79'></a>  79 <em class='comment'>         *</em>
+<a id='L80' name='L80'></a>  80 <em class='comment'>         * @param max      The maximum number of elements to show</em>
+<a id='L81' name='L81'></a>  81 <em class='comment'>         */</em>
+<a id='L82' name='L82'></a>  82         <strong class='reserved'>void</strong> <a href='../S/619.html#L350' title='Referred from 350 in src/gui/widgets/multimenu_button.cpp.'>set_max_shown</a>(<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/10910.html' title='Multiple defined in 3 places.'>max</a>)
+<a id='L83' name='L83'></a>  83         <em class='brace'>{</em>
+<a id='L84' name='L84'></a>  84                 <a href='../Y/14070.html' title='Multiple used in 10 places.'>max_shown_</a> = <a href='../D/10910.html' title='Multiple defined in 3 places.'>max</a>;
+<a id='L85' name='L85'></a>  85         <em class='brace'>}</em>
+<a id='L86' name='L86'></a>  86 
+<a id='L87' name='L87'></a>  87         <em class='comment'>/**</em>
+<a id='L88' name='L88'></a>  88 <em class='comment'>         * Get the maximum number of selected elements shown on the label.</em>
+<a id='L89' name='L89'></a>  89 <em class='comment'>         *</em>
+<a id='L90' name='L90'></a>  90 <em class='comment'>         * @returns        The maximum number of elements to show</em>
+<a id='L91' name='L91'></a>  91 <em class='comment'>         */</em>
+<a id='L92' name='L92'></a>  92         <strong class='reserved'>int</strong> get_max_shown()
+<a id='L93' name='L93'></a>  93         <em class='brace'>{</em>
+<a id='L94' name='L94'></a>  94                 <strong class='reserved'>return</strong> <a href='../Y/14070.html' title='Multiple used in 10 places.'>max_shown_</a>;
+<a id='L95' name='L95'></a>  95         <em class='brace'>}</em>
+<a id='L96' name='L96'></a>  96 
+<a id='L97' name='L97'></a>  97         <em class='comment'>/**</em>
+<a id='L98' name='L98'></a>  98 <em class='comment'>         * Get the number of options available in the menu</em>
+<a id='L99' name='L99'></a>  99 <em class='comment'>         *</em>
+<a id='L100' name='L100'></a> 100 <em class='comment'>         * @returns        The number of options in the menu</em>
+<a id='L101' name='L101'></a> 101 <em class='comment'>         */</em>
+<a id='L102' name='L102'></a> 102         <strong class='reserved'>unsigned</strong> <a href='../R/10446.html' title='Multiple referred from 3 places.'>num_options</a>()
+<a id='L103' name='L103'></a> 103         <em class='brace'>{</em>
+<a id='L104' name='L104'></a> 104                 <strong class='reserved'>return</strong> <a href='../S/268.html#L80' title='Defined at 80 in src/ai/composite/property_handler.hpp.'>values_</a>.<a href='../D/14594.html' title='Multiple defined in 18 places.'>size</a>();
+<a id='L105' name='L105'></a> 105         <em class='brace'>}</em>
+<a id='L106' name='L106'></a> 106 
+<a id='L107' name='L107'></a> 107         <em class='comment'>/**</em>
+<a id='L108' name='L108'></a> 108 <em class='comment'>         * Select an option in the menu</em>
+<a id='L109' name='L109'></a> 109 <em class='comment'>         *</em>
+<a id='L110' name='L110'></a> 110 <em class='comment'>         * @param option   The option to select</em>
+<a id='L111' name='L111'></a> 111 <em class='comment'>         * @param selected True to select it, or false to deselect it</em>
+<a id='L112' name='L112'></a> 112 <em class='comment'>         */</em>
+<a id='L113' name='L113'></a> 113         <strong class='reserved'>void</strong> <a href='../S/619.html#L211' title='Defined at 211 in src/gui/widgets/multimenu_button.cpp.'>select_option</a>(<strong class='reserved'>const</strong> <strong class='reserved'>unsigned</strong> <a href='../Y/15840.html' title='Multiple used in 88 places.'>option</a>, <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/18332.html' title='Multiple used in 87 places.'>selected</a> = <strong class='reserved'>true</strong>);
+<a id='L114' name='L114'></a> 114 
+<a id='L115' name='L115'></a> 115         <em class='comment'>/**</em>
+<a id='L116' name='L116'></a> 116 <em class='comment'>         * Set the options selected in the menu.</em>
+<a id='L117' name='L117'></a> 117 <em class='comment'>         *</em>
+<a id='L118' name='L118'></a> 118 <em class='comment'>         * @param states   A mask specifying which options to select and deselect</em>
+<a id='L119' name='L119'></a> 119 <em class='comment'>         */</em>
+<a id='L120' name='L120'></a> 120         <strong class='reserved'>void</strong> <a href='../S/619.html#L223' title='Defined at 223 in src/gui/widgets/multimenu_button.cpp.'>select_options</a>(<a href='../D/3742.html' title='Multiple defined in 4 places.'>boost</a>::<a href='../Y/9224.html' title='Multiple used in 54 places.'>dynamic_bitset</a>&lt;&gt; <a href='../S/236.html#L278' title='Defined at 278 in src/ai/default/recruitment.hpp.'>states</a>);
+<a id='L121' name='L121'></a> 121 
+<a id='L122' name='L122'></a> 122         <em class='comment'>/**</em>
+<a id='L123' name='L123'></a> 123 <em class='comment'>         * Set the available menu options.</em>
+<a id='L124' name='L124'></a> 124 <em class='comment'>         *</em>
+<a id='L125' name='L125'></a> 125 <em class='comment'>         * @param values   A list of options to show in the menu</em>
+<a id='L126' name='L126'></a> 126 <em class='comment'>         */</em>
+<a id='L127' name='L127'></a> 127         <strong class='reserved'>void</strong> <a href='../D/14246.html' title='Multiple defined in 2 places.'>set_values</a>(<strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21655.html' title='Multiple used in 2726 places.'>vector</a>&lt;::<a href='../D/4773.html' title='Multiple defined in 5 places.'>config</a>&gt;&amp; <a href='../Y/21586.html' title='Multiple used in 175 places.'>values</a>);
+<a id='L128' name='L128'></a> 128 
+<a id='L129' name='L129'></a> 129         <em class='comment'>/**</em>
+<a id='L130' name='L130'></a> 130 <em class='comment'>         * Get the current state of the menu options.</em>
+<a id='L131' name='L131'></a> 131 <em class='comment'>         *</em>
+<a id='L132' name='L132'></a> 132 <em class='comment'>         * @returns        A mask specifying which options are selected</em>
+<a id='L133' name='L133'></a> 133 <em class='comment'>         */</em>
+<a id='L134' name='L134'></a> 134         <a href='../D/3742.html' title='Multiple defined in 4 places.'>boost</a>::<a href='../Y/9224.html' title='Multiple used in 54 places.'>dynamic_bitset</a>&lt;&gt; <a href='../R/7270.html' title='Multiple referred from 6 places.'>get_toggle_states</a>() <strong class='reserved'>const</strong>
+<a id='L135' name='L135'></a> 135         <em class='brace'>{</em>
+<a id='L136' name='L136'></a> 136                 <strong class='reserved'>return</strong> <a href='../Y/20593.html' title='Multiple used in 14 places.'>toggle_states_</a>;
+<a id='L137' name='L137'></a> 137         <em class='brace'>}</em>
 <a id='L138' name='L138'></a> 138 
-<a id='L139' name='L139'></a> 139                 <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/12266.html' title='Multiple defined in 3 places.'>push_back</a>(&amp;<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
-<a id='L140' name='L140'></a> 140 
-<a id='L141' name='L141'></a> 141                 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/10772.html' title='Multiple defined in 18 places.'>map</a>&lt;<a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>, <a href='../D/14845.html' title='Multiple defined in 2 places.'>string_map</a>&gt; <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>;
-<a id='L142' name='L142'></a> 142                 <a href='../D/14845.html' title='Multiple defined in 2 places.'>string_map</a> <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>;
+<a id='L139' name='L139'></a> 139         <em class='comment'>/**</em>
+<a id='L140' name='L140'></a> 140 <em class='comment'>         * Deselect all the menu options.</em>
+<a id='L141' name='L141'></a> 141 <em class='comment'>         */</em>
+<a id='L142' name='L142'></a> 142         <strong class='reserved'>void</strong> <a href='../S/619.html#L195' title='Defined at 195 in src/gui/widgets/multimenu_button.cpp.'>reset_toggle_states</a>();
 <a id='L143' name='L143'></a> 143 
-<a id='L144' name='L144'></a> 144                 <strong class='reserved'>if</strong>(!<a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a>) <em class='brace'>{</em>
-<a id='L145' name='L145'></a> 145                         <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../S/218.html#L134' title='Defined at 134 in src/addon/info.cpp.'>display_icon</a>();
-<a id='L146' name='L146'></a> 146                         <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("icon", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
-<a id='L147' name='L147'></a> 147 
-<a id='L148' name='L148'></a> 148                         <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../S/218.html#L125' title='Defined at 125 in src/addon/info.cpp.'>display_title</a>();
-<a id='L149' name='L149'></a> 149                         <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("name", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
-<a id='L150' name='L150'></a> 150                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
-<a id='L151' name='L151'></a> 151                         <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../S/218.html#L134' title='Defined at 134 in src/addon/info.cpp.'>display_icon</a>() + "~BLIT(icons/icon-addon-publish.png)";
-<a id='L152' name='L152'></a> 152                         <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("icon", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
-<a id='L153' name='L153'></a> 153 
-<a id='L154' name='L154'></a> 154                         <strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/16914.html' title='Multiple used in 2 places.'>publish_name</a> = <a href='../S/82.html#L38' title='Defined at 38 in src/formatter.hpp.'>formatter</a>()
-<a id='L155' name='L155'></a> 155                                 &lt;&lt; "&lt;span color='#00ff00'&gt;" <em class='comment'>// GOOD_COLOR</em>
-<a id='L156' name='L156'></a> 156                                 &lt;&lt; <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../S/218.html#L125' title='Defined at 125 in src/addon/info.cpp.'>display_title</a>()
-<a id='L157' name='L157'></a> 157                                 &lt;&lt; "&lt;/span&gt;";
+<a id='L144' name='L144'></a> 144 <strong class='reserved'>private</strong>:
+<a id='L145' name='L145'></a> 145         <em class='comment'>/**</em>
+<a id='L146' name='L146'></a> 146 <em class='comment'>         * Possible states of the widget.</em>
+<a id='L147' name='L147'></a> 147 <em class='comment'>         *</em>
+<a id='L148' name='L148'></a> 148 <em class='comment'>         * Note the order of the states must be the same as defined in settings.hpp.</em>
+<a id='L149' name='L149'></a> 149 <em class='comment'>         */</em>
+<a id='L150' name='L150'></a> 150         <strong class='reserved'>enum</strong> <a href='../R/13578.html' title='Multiple referred from 54 places.'>state_t</a> <em class='brace'>{</em>
+<a id='L151' name='L151'></a> 151                 <a href='../R/353.html' title='Multiple referred from 40 places.'>ENABLED</a>,
+<a id='L152' name='L152'></a> 152                 <a href='../R/301.html' title='Multiple referred from 48 places.'>DISABLED</a>,
+<a id='L153' name='L153'></a> 153                 <a href='../R/1603.html' title='Multiple referred from 21 places.'>PRESSED</a>,
+<a id='L154' name='L154'></a> 154                 <a href='../R/517.html' title='Multiple referred from 16 places.'>FOCUSED</a>,
+<a id='L155' name='L155'></a> 155         <em class='brace'>}</em>;
+<a id='L156' name='L156'></a> 156 
+<a id='L157' name='L157'></a> 157         <strong class='reserved'>void</strong> <a href='../D/14168.html' title='Multiple defined in 11 places.'>set_state</a>(<strong class='reserved'>const</strong> <a href='../D/14774.html' title='Multiple defined in 20 places.'>state_t</a> <a href='../D/14768.html' title='Multiple defined in 3 places.'>state</a>);
 <a id='L158' name='L158'></a> 158 
-<a id='L159' name='L159'></a> 159                         <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../Y/16914.html' title='Multiple used in 2 places.'>publish_name</a>;
-<a id='L160' name='L160'></a> 160                         <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("name", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
-<a id='L161' name='L161'></a> 161                 <em class='brace'>}</em>
-<a id='L162' name='L162'></a> 162 
-<a id='L163' name='L163'></a> 163                 <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/634.html#L89' title='Defined at 89 in src/gui/widgets/addon_list.cpp.'>describe_status</a>(<a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>);
-<a id='L164' name='L164'></a> 164                 <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("installation_status", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
-<a id='L165' name='L165'></a> 165 
-<a id='L166' name='L166'></a> 166                 <em class='comment'>// If the addon is upgradable or ourdated on server, we display the two relevant</em>
-<a id='L167' name='L167'></a> 167                 <em class='comment'>// versions directly in the list for convenience.</em>
-<a id='L168' name='L168'></a> 168                 <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/19069.html' title='Multiple used in 3 places.'>special_version_display</a> =
-<a id='L169' name='L169'></a> 169                         <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a> == <a href='../S/217.html#L27' title='Defined at 27 in src/addon/state.hpp.'>ADDON_INSTALLED_UPGRADABLE</a> ||
-<a id='L170' name='L170'></a> 170                         <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a> == <a href='../S/217.html#L29' title='Defined at 29 in src/addon/state.hpp.'>ADDON_INSTALLED_OUTDATED</a>;
-<a id='L171' name='L171'></a> 171 
-<a id='L172' name='L172'></a> 172                 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/15909.html' title='Multiple used in 229 places.'>ostringstream</a> <a href='../Y/19166.html' title='Multiple used in 509 places.'>ss</a>;
-<a id='L173' name='L173'></a> 173                 <strong class='reserved'>if</strong>(<a href='../Y/19069.html' title='Multiple used in 3 places.'>special_version_display</a>) <em class='brace'>{</em>
-<a id='L174' name='L174'></a> 174                         <a href='../Y/19166.html' title='Multiple used in 509 places.'>ss</a> &lt;&lt; <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../Y/12229.html' title='Multiple used in 10 places.'>installed_version</a>.<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>() &lt;&lt; "\n";
-<a id='L175' name='L175'></a> 175                 <em class='brace'>}</em>
-<a id='L176' name='L176'></a> 176 
-<a id='L177' name='L177'></a> 177                 <a href='../Y/19166.html' title='Multiple used in 509 places.'>ss</a> &lt;&lt; <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../D/16040.html' title='Multiple defined in 2 places.'>version</a>.<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>();
-<a id='L178' name='L178'></a> 178 
-<a id='L179' name='L179'></a> 179                 <strong class='reserved'>if</strong>(<a href='../Y/19069.html' title='Multiple used in 3 places.'>special_version_display</a>) <em class='brace'>{</em>
-<a id='L180' name='L180'></a> 180                         <a href='../Y/19166.html' title='Multiple used in 509 places.'>ss</a>.<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>(<a href='../S/634.html#L56' title='Defined at 56 in src/gui/widgets/addon_list.cpp.'>colorize_addon_state_string</a>(<a href='../Y/19166.html' title='Multiple used in 509 places.'>ss</a>.<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>(), <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a>, <strong class='reserved'>false</strong>));
-<a id='L181' name='L181'></a> 181                 <em class='brace'>}</em>
-<a id='L182' name='L182'></a> 182 
-<a id='L183' name='L183'></a> 183                 <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../Y/19166.html' title='Multiple used in 509 places.'>ss</a>.<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>();
-<a id='L184' name='L184'></a> 184                 <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("version", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
+<a id='L159' name='L159'></a> 159         <em class='comment'>/**</em>
+<a id='L160' name='L160'></a> 160 <em class='comment'>         * Current state of the widget.</em>
+<a id='L161' name='L161'></a> 161 <em class='comment'>         *</em>
+<a id='L162' name='L162'></a> 162 <em class='comment'>         * The state of the widget determines what to render and how the widget</em>
+<a id='L163' name='L163'></a> 163 <em class='comment'>         * reacts to certain 'events'.</em>
+<a id='L164' name='L164'></a> 164 <em class='comment'>         */</em>
+<a id='L165' name='L165'></a> 165         <a href='../D/14774.html' title='Multiple defined in 20 places.'>state_t</a> <a href='../Y/19291.html' title='Multiple used in 409 places.'>state_</a>;
+<a id='L166' name='L166'></a> 166 
+<a id='L167' name='L167'></a> 167         <em class='comment'>/**</em>
+<a id='L168' name='L168'></a> 168 <em class='comment'>         * The return value of the button.</em>
+<a id='L169' name='L169'></a> 169 <em class='comment'>         *</em>
+<a id='L170' name='L170'></a> 170 <em class='comment'>         * If this value is not 0 and the button is clicked it sets the retval of</em>
+<a id='L171' name='L171'></a> 171 <em class='comment'>         * the window and the window closes itself.</em>
+<a id='L172' name='L172'></a> 172 <em class='comment'>         */</em>
+<a id='L173' name='L173'></a> 173         <strong class='reserved'>int</strong> <a href='../D/13009.html' title='Multiple defined in 5 places.'>retval_</a>;
+<a id='L174' name='L174'></a> 174 
+<a id='L175' name='L175'></a> 175         <em class='comment'>/**</em>
+<a id='L176' name='L176'></a> 176 <em class='comment'>         * The maximum number of selected states to list in the label</em>
+<a id='L177' name='L177'></a> 177 <em class='comment'>         */</em>
+<a id='L178' name='L178'></a> 178         <strong class='reserved'>int</strong> <a href='../Y/14070.html' title='Multiple used in 10 places.'>max_shown_</a>;
+<a id='L179' name='L179'></a> 179 
+<a id='L180' name='L180'></a> 180         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21655.html' title='Multiple used in 2726 places.'>vector</a>&lt;::<a href='../D/4773.html' title='Multiple defined in 5 places.'>config</a>&gt; <a href='../S/268.html#L80' title='Defined at 80 in src/ai/composite/property_handler.hpp.'>values_</a>;
+<a id='L181' name='L181'></a> 181 
+<a id='L182' name='L182'></a> 182         <a href='../D/3742.html' title='Multiple defined in 4 places.'>boost</a>::<a href='../Y/9224.html' title='Multiple used in 54 places.'>dynamic_bitset</a>&lt;&gt; <a href='../Y/20593.html' title='Multiple used in 14 places.'>toggle_states_</a>;
+<a id='L183' name='L183'></a> 183 
+<a id='L184' name='L184'></a> 184         <a href='../D/5442.html' title='Multiple defined in 173 places.'>dialogs</a>::<a href='../S/467.html#L31' title='Defined at 31 in src/gui/dialogs/drop_down_menu.hpp.'>drop_down_menu</a>* <a href='../S/619.html#L49' title='Defined at 49 in src/gui/widgets/multimenu_button.cpp.'>droplist_</a>;
 <a id='L185' name='L185'></a> 185 
-<a id='L186' name='L186'></a> 186                 <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../Y/6096.html' title='Multiple used in 16 places.'>author</a>;
-<a id='L187' name='L187'></a> 187                 <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("author", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
+<a id='L186' name='L186'></a> 186         <strong class='reserved'>void</strong> <a href='../S/619.html#L186' title='Defined at 186 in src/gui/widgets/multimenu_button.cpp.'>update_config_from_toggle_states</a>();
+<a id='L187' name='L187'></a> 187         <strong class='reserved'>void</strong> <a href='../D/15796.html' title='Multiple defined in 2 places.'>update_label</a>();
 <a id='L188' name='L188'></a> 188 
-<a id='L189' name='L189'></a> 189                 <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/218.html#L220' title='Defined at 220 in src/addon/info.cpp.'>size_display_string</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a>);
-<a id='L190' name='L190'></a> 190                 <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("size", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
+<a id='L189' name='L189'></a> 189         <em class='comment'>/** Inherited from styled_widget, implemented by REGISTER_WIDGET. */</em>
+<a id='L190' name='L190'></a> 190         <strong class='reserved'>virtual</strong> <strong class='reserved'>const</strong> <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/7447.html' title='Multiple defined in 5 places.'>get_control_type</a>() <strong class='reserved'>const</strong> <a href='../D/11715.html' title='Multiple defined in 2 places.'>override</a>;
 <a id='L191' name='L191'></a> 191 
-<a id='L192' name='L192'></a> 192                 <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/15280.html' title='Multiple defined in 15 places.'>to_string</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../Y/9067.html' title='Multiple used in 13 places.'>downloads</a>);
-<a id='L193' name='L193'></a> 193                 <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("downloads", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
-<a id='L194' name='L194'></a> 194 
-<a id='L195' name='L195'></a> 195                 <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>["label"] = <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../S/218.html#L155' title='Defined at 155 in src/addon/info.cpp.'>display_type</a>();
-<a id='L196' name='L196'></a> 196                 <a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>.<a href='../Y/9317.html' title='Multiple used in 339 places.'>emplace</a>("type", <a href='../D/9527.html' title='Multiple defined in 7 places.'>item</a>);
+<a id='L192' name='L192'></a> 192         <em class='comment'>/***** ***** ***** signal handlers ***** ****** *****/</em>
+<a id='L193' name='L193'></a> 193 
+<a id='L194' name='L194'></a> 194         <strong class='reserved'>void</strong> <a href='../D/14531.html' title='Multiple defined in 7 places.'>signal_handler_mouse_enter</a>(<strong class='reserved'>const</strong> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/528.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11361.html' title='Multiple used in 430 places.'>handled</a>);
+<a id='L195' name='L195'></a> 195 
+<a id='L196' name='L196'></a> 196         <strong class='reserved'>void</strong> <a href='../D/14532.html' title='Multiple defined in 7 places.'>signal_handler_mouse_leave</a>(<strong class='reserved'>const</strong> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/528.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11361.html' title='Multiple used in 430 places.'>handled</a>);
 <a id='L197' name='L197'></a> 197 
-<a id='L198' name='L198'></a> 198                 <a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>* <a href='../Y/17847.html' title='Multiple used in 57 places.'>row_grid</a> = &amp;<a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../D/2959.html' title='Multiple defined in 6 places.'>add_row</a>(<a href='../D/5236.html' title='Multiple defined in 16 places.'>data</a>);
+<a id='L198' name='L198'></a> 198         <strong class='reserved'>void</strong> <a href='../D/14525.html' title='Multiple defined in 10 places.'>signal_handler_left_button_down</a>(<strong class='reserved'>const</strong> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/528.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11361.html' title='Multiple used in 430 places.'>handled</a>);
 <a id='L199' name='L199'></a> 199 
-<a id='L200' name='L200'></a> 200                 <em class='comment'>// Set special retval for the toggle panels</em>
-<a id='L201' name='L201'></a> 201                 <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/609.html#L38' title='Defined at 38 in src/gui/widgets/toggle_panel.hpp.'>toggle_panel</a>&gt;(<a href='../Y/17847.html' title='Multiple used in 57 places.'>row_grid</a>, "list_panel", <strong class='reserved'>false</strong>).<a href='../D/14063.html' title='Multiple defined in 6 places.'>set_retval</a>(<a href='../Y/575.html' title='Multiple used in 3 places.'>DEFAULT_ACTION_RETVAL</a>);
-<a id='L202' name='L202'></a> 202 
-<a id='L203' name='L203'></a> 203                 <a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>* <a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a> = <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>&gt;(<a href='../Y/17847.html' title='Multiple used in 57 places.'>row_grid</a>, "single_install_buttons", <strong class='reserved'>false</strong>, <strong class='reserved'>false</strong>);
-<a id='L204' name='L204'></a> 204                 <strong class='reserved'>if</strong>(!<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>) <em class='brace'>{</em>
-<a id='L205' name='L205'></a> 205                         <strong class='reserved'>continue</strong>;
-<a id='L206' name='L206'></a> 206                 <em class='brace'>}</em>
-<a id='L207' name='L207'></a> 207                 <a href='../S/602.html#L36' title='Defined at 36 in src/gui/widgets/stacked_widget.hpp.'>stacked_widget</a>&amp; <a href='../Y/12225.html' title='Multiple used in 5 places.'>install_update_stack</a> = <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../S/602.html#L36' title='Defined at 36 in src/gui/widgets/stacked_widget.hpp.'>stacked_widget</a>&gt;(<a href='../Y/17847.html' title='Multiple used in 57 places.'>row_grid</a>, "install_update_stack", <strong class='reserved'>false</strong>);
+<a id='L200' name='L200'></a> 200         <strong class='reserved'>void</strong> <a href='../D/14526.html' title='Multiple defined in 7 places.'>signal_handler_left_button_up</a>(<strong class='reserved'>const</strong> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/528.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11361.html' title='Multiple used in 430 places.'>handled</a>);
+<a id='L201' name='L201'></a> 201 
+<a id='L202' name='L202'></a> 202         <strong class='reserved'>void</strong> <a href='../D/14523.html' title='Multiple defined in 8 places.'>signal_handler_left_button_click</a>(<strong class='reserved'>const</strong> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/528.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a> <a href='../D/6011.html' title='Multiple defined in 11 places.'>event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11361.html' title='Multiple used in 430 places.'>handled</a>);
+<a id='L203' name='L203'></a> 203 
+<a id='L204' name='L204'></a> 204         <strong class='reserved'>void</strong> <a href='../S/619.html#L202' title='Defined at 202 in src/gui/widgets/multimenu_button.cpp.'>toggle_state_changed</a>();
+<a id='L205' name='L205'></a> 205 <em class='brace'>}</em>;
+<a id='L206' name='L206'></a> 206 
+<a id='L207' name='L207'></a> 207 <em class='comment'>// }---------- DEFINITION ---------{</em>
 <a id='L208' name='L208'></a> 208 
-<a id='L209' name='L209'></a> 209                 <strong class='reserved'>if</strong>(!<a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a>) <em class='brace'>{</em>
-<a id='L210' name='L210'></a> 210                         <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/12470.html' title='Multiple used in 6 places.'>is_updatable</a> = <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a> == <a href='../S/217.html#L27' title='Defined at 27 in src/addon/state.hpp.'>ADDON_INSTALLED_UPGRADABLE</a>;
-<a id='L211' name='L211'></a> 211                         <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/12422.html' title='Multiple used in 4 places.'>is_installed</a> =
-<a id='L212' name='L212'></a> 212                                 <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a> == <a href='../S/217.html#L25' title='Defined at 25 in src/addon/state.hpp.'>ADDON_INSTALLED</a> || <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a> == <a href='../S/217.html#L27' title='Defined at 27 in src/addon/state.hpp.'>ADDON_INSTALLED_UPGRADABLE</a>;
-<a id='L213' name='L213'></a> 213 
-<a id='L214' name='L214'></a> 214                         <a href='../Y/12225.html' title='Multiple used in 5 places.'>install_update_stack</a>.<a href='../S/567.html#L152' title='Defined at 152 in src/gui/widgets/stacked_widget.cpp.'>select_layer</a>(<strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../Y/12470.html' title='Multiple used in 6 places.'>is_updatable</a>));
-<a id='L215' name='L215'></a> 215 
-<a id='L216' name='L216'></a> 216                         <strong class='reserved'>if</strong>(!<a href='../Y/12470.html' title='Multiple used in 6 places.'>is_updatable</a>) <em class='brace'>{</em>
-<a id='L217' name='L217'></a> 217                                 <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_install", <strong class='reserved'>false</strong>).<a href='../D/13597.html' title='Multiple defined in 24 places.'>set_active</a>(!<a href='../Y/12422.html' title='Multiple used in 4 places.'>is_installed</a>);
-<a id='L218' name='L218'></a> 218                                 <strong class='reserved'>if</strong>(<a href='../Y/12222.html' title='Multiple used in 5 places.'>install_function_</a> != <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>) <em class='brace'>{</em>
-<a id='L219' name='L219'></a> 219                                         <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L209' title='Defined at 209 in src/gui/core/event/dispatcher.cpp.'>connect_signal_mouse_left_click</a>(
-<a id='L220' name='L220'></a> 220                                                 <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_install", <strong class='reserved'>false</strong>),
-<a id='L221' name='L221'></a> 221                                                 [<strong class='reserved'>this</strong>, <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>](<a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../D/5487.html' title='Multiple defined in 2 places.'>dispatcher</a>&amp;, <strong class='reserved'>const</strong> <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a>)
-<a id='L222' name='L222'></a> 222                                         <em class='brace'>{</em>
-<a id='L223' name='L223'></a> 223                                                 <a href='../Y/12222.html' title='Multiple used in 5 places.'>install_function_</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
-<a id='L224' name='L224'></a> 224                                                 <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a> = <strong class='reserved'>true</strong>;
-<a id='L225' name='L225'></a> 225                                                 <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a> = <strong class='reserved'>true</strong>;
-<a id='L226' name='L226'></a> 226                                         <em class='brace'>}</em>);
-<a id='L227' name='L227'></a> 227                                 <em class='brace'>}</em>
-<a id='L228' name='L228'></a> 228                         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
-<a id='L229' name='L229'></a> 229                                 <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_update", <strong class='reserved'>false</strong>).<a href='../D/13597.html' title='Multiple defined in 24 places.'>set_active</a>(<strong class='reserved'>true</strong>);
-<a id='L230' name='L230'></a> 230                                 <strong class='reserved'>if</strong>(<a href='../Y/21301.html' title='Multiple used in 4 places.'>update_function_</a> != <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>) <em class='brace'>{</em>
-<a id='L231' name='L231'></a> 231                                         <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L209' title='Defined at 209 in src/gui/core/event/dispatcher.cpp.'>connect_signal_mouse_left_click</a>(
-<a id='L232' name='L232'></a> 232                                                 <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_update", <strong class='reserved'>false</strong>),
-<a id='L233' name='L233'></a> 233                                                 [<strong class='reserved'>this</strong>, <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>](<a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../D/5487.html' title='Multiple defined in 2 places.'>dispatcher</a>&amp;, <strong class='reserved'>const</strong> <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a>)
-<a id='L234' name='L234'></a> 234                                         <em class='brace'>{</em>
-<a id='L235' name='L235'></a> 235                                                 <a href='../Y/21301.html' title='Multiple used in 4 places.'>update_function_</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
-<a id='L236' name='L236'></a> 236                                                 <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a> = <strong class='reserved'>true</strong>;
-<a id='L237' name='L237'></a> 237                                                 <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a> = <strong class='reserved'>true</strong>;
-<a id='L238' name='L238'></a> 238                                         <em class='brace'>}</em>);
-<a id='L239' name='L239'></a> 239                                 <em class='brace'>}</em>
-<a id='L240' name='L240'></a> 240                         <em class='brace'>}</em>
-<a id='L241' name='L241'></a> 241 
-<a id='L242' name='L242'></a> 242                         <strong class='reserved'>if</strong>(<a href='../Y/12422.html' title='Multiple used in 4 places.'>is_installed</a>) <em class='brace'>{</em>
-<a id='L243' name='L243'></a> 243                                 <strong class='reserved'>if</strong>(<a href='../Y/21090.html' title='Multiple used in 5 places.'>uninstall_function_</a> != <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>) <em class='brace'>{</em>
-<a id='L244' name='L244'></a> 244                                         <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L209' title='Defined at 209 in src/gui/core/event/dispatcher.cpp.'>connect_signal_mouse_left_click</a>(
-<a id='L245' name='L245'></a> 245                                                 <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_uninstall", <strong class='reserved'>false</strong>),
-<a id='L246' name='L246'></a> 246                                                 [<strong class='reserved'>this</strong>, <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>](<a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../D/5487.html' title='Multiple defined in 2 places.'>dispatcher</a>&amp;, <strong class='reserved'>const</strong> <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a>)
-<a id='L247' name='L247'></a> 247                                         <em class='brace'>{</em>
-<a id='L248' name='L248'></a> 248                                                 <a href='../Y/21090.html' title='Multiple used in 5 places.'>uninstall_function_</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
-<a id='L249' name='L249'></a> 249                                                 <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a> = <strong class='reserved'>true</strong>;
-<a id='L250' name='L250'></a> 250                                                 <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a> = <strong class='reserved'>true</strong>;
-<a id='L251' name='L251'></a> 251                                         <em class='brace'>}</em>);
-<a id='L252' name='L252'></a> 252                                 <em class='brace'>}</em>
-<a id='L253' name='L253'></a> 253                         <em class='brace'>}</em>
-<a id='L254' name='L254'></a> 254 
-<a id='L255' name='L255'></a> 255                         <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_uninstall", <strong class='reserved'>false</strong>).<a href='../D/13597.html' title='Multiple defined in 24 places.'>set_active</a>(<a href='../Y/12422.html' title='Multiple used in 4 places.'>is_installed</a>);
-<a id='L256' name='L256'></a> 256 
-<a id='L257' name='L257'></a> 257                         <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_install_buttons", <strong class='reserved'>false</strong>).<a href='../S/597.html#L479' title='Defined at 479 in src/gui/widgets/widget.cpp.'>set_visible</a>(<a href='../S/634.html#L444' title='Defined at 444 in src/gui/widgets/addon_list.cpp.'>install_buttons_visibility_</a>);
-<a id='L258' name='L258'></a> 258                         <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/9697.html' title='Multiple defined in 5 places.'>label</a>&gt;(<a href='../Y/17847.html' title='Multiple used in 57 places.'>row_grid</a>, "installation_status", <strong class='reserved'>false</strong>).<a href='../S/597.html#L479' title='Defined at 479 in src/gui/widgets/widget.cpp.'>set_visible</a>(<a href='../Y/12224.html' title='Multiple used in 8 places.'>install_status_visibility_</a>);
-<a id='L259' name='L259'></a> 259                 <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
-<a id='L260' name='L260'></a> 260                         <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/12470.html' title='Multiple used in 6 places.'>is_updatable</a> = <a href='../Y/20703.html' title='Multiple used in 11 places.'>tracking_info</a>.<a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a> == <a href='../S/217.html#L29' title='Defined at 29 in src/addon/state.hpp.'>ADDON_INSTALLED_OUTDATED</a>;
-<a id='L261' name='L261'></a> 261                         <strong class='reserved'>const</strong> <strong class='reserved'>bool</strong> <a href='../Y/7054.html' title='Multiple used in 3 places.'>can_delete</a> = !<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>.<a href='../D/9981.html' title='Multiple defined in 2 places.'>local_only</a>;
-<a id='L262' name='L262'></a> 262 
-<a id='L263' name='L263'></a> 263                         <a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&amp; <a href='../Y/12220.html' title='Multiple used in 4 places.'>install_button</a> = <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_install", <strong class='reserved'>false</strong>);
-<a id='L264' name='L264'></a> 264                         <a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&amp; <a href='../Y/21294.html' title='Multiple used in 4 places.'>update_button</a> = <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_update", <strong class='reserved'>false</strong>);
-<a id='L265' name='L265'></a> 265                         <a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&amp; <a href='../Y/21089.html' title='Multiple used in 4 places.'>uninstall_button</a> = <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/3858.html' title='Multiple defined in 3 places.'>button</a>&gt;(<a href='../Y/7905.html' title='Multiple used in 12 places.'>control_grid</a>, "single_uninstall", <strong class='reserved'>false</strong>);
-<a id='L266' name='L266'></a> 266 
-<a id='L267' name='L267'></a> 267                         <a href='../Y/12220.html' title='Multiple used in 4 places.'>install_button</a>.<a href='../D/13597.html' title='Multiple defined in 24 places.'>set_active</a>(<strong class='reserved'>true</strong>);
-<a id='L268' name='L268'></a> 268                         <a href='../Y/21294.html' title='Multiple used in 4 places.'>update_button</a>.<a href='../D/13597.html' title='Multiple defined in 24 places.'>set_active</a>(<strong class='reserved'>true</strong>);
-<a id='L269' name='L269'></a> 269                         <a href='../Y/21089.html' title='Multiple used in 4 places.'>uninstall_button</a>.<a href='../D/13597.html' title='Multiple defined in 24 places.'>set_active</a>(<a href='../Y/7054.html' title='Multiple used in 3 places.'>can_delete</a>);
-<a id='L270' name='L270'></a> 270 
-<a id='L271' name='L271'></a> 271                         <strong class='reserved'>if</strong>(<strong class='reserved'>true</strong>) <em class='brace'>{</em>
-<a id='L272' name='L272'></a> 272                                 <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L209' title='Defined at 209 in src/gui/core/event/dispatcher.cpp.'>connect_signal_mouse_left_click</a>(
-<a id='L273' name='L273'></a> 273                                         <a href='../Y/12220.html' title='Multiple used in 4 places.'>install_button</a>,
-<a id='L274' name='L274'></a> 274                                         [<strong class='reserved'>this</strong>, <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>](<a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../D/5487.html' title='Multiple defined in 2 places.'>dispatcher</a>&amp;, <strong class='reserved'>const</strong> <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a>)
-<a id='L275' name='L275'></a> 275                                 <em class='brace'>{</em>
-<a id='L276' name='L276'></a> 276                                         <a href='../Y/16913.html' title='Multiple used in 5 places.'>publish_function_</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
-<a id='L277' name='L277'></a> 277                                         <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a> = <strong class='reserved'>true</strong>;
-<a id='L278' name='L278'></a> 278                                         <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a> = <strong class='reserved'>true</strong>;
-<a id='L279' name='L279'></a> 279                                 <em class='brace'>}</em>);
-<a id='L280' name='L280'></a> 280 
-<a id='L281' name='L281'></a> 281                                 <a href='../Y/12220.html' title='Multiple used in 4 places.'>install_button</a>.<a href='../S/610.html#L231' title='Defined at 231 in src/gui/widgets/styled_widget.hpp.'>set_tooltip</a>(<a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("Publish add-on"));
-<a id='L282' name='L282'></a> 282                         <em class='brace'>}</em>
-<a id='L283' name='L283'></a> 283 
-<a id='L284' name='L284'></a> 284                         <strong class='reserved'>if</strong>(<a href='../Y/12470.html' title='Multiple used in 6 places.'>is_updatable</a>) <em class='brace'>{</em>
-<a id='L285' name='L285'></a> 285                                 <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L209' title='Defined at 209 in src/gui/core/event/dispatcher.cpp.'>connect_signal_mouse_left_click</a>(
-<a id='L286' name='L286'></a> 286                                         <a href='../Y/21294.html' title='Multiple used in 4 places.'>update_button</a>,
-<a id='L287' name='L287'></a> 287                                         [<strong class='reserved'>this</strong>, <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>](<a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../D/5487.html' title='Multiple defined in 2 places.'>dispatcher</a>&amp;, <strong class='reserved'>const</strong> <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a>)
-<a id='L288' name='L288'></a> 288                                 <em class='brace'>{</em>
-<a id='L289' name='L289'></a> 289                                         <a href='../Y/16913.html' title='Multiple used in 5 places.'>publish_function_</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
-<a id='L290' name='L290'></a> 290                                         <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a> = <strong class='reserved'>true</strong>;
-<a id='L291' name='L291'></a> 291                                         <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a> = <strong class='reserved'>true</strong>;
-<a id='L292' name='L292'></a> 292                                 <em class='brace'>}</em>);
-<a id='L293' name='L293'></a> 293 
-<a id='L294' name='L294'></a> 294                                 <a href='../Y/21294.html' title='Multiple used in 4 places.'>update_button</a>.<a href='../S/610.html#L231' title='Defined at 231 in src/gui/widgets/styled_widget.hpp.'>set_tooltip</a>(<a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("Send new version to server"));
-<a id='L295' name='L295'></a> 295                         <em class='brace'>}</em>
-<a id='L296' name='L296'></a> 296 
-<a id='L297' name='L297'></a> 297                         <strong class='reserved'>if</strong>(<a href='../Y/7054.html' title='Multiple used in 3 places.'>can_delete</a>) <em class='brace'>{</em>
-<a id='L298' name='L298'></a> 298                                 <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/531.html#L209' title='Defined at 209 in src/gui/core/event/dispatcher.cpp.'>connect_signal_mouse_left_click</a>(
-<a id='L299' name='L299'></a> 299                                         <a href='../Y/21089.html' title='Multiple used in 4 places.'>uninstall_button</a>,
-<a id='L300' name='L300'></a> 300                                         [<strong class='reserved'>this</strong>, <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>](<a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../D/5487.html' title='Multiple defined in 2 places.'>dispatcher</a>&amp;, <strong class='reserved'>const</strong> <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/6004.html' title='Multiple defined in 11 places.'>event</a>::<a href='../S/529.html#L55' title='Defined at 55 in src/gui/core/event/handler.hpp.'>ui_event</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a>, <strong class='reserved'>bool</strong>&amp; <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a>)
-<a id='L301' name='L301'></a> 301                                 <em class='brace'>{</em>
-<a id='L302' name='L302'></a> 302                                         <a href='../S/634.html#L50' title='Defined at 50 in src/gui/widgets/addon_list.cpp.'>delete_function_</a>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>);
-<a id='L303' name='L303'></a> 303                                         <a href='../Y/11329.html' title='Multiple used in 430 places.'>handled</a> = <strong class='reserved'>true</strong>;
-<a id='L304' name='L304'></a> 304                                         <a href='../Y/11323.html' title='Multiple used in 64 places.'>halt</a> = <strong class='reserved'>true</strong>;
-<a id='L305' name='L305'></a> 305                                 <em class='brace'>}</em>);
-<a id='L306' name='L306'></a> 306 
-<a id='L307' name='L307'></a> 307                                 <a href='../Y/21089.html' title='Multiple used in 4 places.'>uninstall_button</a>.<a href='../S/610.html#L231' title='Defined at 231 in src/gui/widgets/styled_widget.hpp.'>set_tooltip</a>(<a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("Delete add-on from server"));
-<a id='L308' name='L308'></a> 308                         <em class='brace'>}</em>
-<a id='L309' name='L309'></a> 309 
-<a id='L310' name='L310'></a> 310                         <a href='../Y/12225.html' title='Multiple used in 5 places.'>install_update_stack</a>.<a href='../S/567.html#L152' title='Defined at 152 in src/gui/widgets/stacked_widget.cpp.'>select_layer</a>(<strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../Y/12470.html' title='Multiple used in 6 places.'>is_updatable</a>));
-<a id='L311' name='L311'></a> 311                 <em class='brace'>}</em>
-<a id='L312' name='L312'></a> 312         <em class='brace'>}</em>
-<a id='L313' name='L313'></a> 313 
-<a id='L314' name='L314'></a> 314         <a href='../S/634.html#L388' title='Defined at 388 in src/gui/widgets/addon_list.cpp.'>select_first_addon</a>();
-<a id='L315' name='L315'></a> 315 <em class='brace'>}</em>
-<a id='L316' name='L316'></a> 316 
-<a id='L317' name='L317'></a> 317 <strong class='reserved'>const</strong> <a href='../S/216.html#L29' title='Defined at 29 in src/addon/info.hpp.'>addon_info</a>* <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/7135.html' title='Multiple referred from 4 places.'>get_selected_addon</a>() <strong class='reserved'>const</strong>
-<a id='L318' name='L318'></a> 318 <em class='brace'>{</em>
-<a id='L319' name='L319'></a> 319         <strong class='reserved'>const</strong> <a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>&amp; <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a> = <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<strong class='reserved'>const</strong> <a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>&gt;(&amp;<a href='../D/7585.html' title='Multiple defined in 6 places.'>get_grid</a>(), "addons", <strong class='reserved'>false</strong>);
-<a id='L320' name='L320'></a> 320 
-<a id='L321' name='L321'></a> 321         <strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8854.html' title='Multiple defined in 6 places.'>index</a> = <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../D/7971.html' title='Multiple defined in 2 places.'>get_selected_row</a>();
-<a id='L322' name='L322'></a> 322         <strong class='reserved'>if</strong>(<a href='../D/8854.html' title='Multiple defined in 6 places.'>index</a> == -1 || <a href='../D/8854.html' title='Multiple defined in 6 places.'>index</a> &gt;= <strong class='reserved'>static_cast</strong>&lt;<strong class='reserved'>int</strong>&gt;(<a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a>())) <em class='brace'>{</em>
-<a id='L323' name='L323'></a> 323                 <strong class='reserved'>return</strong> <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>;
-<a id='L324' name='L324'></a> 324         <em class='brace'>}</em>
-<a id='L325' name='L325'></a> 325 
-<a id='L326' name='L326'></a> 326         <strong class='reserved'>return</strong> <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(<a href='../D/8854.html' title='Multiple defined in 6 places.'>index</a>);
-<a id='L327' name='L327'></a> 327 <em class='brace'>}</em>
-<a id='L328' name='L328'></a> 328 
-<a id='L329' name='L329'></a> 329 <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../S/633.html#L59' title='Referred from 59 in src/gui/widgets/addon_list.hpp.'>get_remote_addon_id</a>()
-<a id='L330' name='L330'></a> 330 <em class='brace'>{</em>
-<a id='L331' name='L331'></a> 331         <strong class='reserved'>const</strong> <a href='../S/216.html#L29' title='Defined at 29 in src/addon/info.hpp.'>addon_info</a>* <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a> = <a href='../S/634.html#L317' title='Defined at 317 in src/gui/widgets/addon_list.cpp.'>get_selected_addon</a>();
-<a id='L332' name='L332'></a> 332         <strong class='reserved'>if</strong>(<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a> == <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a> || !<a href='../S/224.html#L24' title='Defined at 24 in src/addon/state.cpp.'>get_addon_tracking_info</a>(*<a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>).<a href='../Y/7065.html' title='Multiple used in 23 places.'>can_publish</a>) <em class='brace'>{</em>
-<a id='L333' name='L333'></a> 333                 <strong class='reserved'>return</strong> "";
-<a id='L334' name='L334'></a> 334         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
-<a id='L335' name='L335'></a> 335                 <strong class='reserved'>return</strong> <a href='../S/4094.html#L323' title='Defined at 323 in data/tools/wesnoth/libgithub.py.'>addon</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>;
-<a id='L336' name='L336'></a> 336         <em class='brace'>}</em>
-<a id='L337' name='L337'></a> 337 <em class='brace'>}</em>
-<a id='L338' name='L338'></a> 338 
-<a id='L339' name='L339'></a> 339 <strong class='reserved'>void</strong> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/12292.html' title='Multiple referred from 3 places.'>select_addon</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>)
-<a id='L340' name='L340'></a> 340 <em class='brace'>{</em>
-<a id='L341' name='L341'></a> 341         <a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>&amp; <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a> = <a href='../S/634.html#L362' title='Defined at 362 in src/gui/widgets/addon_list.cpp.'>get_listbox</a>();
-<a id='L342' name='L342'></a> 342 
-<a id='L343' name='L343'></a> 343         <strong class='reserved'>auto</strong> <a href='../Y/12592.html' title='Multiple used in 308 places.'>iter</a> = <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/10152.html' title='Multiple used in 47 places.'>find_if</a>(<a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/3619.html' title='Multiple defined in 28 places.'>begin</a>(), <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/5899.html' title='Multiple defined in 28 places.'>end</a>(),
-<a id='L344' name='L344'></a> 344                 [&amp;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>](<strong class='reserved'>const</strong> <a href='../S/216.html#L29' title='Defined at 29 in src/addon/info.hpp.'>addon_info</a>* <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>)
-<a id='L345' name='L345'></a> 345         <em class='brace'>{</em>
-<a id='L346' name='L346'></a> 346                 <strong class='reserved'>return</strong> <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a> == <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>;
-<a id='L347' name='L347'></a> 347         <em class='brace'>}</em>);
-<a id='L348' name='L348'></a> 348         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../Y/12592.html' title='Multiple used in 308 places.'>iter</a> != <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/5899.html' title='Multiple defined in 28 places.'>end</a>());
-<a id='L349' name='L349'></a> 349         <strong class='reserved'>const</strong> <a href='../S/216.html#L29' title='Defined at 29 in src/addon/info.hpp.'>addon_info</a>&amp; <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a> = **<a href='../Y/12592.html' title='Multiple used in 308 places.'>iter</a>;
-<a id='L350' name='L350'></a> 350 
-<a id='L351' name='L351'></a> 351         <strong class='reserved'>for</strong>(<strong class='reserved'>unsigned</strong> <strong class='reserved'>int</strong> <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a> = 0u; <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a> &lt; <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../D/7647.html' title='Multiple defined in 4 places.'>get_item_count</a>(); ++<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>)
-<a id='L352' name='L352'></a> 352         <em class='brace'>{</em>
-<a id='L353' name='L353'></a> 353                 <a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>* <a href='../Y/17833.html' title='Multiple used in 376 places.'>row</a> = <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../D/7928.html' title='Multiple defined in 4 places.'>get_row_grid</a>(<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>);
-<a id='L354' name='L354'></a> 354                 <strong class='reserved'>const</strong> <a href='../D/9697.html' title='Multiple defined in 5 places.'>label</a>&amp; <a href='../Y/14750.html' title='Multiple used in 2 places.'>name_label</a> = <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/9697.html' title='Multiple defined in 5 places.'>label</a>&gt;(<a href='../Y/17833.html' title='Multiple used in 376 places.'>row</a>, "name", <strong class='reserved'>false</strong>);
-<a id='L355' name='L355'></a> 355                 <strong class='reserved'>if</strong>(<a href='../Y/14750.html' title='Multiple used in 2 places.'>name_label</a>.<a href='../D/7667.html' title='Multiple defined in 4 places.'>get_label</a>().<a href='../D/3588.html' title='Multiple defined in 2 places.'>base_str</a>() == <a href='../D/8860.html' title='Multiple defined in 2 places.'>info</a>.<a href='../S/218.html#L125' title='Defined at 125 in src/addon/info.cpp.'>display_title</a>())
-<a id='L356' name='L356'></a> 356                 <em class='brace'>{</em>
-<a id='L357' name='L357'></a> 357                         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../D/13452.html' title='Multiple defined in 2 places.'>select_row</a>(<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>);
-<a id='L358' name='L358'></a> 358                 <em class='brace'>}</em>
-<a id='L359' name='L359'></a> 359         <em class='brace'>}</em>
-<a id='L360' name='L360'></a> 360 <em class='brace'>}</em>
-<a id='L361' name='L361'></a> 361 
-<a id='L362' name='L362'></a> 362 <a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>&amp; <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/6888.html' title='Multiple referred from 7 places.'>get_listbox</a>()
-<a id='L363' name='L363'></a> 363 <em class='brace'>{</em>
-<a id='L364' name='L364'></a> 364         <strong class='reserved'>return</strong> <a href='../D/6352.html' title='Multiple defined in 3 places.'>find_widget</a>&lt;<a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>&gt;(&amp;<a href='../D/7585.html' title='Multiple defined in 6 places.'>get_grid</a>(), "addons", <strong class='reserved'>false</strong>);
-<a id='L365' name='L365'></a> 365 <em class='brace'>}</em>
-<a id='L366' name='L366'></a> 366 
-<a id='L367' name='L367'></a> 367 <strong class='reserved'>void</strong> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/2660.html' title='Multiple referred from 2 places.'>add_list_to_keyboard_chain</a>()
-<a id='L368' name='L368'></a> 368 <em class='brace'>{</em>
-<a id='L369' name='L369'></a> 369         <strong class='reserved'>if</strong>(<a href='../D/16394.html' title='Multiple defined in 7 places.'>window</a>* <a href='../D/16394.html' title='Multiple defined in 7 places.'>window</a> = <a href='../D/8195.html' title='Multiple defined in 5 places.'>get_window</a>()) <em class='brace'>{</em>
-<a id='L370' name='L370'></a> 370                 <a href='../D/16394.html' title='Multiple defined in 7 places.'>window</a>-&gt;<a href='../S/570.html#L1305' title='Defined at 1305 in src/gui/widgets/window.cpp.'>add_to_keyboard_chain</a>(&amp;<a href='../S/634.html#L362' title='Defined at 362 in src/gui/widgets/addon_list.cpp.'>get_listbox</a>());
-<a id='L371' name='L371'></a> 371         <em class='brace'>}</em>
-<a id='L372' name='L372'></a> 372 <em class='brace'>}</em>
-<a id='L373' name='L373'></a> 373 
-<a id='L374' name='L374'></a> 374 <strong class='reserved'>void</strong> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/5569.html' title='Multiple referred from 18 places.'>finalize_setup</a>()
-<a id='L375' name='L375'></a> 375 <em class='brace'>{</em>
-<a id='L376' name='L376'></a> 376         <a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>&amp; <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a> = <a href='../S/634.html#L362' title='Defined at 362 in src/gui/widgets/addon_list.cpp.'>get_listbox</a>();
-<a id='L377' name='L377'></a> 377 
-<a id='L378' name='L378'></a> 378         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../S/600.html#L260' title='Defined at 260 in src/gui/widgets/listbox.hpp.'>register_sorting_option</a>(0, [<strong class='reserved'>this</strong>](<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>) <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>[<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>]-&gt;<a href='../D/15244.html' title='Multiple defined in 10 places.'>title</a>; <em class='brace'>}</em>);
-<a id='L379' name='L379'></a> 379         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../S/600.html#L260' title='Defined at 260 in src/gui/widgets/listbox.hpp.'>register_sorting_option</a>(1, [<strong class='reserved'>this</strong>](<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>) <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>[<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>]-&gt;<a href='../Y/6096.html' title='Multiple used in 16 places.'>author</a>; <em class='brace'>}</em>);
-<a id='L380' name='L380'></a> 380         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../S/600.html#L260' title='Defined at 260 in src/gui/widgets/listbox.hpp.'>register_sorting_option</a>(2, [<strong class='reserved'>this</strong>](<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>) <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>[<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>]-&gt;<a href='../D/14578.html' title='Multiple defined in 18 places.'>size</a>; <em class='brace'>}</em>);
-<a id='L381' name='L381'></a> 381         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../S/600.html#L260' title='Defined at 260 in src/gui/widgets/listbox.hpp.'>register_sorting_option</a>(3, [<strong class='reserved'>this</strong>](<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>) <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>[<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>]-&gt;<a href='../Y/9067.html' title='Multiple used in 13 places.'>downloads</a>; <em class='brace'>}</em>);
-<a id='L382' name='L382'></a> 382         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../S/600.html#L260' title='Defined at 260 in src/gui/widgets/listbox.hpp.'>register_sorting_option</a>(4, [<strong class='reserved'>this</strong>](<strong class='reserved'>const</strong> <strong class='reserved'>int</strong> <a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>) <em class='brace'>{</em> <strong class='reserved'>return</strong> <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>[<a href='../D/8660.html' title='Multiple defined in 5 places.'>i</a>]-&gt;<a href='../S/218.html#L155' title='Defined at 155 in src/addon/info.cpp.'>display_type</a>(); <em class='brace'>}</em>);
-<a id='L383' name='L383'></a> 383 
-<a id='L384' name='L384'></a> 384         <strong class='reserved'>auto</strong> <a href='../S/659.html#L33' title='Defined at 33 in src/gui/auxiliary/iterator/policy_order.hpp.'>order</a> = <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13803.html' title='Multiple used in 116 places.'>make_pair</a>(0, <a href='../D/8307.html' title='Multiple defined in 341 places.'>gui2</a>::<a href='../D/9872.html' title='Multiple defined in 2 places.'>listbox</a>::<a href='../S/600.html#L270' title='Defined at 270 in src/gui/widgets/listbox.hpp.'>SORT_ASCENDING</a>);
-<a id='L385' name='L385'></a> 385         <a href='../D/9850.html' title='Multiple defined in 2 places.'>list</a>.<a href='../S/623.html#L612' title='Defined at 612 in src/gui/widgets/listbox.cpp.'>set_active_sorting_option</a>(<a href='../S/659.html#L33' title='Defined at 33 in src/gui/auxiliary/iterator/policy_order.hpp.'>order</a>);
-<a id='L386' name='L386'></a> 386 <em class='brace'>}</em>
-<a id='L387' name='L387'></a> 387 
-<a id='L388' name='L388'></a> 388 <strong class='reserved'>void</strong> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>::<a href='../R/12301.html' title='Multiple referred from 2 places.'>select_first_addon</a>()
-<a id='L389' name='L389'></a> 389 <em class='brace'>{</em>
-<a id='L390' name='L390'></a> 390         <strong class='reserved'>if</strong>(<a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/5865.html' title='Multiple defined in 31 places.'>empty</a>()) <em class='brace'>{</em>
-<a id='L391' name='L391'></a> 391                 <em class='comment'>// Happens in the dialog unit test.</em>
-<a id='L392' name='L392'></a> 392                 <strong class='reserved'>return</strong>;
-<a id='L393' name='L393'></a> 393         <em class='brace'>}</em>
-<a id='L394' name='L394'></a> 394 
-<a id='L395' name='L395'></a> 395         <strong class='reserved'>const</strong> <a href='../S/216.html#L29' title='Defined at 29 in src/addon/info.hpp.'>addon_info</a>* <a href='../Y/10194.html' title='Multiple used in 4 places.'>first_addon</a> = <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>.<a href='../D/3440.html' title='Multiple defined in 2 places.'>at</a>(0);
-<a id='L396' name='L396'></a> 396         <strong class='reserved'>for</strong>(<strong class='reserved'>const</strong> <a href='../S/216.html#L29' title='Defined at 29 in src/addon/info.hpp.'>addon_info</a>* <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a> : <a href='../Y/5364.html' title='Multiple used in 16 places.'>addon_vector_</a>) <em class='brace'>{</em>
-<a id='L397' name='L397'></a> 397                 <strong class='reserved'>if</strong>(<a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>-&gt;<a href='../S/218.html#L125' title='Defined at 125 in src/addon/info.cpp.'>display_title</a>().<a href='../D/4667.html' title='Multiple defined in 14 places.'>compare</a>(<a href='../Y/10194.html' title='Multiple used in 4 places.'>first_addon</a>-&gt;<a href='../S/218.html#L125' title='Defined at 125 in src/addon/info.cpp.'>display_title</a>()) &lt; 0) <em class='brace'>{</em>
-<a id='L398' name='L398'></a> 398                         <a href='../Y/10194.html' title='Multiple used in 4 places.'>first_addon</a> = <a href='../D/2732.html' title='Multiple defined in 5 places.'>a</a>;
-<a id='L399' name='L399'></a> 399                 <em class='brace'>}</em>
-<a id='L400' name='L400'></a> 400         <em class='brace'>}</em>
-<a id='L401' name='L401'></a> 401         <a href='../S/634.html#L339' title='Defined at 339 in src/gui/widgets/addon_list.cpp.'>select_addon</a>(<a href='../Y/10194.html' title='Multiple used in 4 places.'>first_addon</a>-&gt;<a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a>);
-<a id='L402' name='L402'></a> 402 <em class='brace'>}</em>
-<a id='L403' name='L403'></a> 403 
-<a id='L404' name='L404'></a> 404 <a href='../R/2785.html' title='Multiple referred from 4 places.'>addon_list_definition</a>::<a href='../D/3043.html' title='Multiple defined in 2 places.'>addon_list_definition</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>) :
-<a id='L405' name='L405'></a> 405         <a href='../S/522.html#L93' title='Defined at 93 in src/gui/core/widget_definition.hpp.'>styled_widget_definition</a>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>)
-<a id='L406' name='L406'></a> 406 <em class='brace'>{</em>
-<a id='L407' name='L407'></a> 407         <a href='../S/506.html#L68' title='Defined at 68 in src/gui/core/log.hpp.'>DBG_GUI_P</a> &lt;&lt; "Parsing add-on list " &lt;&lt; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a> &lt;&lt; "\n";
-<a id='L408' name='L408'></a> 408 
-<a id='L409' name='L409'></a> 409         <a href='../S/522.html#L98' title='Defined at 98 in src/gui/core/widget_definition.hpp.'>load_resolutions</a>&lt;<a href='../D/12920.html' title='Multiple defined in 41 places.'>resolution</a>&gt;(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>);
-<a id='L410' name='L410'></a> 410 <em class='brace'>}</em>
-<a id='L411' name='L411'></a> 411 
-<a id='L412' name='L412'></a> 412 <a href='../D/3043.html' title='Multiple defined in 2 places.'>addon_list_definition</a>::<a href='../D/12920.html' title='Multiple defined in 41 places.'>resolution</a>::<a href='../D/12920.html' title='Multiple defined in 41 places.'>resolution</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>) :
-<a id='L413' name='L413'></a> 413         <a href='../S/522.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>), <a href='../R/7445.html' title='Multiple referred from 626 places.'>grid</a>(<a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>)
-<a id='L414' name='L414'></a> 414 <em class='brace'>{</em>
-<a id='L415' name='L415'></a> 415         <em class='comment'>// Add a dummy state since every widget needs a state.</em>
-<a id='L416' name='L416'></a> 416         <strong class='reserved'>static</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a> <a href='../Y/9151.html' title='Multiple used in 80 places.'>dummy</a>("draw");
-<a id='L417' name='L417'></a> 417         <a href='../D/14752.html' title='Multiple defined in 3 places.'>state</a>.<a href='../Y/9318.html' title='Multiple used in 463 places.'>emplace_back</a>(<a href='../Y/9151.html' title='Multiple used in 80 places.'>dummy</a>);
-<a id='L418' name='L418'></a> 418 
-<a id='L419' name='L419'></a> 419         <strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4417.html' title='Multiple defined in 14 places.'>child</a> = <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/4417.html' title='Multiple defined in 14 places.'>child</a>("grid");
-<a id='L420' name='L420'></a> 420         <a href='../S/1111.html#L42' title='Defined at 42 in src/wml_exception.hpp.'>VALIDATE</a>(<a href='../D/4417.html' title='Multiple defined in 14 places.'>child</a>, <a href='../D/2645.html' title='Multiple defined in 4 places.'>_</a>("No grid defined."));
-<a id='L421' name='L421'></a> 421 
-<a id='L422' name='L422'></a> 422         <a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a> = <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/13805.html' title='Multiple used in 201 places.'>make_shared</a>&lt;<a href='../S/536.html#L127' title='Defined at 127 in src/gui/core/window_builder.hpp.'>builder_grid</a>&gt;(<a href='../D/4417.html' title='Multiple defined in 14 places.'>child</a>);
-<a id='L423' name='L423'></a> 423 <em class='brace'>}</em>
-<a id='L424' name='L424'></a> 424 
-<a id='L425' name='L425'></a> 425 <strong class='reserved'>namespace</strong> <a href='../R/7944.html' title='Multiple referred from 136 places.'>implementation</a>
-<a id='L426' name='L426'></a> 426 <em class='brace'>{</em>
-<a id='L427' name='L427'></a> 427 
-<a id='L428' name='L428'></a> 428 <strong class='reserved'>static</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>::<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a> <a href='../R/10754.html' title='Multiple referred from 2 places.'>parse_visibility</a>(<strong class='reserved'>const</strong> <a href='../D/14775.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14836.html' title='Multiple defined in 3 places.'>string</a>&amp; <a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a>)
-<a id='L429' name='L429'></a> 429 <em class='brace'>{</em>
-<a id='L430' name='L430'></a> 430         <strong class='reserved'>if</strong>(<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a> == "visible") <em class='brace'>{</em>
-<a id='L431' name='L431'></a> 431                 <strong class='reserved'>return</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>::<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a>::<a href='../Y/21751.html' title='Multiple used in 124 places.'>visible</a>;
-<a id='L432' name='L432'></a> 432         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a> == "hidden") <em class='brace'>{</em>
-<a id='L433' name='L433'></a> 433                 <strong class='reserved'>return</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>::<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a>::<a href='../D/8575.html' title='Multiple defined in 7 places.'>hidden</a>;
-<a id='L434' name='L434'></a> 434         <em class='brace'>}</em> <strong class='reserved'>else</strong> <strong class='reserved'>if</strong>(<a href='../D/14803.html' title='Multiple defined in 25 places.'>str</a> == "invisible") <em class='brace'>{</em>
-<a id='L435' name='L435'></a> 435                 <strong class='reserved'>return</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>::<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a>::<a href='../D/9224.html' title='Multiple defined in 2 places.'>invisible</a>;
-<a id='L436' name='L436'></a> 436         <em class='brace'>}</em> <strong class='reserved'>else</strong> <em class='brace'>{</em>
-<a id='L437' name='L437'></a> 437                 <a href='../S/1111.html#L61' title='Defined at 61 in src/wml_exception.hpp.'>FAIL</a>("Invalid visibility value");
-<a id='L438' name='L438'></a> 438         <em class='brace'>}</em>
-<a id='L439' name='L439'></a> 439 <em class='brace'>}</em>
-<a id='L440' name='L440'></a> 440 
-<a id='L441' name='L441'></a> 441 <a href='../S/633.html#L187' title='Defined at 187 in src/gui/widgets/addon_list.hpp.'>builder_addon_list</a>::<a href='../S/633.html#L187' title='Defined at 187 in src/gui/widgets/addon_list.hpp.'>builder_addon_list</a>(<strong class='reserved'>const</strong> <a href='../D/4769.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>) :
-<a id='L442' name='L442'></a> 442         <a href='../S/610.html#L506' title='Defined at 506 in src/gui/widgets/styled_widget.hpp.'>builder_styled_widget</a>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>),
-<a id='L443' name='L443'></a> 443         <a href='../Y/12224.html' title='Multiple used in 8 places.'>install_status_visibility_</a>(<a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>::<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a>::<a href='../Y/21751.html' title='Multiple used in 124 places.'>visible</a>),
-<a id='L444' name='L444'></a> 444         <a href='../R/8092.html' title='Multiple referred from 7 places.'>install_buttons_visibility_</a>(<a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>::<a href='../D/16086.html' title='Multiple defined in 3 places.'>visibility</a>::<a href='../D/9224.html' title='Multiple defined in 2 places.'>invisible</a>)
-<a id='L445' name='L445'></a> 445 <em class='brace'>{</em>
-<a id='L446' name='L446'></a> 446         <strong class='reserved'>if</strong>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/8447.html' title='Multiple defined in 2 places.'>has_attribute</a>("install_status_visibility")) <em class='brace'>{</em>
-<a id='L447' name='L447'></a> 447                 <a href='../Y/12224.html' title='Multiple used in 8 places.'>install_status_visibility_</a> = <a href='../S/634.html#L428' title='Defined at 428 in src/gui/widgets/addon_list.cpp.'>parse_visibility</a>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>["install_status_visibility"]);
-<a id='L448' name='L448'></a> 448         <em class='brace'>}</em>
-<a id='L449' name='L449'></a> 449         <strong class='reserved'>if</strong>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>.<a href='../D/8447.html' title='Multiple defined in 2 places.'>has_attribute</a>("install_buttons_visibility")) <em class='brace'>{</em>
-<a id='L450' name='L450'></a> 450                 <a href='../S/634.html#L444' title='Defined at 444 in src/gui/widgets/addon_list.cpp.'>install_buttons_visibility_</a> = <a href='../S/634.html#L428' title='Defined at 428 in src/gui/widgets/addon_list.cpp.'>parse_visibility</a>(<a href='../D/4196.html' title='Multiple defined in 5 places.'>cfg</a>["install_buttons_visibility"]);
-<a id='L451' name='L451'></a> 451         <em class='brace'>}</em>
-<a id='L452' name='L452'></a> 452 <em class='brace'>}</em>
-<a id='L453' name='L453'></a> 453 
-<a id='L454' name='L454'></a> 454 <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>* <a href='../S/633.html#L187' title='Defined at 187 in src/gui/widgets/addon_list.hpp.'>builder_addon_list</a>::<a href='../R/3357.html' title='Multiple referred from 165 places.'>build</a>() <strong class='reserved'>const</strong>
-<a id='L455' name='L455'></a> 455 <em class='brace'>{</em>
-<a id='L456' name='L456'></a> 456         <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>* <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a> = <strong class='reserved'>new</strong> <a href='../S/633.html#L36' title='Defined at 36 in src/gui/widgets/addon_list.hpp.'>addon_list</a>(*<strong class='reserved'>this</strong>);
-<a id='L457' name='L457'></a> 457 
-<a id='L458' name='L458'></a> 458         <a href='../S/506.html#L40' title='Defined at 40 in src/gui/core/log.hpp.'>DBG_GUI_G</a> &lt;&lt; "Window builder: placed add-on list '" &lt;&lt; <a href='../D/8671.html' title='Multiple defined in 22 places.'>id</a> &lt;&lt;
-<a id='L459' name='L459'></a> 459                 "' with definition '" &lt;&lt; <a href='../Y/8655.html' title='Multiple used in 1344 places.'>definition</a> &lt;&lt; "'.\n";
-<a id='L460' name='L460'></a> 460 
-<a id='L461' name='L461'></a> 461         <strong class='reserved'>const</strong> <strong class='reserved'>auto</strong> <a href='../Y/7809.html' title='Multiple used in 117 places.'>conf</a> = <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>-&gt;<a href='../S/610.html#L300' title='Defined at 300 in src/gui/widgets/styled_widget.hpp.'>cast_config_to</a>&lt;<a href='../D/3043.html' title='Multiple defined in 2 places.'>addon_list_definition</a>&gt;();
-<a id='L462' name='L462'></a> 462         <a href='../Y/5879.html' title='Multiple used in 1200 places.'>assert</a>(<a href='../Y/7809.html' title='Multiple used in 117 places.'>conf</a> != <a href='../Y/15374.html' title='Multiple used in 2007 places.'>nullptr</a>);
-<a id='L463' name='L463'></a> 463 
-<a id='L464' name='L464'></a> 464         <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>-&gt;<a href='../D/8891.html' title='Multiple defined in 2 places.'>init_grid</a>(<a href='../Y/7809.html' title='Multiple used in 117 places.'>conf</a>-&gt;<a href='../D/8290.html' title='Multiple defined in 17 places.'>grid</a>);
-<a id='L465' name='L465'></a> 465 
-<a id='L466' name='L466'></a> 466         <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>-&gt;<a href='../S/633.html#L107' title='Defined at 107 in src/gui/widgets/addon_list.hpp.'>set_install_status_visibility</a>(<a href='../Y/12224.html' title='Multiple used in 8 places.'>install_status_visibility_</a>);
-<a id='L467' name='L467'></a> 467         <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>-&gt;<a href='../S/633.html#L113' title='Defined at 113 in src/gui/widgets/addon_list.hpp.'>set_install_buttons_visibility</a>(<a href='../S/634.html#L444' title='Defined at 444 in src/gui/widgets/addon_list.cpp.'>install_buttons_visibility_</a>);
-<a id='L468' name='L468'></a> 468 
-<a id='L469' name='L469'></a> 469         <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>-&gt;<a href='../D/6276.html' title='Multiple defined in 6 places.'>finalize_setup</a>();
-<a id='L470' name='L470'></a> 470 
-<a id='L471' name='L471'></a> 471         <strong class='reserved'>return</strong> <a href='../D/16369.html' title='Multiple defined in 8 places.'>widget</a>;
-<a id='L472' name='L472'></a> 472 <em class='brace'>}</em>
-<a id='L473' name='L473'></a> 473 
-<a id='L474' name='L474'></a> 474 <em class='brace'>}</em>
-<a id='L475' name='L475'></a> 475 
-<a id='L476' name='L476'></a> 476 <em class='brace'>}</em>
+<a id='L209' name='L209'></a> 209 <strong class='reserved'>struct</strong> <a href='../R/10248.html' title='Multiple referred from 3 places.'>multimenu_button_definition</a> : <strong class='reserved'>public</strong> <a href='../S/521.html#L93' title='Defined at 93 in src/gui/core/widget_definition.hpp.'>styled_widget_definition</a>
+<a id='L210' name='L210'></a> 210 <em class='brace'>{</em>
+<a id='L211' name='L211'></a> 211         <strong class='reserved'>explicit</strong> <a href='../D/11294.html' title='Multiple defined in 2 places.'>multimenu_button_definition</a>(<strong class='reserved'>const</strong> <a href='../D/4773.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4199.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L212' name='L212'></a> 212 
+<a id='L213' name='L213'></a> 213         <strong class='reserved'>struct</strong> <a href='../R/11819.html' title='Multiple referred from 138 places.'>resolution</a> : <strong class='reserved'>public</strong> <a href='../S/521.html#L43' title='Defined at 43 in src/gui/core/widget_definition.hpp.'>resolution_definition</a>
+<a id='L214' name='L214'></a> 214         <em class='brace'>{</em>
+<a id='L215' name='L215'></a> 215                 <strong class='reserved'>explicit</strong> <a href='../D/12937.html' title='Multiple defined in 41 places.'>resolution</a>(<strong class='reserved'>const</strong> <a href='../D/4773.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4199.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L216' name='L216'></a> 216         <em class='brace'>}</em>;
+<a id='L217' name='L217'></a> 217 <em class='brace'>}</em>;
+<a id='L218' name='L218'></a> 218 
+<a id='L219' name='L219'></a> 219 <em class='comment'>// }---------- BUILDER -----------{</em>
+<a id='L220' name='L220'></a> 220 
+<a id='L221' name='L221'></a> 221 <strong class='reserved'>class</strong> <a href='../S/609.html#L33' title='Defined at 33 in src/gui/widgets/styled_widget.hpp.'>styled_widget</a>;
+<a id='L222' name='L222'></a> 222 
+<a id='L223' name='L223'></a> 223 <strong class='reserved'>namespace</strong> <a href='../R/7956.html' title='Multiple referred from 136 places.'>implementation</a>
+<a id='L224' name='L224'></a> 224 <em class='brace'>{</em>
+<a id='L225' name='L225'></a> 225 
+<a id='L226' name='L226'></a> 226 <strong class='reserved'>struct</strong> <a href='../R/3404.html' title='Multiple referred from 6 places.'>builder_multimenu_button</a> : <strong class='reserved'>public</strong> <a href='../S/609.html#L506' title='Defined at 506 in src/gui/widgets/styled_widget.hpp.'>builder_styled_widget</a>
+<a id='L227' name='L227'></a> 227 <em class='brace'>{</em>
+<a id='L228' name='L228'></a> 228 <strong class='reserved'>public</strong>:
+<a id='L229' name='L229'></a> 229         <strong class='reserved'>explicit</strong> <a href='../S/634.html#L226' title='Defined at 226 in src/gui/widgets/multimenu_button.hpp.'>builder_multimenu_button</a>(<strong class='reserved'>const</strong> <a href='../D/4773.html' title='Multiple defined in 5 places.'>config</a>&amp; <a href='../D/4199.html' title='Multiple defined in 5 places.'>cfg</a>);
+<a id='L230' name='L230'></a> 230 
+<a id='L231' name='L231'></a> 231         <strong class='reserved'>using</strong> <a href='../S/609.html#L506' title='Defined at 506 in src/gui/widgets/styled_widget.hpp.'>builder_styled_widget</a>::<a href='../D/3782.html' title='Multiple defined in 55 places.'>build</a>;
+<a id='L232' name='L232'></a> 232 
+<a id='L233' name='L233'></a> 233         <a href='../D/16385.html' title='Multiple defined in 8 places.'>widget</a>* <a href='../D/3782.html' title='Multiple defined in 55 places.'>build</a>() <strong class='reserved'>const</strong>;
+<a id='L234' name='L234'></a> 234 
+<a id='L235' name='L235'></a> 235 <strong class='reserved'>private</strong>:
+<a id='L236' name='L236'></a> 236         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../D/14852.html' title='Multiple defined in 3 places.'>string</a> <a href='../Y/17761.html' title='Multiple used in 15 places.'>retval_id_</a>;
+<a id='L237' name='L237'></a> 237         <strong class='reserved'>int</strong> <a href='../D/13009.html' title='Multiple defined in 5 places.'>retval_</a>, <a href='../Y/14070.html' title='Multiple used in 10 places.'>max_shown_</a>;
+<a id='L238' name='L238'></a> 238         <a href='../D/14791.html' title='Multiple defined in 5 places.'>std</a>::<a href='../Y/21655.html' title='Multiple used in 2726 places.'>vector</a>&lt;::<a href='../D/4773.html' title='Multiple defined in 5 places.'>config</a>&gt; <a href='../D/11655.html' title='Multiple defined in 2 places.'>options_</a>;
+<a id='L239' name='L239'></a> 239 <em class='brace'>}</em>;
+<a id='L240' name='L240'></a> 240 
+<a id='L241' name='L241'></a> 241 <em class='brace'>}</em> <em class='comment'>// namespace implementation</em>
+<a id='L242' name='L242'></a> 242 
+<a id='L243' name='L243'></a> 243 <em class='comment'>// }------------ END --------------</em>
+<a id='L244' name='L244'></a> 244 
+<a id='L245' name='L245'></a> 245 <em class='brace'>}</em> <em class='comment'>// namespace gui2</em>
 </pre>
 <hr />
 <a id='BOTTOM' name='BOTTOM'></a>
-<em class='comment'>/* [&lt;][&gt;]<a href='#L50'>[^]</a><a href='#L444'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
+<em class='comment'>/* [&lt;][&gt;]<a href='#L58'>[^]</a><a href='#L134'>[v]</a><a href='#TOP'>[top]</a>[bottom]<a href='../mains.html'>[index]</a><a href='../help.html'>[help]</a> */</em>
 </body>
 </html>
