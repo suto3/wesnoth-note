@@ -72,7 +72,7 @@ pot をwesnoth-Save_The_Captured_Princess.po って名前でコピー
 cp Save_The_Captured_Princess.pot translations/ja/LC_MESSAGES/wesnoth-Save_The_Captured_Princess.po
 ```
 
-で、po ファイルを、poedit（ https://poedit.net/ ） で編集して、wesnoth-Save_The_Captured_Princess.mo を作る。
+で、poファイルを、poedit（ https://poedit.net/ ） で編集して、wesnoth-Save_The_Captured_Princess.mo を作る。
 
 
 

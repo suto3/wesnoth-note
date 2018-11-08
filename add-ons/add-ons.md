@@ -11,6 +11,7 @@ the dawn rescue operation
 
 2. 霧の中の捜索作戦 / Search operation in fog
 3. 逆臣討伐 / Deceive the rebels
+
 反逆者へ強襲作戦 / the rebels assault operation
 
 4. 旅立ち / Departure（会話のみ）
